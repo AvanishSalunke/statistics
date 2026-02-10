@@ -210,6 +210,7 @@
 					<li><a href="combnk.html" class="text-decoration-none font-monospace"><small>combnk</small></a></li>
 					<li><a href="crosstab.html" class="text-decoration-none font-monospace"><small>crosstab</small></a></li>
 					<li><a href="datasample.html" class="text-decoration-none font-monospace"><small>datasample</small></a></li>
+					<li><a href="dummyvar.html" class="text-decoration-none font-monospace"><small>dummyvar</small></a></li>
 					<li><a href="fillmissing.html" class="text-decoration-none font-monospace"><small>fillmissing</small></a></li>
 					<li><a href="grp2idx.html" class="text-decoration-none font-monospace"><small>grp2idx</small></a></li>
 					<li><a href="ismissing.html" class="text-decoration-none font-monospace"><small>ismissing</small></a></li>
@@ -761,6 +762,7 @@
 					<li><a href="logistic_regression.html" class="text-decoration-none font-monospace"><small>logistic_regression</small></a></li>
 					<li><a href="mnrfit.html" class="text-decoration-none font-monospace"><small>mnrfit</small></a></li>
 					<li><a href="monotone_smooth.html" class="text-decoration-none font-monospace"><small>monotone_smooth</small></a></li>
+					<li><a href="parseWilkinsonFormula.html" class="text-decoration-none font-monospace"><small>parseWilkinsonFormula</small></a></li>
 					<li><a href="pca.html" class="text-decoration-none font-monospace"><small>pca</small></a></li>
 					<li><a href="pcacov.html" class="text-decoration-none font-monospace"><small>pcacov</small></a></li>
 					<li><a href="pcares.html" class="text-decoration-none font-monospace"><small>pcares</small></a></li>
@@ -909,13 +911,13 @@ Noncentrality parameter
  ## distribution. The noncentrality parameter 's' must be a non-negative real
  ## scalar, representing the magnitude of the signal in the presence of noise.
 
-ans = 0.9841
+ans = 0.9899
 pd =
   RicianDistribution
 
   Rician distribution
-        s =   1.5
-    sigma = 1.002
+        s =     1.5
+    sigma = 1.00001
 
                     </pre></td></tr></tbody>
                   </table>
@@ -1034,12 +1036,12 @@ Scale parameter
  ## distribution. The scale parameter 'sigma' must be a positive real scalar,
  ## controlling the spread due to Gaussian noise.
 
-ans = 0.9945
+ans = 0.9756
 pd =
   RicianDistribution
 
   Rician distribution
-        s = 1.00739
+        s = 1.03899
     sigma =     1.2
 
                     </pre></td></tr></tbody>
@@ -1719,7 +1721,7 @@ Compute the interquartile range of a probability distribution.
  ## of the middle 50% of the distribution, helpful for understanding variability
  ## in signal magnitudes.
 
-iqr_value = 1.0986
+iqr_value = 1.1015
                     </pre></td></tr></tbody>
                   </table>
 
@@ -1791,8 +1793,8 @@ Compute the mean of a probability distribution.
  ## This shows how to compute the expected value for Rician distributions
  ## with different scale parameters, representing the average signal magnitude.
 
-mean1 = 1.1348
-mean2 = 1.5403
+mean1 = 1.1351
+mean2 = 1.5378
                     </pre></td></tr></tbody>
                   </table>
 
@@ -1864,8 +1866,8 @@ Compute the median of a probability distribution.
  ## Use this to find the median value, which splits the distribution into
  ## two equal probability halves, robust to skewness in signal data.
 
-median1 = 1.1188
-median2 = 1.4889
+median1 = 1.1190
+median2 = 1.4724
                     </pre></td></tr></tbody>
                   </table>
 
@@ -1935,7 +1937,7 @@ Compute the negative loglikelihood of a probability distribution.
  ## This is useful for assessing the fit of a Rician distribution to data,
  ## with lower values indicating a better fit, often used in model comparison.
 
-nlogL = -110.90
+nlogL = -111.77
                     </pre></td></tr></tbody>
                   </table>
 
@@ -2027,8 +2029,8 @@ Compute the confidence intervals for probability distribution parameters.
 
 ci =
 
-   0.8895   0.8994
-   1.0691   1.1522
+   0.2302   0.7753
+   0.7190   1.8618
 
                     </pre></td></tr></tbody>
                   </table>
@@ -2562,7 +2564,7 @@ Compute the standard deviation of a probability distribution.
  ## Use this to calculate the standard deviation, which measures the variability
  ## in the signal magnitudes of the distribution.
 
-std_value = 0.7825
+std_value = 0.7833
                     </pre></td></tr></tbody>
                   </table>
 
@@ -2726,7 +2728,7 @@ Compute the variance of a probability distribution.
  ## Use this to calculate the variance, which quantifies the spread of the
  ## signal magnitudes in the distribution.
 
-var_value = 0.5936
+var_value = 0.6028
                     </pre></td></tr></tbody>
                   </table>
 
@@ -2785,8 +2787,8 @@ pd_fitted =
   RicianDistribution
 
   Rician distribution
-        s = 1.98993   [1.95935, 2.02099]
-    sigma = 1.02155   [0.995995, 1.04775]
+        s = 2.0283   [1.99856, 2.05848]
+    sigma = 1.0006   [0.976149, 1.02567]
 </pre></td></tr>
                   </table>
                   <div class="text-center">

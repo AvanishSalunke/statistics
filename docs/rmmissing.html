@@ -210,6 +210,7 @@
 					<li><a href="combnk.html" class="text-decoration-none font-monospace"><small>combnk</small></a></li>
 					<li><a href="crosstab.html" class="text-decoration-none font-monospace"><small>crosstab</small></a></li>
 					<li><a href="datasample.html" class="text-decoration-none font-monospace"><small>datasample</small></a></li>
+					<li><a href="dummyvar.html" class="text-decoration-none font-monospace"><small>dummyvar</small></a></li>
 					<li><a href="fillmissing.html" class="text-decoration-none font-monospace"><small>fillmissing</small></a></li>
 					<li><a href="grp2idx.html" class="text-decoration-none font-monospace"><small>grp2idx</small></a></li>
 					<li><a href="ismissing.html" class="text-decoration-none font-monospace"><small>ismissing</small></a></li>
@@ -761,6 +762,7 @@
 					<li><a href="logistic_regression.html" class="text-decoration-none font-monospace"><small>logistic_regression</small></a></li>
 					<li><a href="mnrfit.html" class="text-decoration-none font-monospace"><small>mnrfit</small></a></li>
 					<li><a href="monotone_smooth.html" class="text-decoration-none font-monospace"><small>monotone_smooth</small></a></li>
+					<li><a href="parseWilkinsonFormula.html" class="text-decoration-none font-monospace"><small>parseWilkinsonFormula</small></a></li>
 					<li><a href="pca.html" class="text-decoration-none font-monospace"><small>pca</small></a></li>
 					<li><a href="pcacov.html" class="text-decoration-none font-monospace"><small>pcacov</small></a></li>
 					<li><a href="pcares.html" class="text-decoration-none font-monospace"><small>pcares</small></a></li>
@@ -802,60 +804,64 @@
 <dt><code><h5 class="fs">statistics: <var>R</var> = <b>rmmissing</b> (<var>A</var>)</code></h5></dt>
 <dt><code><h5 class="fs">statistics: <var>R</var> = <b>rmmissing</b> (<var>A</var>, <var>dim</var>)</code></h5></dt>
 <dt><code><h5 class="fs">statistics: <var>R</var> = <b>rmmissing</b> (&hellip;, <var>Name</var>, <var>Value</var>)</code></h5></dt>
-<dt><code><h5 class="fs">statistics: [<var>R</var> <var>TF</var>] = <b>rmmissing</b> (&hellip;)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: [<var>R</var>, <var>TF</var>] = <b>rmmissing</b> (&hellip;)</code></h5></dt>
 </dl>
 
-<p> Remove missing or incomplete data from an array.
+<p> Remove missing data from arrays.
 </p>
 <div class="ms-5">
-<p> Given an input vector or matrix (2-D array) <var>A</var>, remove missing data
- from a vector or missing rows or columns from a matrix.  <var>A</var>
- can be a numeric array, char array, or an array of cell strings.
- <var>R</var> returns the array after removal of missing data.
+<p> Given an input vector or matrix (2-D array) <var>A</var>, <code><var>R</var> =
+ rmmissing (<var>A</var>)</code> returns an output vector or matrix <var>R</var> of the same
+ type as input <var>A</var> and any missing elements removed.  If <var>A</var> is a
+ vector, missing elements are removed individually, if <var>A</var> is a matrix,
+ then rows containing missing elements are removed.
 </p>
-<p> The values which represent missing data depend on the data type of <var>A</var>:
+<p> Standard missing values and their corresponding data types are:
+</p>
+ <ul>
+<li> <code>NaN</code> - for <code>double</code>, <code>single</code>, <code>duration</code>, and
+ <code>calendarDuration</code> arrays.
+ </li><li> <code>NaT</code> - for <code>datetime</code> arrays.
+ </li><li> <code>&lt;missing&gt;</code> - for <code>string</code> arrays.
+ </li><li> <code>&lt;undefined&gt;</code> - for <code>categorical</code> arrays.
+ </li><li> <code>{0x0 char}</code> - for <code>cell</code> arrays of character vectors.
+ </li></ul>
+
+<p> For any data types that do not support missing values, <code>rmmissing</code>
+ returns <code><var>R</var> == <var>A</var></code> and if a second output argument is
+ requested it also returns <code><var>TF</var> = false (size (<var>A</var>))</code>.
+</p>
+<p> Given an input matrix (2-D array) <var>A</var>, <code><var>R</var> = rmmissing
+ (<var>A</var>, <var>dim</var>)</code> further specifies whether rows or columns containing
+ missing data are removed from the output <var>R</var> based on the value of
+ <var>dim</var>, which must be either 1 or 0.
 </p>
  <ul>
 <li>
- <code>NaN</code>: <code>single</code>, <code>double</code>.
+ <code>1</code>: remove rows.
 
  </li><li>
- <code>' '</code> (white space): <code>char</code>.
-
- </li><li>
- <code>{''}</code>: string cells.
+ <code>2</code>: remove columns.
  </li></ul>
 
-<p> Choose to remove rows (default) or columns by setting optional input
- <var>dim</var>:
+<p> <code><var>R</var> = rmmissing (&hellip;, <var>Name</var>, <var>Value</var>)</code> also accepts
+ the following paired arguments.
 </p>
- <ul>
-<li>
- <code>1</code>: rows.
-
- </li><li>
- <code>2</code>: columns.
- </li></ul>
-
-<p> Note: data types with no default &rsquo;missing&rsquo; value will always result in
- <code>R == A</code> and a TF output of <code>false(size(<var>A</var>))</code>.
-</p>
-<p> Additional optional parameters are set by <var>Name</var>-<var>Value</var> pairs.
- These are:
-</p>
- <ul>
-<li>
- <code>MinNumMissing</code>: minimum number of missing values to remove an entry,
- row or column, defined as a positive integer number.  E.g.: if
- <code>MinNumMissing</code> is set to <code>2</code>, remove the row of a numeric matrix
- only if it includes 2 or more NaN.
- </li></ul>
+ <table>
+<thead><tr><th width="20%">Name</th><th width="5%"></th><th width="75%">Value</th></tr></thead>
+<tr><td width="20%"><code>'MinNumMissing'</code></td><td width="5%"></td><td width="75%">A positive integer scalar value
+ specifying the required minimum number of missing values for removing any
+ particular row or column from a matrix input.  Note that this argument is
+ ignored if input <var>A</var> is a vector.</td></tr>
+<tr><td width="20%"><code>'MissingLocations'</code></td><td width="5%"></td><td width="75%">A logical array of the same size
+ as input <var>A</var> indexing the locations of missing values in input array
+ <var>A</var>.  Note that specifying <code>'MissingLocations'</code> overrides any
+ standard missing values in <var>A</var>.</td></tr>
+</table>
 
 <p> Optional return value <var>TF</var> is a logical array where <code>true</code> values
  represent removed entries, rows or columns from the original data <var>A</var>.
 </p>
-</dd></dl>
-
 <p> <strong>See also: </strong>
   <a href="fillmissing.html">fillmissing</a>, 
   <a href="ismissing.html">ismissing</a>, 

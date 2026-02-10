@@ -210,6 +210,7 @@
 					<li><a href="combnk.html" class="text-decoration-none font-monospace"><small>combnk</small></a></li>
 					<li><a href="crosstab.html" class="text-decoration-none font-monospace"><small>crosstab</small></a></li>
 					<li><a href="datasample.html" class="text-decoration-none font-monospace"><small>datasample</small></a></li>
+					<li><a href="dummyvar.html" class="text-decoration-none font-monospace"><small>dummyvar</small></a></li>
 					<li><a href="fillmissing.html" class="text-decoration-none font-monospace fw-bolder"><small>fillmissing</small></a></li>
 					<li><a href="grp2idx.html" class="text-decoration-none font-monospace"><small>grp2idx</small></a></li>
 					<li><a href="ismissing.html" class="text-decoration-none font-monospace"><small>ismissing</small></a></li>
@@ -761,6 +762,7 @@
 					<li><a href="logistic_regression.html" class="text-decoration-none font-monospace"><small>logistic_regression</small></a></li>
 					<li><a href="mnrfit.html" class="text-decoration-none font-monospace"><small>mnrfit</small></a></li>
 					<li><a href="monotone_smooth.html" class="text-decoration-none font-monospace"><small>monotone_smooth</small></a></li>
+					<li><a href="parseWilkinsonFormula.html" class="text-decoration-none font-monospace"><small>parseWilkinsonFormula</small></a></li>
 					<li><a href="pca.html" class="text-decoration-none font-monospace"><small>pca</small></a></li>
 					<li><a href="pcacov.html" class="text-decoration-none font-monospace"><small>pcacov</small></a></li>
 					<li><a href="pcares.html" class="text-decoration-none font-monospace"><small>pcares</small></a></li>
@@ -808,23 +810,28 @@
 <dt><code><h5 class="fs">statistics: [<var>B</var>, <var>idx</var>] = <b>fillmissing</b> (&hellip;)</code></h5></dt>
 </dl>
 
+<p> Fill missing data in arrays.
+</p>
+<div class="ms-5">
 <p> Replace missing entries of array <var>A</var> either with values in <var>v</var> or
  as determined by other specified methods.  &rsquo;missing&rsquo; values are determined
  by the data type of <var>A</var> as identified by the function <a href="ismissing.html">ismissing</a>,
  currently defined as:
 </p>
-<div class="ms-5">
+<p> Standard missing values and their corresponding data types are:
+</p>
  <ul>
-<li>
- <code>NaN</code>: <code>single</code>, <code>double</code>
-
- </li><li>
- <code>&quot; &quot;</code> (white space): <code>char</code>
-
- </li><li>
- <code>{&quot;&quot;}</code> (white space in cell): string cells.
+<li> <code>NaN</code> - for <code>double</code>, <code>single</code>, <code>duration</code>, and
+ <code>calendarDuration</code> arrays.
+ </li><li> <code>NaT</code> - for <code>datetime</code> arrays.
+ </li><li> <code>&lt;missing&gt;</code> - for <code>string</code> arrays.
+ </li><li> <code>&lt;undefined&gt;</code> - for <code>categorical</code> arrays.
+ </li><li> <code>{0x0 char}</code> - for <code>cell</code> arrays of character vectors.
  </li></ul>
 
+<p> For any data types that do not support missing values, <code>ismissing</code>
+ returns <code><var>TF</var> = false (size (<var>A</var>))</code>.
+</p>
 <p> <var>A</var> can be a numeric scalar or array, a character vector or array, or
  a cell array of character vectors (a.k.a. string cells).
 </p>
@@ -989,10 +996,6 @@
  <var>fill_function</var> processing because the moving window is always empty.
  (3) operation in dimensions higher than 2 perform identically to operations
  in dims 1 and 2, most notable on vectors.
- </li><li>
- Method &quot;makima&quot; is not yet implemented in <code>interp1</code>, which is
- used by <code>fillmissing</code>. Attempting to call this method will execute
- the method from makima.m function created
  </li></ul>
 
 <p> <strong>See also: </strong>

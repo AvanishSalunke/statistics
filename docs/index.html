@@ -108,7 +108,7 @@
             </div>
             <div class="col-sm-9 col-md-10">
               <h3 class="d-inline-block mr-2">statistics</h3>
-              <b>1.8.0&nbsp;2025-11-30</b>
+              <b>1.8.1&nbsp;2026-02-10</b>
               <p class="indent">
                 The Statistics package for GNU Octave.
               </p>
@@ -551,13 +551,18 @@ Model (GAM) for regression.</td>
                <tr>
                  <td>
                    <b><code>
+                   <a href="dummyvar.html">dummyvar</a>
+                   </code></b>
+                 </td>
+                 <td>Create dummy variables.</td>
+               </tr>
+               <tr>
+                 <td>
+                   <b><code>
                    <a href="fillmissing.html">fillmissing</a>
                    </code></b>
                  </td>
-                 <td>Replace missing entries of array A either with values in V or as
-determined by other specified methods.  'missing' values are determined
-by the data type of A as identified by the function ismissing, currently
-defined as:</td>
+                 <td>Fill missing data in arrays.</td>
                </tr>
                <tr>
                  <td>
@@ -565,7 +570,7 @@ defined as:</td>
                    <a href="grp2idx.html">grp2idx</a>
                    </code></b>
                  </td>
-                 <td>Get index for group variables.</td>
+                 <td>Get index for grouping variable.</td>
                </tr>
                <tr>
                  <td>
@@ -573,7 +578,7 @@ defined as:</td>
                    <a href="ismissing.html">ismissing</a>
                    </code></b>
                  </td>
-                 <td>Find missing data in a numeric or string array.</td>
+                 <td>Find missing data in arrays.</td>
                </tr>
                <tr>
                  <td>
@@ -606,7 +611,7 @@ idea by van Albada and Robinson.</td>
                    <a href="rmmissing.html">rmmissing</a>
                    </code></b>
                  </td>
-                 <td>Remove missing or incomplete data from an array.</td>
+                 <td>Remove missing data from arrays.</td>
                </tr>
                <tr>
                  <td>
@@ -614,8 +619,7 @@ idea by van Albada and Robinson.</td>
                    <a href="standardizeMissing.html">standardizeMissing</a>
                    </code></b>
                  </td>
-                 <td>Replace data values specified by INDICATOR in A by the standard
-'missing' data value for that data type.</td>
+                 <td>Replace selected values by standard missing values.</td>
                </tr>
                <tr>
                  <td>
@@ -623,7 +627,7 @@ idea by van Albada and Robinson.</td>
                    <a href="tabulate.html">tabulate</a>
                    </code></b>
                  </td>
-                 <td>Calculate a frequency table.</td>
+                 <td>Create a frequency table of unique values in vector X.</td>
                </tr>
              </tbody>
            </table>
@@ -662,9 +666,7 @@ idea by van Albada and Robinson.</td>
                    <a href="grpstats.html">grpstats</a>
                    </code></b>
                  </td>
-                 <td>Summary statistics by group.  ‘grpstats’ computes groupwise summary
-statistics, for data in a matrix X.  ‘grpstats’ treats NaNs as missing
-values, and removes them.</td>
+                 <td>Summary statistics by group.</td>
                </tr>
                <tr>
                  <td>
@@ -3893,6 +3895,15 @@ functional dependence.</td>
                <tr>
                  <td>
                    <b><code>
+                   <a href="parseWilkinsonFormula.html">parseWilkinsonFormula</a>
+                   </code></b>
+                 </td>
+                 <td>Parse and expand statistical model formulae using the Wilkinson
+notation.</td>
+               </tr>
+               <tr>
+                 <td>
+                   <b><code>
                    <a href="pca.html">pca</a>
                    </code></b>
                  </td>
@@ -3961,7 +3972,7 @@ model ‘y = X * beta + e’.</td>
                    <a href="stepwisefit.html">stepwisefit</a>
                    </code></b>
                  </td>
-                 <td>Linear regression with stepwise variable selection.</td>
+                 <td>Perform stepwise linear regression using conditional p-value criteria.</td>
                </tr>
              </tbody>
            </table>

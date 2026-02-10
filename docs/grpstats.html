@@ -210,6 +210,7 @@
 					<li><a href="combnk.html" class="text-decoration-none font-monospace"><small>combnk</small></a></li>
 					<li><a href="crosstab.html" class="text-decoration-none font-monospace"><small>crosstab</small></a></li>
 					<li><a href="datasample.html" class="text-decoration-none font-monospace"><small>datasample</small></a></li>
+					<li><a href="dummyvar.html" class="text-decoration-none font-monospace"><small>dummyvar</small></a></li>
 					<li><a href="fillmissing.html" class="text-decoration-none font-monospace"><small>fillmissing</small></a></li>
 					<li><a href="grp2idx.html" class="text-decoration-none font-monospace"><small>grp2idx</small></a></li>
 					<li><a href="ismissing.html" class="text-decoration-none font-monospace"><small>ismissing</small></a></li>
@@ -761,6 +762,7 @@
 					<li><a href="logistic_regression.html" class="text-decoration-none font-monospace"><small>logistic_regression</small></a></li>
 					<li><a href="mnrfit.html" class="text-decoration-none font-monospace"><small>mnrfit</small></a></li>
 					<li><a href="monotone_smooth.html" class="text-decoration-none font-monospace"><small>monotone_smooth</small></a></li>
+					<li><a href="parseWilkinsonFormula.html" class="text-decoration-none font-monospace"><small>parseWilkinsonFormula</small></a></li>
 					<li><a href="pca.html" class="text-decoration-none font-monospace"><small>pca</small></a></li>
 					<li><a href="pcacov.html" class="text-decoration-none font-monospace"><small>pcacov</small></a></li>
 					<li><a href="pcares.html" class="text-decoration-none font-monospace"><small>pcares</small></a></li>
@@ -799,62 +801,142 @@
             </div>
             <div class="card-body">
 <dl>
-<dt><code><h5 class="fs">statistics: <var>mean</var> = <b>grpstats</b> (<var>x</var>)</code></h5></dt>
-<dt><code><h5 class="fs">statistics: <var>mean</var> = <b>grpstats</b> (<var>x</var>, <var>group</var>)</code></h5></dt>
-<dt><code><h5 class="fs">statistics: [<var>a</var>, <var>b</var>, &hellip;] = <b>grpstats</b> (<var>x</var>, <var>group</var>, <var>whichstats</var>)</code></h5></dt>
-<dt><code><h5 class="fs">statistics: [<var>a</var>, <var>b</var>, &hellip;] = <b>grpstats</b> (<var>x</var>, <var>group</var>, <var>whichstats</var>, <var>alpha</var>)</code></h5></dt>
-<dt><code><h5 class="fs">statistics: [<var>a</var>, <var>b</var>, &hellip;] = <b>grpstats</b> (<var>x</var>, <var>group</var>,  <var>whichstats</var>, <code>&quot;alpha&quot;</code>, <var>a</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: <var>stats</var> = <b>grpstats</b> (<var>x</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: <var>stats</var> = <b>grpstats</b> (<var>x</var>, <var>group</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: [<var>stats1</var>, &hellip;, <var>statsN</var>] = <b>grpstats</b> (<var>x</var>, <var>group</var>, <var>whichstats</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: [<var>stats1</var>, &hellip;, <var>statsN</var>] = <b>grpstats</b>  (<var>x</var>, <var>group</var>, <var>whichstats</var>, <code>'Alpha'</code>, <var>alpha</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: <var>tblstats</var> = <b>grpstats</b> (<var>tbl</var>, <var>groupvars</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: <var>tblstats</var> = <b>grpstats</b> (<var>tbl</var>, <var>groupvars</var>, <var>whichstats</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: <var>tblstats</var> = <b>grpstats</b> (<var>tbl</var>, <var>groupvars</var>,  <var>whichstats</var>, <var>Name</var>, <var>Value</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: <b>grpstats</b> (<var>x</var>, <var>group</var>, <var>alpha</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: <var>h</var> = <b>grpstats</b> (<var>x</var>, <var>group</var>, <var>alpha</var>)</code></h5></dt>
 </dl>
 
-<p> Summary statistics by group.  <code>grpstats</code> computes groupwise summary
- statistics, for data in a matrix <var>x</var>.  <code>grpstats</code> treats NaNs as
- missing values, and removes them.
+<p> Summary statistics by group.
 </p>
 <div class="ms-5">
-<p> <code><var>means</var> = grpstats (<var>x</var>, <var>group</var>)</code>, when X is a matrix of
- observations, returns the means of each column of <var>x</var> by <var>group</var>.
- <var>group</var> is a grouping variable defined as a categorical variable,
- numeric, string array, or cell array of strings.  <var>group</var> can be [] or
- omitted to compute the mean of the entire sample without grouping.
+<p> <code>grpstats</code> computes groupwise summary statistics for the data in
+ <var>x</var>, which can be a numeric matrix or a table.  Numeric vectors are
+ treated as a single column matrix.  <code>NaN</code>s are treated as missing
+ values and removed from calculations.
 </p>
-<p> <code>[<var>a</var>, <var>b</var>, &hellip;] = grpstats (<var>x</var>, <var>group</var>,
- <var>whichstats</var>)</code>, for a numeric matrix X, returns the statistics specified
- by <var>whichstats</var>, as separate arrays <var>a</var>, <var>b</var>, &hellip;.
- <var>whichstats</var> can be a single function name, or a cell array containing
- multiple function names.  The number of output arguments must match the
- number of function names in <var>whichstats</var>.
- Names in <var>whichstats</var> can be chosen from among the following:
+ <a name="Syntax-for-Numeric-Input"></a>
+<h3 class="subheading">Syntax for Numeric Input</h3>
+
+<p> <code><var>stats</var> = grpstats (<var>x</var>)</code> calculates the mean statistic for
+ each column in <var>x</var> and returns it as row vector in <var>stats</var>.
 </p>
- <table>
-<tr><td width="5%"></td><td width="20%">&quot;mean&quot;</td><td width="75%">mean</td></tr>
-<tr><td width="5%"></td><td width="20%">&quot;median&quot;</td><td width="75%">median</td></tr>
-<tr><td width="5%"></td><td width="20%">&quot;sem&quot;</td><td width="75%">standard error of the mean</td></tr>
-<tr><td width="5%"></td><td width="20%">&quot;std&quot;</td><td width="75%">standard deviation</td></tr>
-<tr><td width="5%"></td><td width="20%">&quot;var&quot;</td><td width="75%">variance</td></tr>
-<tr><td width="5%"></td><td width="20%">&quot;min&quot;</td><td width="75%">minimum value</td></tr>
-<tr><td width="5%"></td><td width="20%">&quot;max&quot;</td><td width="75%">maximum value</td></tr>
-<tr><td width="5%"></td><td width="20%">&quot;range&quot;</td><td width="75%">maximum - minimum</td></tr>
-<tr><td width="5%"></td><td width="20%">&quot;numel&quot;</td><td width="75%">count, or number of elements</td></tr>
-<tr><td width="5%"></td><td width="20%">&quot;meanci&quot;</td><td width="75%">95% confidence interval for the mean</td></tr>
-<tr><td width="5%"></td><td width="20%">&quot;predci&quot;</td><td width="75%">95% prediction interval for a new observation</td></tr>
-<tr><td width="5%"></td><td width="20%">&quot;gname&quot;</td><td width="75%">group name</td></tr>
+<p> <code><var>stats</var> = grpstats (<var>x</var>, <var>group</var>)</code> calculates the mean
+ statistic for each column in <var>x</var> grouped by <var>group</var>.  The returned
+ argument, <var>stats</var>, is also a matrix with equal columns as <var>x</var> and the
+ number of rows is equal to the groups specified by <var>group</var>.
+</p>
+<p> The grouping variable, <var>group</var> can be a vector of any data type
+ supported by the <code>grp2idx</code> function.  Alternatively, it can be a cell
+ vector specifying multiple grouping variables with each cell element
+ containing any of the aforementioned supported grouping vectors.  If
+ <var>group</var> is empty (<code>[]</code>), then input <var>x</var> is treated as a single
+ group.
+</p>
+<p> <code>[<var>stats1</var>, &hellip;, <var>statsN</var>] = grpstats (<var>x</var>, <var>group</var>,
+ <var>whichstats</var>)</code> calculates the summary statistics specified by the
+ <var>whichstats</var> argument, which can include any of the available statistics
+ shown below.  The number of output arguments must match the number of
+ requested statistics specified in <var>whichstats</var>.
+ computes summary statistics for the numeric matrix <var>x</var> grouped by
+ <var>group</var>.
+</p>
+<p> <var>x</var> must be a numeric vector or a 2-D matrix.  Vectors are treated as
+ a single-column matrix.
+</p>
+<p> <var>group</var> is a grouping variable that defines the groups for the rows of
+ <var>x</var>.  It can be a categorical variable, numeric vector, string array, or
+ cell array of strings.  <var>group</var> can also be a cell array containing
+ multiple grouping variables.  If <var>group</var> is empty (<code>[]</code>) or omitted,
+ all of <var>x</var> is treated as a single group.
+</p>
+<p> <var>whichstats</var> specifies the statistics to compute. It can be either a
+ string array or a cell array of strings specifying any of the following
+ builtin statistics.  If omitted, the default is <code>&quot;mean&quot;</code>.
+ <var>whichstats</var> can also contain function handles for custom statistics.
+</p>
+<p> The available statistics are:
+ </p><table>
+<tr><td width="5%"></td><td width="20%"><code>&quot;mean&quot;</code></td><td width="75%">Mean of each group.</td></tr>
+<tr><td width="5%"></td><td width="20%"><code>&quot;median&quot;</code></td><td width="75%">Median of each group.</td></tr>
+<tr><td width="5%"></td><td width="20%"><code>&quot;sem&quot;</code></td><td width="75%">Standard error of the mean for each group.</td></tr>
+<tr><td width="5%"></td><td width="20%"><code>&quot;std&quot;</code></td><td width="75%">Standard deviation of each group.</td></tr>
+<tr><td width="5%"></td><td width="20%"><code>&quot;var&quot;</code></td><td width="75%">Variance of each group.</td></tr>
+<tr><td width="5%"></td><td width="20%"><code>&quot;min&quot;</code></td><td width="75%">Minimum value in each group.</td></tr>
+<tr><td width="5%"></td><td width="20%"><code>&quot;max&quot;</code></td><td width="75%">Maximum value in each group.</td></tr>
+<tr><td width="5%"></td><td width="20%"><code>&quot;range&quot;</code></td><td width="75%">Difference between max and min in each group.</td></tr>
+<tr><td width="5%"></td><td width="20%"><code>&quot;numel&quot;</code></td><td width="75%">Number of elements (count) in each group.</td></tr>
+<tr><td width="5%"></td><td width="20%"><code>&quot;meanci&quot;</code></td><td width="75%">Confidence interval for the mean.</td></tr>
+<tr><td width="5%"></td><td width="20%"><code>&quot;predci&quot;</code></td><td width="75%">Prediction interval for a new observation.</td></tr>
+<tr><td width="5%"></td><td width="20%"><code>&quot;gname&quot;</code></td><td width="75%">Group names.</td></tr>
 </table>
 
-<p> <code>[&hellip;] = grpstats (<var>x</var>, <var>group</var>, <var>whichstats</var>,
- <var>alpha</var>)</code> specifies the confidence level as 100(1-ALPHA)% for the &quot;meanci&quot;
- and &quot;predci&quot; options.  Default value for <var>alpha</var> is 0.05.  The
- significance can also be specified using the Name-Value pair argument syntax.
+<p> <code>[&hellip;] = grpstats (&hellip;, <code>'Alpha'</code>, <var>alpha</var>)</code> specifies
+ the significance level for the confidence intervals (<code>&quot;meanci&quot;</code> and
+ <code>&quot;predci&quot;</code>) as <code>100 * (1-<var>alpha</var>)@%</code>.  <var>alpha</var> must be a
+ scalar between 0 and 1.  When not specified, it defaults to 0.05.  Note that
+ this paired input argument is also valid for table input.
 </p>
-<p> Examples:
-</p>
- <table><tr><td>&nbsp;</td><td><pre class="example"> load carsmall;
- [m,p,g] = grpstats (Weight, Model_Year, {&quot;mean&quot;, &quot;predci&quot;, &quot;gname&quot;})
- n = length(m);
- errorbar((1:n)',m,p(:,2)-m)
- set (gca, &quot;xtick&quot;, 1:n, &quot;xticklabel&quot;, g);
- title (&quot;95% prediction intervals for mean weight by year&quot;)
- </pre></td></tr></table>
+ <a name="Syntax-for-Table-Input"></a>
+<h3 class="subheading">Syntax for Table Input</h3>
 
+<p> <code><var>tblstats</var> = grpstats (<var>tbl</var>, <var>groupvars</var>)</code> computes the
+ summary statistics for the data in table <var>tbl</var>, grouped by the variables
+ specified in <var>groupvars</var>.  If <var>groupvars</var> is empty or omitted, then
+ all of <var>tbl</var> is treated as a single group.  <var>groupvars</var> can be a cell
+ array of character vectors or a string array specifying one or more variable
+ names in <var>tbl</var> to be used as grouping variables.  Alternatively, all
+ valid methods for indexing table variables are supported (e.g. <code>vartype</code>
+ object, logical vector, function handle).
+</p>
+<p> The output <var>tblstats</var> is a table with one row for each group. It contains
+ the grouping variables, an additional  <code>&quot;GroupCount&quot;</code> variable, and the
+ specified summary statistics for the variables in <var>tbl</var>, expect for those
+ specified as grouping variables.  When input is a table, only a single output
+ variable, <var>tblstats</var> can be specified.  The output <var>tblstats</var> also
+ contains <code>RowNames</code>, which are the unique combinations of the specified
+ groups, for which data are available in <var>tbl</var>.  When no groups are
+ specified, the row name of the single row output table defaults to
+ <code>'All'</code>.
+</p>
+<p> <code><var>tblstats</var> = grpstats (<var>tbl</var>, <var>groupvars</var>,
+ <var>whichstats</var>)</code> specifies which statistics to calculate for the variables
+ in <var>tbl</var>.  Unless specified, the mean is calculated for each variable.
+ When specifying more than one statistic, <var>tblstats</var> contains multiple
+ variables for each variable in <var>tbl</var> and each is named by combining the
+ applied statistic with the name of the original variable.  When a function
+ handle is applied, its string representation is used instead.
+</p>
+<p> For table input specifically, <code>grpstats</code> also accepts the following
+ paired arguments.
+</p>
+ <table>
+<thead><tr><th width="20%">Name</th><th width="5%"></th><th width="75%">Value</th></tr></thead>
+<tr><td width="20%"><code>'DataVars'</code></td><td width="5%"></td><td width="75%">A vector specifying the variables in
+ <var>tbl</var>, for which to calculate the specified statistics.  The vector can
+ be any of the valid options for indexing table variables.</td></tr>
+<tr><td width="20%"><code>'VarNames'</code></td><td width="5%"></td><td width="75%">A cell array of character vectors or a
+ string array specifying the names of the variables in the output table.  The
+ number of specified names must match the number of expected variables in the
+ output table.</td></tr>
+</table>
+
+ <a name="Plotting-Syntax"></a>
+<h3 class="subheading">Plotting Syntax</h3>
+
+<p> The syntax <code>grpstats (<var>x</var>, <var>group</var>, <var>alpha</var>)</code> generates an
+ <code>errorbar</code> plot with the group means and their respective confidence
+ intervals.  <var>x</var> must be a numeric vector or matrix.  <var>alpha</var> is a
+ scalar between 0 and 1 that determines the confidence level.  This syntax is
+ an alternative to calling <code>errorbar</code> after computing <code>&quot;mean&quot;</code> and
+ <code>&quot;meanci&quot;</code> statistics.  The optional output <var>h</var> is a handle to the
+ hggroup object representing the data plot and errorbars.
+</p>
 <p> <strong>See also: </strong>
   <a href="grp2idx.html">grp2idx</a>
 </p>
@@ -880,9 +962,9 @@
                     <td><pre class="example">
 
  load carsmall;
- [m,p,g] = grpstats (Weight, Model_Year, {"mean", "predci", "gname"})
- n = length(m);
- errorbar((1:n)',m,p(:,2)-m);
+ [m, p, g] = grpstats (Weight, Model_Year, {'mean', 'predci', 'gname'})
+ n = length (m);
+ errorbar ((1:n)',m,p(:,2)-m);
  set (gca, "xtick", 1:n, "xticklabel", g);
  title ("95% prediction intervals for mean weight by year");
 
@@ -894,9 +976,9 @@ m =
 
 p =
 
-   1847.1   5035.6
-   1457.0   4700.4
-   1754.1   3153.0
+   1777.0   5105.6
+   1383.2   4774.2
+   1718.4   3188.7
 
 g =
   3x1 cell array
@@ -936,36 +1018,114 @@ g =
                     <td><pre class="example">
 
  load carsmall;
- [m,p,g] = grpstats ([Acceleration,Weight/1000],Cylinders, ...
-                     {"mean", "meanci", "gname"}, 0.05)
- [c,r] = size (m);
- errorbar((1:c)'.*ones(c,r),m,p(:,[(1:r)])-m);
+ [m, p, g] = grpstats ([Acceleration,Weight/1000],Cylinders, ...
+                       {'mean', 'meanci', 'gname'}, 0.05)
+ [c, r] = size (m);
+ errorbar ((1:c)'.*ones(c,r),m,p(:,[(1:r)])-m);
  set (gca, "xtick", 1:c, "xticklabel", g);
  title ("95% prediction intervals for mean weight by year");
 
 m =
 
-   11.6406    3.9703
    16.6706    2.3726
    16.4765    3.1255
+   11.6406    3.9703
 
 p =
 
-   11.1762    3.8899   12.1050    4.0506
-   16.1385    2.2998   17.2027    2.4454
-   16.1622    3.0518   16.7907    3.1992
+ans(:,:,1) =
+
+   15.9163    2.2694
+   15.6622    2.9345
+   10.7968    3.8243
+
+ans(:,:,2) =
+
+   17.4249    2.4757
+   17.2907    3.3164
+   12.4845    4.1162
 
 g =
   3x1 cell array
 
-    {'8'}    
     {'4'}    
     {'6'}    
+    {'8'}    
 
                     </pre></td></tr></tbody>
                   </table>
                   <div class="text-center">
                     <img src="assets/grpstats_201.png" class="rounded img-thumbnail" alt="plotted figure">
+                  </div><p></p>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="container-xl my-4">
+          <div class="card rounded">
+            <div class="card-header card-header-mod">
+              <div class="row d-flex flex-wrap align-items-center">
+                <div class="col-sm-3 col-md-5 mb-2 mb-sm-0">
+                  <h3 class="d-inline-block mr-2">
+                  Example: 3
+                  </h3>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="container bg-light">
+                <div class="row">
+                  <table><tbody><tr>
+                    <td>&nbsp;</td>
+                    <td><pre class="example">
+
+ ## Plot mean and 95% CI for a single grouping variable
+ load carsmall;
+ grpstats (Weight, Model_Year, 0.05);
+ title ("Mean Weight by Model Year");
+
+                    </pre></td></tr></tbody>
+                  </table>
+                  <div class="text-center">
+                    <img src="assets/grpstats_301.png" class="rounded img-thumbnail" alt="plotted figure">
+                  </div><p></p>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="container-xl my-4">
+          <div class="card rounded">
+            <div class="card-header card-header-mod">
+              <div class="row d-flex flex-wrap align-items-center">
+                <div class="col-sm-3 col-md-5 mb-2 mb-sm-0">
+                  <h3 class="d-inline-block mr-2">
+                  Example: 4
+                  </h3>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="container bg-light">
+                <div class="row">
+                  <table><tbody><tr>
+                    <td>&nbsp;</td>
+                    <td><pre class="example">
+
+ ## Plot mean and 95% CI for two grouping variables
+ load carsmall;
+ grpstats (Weight, {Origin, Cylinders}, 0.05);
+ title ("Mean Weight by Origin and Number of Cylinders");
+
+                    </pre></td></tr></tbody>
+                  </table>
+                  <div class="text-center">
+                    <img src="assets/grpstats_401.png" class="rounded img-thumbnail" alt="plotted figure">
                   </div><p></p>
 
                 </div>

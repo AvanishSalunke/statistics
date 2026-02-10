@@ -210,6 +210,7 @@
 					<li><a href="combnk.html" class="text-decoration-none font-monospace"><small>combnk</small></a></li>
 					<li><a href="crosstab.html" class="text-decoration-none font-monospace"><small>crosstab</small></a></li>
 					<li><a href="datasample.html" class="text-decoration-none font-monospace"><small>datasample</small></a></li>
+					<li><a href="dummyvar.html" class="text-decoration-none font-monospace"><small>dummyvar</small></a></li>
 					<li><a href="fillmissing.html" class="text-decoration-none font-monospace"><small>fillmissing</small></a></li>
 					<li><a href="grp2idx.html" class="text-decoration-none font-monospace"><small>grp2idx</small></a></li>
 					<li><a href="ismissing.html" class="text-decoration-none font-monospace"><small>ismissing</small></a></li>
@@ -761,6 +762,7 @@
 					<li><a href="logistic_regression.html" class="text-decoration-none font-monospace"><small>logistic_regression</small></a></li>
 					<li><a href="mnrfit.html" class="text-decoration-none font-monospace"><small>mnrfit</small></a></li>
 					<li><a href="monotone_smooth.html" class="text-decoration-none font-monospace"><small>monotone_smooth</small></a></li>
+					<li><a href="parseWilkinsonFormula.html" class="text-decoration-none font-monospace"><small>parseWilkinsonFormula</small></a></li>
 					<li><a href="pca.html" class="text-decoration-none font-monospace"><small>pca</small></a></li>
 					<li><a href="pcacov.html" class="text-decoration-none font-monospace"><small>pcacov</small></a></li>
 					<li><a href="pcares.html" class="text-decoration-none font-monospace"><small>pcares</small></a></li>
@@ -910,7 +912,7 @@ Rate parameter
  ## The rate parameter must be a positive real scalar, representing both the mean
  ## and variance, ideal for count data modeling.
 
-ans = 5.1000
+ans = 4.5700
 pd =
   PoissonDistribution
 
@@ -1611,8 +1613,8 @@ Compute the mean of a probability distribution.
  ## This shows how to compute the expected value for Poisson distributions,
  ## which equals lambda, representing the average number of events.
 
-mean1 = 1.9973
-mean2 = 4.9907
+mean1 = 2.0076
+mean2 = 4.9871
                     </pre></td></tr></tbody>
                   </table>
 
@@ -1755,7 +1757,7 @@ Compute the negative loglikelihood of a probability distribution.
  ## This is useful for assessing the fit of a Poisson distribution to data,
  ## with lower values indicating better fit, often used in model selection.
 
-nlogL = -224.57
+nlogL = -226.76
                     </pre></td></tr></tbody>
                   </table>
 
@@ -1847,8 +1849,8 @@ Compute the confidence intervals for probability distribution parameters.
 
 ci =
 
-   4.8585
-   5.1355
+   4.8022
+   5.0778
 
                     </pre></td></tr></tbody>
                   </table>
@@ -2374,7 +2376,7 @@ Compute the standard deviation of a probability distribution.
  ## Use this to calculate the standard deviation, which equals sqrt(lambda),
  ## measuring variability in event counts.
 
-std_value = 2.2357
+std_value = 2.2358
                     </pre></td></tr></tbody>
                   </table>
 
@@ -2537,7 +2539,7 @@ Compute the variance of a probability distribution.
  ## Use this to calculate the variance, which equals lambda, quantifying the
  ## spread in count data.
 
-var_value = 5.0188
+var_value = 4.9925
                     </pre></td></tr></tbody>
                   </table>
 
@@ -2595,7 +2597,7 @@ pd_fitted =
   PoissonDistribution
 
   Poisson distribution
-   lambda = 5.0146   [4.95253, 5.07667]
+   lambda = 4.9958   [4.93385, 5.05775]
 </pre></td></tr>
                   </table>
                   <div class="text-center">

@@ -210,6 +210,7 @@
 					<li><a href="combnk.html" class="text-decoration-none font-monospace"><small>combnk</small></a></li>
 					<li><a href="crosstab.html" class="text-decoration-none font-monospace"><small>crosstab</small></a></li>
 					<li><a href="datasample.html" class="text-decoration-none font-monospace"><small>datasample</small></a></li>
+					<li><a href="dummyvar.html" class="text-decoration-none font-monospace"><small>dummyvar</small></a></li>
 					<li><a href="fillmissing.html" class="text-decoration-none font-monospace"><small>fillmissing</small></a></li>
 					<li><a href="grp2idx.html" class="text-decoration-none font-monospace"><small>grp2idx</small></a></li>
 					<li><a href="ismissing.html" class="text-decoration-none font-monospace"><small>ismissing</small></a></li>
@@ -761,6 +762,7 @@
 					<li><a href="logistic_regression.html" class="text-decoration-none font-monospace"><small>logistic_regression</small></a></li>
 					<li><a href="mnrfit.html" class="text-decoration-none font-monospace"><small>mnrfit</small></a></li>
 					<li><a href="monotone_smooth.html" class="text-decoration-none font-monospace"><small>monotone_smooth</small></a></li>
+					<li><a href="parseWilkinsonFormula.html" class="text-decoration-none font-monospace"><small>parseWilkinsonFormula</small></a></li>
 					<li><a href="pca.html" class="text-decoration-none font-monospace"><small>pca</small></a></li>
 					<li><a href="pcacov.html" class="text-decoration-none font-monospace"><small>pcacov</small></a></li>
 					<li><a href="pcares.html" class="text-decoration-none font-monospace"><small>pcares</small></a></li>
@@ -912,14 +914,14 @@ Location parameter
  ## distribution. The location parameter (mu) is a real scalar that shifts the
  ## distribution, useful for modeling data centered around a specific value.
 
-ans = -7.7258e-03
+ans = -0.012491
 pd =
   tLocationScaleDistribution
 
   t Location-Scale distribution
-       mu =       1
-    sigma = 1.00063
-       nu = 5.15961
+       mu =        1
+    sigma = 0.997056
+       nu =  4.98394
 
                     </pre></td></tr></tbody>
                   </table>
@@ -1031,14 +1033,14 @@ Scale parameter
  ## spread of the t Location-Scale distribution. Sigma must be a positive real
  ## scalar, useful for modeling variability in data like financial returns.
 
-ans = 0.9893
+ans = 0.9880
 pd =
   tLocationScaleDistribution
 
   t Location-Scale distribution
-       mu = -0.0166193
+       mu = -0.0154656
     sigma =          2
-       nu =    5.13493
+       nu =    5.16791
 
                     </pre></td></tr></tbody>
                   </table>
@@ -1150,14 +1152,14 @@ Degrees of freedom
  ## tail heaviness of the t Location-Scale distribution. Nu must be a positive
  ## real scalar, useful for modeling heavy-tailed data like stock returns.
 
-ans = 5.1040
+ans = 4.8489
 pd =
   tLocationScaleDistribution
 
   t Location-Scale distribution
-       mu = 0.013445
-    sigma =  1.01416
-       nu =       10
+       mu = 0.0126855
+    sigma =   1.00002
+       nu =        10
 
                     </pre></td></tr></tbody>
                   </table>
@@ -1781,7 +1783,7 @@ Compute the interquartile range of a probability distribution.
  ## Use this to calculate the interquartile range, which measures the spread
  ## of the middle 50% of the distribution, helpful for assessing central variability.
 
-iqr_value = 1.4519
+iqr_value = 1.4420
                     </pre></td></tr></tbody>
                   </table>
 
@@ -1853,8 +1855,8 @@ Compute the mean of a probability distribution.
  ## This shows how to compute the expected value for t Location-Scale
  ## distributions, representing the average value, useful in financial modeling or quality control.
 
-mean1 = 2.2857e-03
-mean2 = -0.014156
+mean1 = 1.1194e-03
+mean2 = -0.012212
                     </pre></td></tr></tbody>
                   </table>
 
@@ -1926,8 +1928,8 @@ Compute the median of a probability distribution.
  ## Use this to find the median value, which splits the distribution into
  ## two equal probability halves, robust to heavy-tailed data.
 
-median1 = 7.1934e-04
-median2 = 0.018431
+median1 = 1.0982e-03
+median2 = 0.017472
                     </pre></td></tr></tbody>
                   </table>
 
@@ -1998,7 +2000,7 @@ Compute the negative loglikelihood of a probability distribution.
  ## This is useful for assessing the fit of a t Location-Scale distribution to
  ## data, with lower values indicating a better fit, often used in model comparison.
 
-nlogL_tlslike = 176.05
+nlogL_tlslike = 176.78
                     </pre></td></tr></tbody>
                   </table>
 
@@ -2091,8 +2093,8 @@ Compute the confidence intervals for probability distribution parameters.
 
 ci =
 
-  -0.048512   0.954464   3.797941
-   0.098725   1.104246   6.927224
+  -0.060216   0.981854   3.618273
+   0.091896   1.137822   6.434089
 
                     </pre></td></tr></tbody>
                   </table>
@@ -2621,7 +2623,7 @@ Compute the standard deviation of a probability distribution.
  ## Use this to calculate the standard deviation, which measures the variability
  ## in the distribution, useful for understanding data dispersion.
 
-std_value = 1.2955
+std_value = 1.2936
                     </pre></td></tr></tbody>
                   </table>
 
@@ -2783,7 +2785,7 @@ Compute the variance of a probability distribution.
  ## Use this to calculate the variance, which quantifies the spread of the
  ## distribution, useful for statistical analysis of variability.
 
-var_value = 1.6098
+var_value = 1.6678
                     </pre></td></tr></tbody>
                   </table>
 

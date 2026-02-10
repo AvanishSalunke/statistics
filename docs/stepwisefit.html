@@ -210,6 +210,7 @@
 					<li><a href="combnk.html" class="text-decoration-none font-monospace"><small>combnk</small></a></li>
 					<li><a href="crosstab.html" class="text-decoration-none font-monospace"><small>crosstab</small></a></li>
 					<li><a href="datasample.html" class="text-decoration-none font-monospace"><small>datasample</small></a></li>
+					<li><a href="dummyvar.html" class="text-decoration-none font-monospace"><small>dummyvar</small></a></li>
 					<li><a href="fillmissing.html" class="text-decoration-none font-monospace"><small>fillmissing</small></a></li>
 					<li><a href="grp2idx.html" class="text-decoration-none font-monospace"><small>grp2idx</small></a></li>
 					<li><a href="ismissing.html" class="text-decoration-none font-monospace"><small>ismissing</small></a></li>
@@ -761,6 +762,7 @@
 					<li><a href="logistic_regression.html" class="text-decoration-none font-monospace"><small>logistic_regression</small></a></li>
 					<li><a href="mnrfit.html" class="text-decoration-none font-monospace"><small>mnrfit</small></a></li>
 					<li><a href="monotone_smooth.html" class="text-decoration-none font-monospace"><small>monotone_smooth</small></a></li>
+					<li><a href="parseWilkinsonFormula.html" class="text-decoration-none font-monospace"><small>parseWilkinsonFormula</small></a></li>
 					<li><a href="pca.html" class="text-decoration-none font-monospace"><small>pca</small></a></li>
 					<li><a href="pcacov.html" class="text-decoration-none font-monospace"><small>pcacov</small></a></li>
 					<li><a href="pcares.html" class="text-decoration-none font-monospace"><small>pcares</small></a></li>
@@ -799,46 +801,126 @@
             </div>
             <div class="card-body">
 <dl>
-<dt><code><h5 class="fs">statistics: [<var>X_use</var>, <var>b</var>, <var>bint</var>, <var>r</var>, <var>rint</var>, <var>stats</var>] = <b>stepwisefit</b> (<var>y</var>, <var>X</var>, <var>penter</var> = 0.05, <var>premove</var> = 0.1, <var>method</var> = &quot;corr&quot;)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: <b>stepwisefit</b> (<var>X</var>, <var>y</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: <var>b</var> = <b>stepwisefit</b> (<var>X</var>, <var>y</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: <var>b</var>, <var>se</var>, <var>pval</var>, <var>finalmodel</var>, <var>stats</var>, <var>nextstep</var>, <var>history</var> = <b>stepwisefit</b> (<var>X</var>, <var>y</var>, <var>varargin</var>)</code></h5></dt>
 </dl>
 
-<p> Linear regression with stepwise variable selection.
+<p> Perform stepwise linear regression using conditional p-value criteria.
 </p>
 <div class="ms-5">
+<p> <code>stepwisefit</code> fits a linear regression model to response vector
+ <var>y</var> using predictor matrix <var>X</var> and performs stepwise variable
+ selection based on hypothesis tests for individual regression coefficients.
+</p>
+<p> At each iteration, predictors not currently in the model are tested for
+ inclusion using partial F- or t-tests.  The predictor with the smallest
+ p-value below the entry threshold is added.  Predictors currently in the
+ model (excluding forced predictors) are then tested for removal, and the
+ predictor with the largest p-value exceeding the removal threshold is
+ removed.  The procedure repeats until the model stabilizes or the maximum
+ number of iterations is reached.
+</p>
+<p> After variable selection, the final regression model is refit using
+ <code>regress</code> to compute coefficient estimates and inferential statistics
+ for both included and excluded predictors.
+</p>
  <a name="Arguments"></a>
 <h3 class="subheading">Arguments</h3>
 
  <ul>
 <li>
- <var>y</var> is an <var>n</var> by 1 vector of data to fit.
+ <var>X</var> is an <var>n</var>-by-<var>p</var> numeric matrix of predictor variables.
+
  </li><li>
- <var>X</var> is an <var>n</var> by <var>k</var> matrix containing the values of <var>k</var> potential predictors. No constant term should be included (one will always be added to the regression automatically).
+ <var>y</var> is an <var>n</var>-by-1 numeric response vector.
+
  </li><li>
- <var>penter</var> is the maximum p-value to enter a new variable into the regression (default: 0.05).
- </li><li>
- <var>premove</var> is the minimum p-value to remove a variable from the regression (default: 0.1).
- </li><li>
- <var>method</var> sets how predictors are selected at each step, either based on their correlation with the residuals (&quot;corr&quot;, default)
-   or on the p values of their regression coefficients when they are successively added (&quot;p&quot;).
+ Optional Name–Value pairs may be supplied to control the stepwise
+ selection procedure.
  </li></ul>
 
- <a name="Return-values"></a>
-<h3 class="subheading">Return values</h3>
+ <a name="NameaEUR_0022Value-Arguments"></a>
+<h3 class="subheading">Name–Value Arguments</h3>
+
+ <dl compact="compact">
+<dt> <code>&quot;InModel&quot;</code></dt>
+</dl>
+<p> Logical row vector of length <var>p</var> specifying predictors that are initially
+ included in the model.
+</p>
+ </dd>
+<dt> <code>&quot;Keep&quot;</code></dt>
+</dl>
+<p> Logical row vector of length <var>p</var> specifying predictors that must remain
+ in the model and are never removed during stepwise selection.
+</p>
+ </dd>
+<dt> <code>&quot;PEnter&quot;</code></dt>
+</dl>
+<p> Scalar significance level in the open interval (0,1) specifying the maximum
+ p-value required for a predictor to enter the model.  Default is <code>0.05</code>.
+</p>
+ </dd>
+<dt> <code>&quot;PRemove&quot;</code></dt>
+</dl>
+<p> Scalar significance level in the open interval (0,1) specifying the minimum
+ p-value required for a predictor to be removed from the model.  If not
+ specified, a default value greater than or equal to <code>&quot;PEnter&quot;</code> is used.
+</p>
+ </dd>
+<dt> <code>&quot;MaxIter&quot;</code></dt>
+</dl>
+<p> Positive integer specifying the maximum number of stepwise iterations.
+ Default is <code>Inf</code>.
+</p>
+ </dd>
+<dt> <code>&quot;Scale&quot;</code></dt>
+</dl>
+<p> Either <code>&quot;on&quot;</code> or <code>&quot;off&quot;</code>.  When enabled, predictors are
+ standardized prior to stepwise selection only.  Final regression
+ coefficients are always reported on the original data scale.
+</p>
+ </dd>
+<dt> <code>&quot;Display&quot;</code></dt>
+</dl>
+<p> Either <code>&quot;on&quot;</code> or <code>&quot;off&quot;</code>.  Accepted for compatibility but
+ currently does not affect output.
+ </p></dd>
+</dl>
+
+ <a name="Return-Values"></a>
+<h3 class="subheading">Return Values</h3>
 
  <ul>
 <li>
- <var>X_use</var> contains the indices of the predictors included in the final regression model. The predictors are listed in the order they were added, so typically the first ones listed are the most significant.
+ <var>b</var> is a <var>p</var>-by-1 vector of regression coefficients.  Coefficients
+ for excluded predictors are computed conditionally.
+
  </li><li>
- <var>b</var>, <var>bint</var>, <var>r</var>, <var>rint</var>, <var>stats</var> are the results of <code>[b, bint, r, rint, stats] = regress(y, [ones(size(y)) X(:, X_use)], penter);</code>
+ <var>se</var> is a <var>p</var>-by-1 vector of standard errors.
+
+ </li><li>
+ <var>pval</var> is a <var>p</var>-by-1 vector of two-sided p-values.
+
+ </li><li>
+ <var>finalmodel</var> is a logical row vector indicating which predictors are
+ included in the final model.
+
+ </li><li>
+ <var>stats</var> is a structure containing regression diagnostics, including
+ sums of squares, degrees of freedom, residuals, covariance estimates,
+ F-statistic, and related quantities.
+
+ </li><li>
+ <var>nextstep</var> is a scalar indicating whether an additional stepwise
+ iteration is recommended.  Currently always zero.
+
+ </li><li>
+ <var>history</var> is a structure summarizing the final model state, including
+ selected predictors and coefficient history.
  </li></ul>
- <a name="References"></a>
-<h3 class="subheading">References</h3>
 
- <ol>
-<li>
- N. R. Draper and H. Smith (1966). <cite>Applied Regression Analysis</cite>. Wiley. Chapter 6.
-
-</li></ol>
 <p> <strong>See also: </strong>
   <a href="regress.html">regress</a>
 </p>

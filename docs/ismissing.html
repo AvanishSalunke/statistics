@@ -210,6 +210,7 @@
 					<li><a href="combnk.html" class="text-decoration-none font-monospace"><small>combnk</small></a></li>
 					<li><a href="crosstab.html" class="text-decoration-none font-monospace"><small>crosstab</small></a></li>
 					<li><a href="datasample.html" class="text-decoration-none font-monospace"><small>datasample</small></a></li>
+					<li><a href="dummyvar.html" class="text-decoration-none font-monospace"><small>dummyvar</small></a></li>
 					<li><a href="fillmissing.html" class="text-decoration-none font-monospace"><small>fillmissing</small></a></li>
 					<li><a href="grp2idx.html" class="text-decoration-none font-monospace"><small>grp2idx</small></a></li>
 					<li><a href="ismissing.html" class="text-decoration-none font-monospace fw-bolder"><small>ismissing</small></a></li>
@@ -761,6 +762,7 @@
 					<li><a href="logistic_regression.html" class="text-decoration-none font-monospace"><small>logistic_regression</small></a></li>
 					<li><a href="mnrfit.html" class="text-decoration-none font-monospace"><small>mnrfit</small></a></li>
 					<li><a href="monotone_smooth.html" class="text-decoration-none font-monospace"><small>monotone_smooth</small></a></li>
+					<li><a href="parseWilkinsonFormula.html" class="text-decoration-none font-monospace"><small>parseWilkinsonFormula</small></a></li>
 					<li><a href="pca.html" class="text-decoration-none font-monospace"><small>pca</small></a></li>
 					<li><a href="pcacov.html" class="text-decoration-none font-monospace"><small>pcacov</small></a></li>
 					<li><a href="pcares.html" class="text-decoration-none font-monospace"><small>pcares</small></a></li>
@@ -803,37 +805,59 @@
 <dt><code><h5 class="fs">statistics: <var>TF</var> = <b>ismissing</b> (<var>A</var>, <var>indicator</var>)</code></h5></dt>
 </dl>
 
-<p> Find missing data in a numeric or string array.
+<p> Find missing data in arrays.
 </p>
 <div class="ms-5">
-<p> Given an input numeric data array, char array, or array of cell strings
- <var>A</var>, <code>ismissing</code> returns a logical array <var>TF</var> with
- the same dimensions as <var>A</var>, where <code>true</code> values match missing
- values in the input data.
+<p> <code><var>TF</var> = ismissing (<var>A</var>)</code> returns a logical array, <var>TF</var>, with
+ the same dimensions as <var>A</var>, where <code>true</code> values match the standard
+ missing values in the input data according to their data type.
 </p>
-<p> The optional input <var>indicator</var> is an array of values that represent
- missing values in the input data.  The values which represent missing data
- by default depend on the data type of <var>A</var>:
+<p> Standard missing values and their corresponding data types are:
 </p>
  <ul>
-<li>
- <code>NaN</code>: <code>single</code>, <code>double</code>.
-
- </li><li>
- <code>' '</code> (white space): <code>char</code>.
-
- </li><li>
- <code>{''}</code>: string cells.
+<li> <code>NaN</code> - for <code>double</code>, <code>single</code>, <code>duration</code>, and
+ <code>calendarDuration</code> arrays.
+ </li><li> <code>NaT</code> - for <code>datetime</code> arrays.
+ </li><li> <code>&lt;missing&gt;</code> - for <code>string</code> arrays.
+ </li><li> <code>&lt;undefined&gt;</code> - for <code>categorical</code> arrays.
+ </li><li> <code>{0x0 char}</code> - for <code>cell</code> arrays of character vectors.
  </li></ul>
 
-<p> Note: logical and numeric data types may be used in any combination
- for <var>A</var> and <var>indicator</var>. <var>A</var> and the indicator values will be
- compared as type double, and the output will have the same class as <var>A</var>.
- Data types other than those specified above have no defined &rsquo;missing&rsquo; value.
- As such, the TF output for those inputs will always be
- <code>false(size(<var>A</var>))</code>. The exception to this is that <var>indicator</var>
- can be specified for logical and numeric inputs to designate values that
- will register as &rsquo;missing&rsquo;.
+<p> For any data types that do not support missing values, <code>ismissing</code>
+ returns <code><var>TF</var> = false (size (<var>A</var>))</code>.
+</p>
+<p> Note: the generic <code>ismissing</code> function from the statistics package only
+ operates on core Octave datatypes and it explicitly identifies missing values
+ in <code>double</code> and <code>single</code> arrays, as well as in <code>cell</code>
+ arrays of character vectors.  All other data types are handled by the
+ overloaded methods from their respective data class from the datatypes
+ package.  Use <code>help class_name.ismissing</code> to find more information about
+ the functional specialization of their respective class implementation.
+</p>
+<p> The optional input <var>indicator</var> can be a scalar or a vector, of the same
+ type as the input data <var>A</var>, specifying alternative missing values in the
+ input data.  When specifying <var>indicator</var> values, the standard missing
+ values are ignored, unless explicitly stated in the <var>indicator</var>.
+</p>
+<p> Additional data type matches between <var>indicator</var> and <var>A</var> are:
+</p>
+ <ul>
+<li> <code>double</code> indicators also match <code>single</code>, all integer types,
+ and <code>logical</code> data in <var>A</var>.
+
+ </li><li> <code>string</code> and <code>char</code> indicators also match
+ <code>categorical</code> data in <var>A</var>.
+
+ </li><li> <code>char</code> and <code>cellstr</code> indicators also match <code>string</code>
+ data in <var>A</var>.
+ </li></ul>
+
+<p> Note: the generic <code>ismissing</code> function from the statistics package only
+ accepts <var>indicator</var> argument for numeric, <code>logical</code>, and
+ <code>char</code> arrays, as well as for <code>cell</code> arrays of character vectors.
+ For all other core Octave data types, <code>ismissing</code> produces an error.
+ However, <var>indicator</var> is supported for data classes from the datatypes
+ package through their respective class implementation of overloaded methods.
 </p>
 <p> <strong>See also: </strong>
   <a href="fillmissing.html">fillmissing</a>, 

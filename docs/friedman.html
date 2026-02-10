@@ -210,6 +210,7 @@
 					<li><a href="combnk.html" class="text-decoration-none font-monospace"><small>combnk</small></a></li>
 					<li><a href="crosstab.html" class="text-decoration-none font-monospace"><small>crosstab</small></a></li>
 					<li><a href="datasample.html" class="text-decoration-none font-monospace"><small>datasample</small></a></li>
+					<li><a href="dummyvar.html" class="text-decoration-none font-monospace"><small>dummyvar</small></a></li>
 					<li><a href="fillmissing.html" class="text-decoration-none font-monospace"><small>fillmissing</small></a></li>
 					<li><a href="grp2idx.html" class="text-decoration-none font-monospace"><small>grp2idx</small></a></li>
 					<li><a href="ismissing.html" class="text-decoration-none font-monospace"><small>ismissing</small></a></li>
@@ -761,6 +762,7 @@
 					<li><a href="logistic_regression.html" class="text-decoration-none font-monospace"><small>logistic_regression</small></a></li>
 					<li><a href="mnrfit.html" class="text-decoration-none font-monospace"><small>mnrfit</small></a></li>
 					<li><a href="monotone_smooth.html" class="text-decoration-none font-monospace"><small>monotone_smooth</small></a></li>
+					<li><a href="parseWilkinsonFormula.html" class="text-decoration-none font-monospace"><small>parseWilkinsonFormula</small></a></li>
 					<li><a href="pca.html" class="text-decoration-none font-monospace"><small>pca</small></a></li>
 					<li><a href="pcacov.html" class="text-decoration-none font-monospace"><small>pcacov</small></a></li>
 					<li><a href="pcares.html" class="text-decoration-none font-monospace"><small>pcares</small></a></li>
@@ -802,8 +804,8 @@
 <dt><code><h5 class="fs">statistics: <var>p</var> = <b>friedman</b> (<var>x</var>)</code></h5></dt>
 <dt><code><h5 class="fs">statistics: <var>p</var> = <b>friedman</b> (<var>x</var>, <var>reps</var>)</code></h5></dt>
 <dt><code><h5 class="fs">statistics: <var>p</var> = <b>friedman</b> (<var>x</var>, <var>reps</var>, <var>displayopt</var>)</code></h5></dt>
-<dt><code><h5 class="fs">statistics: [<var>p</var>, <var>atab</var>] = <b>friedman</b> (&hellip;)</code></h5></dt>
-<dt><code><h5 class="fs">statistics: [<var>p</var>, <var>atab</var>, <var>stats</var>] = <b>friedman</b> (&hellip;)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: [<var>p</var>, <var>tbl</var>] = <b>friedman</b> (&hellip;)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: [<var>p</var>, <var>tbl</var>, <var>stats</var>] = <b>friedman</b> (&hellip;)</code></h5></dt>
 </dl>
 
 <p> Performs the nonparametric Friedman&rsquo;s test to compare column effects in a
@@ -823,7 +825,7 @@
  If not provided, no replicates are assumed.
  </li><li>
  <var>displayopt</var> is an optional parameter for displaying the Friedman&rsquo;s ANOVA
- table, when it is &rsquo;on&rsquo; (default) and suppressing the display when it is &rsquo;off&rsquo;.
+ table, when it is &rsquo;on&rsquo; and suppressing the display when it is &rsquo;off&rsquo; (default).
  </li></ul>
 
 <p> <code>friedman</code> returns up to three output arguments:
@@ -832,15 +834,16 @@
 <li>
  <var>p</var> is the p-value of the null hypothesis that all group means are equal.
  </li><li>
- <var>atab</var> is a cell array containing the results in a Friedman&rsquo;s ANOVA table.
+ <var>tbl</var> is a table containing the results of the Friedman&rsquo;s test in ANOVA
+ table format.  The table includes columns for Source, SS, df, MS, Chi-sq, and
+ Prob&gt;Chi-sq with rows for Columns, [Interaction], Error, and Total.
  </li><li>
- <var>stats</var> is a structure containing statistics useful for performing
- a multiple comparison of medians with the MULTCOMPARE function.
+ <var>stats</var> is a structure containing statistics useful for performing a
+ multiple comparison of medians with the MULTCOMPARE function.
  </li></ul>
 
-<p> If friedman is called without any output arguments, then it prints the results
- in a one-way ANOVA table to the standard output as if <var>displayopt</var> is
- &rsquo;on&rsquo;.
+<p> If friedman is called without any output arguments, then it prints the
+ results in a Friedman&rsquo;s ANOVA table to the standard output.
 </p>
 <p> Examples:
 </p>
@@ -849,7 +852,7 @@
  </pre></td></tr></table>
 
 
- <table><tr><td>&nbsp;</td><td><pre class="example"> [p, anovatab, stats] = friedman (popcorn, 3, &quot;off&quot;);
+ <table><tr><td>&nbsp;</td><td><pre class="example"> [p, anovatab, stats] = friedman (popcorn, 3);
  disp (p);
  </pre></td></tr></table>
 
@@ -882,13 +885,16 @@
  load popcorn;
  friedman (popcorn, 3);
 
-              Friedman's ANOVA Table
-Source            SS      df        MS    Chi-sq    Prob&gt;Chi-sq
----------------------------------------------------------------
-Columns         99.7500     2    49.8750    13.76    0.0010
-Interaction      0.0833     2     0.0417  
-Error           16.1667    12     1.3472
-Total          116.0000    17
+  4x6 table
+
+        Source           SS       df      MS       Chi_sq     Prob_Chi_sq    
+    _______________    _______    __    _______    _______    ___________    
+
+    {'Columns'    }      99.75     2     49.875    13.7586     0.00102885    
+    {'Interaction'}          0     1          0          0              1    
+    {'Error'      }    16.1667    12    1.34722          0              0    
+    {'Total'      }        116    17          0          0              0    
+
                     </pre></td></tr></tbody>
                   </table>
 
@@ -917,7 +923,7 @@ Total          116.0000    17
                     <td><pre class="example">
 
  load popcorn;
- [p, atab] = friedman (popcorn, 3, "off");
+ [p, atab] = friedman (popcorn, 3);
  disp (p);
 
 1.0289e-03

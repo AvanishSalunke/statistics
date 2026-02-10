@@ -210,6 +210,7 @@
 					<li><a href="combnk.html" class="text-decoration-none font-monospace"><small>combnk</small></a></li>
 					<li><a href="crosstab.html" class="text-decoration-none font-monospace"><small>crosstab</small></a></li>
 					<li><a href="datasample.html" class="text-decoration-none font-monospace"><small>datasample</small></a></li>
+					<li><a href="dummyvar.html" class="text-decoration-none font-monospace"><small>dummyvar</small></a></li>
 					<li><a href="fillmissing.html" class="text-decoration-none font-monospace"><small>fillmissing</small></a></li>
 					<li><a href="grp2idx.html" class="text-decoration-none font-monospace fw-bolder"><small>grp2idx</small></a></li>
 					<li><a href="ismissing.html" class="text-decoration-none font-monospace"><small>ismissing</small></a></li>
@@ -761,6 +762,7 @@
 					<li><a href="logistic_regression.html" class="text-decoration-none font-monospace"><small>logistic_regression</small></a></li>
 					<li><a href="mnrfit.html" class="text-decoration-none font-monospace"><small>mnrfit</small></a></li>
 					<li><a href="monotone_smooth.html" class="text-decoration-none font-monospace"><small>monotone_smooth</small></a></li>
+					<li><a href="parseWilkinsonFormula.html" class="text-decoration-none font-monospace"><small>parseWilkinsonFormula</small></a></li>
 					<li><a href="pca.html" class="text-decoration-none font-monospace"><small>pca</small></a></li>
 					<li><a href="pcacov.html" class="text-decoration-none font-monospace"><small>pcacov</small></a></li>
 					<li><a href="pcares.html" class="text-decoration-none font-monospace"><small>pcares</small></a></li>
@@ -799,18 +801,48 @@
             </div>
             <div class="card-body">
 <dl>
+<dt><code><h5 class="fs">statistics: <var>g</var> = <b>grp2idx</b> (<var>s</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: [<var>g</var>, <var>gn</var>] = <b>grp2idx</b> (<var>s</var>)</code></h5></dt>
 <dt><code><h5 class="fs">statistics: [<var>g</var>, <var>gn</var>, <var>gl</var>] = <b>grp2idx</b> (<var>s</var>)</code></h5></dt>
 </dl>
 
-<p> Get index for group variables.
+<p> Get index for grouping variable.
 </p>
 <div class="ms-5">
-<p> For variable <var>s</var>, returns the indices <var>g</var>, into the variable
- groups <var>gn</var> and <var>gl</var>.  The first has a string representation of
- the groups while the later has its actual values. The group indices are
- allocated in order of appearance in <var>s</var>.
+<p> <code><var>g</var> = grp2idx (<var>s</var>)</code> returns a numeric column vector of integer
+ values <var>g</var> indexing the distinct groups in the grouping variable <var>s</var>.
+ <var>s</var> can specified as any of the following data types:
 </p>
-<p> NaNs and empty strings in <var>s</var> appear as NaN in <var>g</var> and are
+ <ul>
+<li> categorical vector
+ </li><li> cell array of character vectors
+ </li><li> character array
+ </li><li> duration vector
+ </li><li> logical vector
+ </li><li> numeric vector
+ </li></ul>
+
+<p> <var>s</var> must be a vector, unless it is a 2-D character array.  In the case of
+ numerical and logical data types, the group indices are ordered in sorted
+ order of <var>s</var>.  In the case of categorical arrays, the group indices are
+ allocated by the order of the categories in <var>s</var>.  For the rest of the
+ data types, the group indices are allocated by order of first appearance in
+ <var>s</var>.  Note that in case of a categorical grouping variable, the indexing
+ integer values might not be continuous, since <var>s</var> may contain unassigned
+ categories.  For every other data type, <var>g</var> will contain integer values
+ in the the range <math>[1:K]</math>, where <math>K</math> is the number of distinct
+ groups in <var>s</var>.
+</p>
+<p> <code>[<var>g</var>, <var>gn</var>] = grp2idx (<var>s</var>)</code> also retuns a cell array of
+ character vectors <var>gn</var> representing the list of group names.  The order
+ of the group names in <var>gn</var> follow the same pattern as the group indices
+ in <var>g</var> according to the data type of <var>s</var>, as described above.
+</p>
+<p> <code>[<var>g</var>, <var>gn</var>, <var>gl</var>] = grp2idx (<var>s</var>)</code> further returns a
+ column vector <var>gl</var> representing the list of the group levels with the
+ same data type as <var>s</var>.
+</p>
+<p> Note that standard missing values in <var>s</var> appear as NaN in <var>g</var> and are
  not present on either <var>gn</var> and <var>gl</var>.
 </p>
 <p> <strong>See also: </strong>

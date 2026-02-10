@@ -210,6 +210,7 @@
 					<li><a href="combnk.html" class="text-decoration-none font-monospace"><small>combnk</small></a></li>
 					<li><a href="crosstab.html" class="text-decoration-none font-monospace"><small>crosstab</small></a></li>
 					<li><a href="datasample.html" class="text-decoration-none font-monospace"><small>datasample</small></a></li>
+					<li><a href="dummyvar.html" class="text-decoration-none font-monospace"><small>dummyvar</small></a></li>
 					<li><a href="fillmissing.html" class="text-decoration-none font-monospace"><small>fillmissing</small></a></li>
 					<li><a href="grp2idx.html" class="text-decoration-none font-monospace"><small>grp2idx</small></a></li>
 					<li><a href="ismissing.html" class="text-decoration-none font-monospace"><small>ismissing</small></a></li>
@@ -761,6 +762,7 @@
 					<li><a href="logistic_regression.html" class="text-decoration-none font-monospace"><small>logistic_regression</small></a></li>
 					<li><a href="mnrfit.html" class="text-decoration-none font-monospace"><small>mnrfit</small></a></li>
 					<li><a href="monotone_smooth.html" class="text-decoration-none font-monospace"><small>monotone_smooth</small></a></li>
+					<li><a href="parseWilkinsonFormula.html" class="text-decoration-none font-monospace"><small>parseWilkinsonFormula</small></a></li>
 					<li><a href="pca.html" class="text-decoration-none font-monospace"><small>pca</small></a></li>
 					<li><a href="pcacov.html" class="text-decoration-none font-monospace"><small>pcacov</small></a></li>
 					<li><a href="pcares.html" class="text-decoration-none font-monospace"><small>pcares</small></a></li>
@@ -802,47 +804,49 @@
 <dt><code><h5 class="fs">statistics: <var>B</var> = <b>standardizeMissing</b> (<var>A</var>, <var>indicator</var>)</code></h5></dt>
 </dl>
 
-<p> Replace data values specified by <var>indicator</var> in <var>A</var> by the
- standard &rsquo;missing&rsquo; data value for that data type.
+<p> Replace selected values by standard missing values.
 </p>
 <div class="ms-5">
-<p> <var>A</var> can be a numeric scalar or array, a character vector or array, or
- a cell array of character vectors (a.k.a. string cells).
+<p> <code><var>Β</var> = standardizeMissing (<var>A</var>, <var>indicator</var>)</code> returns a
+ standardized array <var>B</var> of the same size and data type as the input array
+ <var>A</var> and with all elements specified by <var>indicator</var> replaced by the
+ standard missing value corresponding the data type of <var>A</var>.
+ <var>indicator</var> can be either a scalar or a vector.
 </p>
-<p> <var>indicator</var> can be a scalar or an array containing values to be
- replaced by the &rsquo;missing&rsquo; value for the class of <var>A</var>, and should have
- a data type matching <var>A</var>.
-</p>
-<p> &rsquo;missing&rsquo; values are defined as :
+<p> Standard missing values and their corresponding data types are:
 </p>
  <ul>
-<li>
- <code>NaN</code>: <code>single</code>, <code>double</code>
-
- </li><li>
- <code>&quot; &quot;</code> (white space): <code>char</code>
-
- </li><li>
- <code>{&quot;&quot;}</code> (empty string in cell): string cells.
+<li> <code>NaN</code> - for <code>double</code>, <code>single</code>, <code>duration</code>, and
+ <code>calendarDuration</code> arrays.
+ </li><li> <code>NaT</code> - for <code>datetime</code> arrays.
+ </li><li> <code>&lt;missing&gt;</code> - for <code>string</code> arrays.
+ </li><li> <code>&lt;undefined&gt;</code> - for <code>categorical</code> arrays.
+ </li><li> <code>{0x0 char}</code> - for <code>cell</code> arrays of character vectors.
  </li></ul>
 
-<p> Compatibility Notes:
- </p><ul>
-<li>
- Octave&rsquo;s implementation of <code>standardizeMissing</code>
- does not restrict <var>indicator</var> of type <code>char</code> to row vectors.
-
- </li><li>
- All numerical and logical inputs for <var>A</var> and <var>indicator</var> may
- be specified in any combination. The output will be the same class as
- <var>A</var>, with the <var>indicator</var> converted to that data type for
- comparison.  Only <code>single</code> and <code>double</code> have defined &rsquo;missing&rsquo;
- values, so <var>A</var> of other data types will always output
- <var>B</var> = <var>A</var>.
+<p> For any other data type input that does not support missing values,
+ <code>standardizeMissing</code> returns <code><var>B</var> = <var>A</var></code> and any
+ <var>indicator</var> value is ignored.
+</p>
+<p> The nonstandard missing value <var>indicator</var> must be of the same type as the
+ data input <var>A</var> or have a compatible data types according to the following
+ rules:
+</p>
+ <ul>
+<li> all numeric indicators match both <code>double</code> and <code>single</code>
+ data types in <var>A</var>.
+ </li><li> indicators specified as <code>string</code> arrays, <code>char</code> vectors,
+ and <code>cell</code> arrays of character vectors match categorical data type in
+ <var>A</var>.
+ </li><li> a <code>char</code> vector matches a <code>cell</code> array of character vectors
+ in <var>A</var>.
  </li></ul>
 
-</dd></dl>
-
+<p> Note: the generic <code>standardizeMissing</code> function from the statistics does
+ not operate on table inputs, which is handled by the overloaded method of the
+ table class.  Use <code>help table.standardizeMissing</code> to find more
+ information about the functional specialization on tables.
+</p>
 <p> <strong>See also: </strong>
   <a href="fillmissing.html">fillmissing</a>, 
   <a href="ismissing.html">ismissing</a>, 

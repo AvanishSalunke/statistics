@@ -210,6 +210,7 @@
 					<li><a href="combnk.html" class="text-decoration-none font-monospace"><small>combnk</small></a></li>
 					<li><a href="crosstab.html" class="text-decoration-none font-monospace"><small>crosstab</small></a></li>
 					<li><a href="datasample.html" class="text-decoration-none font-monospace"><small>datasample</small></a></li>
+					<li><a href="dummyvar.html" class="text-decoration-none font-monospace"><small>dummyvar</small></a></li>
 					<li><a href="fillmissing.html" class="text-decoration-none font-monospace"><small>fillmissing</small></a></li>
 					<li><a href="grp2idx.html" class="text-decoration-none font-monospace"><small>grp2idx</small></a></li>
 					<li><a href="ismissing.html" class="text-decoration-none font-monospace"><small>ismissing</small></a></li>
@@ -761,6 +762,7 @@
 					<li><a href="logistic_regression.html" class="text-decoration-none font-monospace"><small>logistic_regression</small></a></li>
 					<li><a href="mnrfit.html" class="text-decoration-none font-monospace"><small>mnrfit</small></a></li>
 					<li><a href="monotone_smooth.html" class="text-decoration-none font-monospace"><small>monotone_smooth</small></a></li>
+					<li><a href="parseWilkinsonFormula.html" class="text-decoration-none font-monospace"><small>parseWilkinsonFormula</small></a></li>
 					<li><a href="pca.html" class="text-decoration-none font-monospace"><small>pca</small></a></li>
 					<li><a href="pcacov.html" class="text-decoration-none font-monospace"><small>pcacov</small></a></li>
 					<li><a href="pcares.html" class="text-decoration-none font-monospace"><small>pcares</small></a></li>
@@ -800,26 +802,35 @@
             <div class="card-body">
 <dl>
 <dt><code><h5 class="fs">statistics: <b>tabulate</b> (<var>x</var>)</code></h5></dt>
-<dt><code><h5 class="fs">statistics: <var>table</var> = <b>tabulate</b> (<var>x</var>)</code></h5></dt>
+<dt><code><h5 class="fs">statistics: <var>tbl</var> = <b>tabulate</b> (<var>x</var>)</code></h5></dt>
 </dl>
 
-<p> Calculate a frequency table.
+<p> Create a frequency table of unique values in vector <var>x</var>.
 </p>
 <div class="ms-5">
 <p> <code>tabulate (x)</code> displays a frequency table of the data in the vector
- <var>x</var>.  For each unique value in <var>x</var>, the tabulate function shows the
- number of instances and percentage of that value in <var>x</var>.
+ <var>x</var>.  The input <var>x</var> can be a numeric vector, a logical vector,
+ a character array, a cell array of strings, a categorical array, or a
+ string array.
 </p>
-<p> <code><var>table</var> = tabulate (<var>x</var>)</code> returns the frequency table,
- <var>table</var>, as a numeric matrix when <var>x</var> is numeric and as a cell array
- otherwise.  When an output argument is requested, <code>tabulate</code> does not
- print the frequency table in the command window.
+<p> The table displays the value, the number of instances (count), and the
+ percentage of that value in <var>x</var>.  If no output argument is requested,
+ the table is displayed in the command window.
+</p>
+<p> <code><var>tbl</var> = tabulate (<var>x</var>)</code> returns the frequency table,
+ <var>tbl</var>, as a numeric matrix when <var>x</var> is numeric and as a cell array
+ otherwise.
 </p>
 <p> If <var>x</var> is numeric, any missing values (<code>NaNs</code>) are ignored.
+ Similarly, undefined elements in categorical arrays and missing elements in
+ string arrays are ignored.
 </p>
 <p> If all the elements of <var>x</var> are positive integers, then the frequency
  table includes 0 counts for the integers between 1 and <code>max (<var>x</var>)</code>
  that do not appear in <var>x</var>.
+</p>
+<p> For categorical arrays, the frequency table includes 0 counts for any
+ categories that are defined but do not appear in <var>x</var>.
 </p>
 <p> <strong>See also: </strong>
 bar, 
@@ -867,9 +878,14 @@ gender =
     {'Female'}    
     {'Female'}    
 
-   Value    Count    Percent
-    Male       47      47.00%
-  Female       53      53.00%
+  2x3 table
+
+      Value       Count    Percent    
+    __________    _____    _______    
+
+    {'Male'  }       47         47    
+    {'Female'}       53         53    
+
                     </pre></td></tr></tbody>
                   </table>
 
@@ -976,13 +992,18 @@ last =
  ## country of origin of each car in the data set
  tabulate (Origin)
 
-    Value    Count    Percent
-      USA       69      69.00%
-   France        4       4.00%
-    Japan       15      15.00%
-  Germany        9       9.00%
-   Sweden        2       2.00%
-    Italy        1       1.00%
+  6x3 table
+
+       Value       Count    Percent    
+    ___________    _____    _______    
+
+    {'USA'    }       69         69    
+    {'France' }        4          4    
+    {'Japan'  }       15         15    
+    {'Germany'}        9          9    
+    {'Sweden' }        2          2    
+    {'Italy'  }        1          1    
+
                     </pre></td></tr></tbody>
                   </table>
 
@@ -1027,44 +1048,49 @@ last =
 
 total_cars = 100
 missingMPG = 6
-  Value    Count    Percent
-     18        4       4.26%
-     15        5       5.32%
-     16        2       2.13%
-     17        1       1.06%
-     14        5       5.32%
-     24        4       4.26%
-     22        4       4.26%
-     21        2       2.13%
-     27        6       6.38%
-     26        4       4.26%
-     25        5       5.32%
-     10        2       2.13%
-     11        1       1.06%
-      9        1       1.06%
-     28        4       4.26%
-   17.5        2       2.13%
-   15.5        1       1.06%
-   14.5        1       1.06%
-   22.5        1       1.06%
-     29        3       3.19%
-   24.5        1       1.06%
-     33        1       1.06%
-     20        2       2.13%
-   18.5        1       1.06%
-   29.5        1       1.06%
-     32        4       4.26%
-   26.5        1       1.06%
-     13        4       4.26%
-     19        2       2.13%
-   16.5        2       2.13%
-     34        2       2.13%
-     31        3       3.19%
-     23        1       1.06%
-     36        5       5.32%
-     37        1       1.06%
-     38        4       4.26%
-     44        1       1.06%
+  37x3 table
+
+    Value    Count    Percent    
+    _____    _____    _______    
+
+        9        1    1.06383    
+       10        2    2.12766    
+       11        1    1.06383    
+       13        4    4.25532    
+       14        5    5.31915    
+     14.5        1    1.06383    
+       15        5    5.31915    
+     15.5        1    1.06383    
+       16        2    2.12766    
+     16.5        2    2.12766    
+       17        1    1.06383    
+     17.5        2    2.12766    
+       18        4    4.25532    
+     18.5        1    1.06383    
+       19        2    2.12766    
+       20        2    2.12766    
+       21        2    2.12766    
+       22        4    4.25532    
+     22.5        1    1.06383    
+       23        1    1.06383    
+       24        4    4.25532    
+     24.5        1    1.06383    
+       25        5    5.31915    
+       26        4    4.25532    
+     26.5        1    1.06383    
+       27        6    6.38298    
+       28        4    4.25532    
+       29        3    3.19149    
+     29.5        1    1.06383    
+       31        3    3.19149    
+       32        4    4.25532    
+       33        1    1.06383    
+       34        2    2.12766    
+       36        5    5.31915    
+       37        1    1.06383    
+       38        4    4.25532    
+       44        1    1.06383    
+
 valid_cars = 94
                     </pre></td></tr></tbody>
                   </table>
