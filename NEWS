@@ -88,7 +88,7 @@
 
  ** pcacov: improve input validation
 
- ** pdist, pdist2: improve performance
+ ** pdist, pdist2: improve performance, add fast euclidean algorithms
 
  ** rangesearch: improve input validation and avoid infinite recursion
 
