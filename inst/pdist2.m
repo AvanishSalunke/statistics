@@ -40,7 +40,11 @@
 ##
 ## @multitable @columnfractions 0.23 0.02 0.65
 ## @item @qcode{"euclidean"} @tab @tab Euclidean distance.
+## @item @qcode{"fasteuclidean"} @tab @tab Euclidean distance computed with an
+## alternative algorithm which may be faster but might reduce accuracy.
 ## @item @qcode{"squaredeuclidean"} @tab @tab Squared Euclidean distance.
+## @item @qcode{"fastsquaredeuclidean"} @tab @tab Euclidean distance computed
+## with an alternative algorithm which may be faster but might reduce accuracy.
 ## @item @qcode{"seuclidean"} @tab @tab standardized Euclidean distance.  Each
 ## coordinate difference between the rows in @var{X} and the query matrix
 ## @var{Y} is scaled by dividing by the corresponding element of the standard
@@ -118,14 +122,15 @@ function [D, I] = pdist2 (X, Y, varargin)
   endif
 
   ## Add default values
-  Distance = "euclidean";   # Distance metric
+  Distance = 'euclidean';   # Distance metric
   DistParameter = [];       # Distance parameter
   SortOrder = [];           # Flag for sorting distances to find
 
   ## Parse additional Distance metric and Distance parameter (if available)
-  DMs = {"euclidean", "squaredeuclidean", "seuclidean", ...
-         "mahalanobis", "cityblock", "minkowski", "chebychev", ...
-         "cosine", "correlation", "hamming", "jaccard", "spearman"};
+  DMs = {'euclidean', 'squaredeuclidean', 'seuclidean', ...
+         'fasteuclidean', 'fastsquaredeuclidean', ...
+         'chebychev', 'cityblock', 'cosine', 'correlation', ...
+         'mahalanobis', 'minkowski', 'hamming', 'jaccard', 'spearman'};
   if (numel (varargin) > 0)
     if (any (strcmpi (DMs, varargin{1})))
       Distance = tolower (varargin{1});
@@ -155,12 +160,12 @@ function [D, I] = pdist2 (X, Y, varargin)
       error ("pdist2: missing value in optional name/value paired arguments.");
     endif
     switch (tolower (varargin{1}))
-      case "smallest"
-        SortOrder = "ascend";
+      case 'smallest'
+        SortOrder = 'ascend';
         K = varargin{2};
         parcount += 1;
-      case "largest"
-        SortOrder = "descend";
+      case 'largest'
+        SortOrder = 'descend';
         K = varargin{2};
         parcount += 1;
       otherwise
@@ -176,6 +181,34 @@ function [D, I] = pdist2 (X, Y, varargin)
   if (isempty (SortOrder) && nargout > 1)
     error (strcat ("pdist2: Smallest or Largest must be specified", ...
                    " to compute second output."));
+  endif
+
+  ## FAST PATH: Optimization for fast Euclidean algorithm
+  fast_algs = {'fasteuclidean', 'fastsquaredeuclidean'};
+  if (ischar (Distance) && ismember (Distance, fast_algs))
+
+    ## sumsq avoids the temporary memory of X.^2
+    ## D = ||x||^2 + ||y||^2 - 2x.y
+    D = sumsq (X, 2) + sumsq (Y, 2).' - 2 * (X * Y');
+
+    ## Remove possible numerical negative noise
+    D = max (D, 0);
+
+    if (strcmp (Distance, 'fasteuclidean'))
+      D = sqrt (D);
+    endif
+
+    ## Handle SortOrder (Smallest/Largest) output if requested
+    if (nargout > 1 || parcount)
+      ## This finds K nearest X's for each Y.
+      [D, I] = sort (D, 1, SortOrder);
+
+      K = min (size (D, 1), K);
+      D = D(1:K, :);
+      I = I(1:K, :);
+    endif
+
+    return;
   endif
 
   ## Threshold for switching between vectorized and blocked computation
@@ -214,114 +247,124 @@ function [D, I] = pdist2 (X, Y, varargin)
   ## For large M or N: use blocked row-by-row computation (slower, O(N*P) memory)
   if (max (M, Nrows) < N_threshold)
     ## Original vectorized implementation
-    [ix, iy] = meshgrid (1:M, 1:Nrows);
+    if (strcmp (Distance, 'cosine'))
+      X_inv_norm = 1 ./ sqrt (sumsq (X, 2));
+      Y_inv_norm = 1 ./ sqrt (sumsq (Y, 2));
 
-    switch (Distance)
-      case "euclidean"
-        D = sqrt (sum ((X(ix(:),:) - Y(iy(:),:)) .^ 2, 2));
+      ## Normalize the matrices in-place (broadcasting)
+      X = X .* X_inv_norm;
+      Y = Y .* Y_inv_norm;
 
-      case "squaredeuclidean"
-        D = sum ((X(ix(:),:) - Y(iy(:),:)) .^ 2, 2);
+      ## Cosine distance = 1 - dot_product (normalized vectors)
+      D = 1 - (X * Y');
 
-      case "seuclidean"
-        if (isempty (DistParameter))
-          DistParameter = std (X, [], 1);
-        else
-          if (numel (DistParameter) != columns (X))
-            error (strcat ("pdist2: DistParameter for standardized", ...
-                           " euclidean must be a vector of equal length", ...
-                           " to the number of columns in X."));
+    else
+      ## Create indexing grid
+      [ix, iy] = meshgrid (1:M, 1:Nrows);
+
+      switch (Distance)
+        case 'euclidean'
+          D = sqrt (sum ((X(ix(:),:) - Y(iy(:),:)) .^ 2, 2));
+
+        case 'squaredeuclidean'
+          D = sum ((X(ix(:),:) - Y(iy(:),:)) .^ 2, 2);
+
+        case 'seuclidean'
+          if (isempty (DistParameter))
+            DistParameter = std (X, [], 1);
+          else
+            if (numel (DistParameter) != columns (X))
+              error (strcat ("pdist2: DistParameter for standardized", ...
+                             " euclidean must be a vector of equal length", ...
+                             " to the number of columns in X."));
+            endif
+            if (any (DistParameter < 0))
+              error (strcat ("pdist2: DistParameter for standardized", ...
+                             " euclidean must be a nonnegative vector."));
+            endif
           endif
-          if (any (DistParameter < 0))
-            error (strcat ("pdist2: DistParameter for standardized", ...
-                           " euclidean must be a nonnegative vector."));
+          DistParameter(DistParameter == 0) = 1;  # fix constant variable
+          D = sqrt (sum (((X(ix(:),:) - Y(iy(:),:)) ./ DistParameter) .^ 2, 2));
+
+        case 'mahalanobis'
+          if (isempty (DistParameter))
+            DistParameter = cov (X(! any (isnan (X), 2),:));
+          else
+            if (columns (DistParameter) != columns (X))
+              error (strcat ("pdist2: DistParameter for mahalanobis", ...
+                             " distance must be a covariance matrix with", ...
+                             " the same number of columns as X."));
+            endif
+            [~, p] = chol (DistParameter);
+            if (p != 0)
+              error (strcat ("pdist2: covariance matrix for mahalanobis", ...
+                             " distance must be symmetric and positive", ...
+                             " definite."));
+            endif
           endif
-        endif
-        DistParameter(DistParameter == 0) = 1;  # fix constant variable
-        D = sqrt (sum (((X(ix(:),:) - Y(iy(:),:)) ./ DistParameter) .^ 2, 2));
-
-      case "mahalanobis"
-        if (isempty (DistParameter))
-          DistParameter = cov (X(! any (isnan (X), 2),:));
-        else
-          if (columns (DistParameter) != columns (X))
-            error (strcat ("pdist2: DistParameter for mahalanobis", ...
-                           " distance must be a covariance matrix with", ...
-                           " the same number of columns as X."));
+          ## Catch warning if matrix is close to singular or badly scaled.
+          [DP_inv, rc] = inv (DistParameter);
+          if (rc < eps)
+            msg = sprintf (strcat ("pdist2: matrix is close to", ...
+                                   " singular or badly scaled.\n RCOND = ", ...
+                                   " %e. Results may be inaccurate."), rc);
+            warning (msg);
           endif
-          [~, p] = chol (DistParameter);
-          if (p != 0)
-            error (strcat ("pdist2: covariance matrix for mahalanobis", ...
-                           " distance must be symmetric and positive", ...
-                           " definite."));
+          dxy = X(ix(:),:) - Y(iy(:),:);
+          D = sqrt (sum ((dxy * DP_inv) .* dxy, 2));
+
+        case 'cityblock'
+          D = sum (abs (X(ix(:),:) - Y(iy(:),:)), 2);
+
+        case 'minkowski'
+          if (isempty (DistParameter))
+            DistParameter = 2;
+          else
+            if (! (isnumeric (DistParameter) && isscalar (DistParameter)
+                                             && DistParameter > 0))
+              error (strcat ("pdist2: DistParameter for minkowski distance", ...
+                             " must be a positive scalar."));
+            endif
           endif
-        endif
-        ## Catch warning if matrix is close to singular or badly scaled.
-        [DP_inv, rc] = inv (DistParameter);
-        if (rc < eps)
-          msg = sprintf (strcat ("pdist2: matrix is close to", ...
-                                 " singular or badly scaled.\n RCOND = ", ...
-                                 " %e. Results may be inaccurate."), rc);
-          warning (msg);
-        endif
-        dxy = X(ix(:),:) - Y(iy(:),:);
-        D = sqrt (sum ((dxy * DP_inv) .* dxy, 2));
+          D = sum (abs (X(ix(:),:) - Y(iy(:),:)) .^ DistParameter, 2) .^ ...
+                  (1 / DistParameter);
 
-      case "cityblock"
-        D = sum (abs (X(ix(:),:) - Y(iy(:),:)), 2);
+        case 'chebychev'
+          D = max (abs (X(ix(:),:) - Y(iy(:),:)), [], 2);
 
-      case "minkowski"
-        if (isempty (DistParameter))
-          DistParameter = 2;
-        else
-          if (! (isnumeric (DistParameter) && isscalar (DistParameter)
-                                           && DistParameter > 0))
-            error (strcat ("pdist2: DistParameter for minkowski distance", ...
-                           " must be a positive scalar."));
-          endif
-        endif
-        D = sum (abs (X(ix(:),:) - Y(iy(:),:)) .^ DistParameter, 2) .^ ...
-                (1 / DistParameter);
+        case 'correlation'
+          mX = mean (X(ix(:),:), 2);
+          mY = mean (Y(iy(:),:), 2);
+          xy = sum ((X(ix(:),:) - mX) .* (Y(iy(:),:) - mY), 2);
+          xx = sqrt (sum ((X(ix(:),:) - mX) .* (X(ix(:),:) - mX), 2));
+          yy = sqrt (sum ((Y(iy(:),:) - mY) .* (Y(iy(:),:) - mY), 2));
+          D = 1 - (xy ./ (xx .* yy));
 
-      case "chebychev"
-        D = max (abs (X(ix(:),:) - Y(iy(:),:)), [], 2);
+        case 'hamming'
+          D = mean (abs (X(ix(:),:) != Y(iy(:),:)), 2);
 
-      case "cosine"
-        sx = sum (X .^ 2, 2) .^ (-1 / 2);
-        sy = sum (Y .^ 2, 2) .^ (-1 / 2);
-        D = 1 - sum (X(ix(:),:) .* Y(iy(:),:), 2) .* sx(ix(:)) .* sy(iy(:));
+        case 'jaccard'
+          xy0 = (X(ix(:),:) != 0 | Y(iy(:),:) != 0);
+          D = sum ((X(ix(:),:) != Y(iy(:),:)) & xy0, 2) ./ sum (xy0, 2);
 
-      case "correlation"
-        mX = mean (X(ix(:),:), 2);
-        mY = mean (Y(iy(:),:), 2);
-        xy = sum ((X(ix(:),:) - mX) .* (Y(iy(:),:) - mY), 2);
-        xx = sqrt (sum ((X(ix(:),:) - mX) .* (X(ix(:),:) - mX), 2));
-        yy = sqrt (sum ((Y(iy(:),:) - mY) .* (Y(iy(:),:) - mY), 2));
-        D = 1 - (xy ./ (xx .* yy));
+        case 'spearman'
+          for i = 1:M
+            rX(i,:) = tiedrank (X(i,:));
+          endfor
+          for i = 1:Nrows
+            rY(i,:) = tiedrank (Y(i,:));
+          endfor
+          rM = (size (X, 2) + 1) / 2;
+          xy = sum ((rX(ix(:),:) - rM) .* (rY(iy(:),:) - rM), 2);
+          xx = sqrt (sum ((rX(ix(:),:) - rM) .* (rX(ix(:),:) - rM), 2));
+          yy = sqrt (sum ((rY(iy(:),:) - rM) .* (rY(iy(:),:) - rM), 2));
+          D = 1 - (xy ./ (xx .* yy));
+      endswitch
 
-      case "hamming"
-        D = mean (abs (X(ix(:),:) != Y(iy(:),:)), 2);
+      ## From vector to matrix
+      D = reshape (D, Nrows, M)';
 
-      case "jaccard"
-        xy0 = (X(ix(:),:) != 0 | Y(iy(:),:) != 0);
-        D = sum ((X(ix(:),:) != Y(iy(:),:)) & xy0, 2) ./ sum (xy0, 2);
-
-      case "spearman"
-        for i = 1:M
-          rX(i,:) = tiedrank (X(i,:));
-        endfor
-        for i = 1:Nrows
-          rY(i,:) = tiedrank (Y(i,:));
-        endfor
-        rM = (size (X, 2) + 1) / 2;
-        xy = sum ((rX(ix(:),:) - rM) .* (rY(iy(:),:) - rM), 2);
-        xx = sqrt (sum ((rX(ix(:),:) - rM) .* (rX(ix(:),:) - rM), 2));
-        yy = sqrt (sum ((rY(iy(:),:) - rM) .* (rY(iy(:),:) - rM), 2));
-        D = 1 - (xy ./ (xx .* yy));
-    endswitch
-
-    ## From vector to matrix
-    D = reshape (D, Nrows, M)';
+    endif
 
   else
     ## Blocked row-by-row computation for large M or N (avoids O(M*N*P) memory)
@@ -329,7 +372,7 @@ function [D, I] = pdist2 (X, Y, varargin)
 
     ## Precompute metric-specific data
     switch (Distance)
-      case "seuclidean"
+      case 'seuclidean'
         if (isempty (DistParameter))
           DistParameter = std (X, [], 1);
         else
@@ -345,7 +388,7 @@ function [D, I] = pdist2 (X, Y, varargin)
         endif
         DistParameter(DistParameter == 0) = 1;
 
-      case "mahalanobis"
+      case 'mahalanobis'
         if (isempty (DistParameter))
           DistParameter = cov (X(! any (isnan (X), 2),:));
         else
@@ -369,7 +412,7 @@ function [D, I] = pdist2 (X, Y, varargin)
           warning (msg);
         endif
 
-      case "minkowski"
+      case 'minkowski'
         if (isempty (DistParameter))
           DistParameter = 2;
         else
@@ -380,11 +423,11 @@ function [D, I] = pdist2 (X, Y, varargin)
           endif
         endif
 
-      case "cosine"
+      case 'cosine'
         sx = sum (X .^ 2, 2) .^ (-1 / 2);
         sy = sum (Y .^ 2, 2) .^ (-1 / 2);
 
-      case "spearman"
+      case 'spearman'
         rX = zeros (size (X));
         rY = zeros (size (Y));
         for i = 1:M
@@ -398,48 +441,48 @@ function [D, I] = pdist2 (X, Y, varargin)
 
     ## Row-by-row computation with switch outside loop
     switch (Distance)
-      case "euclidean"
+      case 'euclidean'
         for i = 1:M
           D(i,:) = sqrt (sum ((X(i,:) - Y) .^ 2, 2))';
         endfor
 
-      case "squaredeuclidean"
+      case 'squaredeuclidean'
         for i = 1:M
           D(i,:) = sum ((X(i,:) - Y) .^ 2, 2)';
         endfor
 
-      case "seuclidean"
+      case 'seuclidean'
         for i = 1:M
           D(i,:) = sqrt (sum (((X(i,:) - Y) ./ DistParameter) .^ 2, 2))';
         endfor
 
-      case "mahalanobis"
+      case 'mahalanobis'
         for i = 1:M
           dxy = X(i,:) - Y;
           D(i,:) = sqrt (sum ((dxy * DP_inv) .* dxy, 2))';
         endfor
 
-      case "cityblock"
+      case 'cityblock'
         for i = 1:M
           D(i,:) = sum (abs (X(i,:) - Y), 2)';
         endfor
 
-      case "minkowski"
+      case 'minkowski'
         for i = 1:M
           D(i,:) = (sum (abs (X(i,:) - Y) .^ DistParameter, 2) .^ (1 / DistParameter))';
         endfor
 
-      case "chebychev"
+      case 'chebychev'
         for i = 1:M
           D(i,:) = max (abs (X(i,:) - Y), [], 2)';
         endfor
 
-      case "cosine"
+      case 'cosine'
         for i = 1:M
           D(i,:) = (1 - sum (X(i,:) .* Y, 2) .* sx(i) .* sy)';
         endfor
 
-      case "correlation"
+      case 'correlation'
         for i = 1:M
           mXi = mean (X(i,:));
           mY = mean (Y, 2);
@@ -449,18 +492,18 @@ function [D, I] = pdist2 (X, Y, varargin)
           D(i,:) = (1 - (xy ./ (xx .* yy)))';
         endfor
 
-      case "hamming"
+      case 'hamming'
         for i = 1:M
           D(i,:) = mean (abs (X(i,:) != Y), 2)';
         endfor
 
-      case "jaccard"
+      case 'jaccard'
         for i = 1:M
           xy0 = (X(i,:) != 0 | Y != 0);
           D(i,:) = (sum ((X(i,:) != Y) & xy0, 2) ./ sum (xy0, 2))';
         endfor
 
-      case "spearman"
+      case 'spearman'
         for i = 1:M
           xy = sum ((rX(i,:) - rM) .* (rY - rM), 2);
           xx = sqrt (sum ((rX(i,:) - rM) .^ 2));
