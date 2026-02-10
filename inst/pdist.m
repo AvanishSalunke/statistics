@@ -38,7 +38,11 @@
 ##
 ## @multitable @columnfractions 0.23 0.02 0.65
 ## @item @qcode{"euclidean"} @tab @tab Euclidean distance.
+## @item @qcode{"fasteuclidean"} @tab @tab Euclidean distance computed with an
+## alternative algorithm which may be faster but might reduce accuracy.
 ## @item @qcode{"squaredeuclidean"} @tab @tab Squared Euclidean distance.
+## @item @qcode{"fastsquaredeuclidean"} @tab @tab Euclidean distance computed
+## with an alternative algorithm which may be faster but might reduce accuracy.
 ## @item @qcode{"seuclidean"} @tab @tab standardized Euclidean distance.  Each
 ## coordinate difference between the rows in @var{X} and the query matrix
 ## @var{Y} is scaled by dividing by the corresponding element of the standard
@@ -103,9 +107,10 @@ function D = pdist (X, varargin)
   DistParameter = [];       # Distance parameter
 
   ## Parse additional Distance metric and Distance parameter (if available)
-  DMs = {"euclidean", "squaredeuclidean", "seuclidean", ...
-         "mahalanobis", "cityblock", "minkowski", "chebychev", ...
-         "cosine", "correlation", "hamming", "jaccard", "spearman"};
+  DMs = {'euclidean', 'squaredeuclidean', 'seuclidean', ...
+         'fasteuclidean', 'fastsquaredeuclidean', ...
+         'chebychev', 'cityblock', 'cosine', 'correlation', ...
+         'mahalanobis', 'minkowski', 'hamming', 'jaccard', 'spearman'};
   if (numel (varargin) > 0)
     if (any (strcmpi (DMs, varargin{1})))
       Distance = tolower (varargin{1});
@@ -121,6 +126,34 @@ function D = pdist (X, varargin)
     else
       error ("pdist: invalid value for DistParameter input argument.");
     endif
+  endif
+
+  ## FAST PATH: Optimization for fast Euclidean algorithm
+  fast_algs = {'fasteuclidean', 'fastsquaredeuclidean'};
+  if (ischar (Distance) && ismember (Distance, fast_algs))
+
+    ## sumsq avoids the temporary memory of X.^2
+    ## D = ||x||^2 + ||x||^2 - 2x.x
+    D = sumsq (X, 2) + sumsq (X, 2).' - 2 * (X * X');
+
+    ## Remove possible numerical negative noise
+    D = max (D, 0);
+
+    if (strcmp (Distance, 'fasteuclidean'))
+      D = sqrt (D);
+    endif
+
+    ## Handle SortOrder (Smallest/Largest) output if requested
+    if (nargout > 1 || parcount)
+      ## This finds K nearest X's for each Y.
+      [D, I] = sort (D, 1, SortOrder);
+
+      K = min (size (D, 1), K);
+      D = D(1:K, :);
+      I = I(1:K, :);
+    endif
+
+    return;
   endif
 
   ## Calculate selected distance
