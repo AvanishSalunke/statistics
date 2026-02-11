@@ -178,6 +178,10 @@ function varargout = parseWilkinsonFormula (varargin)
       endif
       data_table = varargin{3};
 
+      if (! isa (data_table, "table"))
+        error ("parseWilkinsonFormula: Input data must be a 'table' class.");
+      endif
+
       ## splitting manually.
       tilde_idx = strfind (formula_str, "~");
 
@@ -793,26 +797,14 @@ endfunction
 function [X, y, col_names] = run_model_matrix_builder (schema, data)
 
   req_vars = schema.VariableNames;
-
-  is_table_input = isa (data, "table");
-
-  if (is_table_input)
-    ## table:
-    get_var_names = @() data.Properties.VariableNames;
-    check_has_var = @(name) ismember (name, data.Properties.VariableNames);
-  else
-    ## struct:
-    get_var_names = @() fieldnames (data);
-    check_has_var = @(name) isfield (data, name);
-  endif
+  table_vars = data.Properties.VariableNames;
 
   ## Data validation & masking
   if (isempty (req_vars))
-    fnames = get_var_names ();
-    n_total = length (data.(fnames{1}));
+    n_total = height (data);
     valid_mask = true (n_total, 1);
   else
-    if (! check_has_var (req_vars{1}))
+    if (! ismember (req_vars{1}, table_vars))
       error ("parseWilkinsonFormula: Unknown variable '%s' in Data Table.", ...
              req_vars{1});
     endif
@@ -829,7 +821,7 @@ function [X, y, col_names] = run_model_matrix_builder (schema, data)
 
   if (! isempty (schema.ResponseIdx))
     y_name = req_vars{schema.ResponseIdx};
-    if (! check_has_var (y_name))
+    if (! ismember (y_name, table_vars))
       error ("parseWilkinsonFormula: Unknown variable '%s' in Data Table.", ...
              y_name);
     endif
@@ -843,7 +835,7 @@ function [X, y, col_names] = run_model_matrix_builder (schema, data)
   if (isfield (schema, "ResponseVars") && ! isempty (schema.ResponseVars))
     for k = 1:length (schema.ResponseVars)
       y_name = schema.ResponseVars{k};
-      if (check_has_var (y_name))
+      if (ismember (y_name, table_vars))
         col = data.(y_name);
         if (isnumeric (col))
           valid_mask = valid_mask & ! isnan (col);
@@ -866,6 +858,10 @@ function [X, y, col_names] = run_model_matrix_builder (schema, data)
     if (isnumeric (raw))
       var_info.(vname).type = "numeric";
       var_info.(vname).data = raw;
+    elseif (isa (raw, "categorical"))
+      var_info.(vname).type = "categorical";
+      var_info.(vname).levels = categories (raw);
+      [~, var_info.(vname).indices] = ismember (raw, var_info.(vname).levels);
     else
       if (! iscellstr (raw) && ! isstring (raw))
         raw = cellstr (raw);
@@ -1029,15 +1025,7 @@ function max_terms = get_maximal_terms (term_list)
 endfunction
 
 function vars = resolve_lhs_vars (lhs_str, data)
-  if (isa (data, "table"))
-    all_names = data.Properties.VariableNames;
-  elseif (isstruct (data))
-    all_names = fieldnames (data);
-    all_names = all_names(:)';
-  else
-    error ("parseWilkinsonFormula: Data must be a table or struct.");
-  endif
-
+  all_names = data.Properties.VariableNames;
   vars = {};
   if (isempty (lhs_str)), return; endif
 
@@ -1283,46 +1271,52 @@ endfunction
 %! assert (! any (all (s2.Terms == 0, 2)));
 %!test
 %! ## Test : Numeric Interaction
-%! d.y = [1;2;3;4;5];
-%! d.X1 = [1;2;1;2;1];
-%! d.X2 = [10;10;20;20;10];
+%! y = [1;2;3;4;5];
+%! X1 = [1;2;1;2;1];
+%! X2 = [10;10;20;20;10];
+%! d = table (y, X1, X2);
 %! [M, ~, ~] = parseWilkinsonFormula ("y ~ X1:X2", "model_matrix", d);
 %! assert (size (M), [5, 2]);
 %! assert (M(:, 2), d.X1 .* d.X2);
 %!test
 %! ## Test : Categorical Expansion
-%! d.y = [1;1;1];
-%! d.G = {"A"; "B"; "C"};
+%! y = [1;1;1];
+%! G = {"A"; "B"; "C"};
+%! d = table (y, G);
 %! [M, ~, names] = parseWilkinsonFormula ("~ G", "model_matrix", d);
 %! assert (size (M, 2), 3);
 %! assert (names, {"(Intercept)"; "G_B"; "G_C"});
 %!test
 %! ## Test : Categorical * Categorical Rank
-%! d.y = [1;2;3;4];
-%! d.F1 = {"a";"b";"a";"b"};
-%! d.F2 = {"x";"x";"y";"y"};
+%! y = [1;2;3;4];
+%! F1 = {"a";"b";"a";"b"};
+%! F2 = {"x";"x";"y";"y"};
+%! d = table (y, F1, F2);
 %! [M, ~, ~] = parseWilkinsonFormula ("~ F1 * F2", "model_matrix", d);
 %! assert (size (M, 2), 4);
 %! assert (rank (M), 4);
 %!test
 %! ## Test : Numeric * Categorical Naming
-%! d.y = [1;2];
-%! d.N = [10; 20];
-%! d.C = {"lo"; "hi"};
+%! y = [1;2];
+%! N = [10; 20];
+%! C = {"lo"; "hi"};
+%! d = table (y, N, C);
 %! [M, ~, names] = parseWilkinsonFormula ("~ N * C", "model_matrix", d);
 %! assert (any (strcmp (names, "C_lo:N")));
 %!test
 %! ## Test : Intercept Only Model
-%! d.y = [1; 2; 3];
+%! y = [1; 2; 3];
+%! d = table (y);
 %! [X, ~, names] = parseWilkinsonFormula ("y ~ 1", "model_matrix", d);
 %! assert (size (X, 2), 1);
 %! assert (names, {"(Intercept)"});
 %! assert (all (X == 1));
 %!test
 %! ## Test : NaNs and Missing Data
-%! d.y = [1; 2; 3; 4];
-%! d.A = [1; 1; NaN; 1];
-%! d.B = [10; 20; 30; NaN];
+%! y = [1; 2; 3; 4];
+%! A = [1; 1; NaN; 1];
+%! B = [10; 20; 30; NaN];
+%! d = table (y, A, B);
 %! [X, y_out, ~] = parseWilkinsonFormula ("y ~ A", "model_matrix", d);
 %! assert (length (y_out), 3);
 %! assert (y_out(3), 4);
@@ -1333,10 +1327,10 @@ endfunction
 %! terms = cellfun (@(x) strjoin(sort(x), ":"), t, "UniformOutput", false);
 %! expected = sort ({"A", "A:B", "A:C"});
 %! assert (sort (terms), expected);
-%!test
 %! ## Test : Variable Name Collision
-%! d.Var = [1; 1];
-%! d.Var_1 = [2; 2];
+%! Var = [1; 1];
+%! Var_1 = [2; 2];
+%! d = table (Var, Var_1);
 %! [~, ~, names] = parseWilkinsonFormula ("~ Var + Var_1", "model_matrix", d);
 %! assert (any (strcmp (names, "Var")));
 %! assert (any (strcmp (names, "Var_1")));
@@ -1361,14 +1355,17 @@ endfunction
 %! assert (names{1}, "(Intercept)");
 %!test
 %! ## Test : Multi-variable List
-%! d.y1 = [1; 2; 3]; d.y2 = [4; 5; 6]; d.x = [1; 0; 1];
+%! y1 = [1; 2; 3]; y2 = [4; 5; 6]; x = [1; 0; 1];
+%! d = table (y1, y2, x);
 %! [X, y, ~] = parseWilkinsonFormula ("y1, y2 ~ x", "model_matrix", d);
 %! assert (size (y), [3, 2]);
 %! assert (y(:,1), d.y1);
 %! assert (y(:,2), d.y2);
 %!test
+%!test
 %! ## Test : multivariable range.
-%! d.A = [10;20]; d.B = [30;40]; d.C = [50;60]; d.x = [1;2];
+%! A = [10;20]; B = [30;40]; C = [50;60]; x = [1;2];
+%! d = table (A, B, C, x);
 %! [X, y, ~] = parseWilkinsonFormula ("A - C ~ x", "model_matrix", d);
 %! assert (size (y), [2, 3]);
 %! assert (y(:,1), d.A);
@@ -1376,8 +1373,9 @@ endfunction
 %! assert (y(:,3), d.C);
 %!test
 %! ## Test : multivariable list + range.
-%! d.y1 = [1]; d.y2 = [2]; d.y3 = [3]; d.y4 = [4]; d.y5 = [5];
-%! d.x1 = [10]; d.x2 = [2];
+%! y1 = [1]; y2 = [2]; y3 = [3]; y4 = [4]; y5 = [5];
+%! x1 = [10]; x2 = [2];
+%! d = table (y1, y2, y3, y4, y5, x1, x2);
 %! [X, y, names] = parseWilkinsonFormula ("y1, y3 - y5 ~ x1:x2", "model_matrix", d);
 %! expected_y = [d.y1, d.y3, d.y4, d.y5];
 %! assert (isequal (y, expected_y));
@@ -1385,7 +1383,8 @@ endfunction
 %! assert (any (strcmp (names, "x1:x2")));
 %!test
 %! ## Test : reverse range.
-%! d.A = [1]; d.B = [2]; d.C = [3]; d.x = [10];
+%! A = [1]; B = [2]; C = [3]; x = [10];
+%! d = table (A, B, C, x);
 %! [X, y, names] = parseWilkinsonFormula ("C - A ~ x - 1", "model_matrix", d);
 %! assert (size (y), [1, 3]);
 %! assert (y(:,1), d.A);
@@ -1394,9 +1393,10 @@ endfunction
 %! assert (! any (strcmp (names, "(Intercept)")));
 %!test
 %! ## Test : nans in multi-y.
-%! d.yA = {1; 2; 3; 4};
-%! d.yB = [10; 20; NaN; 40];
-%! d.x  = [1; 1; 1; 1];
+%! yA = {1; 2; 3; 4};
+%! yB = [10; 20; NaN; 40];
+%! x  = [1; 1; 1; 1];
+%! d = table (yA, yB, x);
 %! [X, y, ~] = parseWilkinsonFormula ("yA, yB ~ x", "model_matrix", d);
 %! assert (size (y), [3, 2]);
 %! assert (y(3, 1), 4);
@@ -1416,10 +1416,10 @@ endfunction
 %!error <Unexpected token> parseWilkinsonFormula ("A + * B", "parse")
 %!error <Unexpected token> parseWilkinsonFormula ("y ~ x ~ z", "parse")
 %!error <'model_matrix' mode requires a Data Table> parseWilkinsonFormula ("~ A", "model_matrix")
-%!error <Unknown variable> d.x=1; parseWilkinsonFormula ("~ Z", "model_matrix", d)
-%!error <Response variable 'Z' not found in Data> d.x=1; d.y=1; parseWilkinsonFormula ("Z ~ x", "model_matrix", d)
-%!error <Unknown variable 'A' in range> d.x=1; d.y=1; parseWilkinsonFormula ("A - y ~ x", "model_matrix", d)
-%!error <Unknown variable 'B' in range> d.x=1; d.y=1; parseWilkinsonFormula ("y - B ~ x", "model_matrix", d)
-%!error <Invalid syntax in response term> d.y=1; parseWilkinsonFormula ("y - y - y ~ x", "model_matrix", d)
-%!error <Response variable 'S' must be numeric> d.S={"a";"b"}; d.x=[1;2]; parseWilkinsonFormula ("S ~ x", "model_matrix", d)
-%!error <Data must be a table or struct> parseWilkinsonFormula ("y ~ x", "model_matrix", [1,2,3])
+%!error <Unknown variable> d=table([1], "VariableNames", {"x"}); parseWilkinsonFormula ("~ Z", "model_matrix", d)
+%!error <Response variable 'Z' not found in Data> d=table([1], [1], "VariableNames", {"x", "y"}); parseWilkinsonFormula ("Z ~ x", "model_matrix", d)
+%!error <Unknown variable 'A' in range> d=table([1], [1], "VariableNames", {"x", "y"}); parseWilkinsonFormula ("A - y ~ x", "model_matrix", d)
+%!error <Unknown variable 'B' in range> d=table([1], [1], "VariableNames", {"x", "y"}); parseWilkinsonFormula ("y - B ~ x", "model_matrix", d)
+%!error <Invalid syntax in response term> d=table([1], "VariableNames", {"y"}); parseWilkinsonFormula ("y - y - y ~ x", "model_matrix", d)
+%!error <Response variable 'S' must be numeric> S={"a";"b"}; x=[1;2]; d=table(S, x); parseWilkinsonFormula ("S ~ x", "model_matrix", d)
+%!error <parseWilkinsonFormula: Input data must be a 'table' class.> parseWilkinsonFormula ("y ~ x", "model_matrix", [1,2,3])
