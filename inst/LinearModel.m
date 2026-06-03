@@ -188,7 +188,7 @@ classdef LinearModel
     ##
     ## A structure with three fields:
     ## @itemize
-    ## @item @code{Fstat}- F-statistic of the fitted model versus a null
+    ## @item @code{Fstat} - F-statistic of the fitted model versus a null
     ##   model containing only a constant term
     ## @item @code{Pvalue} - p-value for the F-statistic
     ## @item @code{NullModel} - character vector describing the null model
@@ -511,24 +511,108 @@ classdef LinearModel
   properties (Access = private, Hidden)
 
     ## Full design matrix, n by p_design, used for predictions
-    DesignMatrix_ = [];
+    DesignMatrix = [];
 
     ## Column indices of active coefficients in the design matrix
-    ActiveCols_ = [];
+    ActiveCols = [];
 
     ## Whether the model includes an intercept term
-    HasIntercept_ = true;
+    HasIntercept = true;
 
     ## Response vector, full n by 1 with NaN for non-subset rows
-    ResponseVector_ = [];
+    ResponseVector = [];
 
   endproperties
 
-  
+  methods (Hidden)
+
+    ## Custom display
+    function display (this)
+      in_name = inputname (1);
+      if (! isempty (in_name))
+        fprintf ('%s =\n', in_name);
+      endif
+      disp (this);
+    endfunction
+
+    ## Custom display
+    function disp (this)
+      fprintf ("\n  Linear regression model:\n");
+      if (! isempty (this.Formula) && isstruct (this.Formula) ...
+          && isfield (this.Formula, 'LinearPredictor'))
+        fprintf ("      %s ~ %s\n", this.ResponseName, ...
+                 this.Formula.LinearPredictor);
+      endif
+
+      if (! isempty (this.Coefficients))
+        fprintf ("\n  Coefficients:\n\n");
+        disp (this.Coefficients);
+      endif
+
+      fprintf ("\n");
+      if (! isempty (this.NumObservations) && ! isempty (this.DFE))
+        fprintf ("Number of observations: %d, Error degrees of freedom: %d\n", ...
+                 this.NumObservations, this.DFE);
+      endif
+      if (! isempty (this.RMSE))
+        fprintf ("Root Mean Squared Error: %g\n", this.RMSE);
+      endif
+      if (! isempty (this.Rsquared) && isstruct (this.Rsquared))
+        fprintf ("R-squared: %g,  Adjusted R-Squared: %g\n", ...
+                 this.Rsquared.Ordinary, this.Rsquared.Adjusted);
+      endif
+      if (! isempty (this.ModelFitVsNullModel) ...
+          && isstruct (this.ModelFitVsNullModel) ...
+          && isfield (this.ModelFitVsNullModel, 'Fstat'))
+        fprintf ("F-statistic vs. constant model: %g, p-value = %g\n", ...
+                 this.ModelFitVsNullModel.Fstat, ...
+                 this.ModelFitVsNullModel.Pvalue);
+      endif
+    endfunction
+
+    ## Class specific subscripted reference
+    function varargout = subsref (this, s)
+      chain_s = s(2:end);
+      s = s(1);
+      switch (s.type)
+        case '()'
+          error (["LinearModel: () indexing is not supported.  " ...
+                  "Use dot notation to access properties."]);
+        case '{}'
+          error (["LinearModel: {} indexing is not supported.  " ...
+                  "Use dot notation to access properties."]);
+        case '.'
+          if (! ischar (s.subs))
+            error ("LinearModel.subsref: property name must be a character vector.");
+          endif
+
+          ## Allow normal execution if the user is calling a class method
+          if (ismethod (this, s.subs))
+            [varargout{1:nargout}] = builtin ('subsref', this, [s, chain_s]);
+            return;
+          endif
+          try
+            out = this.(s.subs);
+          catch
+            error ("LinearModel.subsref: unknown property '%s'.", s.subs);
+          end_try_catch
+      endswitch
+      if (! isempty (chain_s))
+        out = subsref (out, chain_s);
+      endif
+      varargout{1} = out;
+    endfunction
+
+  endmethods
+
   methods (Access = public)
 
     ## Class constructor. 
     function this = LinearModel (varargin)
+
+      if (nargin == 0)
+        return;
+      endif
 
     endfunction
 
