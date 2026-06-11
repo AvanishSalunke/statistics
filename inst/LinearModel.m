@@ -522,6 +522,21 @@ classdef LinearModel
     ## Response vector, full n by 1 with NaN for non-subset rows
     ResponseVector = [];
 
+    ## Full n by 1 observation weights
+    WeightVector = [];
+
+    ## n by 1 logical mask: true for rows used in the fit
+    SubsetMask = [];
+
+    ## Terms matrix from modelspec or lm_parse_modelspec
+    TermsMatrix = [];
+
+    ## Categorical level info for re-encoding in predict
+    CatLevelInfo = [];
+
+    ## Predictor names after categorical dummy expansion
+    EncPredictorNames = {};
+
   endproperties
 
   methods (Hidden)
@@ -607,15 +622,1126 @@ classdef LinearModel
 
   methods (Access = public)
 
-    ## Class constructor. 
     function this = LinearModel (varargin)
+      ##   LinearModel ('matrix', X, y, modelspec, NV...)
+      ##   LinearModel ('table',  tbl, resp_input, modelspec, NV...)
 
       if (nargin == 0)
         return;
       endif
 
+      input_type = varargin{1};
+      data       = varargin{2};
+      resp_input = varargin{3};
+      modelspec  = varargin{4};
+      nv_args    = varargin(5:end);
+
+      opts       = LinearModel.lm_parse_nv (nv_args);
+      is_formula = ischar (modelspec) && any (modelspec == '~');
+
+      if (strcmp (input_type, 'matrix'))
+        X_raw   = double (data);
+        n_total = size (X_raw, 1);
+        p_raw   = size (X_raw, 2);
+        y_full  = double (resp_input(:));
+
+        if (! isempty (opts.VarNames))
+          if (numel (opts.VarNames) != p_raw + 1)
+            error ('LinearModel: VarNames must have %d elements.', p_raw + 1);
+          endif
+          pred_names_raw = opts.VarNames(1:p_raw);
+          resp_name      = opts.VarNames{end};
+        else
+          pred_names_raw = arrayfun (@(k) sprintf ('x%d', k), 1:p_raw, ...
+                                     'UniformOutput', false);
+          resp_name      = 'y';
+        endif
+        if (! isempty (opts.ResponseVar))
+          resp_name = opts.ResponseVar;
+        endif
+        var_names_all = [pred_names_raw, {resp_name}];
+        n_vars        = p_raw + 1;
+
+      else ## 'table'
+        tbl           = data;
+        col_names     = tbl.Properties.VariableNames;
+        n_total       = height (tbl);
+        n_vars        = width (tbl);
+        var_names_all = col_names;
+
+        if (ischar (resp_input) && ! isempty (resp_input))
+          resp_name = resp_input;
+        elseif (isstring (resp_input) && ! isempty (resp_input))
+          resp_name = char (resp_input);
+        elseif (isnumeric (resp_input) && ! isempty (resp_input))
+          resp_name = 'y';
+          if (! isempty (opts.ResponseVar))
+            resp_name = opts.ResponseVar;
+          endif
+          y_ext = double (resp_input(:));
+        elseif (is_formula)
+          tparts    = strsplit (modelspec, '~');
+          resp_name = strtrim (tparts{1});
+        else
+          resp_name = col_names{end};
+        endif
+
+        if (! isempty (opts.PredictorVars))
+          pred_names_raw = opts.PredictorVars;
+        else
+          pred_names_raw = col_names(! strcmp (col_names, resp_name));
+        endif
+        p_raw = numel (pred_names_raw);
+
+        if (exist ('y_ext', 'var'))
+          y_full = y_ext;
+        else
+          y_full = double (tbl.(resp_name)(:));
+        endif
+      endif
+
+      ## categorical column flags
+      cat_logical = false (1, p_raw);
+      if (! isempty (opts.CategoricalVars))
+        cv = opts.CategoricalVars;
+        if (islogical (cv))
+          n_cv = min (numel (cv), p_raw);
+          cat_logical(1:n_cv) = cv(1:n_cv);
+        elseif (isnumeric (cv))
+          valid_cv = cv(cv > 0 & cv <= p_raw);
+          cat_logical(valid_cv) = true;
+        elseif (iscell (cv))
+          for i = 1:numel (cv)
+            cat_logical(strcmp (pred_names_raw, cv{i})) = true;
+          endfor
+        endif
+      endif
+      if (strcmp (input_type, 'table'))
+        for j = 1:p_raw
+          col = tbl.(pred_names_raw{j});
+          if (iscell (col) || isa (col, 'categorical'))
+            cat_logical(j) = true;
+          endif
+        endfor
+      endif
+
+      ## missing and excluded masks
+      if (strcmp (input_type, 'matrix'))
+        missing_mask = any (isnan (X_raw), 2) | isnan (y_full);
+      else
+        missing_mask = isnan (y_full);
+        for j = 1:p_raw
+          col = tbl.(pred_names_raw{j});
+          if (isnumeric (col))
+            missing_mask = missing_mask | isnan (col(:));
+          elseif (iscell (col))
+            empty_or_nan = cellfun (@(x) isempty (x) || ...
+              (isnumeric (x) && any (isnan (x))), col(:));
+            missing_mask = missing_mask | empty_or_nan;
+          endif
+        endfor
+      endif
+
+      excluded_mask = false (n_total, 1);
+      if (! isempty (opts.Exclude))
+        ex = opts.Exclude(:);
+        if (islogical (ex))
+          excluded_mask(1:numel (ex)) = ex;
+        else
+          excluded_mask(ex) = true;
+        endif
+      endif
+
+      subset_mask = ! missing_mask & ! excluded_mask;
+      n_obs       = sum (subset_mask);
+
+      if (n_obs < 1)
+        error ('LinearModel: No observations remain after removing missing/excluded rows.');
+      endif
+
+      ## weights
+      if (isempty (opts.Weights))
+        w_full = ones (n_total, 1);
+      else
+        w_full = double (opts.Weights(:));
+      endif
+      w_sub = w_full(subset_mask);
+
+      if (is_formula)
+
+        ## PATH A: Wilkinson formula string
+        if (strcmp (input_type, 'matrix'))
+          tbl_temp = array2table ([X_raw, y_full], 'VariableNames', var_names_all);
+          tbl_sub  = tbl_temp(subset_mask, :);
+        else
+          tbl_sub = tbl(subset_mask, :);
+        endif
+
+        [X_design_sub, ~, coef_names_raw] = parseWilkinsonFormula ( ...
+          modelspec, 'model_matrix', tbl_sub);
+
+        coef_names    = coef_names_raw(:)';
+        y_sub         = y_full(subset_mask);
+        n_coef        = size (X_design_sub, 2);
+        has_intercept = any (strcmp (coef_names, '(Intercept)'));
+        enc_names     = coef_names(! strcmp (coef_names, '(Intercept)'));
+
+        schema = parseWilkinsonFormula (modelspec, 'matrix');
+        if (isfield (schema, 'Terms'))
+          terms = schema.Terms;
+        else
+          terms = [];
+        endif
+
+        cat_info.names  = {};
+        cat_info.levels = {};
+
+      else
+
+        ## PATH B: Keyword / numeric terms matrix
+        X_num_full     = zeros (n_total, p_raw);
+        cat_str_levels = cell (1, p_raw);
+
+        for j = 1:p_raw
+          if (strcmp (input_type, 'table'))
+            col = tbl.(pred_names_raw{j});
+            if (iscell (col))
+              [cat_str_levels{j}, ~, ic] = unique (col);
+              X_num_full(:, j) = ic;
+            elseif (isa (col, 'categorical'))
+              cat_str_levels{j} = categories (col);
+              [~, ic] = ismember (cellstr (col), cat_str_levels{j});
+              X_num_full(:, j) = ic;
+            else
+              X_num_full(:, j) = double (col(:));
+              cat_str_levels{j} = {};
+            endif
+          else
+            X_num_full(:, j) = X_raw(:, j);
+            if (cat_logical(j))
+              uvals = sort (unique (X_raw(isfinite (X_raw(:,j)), j)));
+              cat_str_levels{j} = cellstr (num2str (uvals(:)));
+            else
+              cat_str_levels{j} = {};
+            endif
+          endif
+        endfor
+
+        X_num_sub = X_num_full(subset_mask, :);
+        y_sub     = y_full(subset_mask);
+
+        [X_enc_sub, enc_names, cat_info] = LinearModel.lm_encode_categorical ( ...
+          X_num_sub, cat_logical, pred_names_raw, cat_str_levels);
+        p_enc  = size (X_enc_sub, 2);
+
+        [terms, has_intercept, coef_names] = LinearModel.lm_parse_modelspec ( ...
+          modelspec, enc_names, p_enc, opts.Intercept);
+        n_coef = rows (terms);
+
+        X_design_sub = zeros (n_obs, n_coef);
+        for t = 1:n_coef
+          term_row = terms(t, 1:p_enc);
+          col_t    = ones (n_obs, 1);
+          for j = find (term_row != 0)
+            col_t = col_t .* (X_enc_sub(:, j) .^ term_row(j));
+          endfor
+          X_design_sub(:, t) = col_t;
+        endfor
+
+      endif
+
+      fit = LinearModel.lm_fit (X_design_sub, y_sub, w_sub);
+      D   = LinearModel.lm_diagnostics (X_design_sub, y_sub, fit);
+
+      p    = fit.rank_X;
+      SSE  = fit.SSE;
+      SSR  = fit.SSR;
+      SST  = fit.SST;
+      DFE  = fit.DFE;
+      MSE  = fit.MSE;
+      RMSE = fit.RMSE;
+
+      LogLikelihood = -(n_obs / 2) * (1 + log (2 * pi * SSE / n_obs));
+
+      AIC  = -2 * LogLikelihood + 2 * p;
+      dAIC = n_obs - p - 1;
+      if (dAIC > 0)
+        AICc = AIC + (2 * p * (p + 1)) / dAIC;
+      else
+        AICc = Inf;
+      endif
+      BIC  = -2 * LogLikelihood + p * log (n_obs);
+      CAIC = BIC + p;
+
+      R2_ord = SSR / max (SST, eps);
+      if (n_obs > 1 && DFE > 0)
+        R2_adj = 1 - (SSE / DFE) / (SST / (n_obs - 1));
+      else
+        R2_adj = NaN;
+      endif
+
+      if (has_intercept && p > 1)
+        df1   = p - 1;
+        Fstat = (SSR / df1) / max (MSE, eps);
+        Fpval = 1 - fcdf (Fstat, df1, DFE);
+      elseif (! has_intercept && p > 0)
+        df1   = p;
+        Fstat = (SSR / df1) / max (MSE, eps);
+        Fpval = 1 - fcdf (Fstat, df1, DFE);
+      else
+        Fstat = NaN;
+        Fpval = NaN;
+      endif
+
+      h        = fit.leverage;
+      S2_i_sub = D.S2_i;
+
+      Fitted_full = NaN (n_total, 1);
+      Fitted_full(subset_mask) = fit.Fitted;
+
+      Raw_full = NaN (n_total, 1);
+      Raw_full(subset_mask) = fit.Raw;
+
+      Pearson_sub = fit.Raw / sqrt (max (MSE, eps));
+      Std_sub     = fit.Raw ./ (RMSE .* sqrt (max (1 - h, eps)));
+      Stu_sub     = fit.Raw ./ (sqrt (max (S2_i_sub, eps)) .* sqrt (max (1 - h, eps)));
+
+      Pearson_full = NaN (n_total, 1);
+      Std_full     = NaN (n_total, 1);
+      Stu_full     = NaN (n_total, 1);
+      Pearson_full(subset_mask) = Pearson_sub;
+      Std_full(subset_mask)     = Std_sub;
+      Stu_full(subset_mask)     = Stu_sub;
+
+      beta_full  = fit.beta;
+      se_full    = zeros (n_coef, 1);
+      tstat_full = NaN (n_coef, 1);
+      pval_full  = NaN (n_coef, 1);
+      active     = fit.active_cols;
+      cov_diag   = diag (fit.CovBeta);
+
+      se_full(active)    = sqrt (cov_diag(active));
+      tstat_full(active) = beta_full(active) ./ se_full(active);
+      pval_full(active)  = 2 * (1 - tcdf (abs (tstat_full(active)), DFE));
+
+      CoeffTable = table (beta_full, se_full, tstat_full, pval_full, ...
+        'VariableNames', {'Estimate', 'SE', 'tStat', 'pValue'}, ...
+        'RowNames',      coef_names(:));
+
+      ResidTable = table (Raw_full, Pearson_full, Stu_full, Std_full, ...
+        'VariableNames', {'Raw', 'Pearson', 'Studentized', 'Standardized'});
+
+      Lev_full = zeros (n_total, 1);
+      CD_full  = NaN   (n_total, 1);
+      Dff_full = NaN   (n_total, 1);
+      S2i_full = NaN   (n_total, 1);
+      CR_full  = NaN   (n_total, 1);
+      Lev_full(subset_mask) = D.Leverage;
+      CD_full(subset_mask)  = D.CooksDistance;
+      Dff_full(subset_mask) = D.Dffits;
+      S2i_full(subset_mask) = D.S2_i;
+      CR_full(subset_mask)  = D.CovRatio;
+
+      Dfb_full   = zeros (n_total, p);
+      Dfb_full(subset_mask, :) = D.Dfbetas;
+
+      HatMat_pad = zeros (n_total, n_obs);
+      HatMat_pad(subset_mask, :) = D.HatMatrix;
+
+      DiagTable = table (Lev_full, CD_full, Dff_full, S2i_full, CR_full, ...
+        Dfb_full, HatMat_pad, ...
+        'VariableNames', {'Leverage', 'CooksDistance', 'Dffits', 'S2_i', ...
+                          'CovRatio', 'Dfbetas', 'HatMatrix'});
+
+      if (has_intercept)
+        non_int = coef_names(! strcmp (coef_names, '(Intercept)'));
+        lp_str  = ifelse (isempty (non_int), '1', ['1 + ', strjoin(non_int, ' + ')]);
+      else
+        lp_str = strjoin (coef_names, ' + ');
+      endif
+
+      FormulaS.ResponseName    = resp_name;
+      FormulaS.LinearPredictor = lp_str;
+      FormulaS.PredictorNames  = pred_names_raw;
+      FormulaS.TermNames       = coef_names;
+      FormulaS.HasIntercept    = has_intercept;
+      FormulaS.Terms           = terms;
+      FormulaS.InModel         = true (1, n_coef);
+      FormulaS.NTerms          = n_coef;
+      FormulaS.NPredictors     = p_raw;
+      FormulaS.NVars           = n_vars;
+
+      ObsInfo = table (w_full, excluded_mask, missing_mask, subset_mask, ...
+        'VariableNames', {'Weights', 'Excluded', 'Missing', 'Subset'});
+
+      if (strcmp (input_type, 'matrix'))
+        VarsTable = array2table ([X_raw, y_full], 'VariableNames', var_names_all);
+      else
+        VarsTable = tbl;
+      endif
+
+      nv_total   = numel (var_names_all);
+      vi_class   = cell  (nv_total, 1);
+      vi_range   = cell  (nv_total, 1);
+      vi_inmodel = false (nv_total, 1);
+      vi_iscat   = false (nv_total, 1);
+
+      for j = 1:nv_total
+        vname       = var_names_all{j};
+        is_resp_var = strcmp (vname, resp_name);
+        j_pred      = find (strcmp (pred_names_raw, vname), 1);
+
+        if (strcmp (input_type, 'matrix'))
+          if (! is_resp_var && ! isempty (j_pred))
+            col_d = X_raw(:, j_pred);
+            vi_iscat(j) = cat_logical(j_pred);
+          else
+            col_d = y_full;
+          endif
+          vi_class{j} = 'double';
+          fv = col_d(isfinite (col_d));
+          vi_range{j} = ifelse (isempty (fv), [NaN, NaN], [min(fv), max(fv)]);
+        else
+          col_d = tbl.(vname);
+          vi_class{j} = class (col_d);
+          if (isnumeric (col_d))
+            fv = col_d(isfinite (col_d));
+            vi_range{j} = ifelse (isempty (fv), [NaN, NaN], [min(fv), max(fv)]);
+          elseif (iscell (col_d))
+            vi_range{j} = unique (col_d);
+          else
+            vi_range{j} = {};
+          endif
+          if (! is_resp_var && ! isempty (j_pred))
+            vi_iscat(j) = cat_logical(j_pred);
+          endif
+        endif
+
+        if (! is_resp_var && ! isempty (j_pred))
+          vi_inmodel(j) = true;
+        endif
+      endfor
+
+      VarInfo = table (vi_class, vi_range, vi_inmodel, vi_iscat, ...
+        'VariableNames', {'Class', 'Range', 'InModel', 'IsCategorical'}, ...
+        'RowNames',      var_names_all(:));
+
+      this.Coefficients             = CoeffTable;
+      this.CoefficientCovariance    = fit.CovBeta;
+      this.CoefficientNames         = coef_names;
+      this.NumCoefficients          = n_coef;
+      this.NumEstimatedCoefficients = p;
+      this.DFE                      = DFE;
+      this.Diagnostics              = DiagTable;
+      this.Fitted                   = Fitted_full;
+      this.LogLikelihood            = LogLikelihood;
+      this.ModelCriterion           = struct ('AIC',  AIC, 'AICc', AICc, ...
+                                             'BIC',  BIC, 'CAIC', CAIC);
+      this.ModelFitVsNullModel      = struct ('Fstat',     Fstat, ...
+                                             'Pvalue',    Fpval, ...
+                                             'NullModel', 'constant');
+      this.MSE                      = MSE;
+      this.Residuals                = ResidTable;
+      this.RMSE                     = RMSE;
+      this.Rsquared                 = struct ('Ordinary', R2_ord, 'Adjusted', R2_adj);
+      this.SSE                      = SSE;
+      this.SSR                      = SSR;
+      this.SST                      = SST;
+      this.Robust                   = [];
+      this.Steps                    = [];
+      this.Formula                  = FormulaS;
+      this.NumObservations          = n_obs;
+      this.NumPredictors            = p_raw;
+      this.NumVariables             = n_vars;
+      this.ObservationInfo          = ObsInfo;
+      this.ObservationNames         = {};
+      this.PredictorNames           = pred_names_raw;
+      this.ResponseName             = resp_name;
+      this.VariableInfo             = VarInfo;
+      this.VariableNames            = var_names_all;
+      this.Variables                = VarsTable;
+
+      this.DesignMatrix             = X_design_sub;
+      this.ActiveCols               = fit.active_cols;
+      this.HasIntercept             = has_intercept;
+      this.ResponseVector           = y_full;
+      this.WeightVector             = w_full;
+      this.SubsetMask               = subset_mask;
+      this.TermsMatrix              = terms;
+      this.CatLevelInfo             = cat_info;
+      this.EncPredictorNames        = enc_names;
+
+    endfunction
+
+  endmethods
+
+  methods (Access = private, Static)
+
+    function opts = lm_parse_nv (nv_args)
+      opts.Intercept       = true;
+      opts.Weights         = [];
+      opts.Exclude         = [];
+      opts.RobustOpts      = [];
+      opts.VarNames        = {};
+      opts.CategoricalVars = [];
+      opts.ResponseVar     = '';
+      opts.PredictorVars   = {};
+
+      if (isempty (nv_args))
+        return;
+      endif
+      if (mod (numel (nv_args), 2) != 0)
+        error ('LinearModel: Name-Value pairs must come in pairs.');
+      endif
+
+      for i = 1:2:numel (nv_args)
+        key = lower (char (nv_args{i}));
+        val = nv_args{i + 1};
+        switch (key)
+          case 'intercept'
+            opts.Intercept       = logical (val);
+          case 'weights'
+            opts.Weights         = double (val(:));
+          case 'exclude'
+            opts.Exclude         = val;
+          case 'robustopts'
+            opts.RobustOpts      = val;
+          case 'varnames'
+            opts.VarNames        = cellstr (val);
+          case 'categoricalvars'
+            opts.CategoricalVars = val;
+          case 'responsevar'
+            opts.ResponseVar     = char (val);
+          case 'predictorvars'
+            opts.PredictorVars   = cellstr (val);
+          otherwise
+            error ("LinearModel: Unknown option '%s'.", nv_args{i});
+        endswitch
+      endfor
+    endfunction
+
+    ## Parse modelspec into terms matrix.
+    function [terms, has_intercept, coef_names] = lm_parse_modelspec ( ...
+        modelspec, pred_names, n_preds, intercept_nv)
+
+      p = n_preds;
+
+      if (isempty (modelspec) || (ischar (modelspec) && strcmpi (modelspec, 'linear')))
+        terms = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
+
+      elseif (ischar (modelspec) && strcmpi (modelspec, 'constant'))
+        terms = zeros (1, p+1);
+
+      elseif (ischar (modelspec) && strcmpi (modelspec, 'interactions'))
+        linear_part = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
+        inter_part  = zeros (0, p+1);
+        for i = 1:p
+          for j = i+1:p
+            row = zeros (1, p+1); row(i) = 1; row(j) = 1;
+            inter_part = [inter_part; row];
+          endfor
+        endfor
+        terms = [linear_part; inter_part];
+
+      elseif (ischar (modelspec) && strcmpi (modelspec, 'purequadratic'))
+        linear_part = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
+        quad_part   = zeros (p, p+1);
+        for j = 1:p
+          quad_part(j, j) = 2;
+        endfor
+        terms = [linear_part; quad_part];
+
+      elseif (ischar (modelspec) && strcmpi (modelspec, 'quadratic'))
+        linear_part = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
+        quad_part   = zeros (p, p+1);
+        for j = 1:p
+          quad_part(j, j) = 2;
+        endfor
+        inter_part = zeros (0, p+1);
+        for i = 1:p
+          for j = i+1:p
+            row = zeros (1, p+1); row(i) = 1; row(j) = 1;
+            inter_part = [inter_part; row];
+          endfor
+        endfor
+        terms = [linear_part; quad_part; inter_part];
+
+      elseif (ischar (modelspec) && strcmpi (modelspec, 'full'))
+        error ("fitlm: 'full' is not a valid model specification.");
+
+      elseif (isnumeric (modelspec))
+        terms = double (modelspec);
+        if (size (terms, 2) == p)
+          terms = [terms, zeros(rows (terms), 1)];
+        elseif (size (terms, 2) == p + 1)
+          if (! all (terms(:, end) == 0))
+            error ('LinearModel: Last column of terms matrix must be all zeros.');
+          endif
+        else
+          error ('LinearModel: Terms matrix must have %d or %d columns.', p, p+1);
+        endif
+
+      else
+        error ('fitlm: Unknown model specification.');
+      endif
+
+      if (! intercept_nv)
+        int_rows = all (terms(:, 1:end-1) == 0, 2);
+        terms    = terms(! int_rows, :);
+      endif
+
+      has_intercept = any (all (terms(:, 1:end-1) == 0, 2));
+
+      n_terms    = rows (terms);
+      coef_names = cell (1, n_terms);
+      for t = 1:n_terms
+        term_row = terms(t, 1:end-1);
+        if (all (term_row == 0))
+          coef_names{t} = '(Intercept)';
+        else
+          parts_t = {};
+          for j = 1:numel (term_row)
+            if (term_row(j) != 0)
+              if (term_row(j) == 1)
+                parts_t{end+1} = pred_names{j};
+              else
+                parts_t{end+1} = sprintf ('%s^%d', pred_names{j}, term_row(j));
+              endif
+            endif
+          endfor
+          coef_names{t} = strjoin (parts_t, ':');
+        endif
+      endfor
+    endfunction
+
+    ## expand categorical columns into L-1 dummy variables
+    function [X_enc, enc_names, cat_info] = lm_encode_categorical ( ...
+        X_num, cat_cols, pred_names, cat_levels)
+
+      X_enc     = zeros (rows (X_num), 0);
+      enc_names = {};
+      cat_info.names  = {};
+      cat_info.levels = {};
+
+      for j = 1:numel (pred_names)
+        if (! cat_cols(j))
+          X_enc     = [X_enc, X_num(:, j)];
+          enc_names = [enc_names, pred_names{j}];
+        else
+          levels_j = cat_levels{j};
+          if (isempty (levels_j))
+            uvals    = sort (unique (X_num(isfinite (X_num(:,j)), j)));
+            levels_j = cellstr (num2str (uvals(:)));
+          endif
+          n_lev = numel (levels_j);
+          for L = 2:n_lev
+            dummy     = double (X_num(:, j) == L);
+            X_enc     = [X_enc, dummy];
+            enc_names = [enc_names, [pred_names{j}, '_', char(levels_j{L})]];
+          endfor
+          cat_info.names{end+1}  = pred_names{j};
+          cat_info.levels{end+1} = levels_j;
+        endif
+      endfor
+    endfunction
+
+    ## weighted least-squares via pivoted QR; returns fit struct
+    function fit = lm_fit (X, y, w)
+      n = rows (X);
+      p = columns (X);
+      w = w(:);
+
+      W_sqrt = sqrt (w);
+      Xw     = X .* W_sqrt;
+      yw     = y .* W_sqrt;
+
+      [Q, R, Pperm] = qr (Xw, 0);
+
+      if (isvector (Pperm))
+        P_vec = double (Pperm(:)');
+      else
+        [~, P_vec] = max (Pperm, [], 1);
+      endif
+
+      dr = abs (diag (R));
+      if (isempty (dr) || dr(1) == 0)
+        rank_X = 0;
+      else
+        tol    = max (size (Xw)) * eps (dr(1));
+        rank_X = sum (dr > tol);
+      endif
+
+      beta        = zeros (p, 1);
+      active_cols = P_vec(1:rank_X);
+
+      if (rank_X > 0)
+        R11   = R(1:rank_X, 1:rank_X);
+        Q1    = Q(:, 1:rank_X);
+        gamma = R11 \ (Q1' * yw);
+        beta(active_cols) = gamma;
+      endif
+
+      Fitted = X * beta;
+      Raw    = y - Fitted;
+
+      n_eff = sum (w > 0);
+      SSE   = sum (w .* Raw.^2);
+      wmean = sum (w .* y) / max (sum (w), eps);
+      SST   = sum (w .* (y - wmean).^2);
+      SSR   = SST - SSE;
+
+      DFE = n_eff - rank_X;
+      if (DFE > 0)
+        MSE  = SSE / DFE;
+        RMSE = sqrt (MSE);
+      else
+        MSE  = NaN;
+        RMSE = NaN;
+      endif
+
+      CovBeta = zeros (p, p);
+      if (rank_X > 0)
+        R11_inv = R11 \ eye (rank_X);
+        CovBeta(active_cols, active_cols) = MSE * (R11_inv * R11_inv');
+      endif
+
+      ## Compute hat matrix and leverage
+      if (rank_X > 0)
+        Q1t      = Q1 * Q1';
+        H        = (Q1t ./ W_sqrt) .* W_sqrt';
+        leverage = sum (Q1.^2, 2);
+      else
+        H        = zeros (n, n);
+        leverage = zeros (n, 1);
+      endif
+
+      fit.beta        = beta;
+      fit.H           = H;
+      fit.leverage    = leverage;
+      fit.SSE         = SSE;
+      fit.SSR         = SSR;
+      fit.SST         = SST;
+      fit.DFE         = DFE;
+      fit.MSE         = MSE;
+      fit.RMSE        = RMSE;
+      fit.CovBeta     = CovBeta;
+      fit.rank_X      = rank_X;
+      fit.active_cols = active_cols;
+      fit.Fitted      = Fitted;
+      fit.Raw         = Raw;
+    endfunction
+
+    ## observation-level influence statistics; returns D struct
+    function D = lm_diagnostics (X, y, fit)
+      n    = rows (X);
+      p    = fit.rank_X;
+      h    = fit.leverage;
+      Raw  = fit.Raw;
+      DFE  = fit.DFE;
+      MSE  = fit.MSE;
+      RMSE = fit.RMSE;
+
+      S2_i = (DFE * MSE - Raw.^2 ./ max (1 - h, eps)) / max (DFE - 1, 1);
+
+      r_std = Raw ./ max (RMSE .* sqrt (max (1 - h, eps)), eps);
+      r_stu = Raw ./ max (sqrt (max (S2_i, eps)) .* sqrt (max (1 - h, eps)), eps);
+
+      CooksDistance = (1 / max (p, 1)) .* r_std.^2 .* h ./ max (1 - h, eps);
+      Dffits        = r_stu .* sqrt (h ./ max (1 - h, eps));
+      CovRatio      = (S2_i ./ max (MSE, eps)).^p ./ max (1 - h, eps);
+
+      active   = fit.active_cols;
+      CovB_act = fit.CovBeta(active, active);
+      XtXinv_d = diag (CovB_act) / max (MSE, eps);
+      Dfbetas  = zeros (n, p);
+
+      if (p > 0)
+        for i = 1:n
+          xi_act     = X(i, active)';
+          infl       = (CovB_act / max (MSE, eps)) * xi_act;
+          denom_base = (1 - h(i)) * sqrt (max (S2_i(i), eps));
+          for jj = 1:p
+            se_jj = sqrt (max (XtXinv_d(jj), eps));
+            Dfbetas(i, jj) = infl(jj) * Raw(i) / max (denom_base * se_jj, eps);
+          endfor
+        endfor
+      endif
+
+      D.Leverage      = h;
+      D.CooksDistance = CooksDistance;
+      D.Dffits        = Dffits;
+      D.S2_i          = S2_i;
+      D.CovRatio      = CovRatio;
+      D.Dfbetas       = Dfbetas;
+      D.HatMatrix     = fit.H;
     endfunction
 
   endmethods
 
 endclassdef
+
+%!shared mdl, X, y, n
+%! n = 20;
+%! X = [1:n; (1:n).^2]' / n;
+%! y = X * [3; -1] + 0.2 * sin ((1:n)');
+%! mdl = fitlm (X, y);
+
+%!test
+%! ## integer count properties
+%! assert (mdl.NumObservations,          20);
+%! assert (mdl.NumCoefficients,           3);
+%! assert (mdl.NumVariables,              3);
+%! assert (mdl.NumPredictors,             2);
+%! assert (mdl.NumEstimatedCoefficients,  3);
+%! assert (mdl.DFE,                      17);
+
+%!test
+%! ## SS partition identity and positivity
+%! assert (mdl.SSE + mdl.SSR, mdl.SST, 1e-8);
+%! assert (mdl.SSE / mdl.DFE, mdl.MSE, 1e-12);
+%! assert (sqrt (mdl.MSE), mdl.RMSE, 1e-12);
+%! assert (mdl.SSE > 0 && mdl.SSR > 0 && mdl.SST > 0);
+
+%!test
+%! ## constant model SSR zero SSE equals SST
+%! mc = fitlm (X, y, 'constant');
+%! assert (mc.SSR, 0, 1e-12);
+%! assert (mc.SSE, mc.SST, 1e-12);
+
+%!test
+%! ## R-squared 
+%! assert (mdl.Rsquared.Ordinary, 0.999338005765704, 1e-10);
+%! assert (mdl.Rsquared.Adjusted, 0.999260124091081, 1e-10);
+%! assert (mdl.Rsquared.Ordinary, mdl.SSR / mdl.SST, 1e-10);
+%! assert (mdl.Rsquared.Adjusted, 1 - (mdl.SSE/mdl.DFE) / (mdl.SST/(n-1)), 1e-10);
+%! assert (isfield (mdl.Rsquared, 'Ordinary') && isfield (mdl.Rsquared, 'Adjusted'));
+
+%!test
+%! ## residuals
+%! assert (mdl.Residuals.Raw, y - mdl.Fitted, 1e-10);
+%! assert (sum (mdl.Residuals.Raw), 0, 1e-8);
+%! assert (mdl.Residuals.Pearson, mdl.Residuals.Raw / sqrt (mdl.MSE), 1e-10);
+
+%!test
+%! ## standardized and studentized residual formulas
+%! h   = mdl.Diagnostics.Leverage;
+%! S2i = mdl.Diagnostics.S2_i;
+%! assert (mdl.Residuals.Standardized, ...
+%!         mdl.Residuals.Raw ./ (mdl.RMSE .* sqrt (1 - h)), 1e-8);
+%! assert (mdl.Residuals.Studentized, ...
+%!         mdl.Residuals.Raw ./ (sqrt (S2i) .* sqrt (1 - h)), 1e-6);
+
+%!test
+%! ## fitted values equal y minus raw residuals
+%! assert (numel (mdl.Fitted), 20);
+%! assert (all (! isnan (mdl.Fitted)));
+%! assert (mdl.Fitted, y - mdl.Residuals.Raw, 1e-10);
+
+%!test
+%! ## coefficient estimates SE tStat 
+%! assert (mdl.Coefficients.Estimate, [0.1161886778; 2.508451491; -0.9788353298], 1e-7);
+%! assert (mdl.Coefficients.SE,       [0.112185831;  0.4920818186; 0.02276108523], 1e-8);
+%! assert (mdl.Coefficients.tStat,    [1.035680502;  5.097630913; -43.00477415],   1e-6);
+
+%!test
+%! ## tStat and pValue
+%! assert (mdl.Coefficients.tStat, ...
+%!         mdl.Coefficients.Estimate ./ mdl.Coefficients.SE, 1e-10);
+%! assert (all (mdl.Coefficients.SE > 0));
+%! assert (all (mdl.Coefficients.pValue >= 0 & mdl.Coefficients.pValue <= 1));
+
+%!test
+%! ## CoefficientNames matches Coefficients row names
+%! assert (isequal (mdl.CoefficientNames, mdl.Coefficients.Properties.RowNames(:)'));
+%! assert (mdl.CoefficientNames{1}, '(Intercept)');
+%! assert (mdl.CoefficientNames{2}, 'x1');
+%! assert (mdl.CoefficientNames{3}, 'x2');
+
+%!test
+%! ## CoefficientCovariance properties
+%! assert (size (mdl.CoefficientCovariance), [3, 3]);
+%! assert (mdl.CoefficientCovariance, mdl.CoefficientCovariance', 1e-12);
+%! assert (diag (mdl.CoefficientCovariance), [0.0125857; 0.242145; 0.000518067], 1e-6);
+%! assert (all (diag (mdl.CoefficientCovariance) >= 0));
+%! assert (mdl.Coefficients.SE, sqrt (diag (mdl.CoefficientCovariance)), 1e-10);
+
+%!test
+%! ## HatMatrix properties
+%! H = mdl.Diagnostics.HatMatrix;
+%! assert (size (H), [20, 20]);
+%! assert (mdl.Diagnostics.Leverage, diag (H), 1e-10);
+%! assert (sum (mdl.Diagnostics.Leverage), 3, 1e-8);
+%! assert (H, H', 1e-10);
+%! assert (H * H, H, 1e-8);
+%! assert (all (mdl.Diagnostics.Leverage >= 0) && all (mdl.Diagnostics.Leverage <= 1));
+
+%!test
+%! ## Cook's D S2_i CovRatio Dffits formulas
+%! p   = mdl.NumEstimatedCoefficients;
+%! h   = mdl.Diagnostics.Leverage;
+%! raw = mdl.Residuals.Raw;
+%! r   = mdl.Residuals.Standardized;
+%! S2i = mdl.Diagnostics.S2_i;
+%! assert (mdl.Diagnostics.CooksDistance, (1/p) .* r.^2 .* h ./ (1-h), 1e-8);
+%! assert (mdl.Diagnostics.S2_i, (mdl.DFE*mdl.MSE - raw.^2./(1-h))/(mdl.DFE-1), 1e-8);
+%! assert (mdl.Diagnostics.CovRatio, (S2i./mdl.MSE).^p ./ (1-h), 1e-6);
+%! assert (mdl.Diagnostics.Dffits, mdl.Residuals.Studentized .* sqrt(h./(1-h)), 1e-6);
+%! assert (all (mdl.Diagnostics.CooksDistance >= 0));
+
+%!test
+%! ## Dfbetas size
+%! assert (size (mdl.Diagnostics.Dfbetas), [20, 3]);
+
+%!test
+%! ## Diagnostics table schema
+%! assert (width (mdl.Diagnostics), 7);
+%! assert (isequal (mdl.Diagnostics.Properties.VariableNames, ...
+%!                  {'Leverage','CooksDistance','Dffits','S2_i', ...
+%!                   'CovRatio','Dfbetas','HatMatrix'}));
+
+%!test
+%! ## LogLikelihood formula
+%! assert (mdl.LogLikelihood, 11.0836133807695, 1e-6);
+%! assert (mdl.LogLikelihood, -(n/2)*(1 + log(2*pi*mdl.SSE/n)), 1e-8);
+
+%!test
+%! ## Information criteria
+%! assert (mdl.ModelCriterion.AIC,  -16.1672267615389, 1e-6);
+%! assert (mdl.ModelCriterion.AICc, -14.6672267615389, 1e-6);
+%! assert (mdl.ModelCriterion.BIC,  -13.180029940877,  1e-6);
+%! assert (mdl.ModelCriterion.CAIC, -10.180029940877,  1e-6);
+%! assert (mdl.ModelCriterion.BIC > mdl.ModelCriterion.AIC);
+%! assert (isfield (mdl.ModelCriterion, 'AIC')  && isfield (mdl.ModelCriterion, 'AICc') && ...
+%!         isfield (mdl.ModelCriterion, 'BIC')  && isfield (mdl.ModelCriterion, 'CAIC'));
+
+%!test
+%! ## Model fit vs null model
+%! assert (mdl.ModelFitVsNullModel.Fstat, 12831.4909842738, 1e-4);
+%! assert (mdl.ModelFitVsNullModel.Pvalue >= 0 && mdl.ModelFitVsNullModel.Pvalue <= 1);
+%! assert (strcmp (mdl.ModelFitVsNullModel.NullModel, 'constant'));
+%! p2  = mdl.NumEstimatedCoefficients - 1;
+%! R2  = mdl.Rsquared.Ordinary;
+%! assert (mdl.ModelFitVsNullModel.Fstat, (R2/p2)/((1-R2)/(n-p2-1)), 1e-6);
+
+%!test
+%! ## Coefficients table schema
+%! assert (width (mdl.Coefficients), 4);
+%! assert (height (mdl.Coefficients), 3);
+%! assert (isequal (mdl.Coefficients.Properties.VariableNames, ...
+%!                  {'Estimate','SE','tStat','pValue'}));
+
+%!test
+%! ## Residuals table schema
+%! assert (width (mdl.Residuals), 4);
+%! assert (height (mdl.Residuals), 20);
+%! assert (isequal (mdl.Residuals.Properties.VariableNames, ...
+%!                  {'Raw','Pearson','Studentized','Standardized'}));
+%! assert (all (! isnan (mdl.Residuals.Raw)));
+
+%!test
+%! ## ObservationInfo schema
+%! assert (width (mdl.ObservationInfo), 4);
+%! assert (height (mdl.ObservationInfo), 20);
+%! assert (isequal (mdl.ObservationInfo.Properties.VariableNames, ...
+%!                  {'Weights','Excluded','Missing','Subset'}));
+%! assert (all (mdl.ObservationInfo.Weights == 1));
+%! assert (sum (mdl.ObservationInfo.Subset), 20);
+%! assert (all (mdl.ObservationInfo.Subset == ...
+%!              (! mdl.ObservationInfo.Missing & ! mdl.ObservationInfo.Excluded)));
+
+%!test
+%! ## VariableInfo schema
+%! assert (width  (mdl.VariableInfo), 4);
+%! assert (height (mdl.VariableInfo), 3);
+%! assert (isequal (mdl.VariableInfo.Properties.VariableNames, ...
+%!                  {'Class','Range','InModel','IsCategorical'}));
+%! assert (mdl.VariableInfo.InModel(strcmp (mdl.VariableNames, 'y')), false);
+%! assert (all (mdl.VariableInfo.InModel(! strcmp (mdl.VariableNames, 'y'))));
+%! assert (ischar (mdl.VariableInfo.Class{1}));
+
+%!test
+%! ## Predictor and variable names
+%! assert (mdl.ResponseName, 'y');
+%! assert (isequal (mdl.PredictorNames, {'x1','x2'}));
+%! assert (isequal (mdl.VariableNames, {'x1','x2','y'}));
+
+%!test
+%! ## Formula struct properties
+%! assert (mdl.Formula.HasIntercept, true);
+%! assert (mdl.Formula.LinearPredictor, '1 + x1 + x2');
+%! assert (mdl.Formula.NTerms, 3);
+%! assert (isfield (mdl.Formula, 'ResponseName') && isfield (mdl.Formula, 'LinearPredictor'));
+
+%!test
+%! ## Variables table schema
+%! assert (strcmp (mdl.Variables.Properties.VariableNames{end}, 'y'));
+
+%!test
+%! ## NaN in predictor
+%! X2 = X;  X2(2,1) = NaN;
+%! m2 = fitlm (X2, y);
+%! assert (m2.NumObservations, 19);
+%! assert (m2.ObservationInfo.Missing(2), true);
+%! assert (m2.ObservationInfo.Subset(2),  false);
+%! assert (isnan (m2.Fitted(2)));
+%! assert (m2.SSE + m2.SSR, m2.SST, 1e-8);
+
+%!test
+%! ## NaN in response
+%! y3 = y;  y3(5) = NaN;
+%! m3 = fitlm (X, y3);
+%! assert (m3.NumObservations, 19);
+%! assert (m3.ObservationInfo.Missing(5), true);
+%! assert (isnan (m3.Fitted(5)));
+
+%!test
+%! ## multiple NaN rows
+%! X4 = X;  X4([2,8,14],2) = NaN;
+%! m4 = fitlm (X4, y);
+%! assert (sum (m4.ObservationInfo.Missing), 3);
+%! assert (m4.NumObservations, 17);
+%! assert (m4.SSE + m4.SSR, m4.SST, 1e-8);
+
+%!test
+%! ## exclude by index
+%! me = fitlm (X, y, 'Exclude', [3, 7]);
+%! assert (me.NumObservations, 18);
+%! assert (sum (me.ObservationInfo.Excluded), 2);
+%! assert (isnan (me.Fitted(3)) && isnan (me.Fitted(7)));
+
+%!test
+%! ## exclude by logical vector
+%! excl = false (n, 1);  excl([1, 4]) = true;
+%! me2 = fitlm (X, y, 'Exclude', excl);
+%! assert (me2.NumObservations, 18);
+%! assert (me2.ObservationInfo.Excluded(1) && me2.ObservationInfo.Excluded(4));
+
+%!test
+%! ## NaN and exclude
+%! X6 = X;  X6(1,1) = NaN;
+%! m6 = fitlm (X6, y, 'Exclude', [2]);
+%! assert (m6.NumObservations, 18);
+%! assert (m6.ObservationInfo.Missing(1),  true);
+%! assert (m6.ObservationInfo.Excluded(2), true);
+
+%!test
+%! ## WLS SSE
+%! w  = abs (sin ((1:n)')) + 0.1;
+%! mw = fitlm (X, y, 'Weights', w);
+%! assert (mw.SSE, sum (w .* mw.Residuals.Raw.^2), 1e-10);
+%! assert (mw.ObservationInfo.Weights, w, 1e-15);
+%! assert (mw.SSE + mw.SSR, mw.SST, 1e-8);
+
+%!test
+%! ## uniform weights
+%! mw2 = fitlm (X, y, 'Weights', 2 * ones (n, 1));
+%! assert (mw2.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-10);
+
+%!test
+%! ## constant and linear modelspecs
+%! mc = fitlm (X, y, 'constant');
+%! assert (mc.NumCoefficients, 1);
+%! assert (mc.CoefficientNames{1}, '(Intercept)');
+%! ml = fitlm (X, y, 'linear');
+%! m0 = fitlm (X, y, []);
+%! assert (ml.NumCoefficients, 3);
+%! assert (ml.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-12);
+%! assert (m0.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-12);
+
+%!test
+%! ## modelspec term counts
+%! assert (fitlm (X, y, 'interactions').NumCoefficients,  4);
+%! assert (fitlm (X, y, 'purequadratic').NumCoefficients, 5);
+%! assert (fitlm (X, y, 'quadratic').NumCoefficients,     6);
+
+%!test
+%! ## SS partition holds
+%! for s = {'constant','linear','interactions','purequadratic','quadratic'}
+%!   ms = fitlm (X, y, s{1});
+%!   assert (ms.SSE + ms.SSR, ms.SST, 1e-8);
+%! endfor
+
+%!test
+%! ## Intercept=false
+%! mni = fitlm (X, y, 'Intercept', false);
+%! assert (mni.NumCoefficients, 2);
+%! assert (mni.Formula.HasIntercept, false);
+%! assert (! any (strcmp (mni.CoefficientNames, '(Intercept)')));
+
+%!test
+%! ## p-column terms matrix
+%! m_p = fitlm (X, y, [1 0; 0 1]);
+%! assert (m_p.NumCoefficients, 2);
+%! assert (! any (strcmp (m_p.CoefficientNames, '(Intercept)')));
+
+%!test
+%! ## p+1 column terms matrix
+%! m_p1 = fitlm (X, y, [0 0 0; 1 0 0; 0 1 0]);
+%! assert (m_p1.NumCoefficients, 3);
+%! assert (m_p1.CoefficientNames{1}, '(Intercept)');
+
+%!test
+%! ## table Wilkinson formula
+%! T = table (X(:,1), X(:,2), y, 'VariableNames', {'a','b','resp'});
+%! mf = fitlm (T, 'resp ~ a + b');
+%! assert (mf.NumCoefficients, 3);
+%! assert (mf.ResponseName, 'resp');
+%! assert (mf.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-8);
+
+%!test
+%! ## matrix Wilkinson formula
+%! mfm = fitlm (X, y, 'y ~ x1 + x2');
+%! assert (mfm.NumCoefficients, 3);
+%! assert (mfm.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-8);
+
+%!test
+%! ## table default
+%! T3 = table (X(:,1), X(:,2), y, 'VariableNames', {'x1','x2','y'});
+%! mt = fitlm (T3);
+%! assert (mt.ResponseName, 'y');
+%! assert (mt.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-8);
+
+%!test
+%! ## VarNames sets custom names
+%! vn = fitlm (X, y, 'VarNames', {'alpha','beta','resp'});
+%! assert (vn.ResponseName, 'resp');
+%! assert (isequal (vn.PredictorNames, {'alpha','beta'}));
+%! assert (any (strcmp (vn.CoefficientNames, 'alpha')));
+%! assert (any (strcmp (vn.CoefficientNames, 'beta')));
+
+%!test
+%! ## ResponseVar overrides VarNames
+%! rv = fitlm (X, y, 'VarNames', {'a','b','r'}, 'ResponseVar', 'r');
+%! assert (rv.ResponseName, 'r');
+
+%!test
+%! ## rank-deficient matrix
+%! X_rd = [ones(n,1), X, X(:,1)+X(:,2)];
+%! m_rd = fitlm (X_rd, y);
+%! assert (m_rd.NumCoefficients, 5);
+%! assert (m_rd.NumEstimatedCoefficients, 3);
+%! drop = find (m_rd.Coefficients.SE == 0);
+%! assert (numel (drop), 2);
+%! assert (all (isnan (m_rd.Coefficients.tStat(drop))));
+%! assert (all (isnan (m_rd.Coefficients.pValue(drop))));
+%! assert (m_rd.SSE + m_rd.SSR, m_rd.SST, 1e-8);
+%! assert (all (all (m_rd.CoefficientCovariance(drop,:) == 0)));
+
+%!error <'full' is not a valid model specification> fitlm (X, y, 'full')
+%!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
+%!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
+%!error <Terms matrix must have 2 or 3 columns> fitlm (X, y, [1 2 3 4; 5 6 7 8])
+%!error <Last column of terms matrix must be all zeros> fitlm (X, y, [1 2 1; 0 1 1])
+%!error <No observations remain> fitlm (NaN (5, 2), NaN (5, 1))
+%!error <No observations remain> fitlm (NaN (3, 2), [1; 2; 3])
+%!error <No observations remain> fitlm ([1 2; 3 4; 5 6], NaN (3, 1))
+%!error <No observations remain> fitlm (X, y, 'Exclude', (1:n)')
+%!error <Not enough input arguments> fitlm ()
+%!error <Predictor variables must be numeric> fitlm ('hello', y)
+%!error <Predictor variables must be numeric> fitlm ({'a';'b'}, [1; 2])
+%!error <Y argument is required> fitlm (X)
+%!error <Y argument is required> fitlm (X, 'Weights', [1;1;1])
+%!error <Predictor and response variables must have the same length> fitlm (X, [1; 2])
+%!error <Predictor and response variables must have the same length> fitlm (X, [1 2])
+%!error <indexing is not supported> mdl (1)
+%!error <indexing is not supported> mdl {1}
