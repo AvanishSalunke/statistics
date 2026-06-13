@@ -1078,46 +1078,40 @@ classdef LinearModel
   methods (Access = private, Static)
 
     function opts = lm_parse_nv (nv_args)
-      opts.Intercept       = true;
-      opts.Weights         = [];
-      opts.Exclude         = [];
-      opts.RobustOpts      = [];
-      opts.VarNames        = {};
-      opts.CategoricalVars = [];
-      opts.ResponseVar     = '';
-      opts.PredictorVars   = {};
 
-      if (isempty (nv_args))
-        return;
+      opt_names = {'Intercept', 'Weights', 'Exclude', 'RobustOpts', ...
+                   'VarNames', 'CategoricalVars', 'ResponseVar', 'PredictorVars'};
+      def_vals  = {true, [], [], [], {}, [], '', {}};
+      [intercept, weights, exclude, robustopts, varnames, catvars, ...
+       respvar, predvars, rem_args] = parsePairedArguments (opt_names, def_vals, nv_args);
+
+      if (! isempty (rem_args))
+        error ("LinearModel: Unknown option '%s'.", rem_args{1});
       endif
-      if (mod (numel (nv_args), 2) != 0)
-        error ('LinearModel: Name-Value pairs must come in pairs.');
+      
+      opts.Intercept       = logical (intercept);
+      opts.Exclude         = exclude;
+      opts.RobustOpts      = robustopts;
+      opts.CategoricalVars = catvars;
+      opts.ResponseVar     = char (respvar);
+
+      if (isempty (weights))
+        opts.Weights = [];
+      else
+        opts.Weights = double (weights(:));
       endif
 
-      for i = 1:2:numel (nv_args)
-        key = lower (char (nv_args{i}));
-        val = nv_args{i + 1};
-        switch (key)
-          case 'intercept'
-            opts.Intercept       = logical (val);
-          case 'weights'
-            opts.Weights         = double (val(:));
-          case 'exclude'
-            opts.Exclude         = val;
-          case 'robustopts'
-            opts.RobustOpts      = val;
-          case 'varnames'
-            opts.VarNames        = cellstr (val);
-          case 'categoricalvars'
-            opts.CategoricalVars = val;
-          case 'responsevar'
-            opts.ResponseVar     = char (val);
-          case 'predictorvars'
-            opts.PredictorVars   = cellstr (val);
-          otherwise
-            error ("LinearModel: Unknown option '%s'.", nv_args{i});
-        endswitch
-      endfor
+      if (isempty (varnames))
+        opts.VarNames = {};
+      else
+        opts.VarNames = cellstr (varnames);
+      endif
+
+      if (isempty (predvars))
+        opts.PredictorVars = {};
+      else
+        opts.PredictorVars = cellstr (predvars);
+      endif
     endfunction
 
     ## Parse modelspec into terms matrix.
