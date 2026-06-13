@@ -729,17 +729,7 @@ classdef LinearModel
       if (! istable (data))
         missing_mask = any (isnan (X_raw), 2) | isnan (y_full);
       else
-        missing_mask = isnan (y_full);
-        for j = 1:p_raw
-          col = tbl.(pred_names_raw{j});
-          if (isnumeric (col))
-            missing_mask = missing_mask | isnan (col(:));
-          elseif (iscell (col))
-            empty_or_nan = cellfun (@(x) isempty (x) || ...
-              (isnumeric (x) && any (isnan (x))), col(:));
-            missing_mask = missing_mask | empty_or_nan;
-          endif
-        endfor
+        missing_mask = any (ismissing (tbl), 2);
       endif
 
       excluded_mask = false (n_total, 1);
