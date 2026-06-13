@@ -622,24 +622,24 @@ classdef LinearModel
 
   methods (Access = public)
 
+    ## Class Constructor
     function this = LinearModel (varargin)
-      ##   LinearModel ('matrix', X, y, modelspec, NV...)
-      ##   LinearModel ('table',  tbl, resp_input, modelspec, NV...)
+      ##   LinearModel (X, y, modelspec, NV...)
+      ##   LinearModel (tbl, resp_input, modelspec, NV...)
 
       if (nargin == 0)
         return;
       endif
 
-      input_type = varargin{1};
-      data       = varargin{2};
-      resp_input = varargin{3};
-      modelspec  = varargin{4};
-      nv_args    = varargin(5:end);
+      data       = varargin{1};
+      resp_input = varargin{2};
+      modelspec  = varargin{3};
+      nv_args    = varargin(4:end);
 
       opts       = LinearModel.lm_parse_nv (nv_args);
       is_formula = ischar (modelspec) && any (modelspec == '~');
 
-      if (strcmp (input_type, 'matrix'))
+      if (! istable (data))
         X_raw   = double (data);
         n_total = size (X_raw, 1);
         p_raw   = size (X_raw, 2);
@@ -716,7 +716,7 @@ classdef LinearModel
           endfor
         endif
       endif
-      if (strcmp (input_type, 'table'))
+      if (istable (data))
         for j = 1:p_raw
           col = tbl.(pred_names_raw{j});
           if (iscell (col) || isa (col, 'categorical'))
@@ -726,7 +726,7 @@ classdef LinearModel
       endif
 
       ## missing and excluded masks
-      if (strcmp (input_type, 'matrix'))
+      if (! istable (data))
         missing_mask = any (isnan (X_raw), 2) | isnan (y_full);
       else
         missing_mask = isnan (y_full);
@@ -770,7 +770,7 @@ classdef LinearModel
       if (is_formula)
 
         ## PATH A: Wilkinson formula string
-        if (strcmp (input_type, 'matrix'))
+        if (! istable (data))
           tbl_temp = array2table ([X_raw, y_full], 'VariableNames', var_names_all);
           tbl_sub  = tbl_temp(subset_mask, :);
         else
@@ -803,7 +803,7 @@ classdef LinearModel
         cat_str_levels = cell (1, p_raw);
 
         for j = 1:p_raw
-          if (strcmp (input_type, 'table'))
+          if (istable (data))
             col = tbl.(pred_names_raw{j});
             if (iscell (col))
               [cat_str_levels{j}, ~, ic] = unique (col);
@@ -974,7 +974,7 @@ classdef LinearModel
       ObsInfo = table (w_full, excluded_mask, missing_mask, subset_mask, ...
         'VariableNames', {'Weights', 'Excluded', 'Missing', 'Subset'});
 
-      if (strcmp (input_type, 'matrix'))
+      if (! istable (data))
         VarsTable = array2table ([X_raw, y_full], 'VariableNames', var_names_all);
       else
         VarsTable = tbl;
@@ -991,7 +991,7 @@ classdef LinearModel
         is_resp_var = strcmp (vname, resp_name);
         j_pred      = find (strcmp (pred_names_raw, vname), 1);
 
-        if (strcmp (input_type, 'matrix'))
+        if (! istable (data))
           if (! is_resp_var && ! isempty (j_pred))
             col_d = X_raw(:, j_pred);
             vi_iscat(j) = cat_logical(j_pred);

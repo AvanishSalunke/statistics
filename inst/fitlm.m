@@ -121,7 +121,7 @@ function mdl = fitlm (varargin)
       endif
     endif
 
-    mdl = LinearModel ("table", arg1, response, modelspec, nv_args{:});
+    mdl = LinearModel (arg1, response, modelspec, nv_args{:});
 
   elseif ((isnumeric (arg1) || islogical (arg1)) && ismatrix (arg1))
 
@@ -150,7 +150,7 @@ function mdl = fitlm (varargin)
     y = double (arg2(:));
     [modelspec, nv_args] = lm_split_args (rest(2:end));
 
-    mdl = LinearModel ("matrix", arg1, y, modelspec, nv_args{:});
+    mdl = LinearModel (arg1, y, modelspec, nv_args{:});
 
   else
     error (["fitlm: Predictor variables must be numeric vectors, numeric " ...
