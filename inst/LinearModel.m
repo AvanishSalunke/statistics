@@ -537,6 +537,12 @@ classdef LinearModel
     ## Predictor names after categorical dummy expansion
     EncPredictorNames = {};
 
+    ## Encoded predictor matrix (Path B only), cached for refit
+    EncodedPredMatrix = [];
+
+    ## Parsed NV options stored for refit operations
+    OrigOpts = [];
+
   endproperties
 
   methods (Hidden)
@@ -828,15 +834,7 @@ classdef LinearModel
           modelspec, enc_names, p_enc, opts.Intercept);
         n_coef = rows (terms);
 
-        X_design_sub = zeros (n_obs, n_coef);
-        for t = 1:n_coef
-          term_row = terms(t, 1:p_enc);
-          col_t    = ones (n_obs, 1);
-          for j = find (term_row != 0)
-            col_t = col_t .* (X_enc_sub(:, j) .^ term_row(j));
-          endfor
-          X_design_sub(:, t) = col_t;
-        endfor
+        X_design_sub = LinearModel.lm_build_design (terms, X_enc_sub);
 
       endif
 
@@ -851,37 +849,16 @@ classdef LinearModel
       MSE  = fit.MSE;
       RMSE = fit.RMSE;
 
-      LogLikelihood = -(n_obs / 2) * (1 + log (2 * pi * SSE / n_obs));
-
-      AIC  = -2 * LogLikelihood + 2 * p;
-      dAIC = n_obs - p - 1;
-      if (dAIC > 0)
-        AICc = AIC + (2 * p * (p + 1)) / dAIC;
-      else
-        AICc = Inf;
-      endif
-      BIC  = -2 * LogLikelihood + p * log (n_obs);
-      CAIC = BIC + p;
-
-      R2_ord = SSR / max (SST, eps);
-      if (n_obs > 1 && DFE > 0)
-        R2_adj = 1 - (SSE / DFE) / (SST / (n_obs - 1));
-      else
-        R2_adj = NaN;
-      endif
-
-      if (has_intercept && p > 1)
-        df1   = p - 1;
-        Fstat = (SSR / df1) / max (MSE, eps);
-        Fpval = 1 - fcdf (Fstat, df1, DFE);
-      elseif (! has_intercept && p > 0)
-        df1   = p;
-        Fstat = (SSR / df1) / max (MSE, eps);
-        Fpval = 1 - fcdf (Fstat, df1, DFE);
-      else
-        Fstat = NaN;
-        Fpval = NaN;
-      endif
+      crit          = LinearModel.lm_criteria (fit, n_obs, has_intercept);
+      LogLikelihood = crit.LogLikelihood;
+      AIC           = crit.AIC;
+      AICc          = crit.AICc;
+      BIC           = crit.BIC;
+      CAIC          = crit.CAIC;
+      R2_ord        = crit.Rsquared;
+      R2_adj        = crit.AdjRsquared;
+      Fstat         = crit.Fstat;
+      Fpval         = crit.Fpval;
 
       h        = fit.leverage;
       S2_i_sub = D.S2_i;
@@ -1060,6 +1037,10 @@ classdef LinearModel
       this.TermsMatrix              = terms;
       this.CatLevelInfo             = cat_info;
       this.EncPredictorNames        = enc_names;
+      this.OrigOpts                 = opts;
+      if (! is_formula)
+        this.EncodedPredMatrix      = X_enc_sub;
+      endif
 
     endfunction
 
@@ -1230,7 +1211,10 @@ classdef LinearModel
     endfunction
 
     ## weighted least-squares via pivoted QR; returns fit struct
-    function fit = lm_fit (X, y, w)
+    function fit = lm_fit (X, y, w, compute_H)
+      if (nargin < 4)
+        compute_H = true;
+      endif
       n = rows (X);
       p = columns (X);
       w = w(:);
@@ -1291,12 +1275,20 @@ classdef LinearModel
 
       ## Compute hat matrix and leverage
       if (rank_X > 0)
-        Q1t      = Q1 * Q1';
-        H        = (Q1t ./ W_sqrt) .* W_sqrt';
         leverage = sum (Q1.^2, 2);
+        if (compute_H)
+          Q1t = Q1 * Q1';
+          H   = (Q1t ./ W_sqrt) .* W_sqrt';
+        else
+          H = [];
+        endif
       else
-        H        = zeros (n, n);
         leverage = zeros (n, 1);
+        if (compute_H)
+          H = zeros (n, n);
+        else
+          H = [];
+        endif
       endif
 
       fit.beta        = beta;
@@ -1358,6 +1350,96 @@ classdef LinearModel
       D.CovRatio      = CovRatio;
       D.Dfbetas       = Dfbetas;
       D.HatMatrix     = fit.H;
+    endfunction
+
+    function X_design = lm_build_design (terms, X_enc)
+      n_obs    = rows (X_enc);
+      n_coef   = rows (terms);
+      p_enc    = columns (X_enc);
+      X_design = zeros (n_obs, n_coef);
+      for t = 1:n_coef
+        term_row = terms(t, 1:p_enc);
+        col_t    = ones (n_obs, 1);
+        for j = find (term_row != 0)
+          col_t = col_t .* (X_enc(:, j) .^ term_row(j));
+        endfor
+        X_design(:, t) = col_t;
+      endfor
+    endfunction
+
+    function crit = lm_criteria (fit, n_obs, has_intercept)
+      p   = fit.rank_X;
+      SSE = fit.SSE;
+      SSR = fit.SSR;
+      SST = fit.SST;
+      DFE = fit.DFE;
+      MSE = fit.MSE;
+
+      LogLikelihood = -(n_obs / 2) * (1 + log (2 * pi * SSE / n_obs));
+
+      AIC  = -2 * LogLikelihood + 2 * p;
+      dAIC = n_obs - p - 1;
+      if (dAIC > 0)
+        AICc = AIC + (2 * p * (p + 1)) / dAIC;
+      else
+        AICc = Inf;
+      endif
+      BIC  = -2 * LogLikelihood + p * log (n_obs);
+      CAIC = BIC + p;
+
+      R2_ord = SSR / max (SST, eps);
+      if (n_obs > 1 && DFE > 0)
+        R2_adj = 1 - (SSE / DFE) / (SST / (n_obs - 1));
+      else
+        R2_adj = NaN;
+      endif
+
+      if (has_intercept && p > 1)
+        df1   = p - 1;
+        Fstat = (SSR / df1) / max (MSE, eps);
+        Fpval = 1 - fcdf (Fstat, df1, DFE);
+      elseif (! has_intercept && p > 0)
+        df1   = p;
+        Fstat = (SSR / df1) / max (MSE, eps);
+        Fpval = 1 - fcdf (Fstat, df1, DFE);
+      else
+        Fstat = NaN;
+        Fpval = NaN;
+      endif
+
+      crit.LogLikelihood = LogLikelihood;
+      crit.AIC           = AIC;
+      crit.AICc          = AICc;
+      crit.BIC           = BIC;
+      crit.CAIC          = CAIC;
+      crit.Rsquared      = R2_ord;
+      crit.AdjRsquared   = R2_adj;
+      crit.Fstat         = Fstat;
+      crit.Fpval         = Fpval;
+    endfunction
+
+    function mdl2 = lm_refit (mdl, new_terms)
+      opts = mdl.OrigOpts;
+
+      if (! isempty (mdl.CatLevelInfo) && isfield (mdl.CatLevelInfo, 'names') ...
+          && ! isempty (mdl.CatLevelInfo.names))
+        cat_vars = mdl.CatLevelInfo.names;
+      else
+        cat_vars = opts.CategoricalVars;
+      endif
+
+      nv_list = {'Intercept', opts.Intercept};
+      if (! isempty (opts.Weights))
+        nv_list = [nv_list, {'Weights', opts.Weights}];
+      endif
+      if (! isempty (opts.Exclude))
+        nv_list = [nv_list, {'Exclude', opts.Exclude}];
+      endif
+      if (! isempty (cat_vars))
+        nv_list = [nv_list, {'CategoricalVars', cat_vars}];
+      endif
+
+      mdl2 = fitlm (mdl.Variables, mdl.ResponseName, new_terms, nv_list{:});
     endfunction
 
   endmethods
