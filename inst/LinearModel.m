@@ -1044,6 +1044,141 @@ classdef LinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {@var{ypred} =} predict (@var{mdl}, @var{Xnew})
+    ## @deftypefnx {LinearModel} {@var{ypred} =} predict (@var{mdl})
+    ## @deftypefnx {LinearModel} {[@var{ypred}, @var{yci}] =} predict (@var{mdl}, @var{Xnew})
+    ## @deftypefnx {LinearModel} {[@var{ypred}, @var{yci}] =} predict (@var{mdl}, @var{Xnew}, @var{Name}, @var{Value})
+    ##
+    ## Predict responses of a fitted linear regression model.
+    ##
+    ## @code{@var{ypred} = predict (@var{mdl}, @var{Xnew})} returns predicted
+    ## response values for the predictor data in @var{Xnew} using the fitted
+    ## linear model @var{mdl}.  @var{Xnew} can be a numeric matrix or a table.
+    ##
+    ## @code{@var{ypred} = predict (@var{mdl})} returns predicted values for
+    ## all observations in the training data, including excluded rows.
+    ##
+    ## @code{[@var{ypred}, @var{yci}] = predict (@dots{})} also returns
+    ## confidence intervals @var{yci} as an @math{n} x @math{2} matrix.
+    ##
+    ## Name-Value pair arguments:
+    ##
+    ## @multitable @columnfractions 0.2 0.02 0.78
+    ## @headitem @var{Name} @tab @tab @var{Value}
+    ##
+    ## @item @qcode{"Alpha"} @tab @tab Significance level, scalar in @math{[0,1]}.
+    ## Default is @code{0.05}.
+    ##
+    ## @item @qcode{"Prediction"} @tab @tab @code{"curve"} (default) for
+    ## confidence interval on the mean response, or @code{"observation"} for a
+    ## prediction interval for a new observation.
+    ##
+    ## @item @qcode{"Simultaneous"} @tab @tab Logical flag.  If @code{true},
+    ## compute simultaneous bounds using Scheff@'{e}'s method.  Default is
+    ## @code{false}.
+    ## @end multitable
+    ##
+    ## @seealso{fitlm, LinearModel}
+    ## @end deftypefn
+    function [ypred, yci] = predict (mdl, Xnew, varargin)
+
+      alpha    = 0.05;
+      pred_obs = false;
+      simultan = false;
+
+      i = 1;
+      while (i <= numel (varargin))
+        if (strcmpi (varargin{i}, 'Alpha'))
+          alpha = varargin{i+1};
+          if (! isscalar (alpha) || ! isnumeric (alpha) || alpha < 0 || alpha > 1)
+            error ('predict: Alpha must be a scalar in [0,1].');
+          endif
+          i += 2;
+        elseif (strcmpi (varargin{i}, 'Prediction'))
+          pred_str = lower (char (varargin{i+1}));
+          if (! any (strcmp (pred_str, {'curve', 'observation'})))
+            error ('predict: Prediction must be ''curve'' or ''observation''.');
+          endif
+          pred_obs = strcmp (pred_str, 'observation');
+          i += 2;
+        elseif (strcmpi (varargin{i}, 'Simultaneous'))
+          simultan = logical (varargin{i+1});
+          i += 2;
+        else
+          error ('predict: unknown option ''%s''.', varargin{i});
+        endif
+      endwhile
+
+      if (nargin < 2 || isempty (Xnew))
+        Xnew = mdl.Variables;
+      endif
+
+      pred_names = mdl.PredictorNames;
+      p_raw      = mdl.NumPredictors;
+
+      if (istable (Xnew))
+        n_new = height (Xnew);
+        X_raw = zeros (n_new, p_raw);
+        for j = 1:p_raw
+          if (! ismember (pred_names{j}, Xnew.Properties.VariableNames))
+            error ('predict: Xnew table is missing predictor ''%s''.', pred_names{j});
+          endif
+          col = Xnew.(pred_names{j});
+          if (iscell (col))
+            cat_idx = [];
+            if (! isempty (mdl.CatLevelInfo.names))
+              cat_idx = find (strcmp (mdl.CatLevelInfo.names, pred_names{j}));
+            endif
+            if (! isempty (cat_idx))
+              levels_j = mdl.CatLevelInfo.levels{cat_idx};
+              codes    = zeros (n_new, 1);
+              for k = 1:numel (levels_j)
+                codes(strcmp (col, levels_j{k})) = k;
+              endfor
+              X_raw(:, j) = codes;
+            endif
+          else
+            X_raw(:, j) = double (col);
+          endif
+        endfor
+      else
+        X_raw = double (Xnew);
+        if (columns (X_raw) != p_raw)
+          error ('predict: Xnew must have %d columns.', p_raw);
+        endif
+        n_new = rows (X_raw);
+      endif
+
+      nan_rows     = any (isnan (X_raw), 2);
+      X_enc_new    = LinearModel.lm_predict (X_raw, pred_names, mdl.CatLevelInfo);
+      X_design_new = LinearModel.lm_build_design (mdl.TermsMatrix, X_enc_new);
+
+      beta            = mdl.Coefficients.Estimate;
+      ypred           = X_design_new * beta;
+      ypred(nan_rows) = NaN;
+
+      if (nargout > 1)
+        CovB   = mdl.CoefficientCovariance;
+        var_cv = sum ((X_design_new * CovB) .* X_design_new, 2);
+        if (pred_obs)
+          var_ci = var_cv + mdl.MSE;
+        else
+          var_ci = var_cv;
+        endif
+        p_est = mdl.NumEstimatedCoefficients;
+        if (simultan)
+          mult = sqrt (p_est * finv (1 - alpha, p_est, mdl.DFE));
+        else
+          mult = tinv (1 - alpha / 2, mdl.DFE);
+        endif
+        hw              = mult * sqrt (max (var_ci, 0));
+        yci             = [ypred - hw, ypred + hw];
+        yci(nan_rows,:) = NaN;
+      endif
+
+    endfunction
+
   endmethods
 
   methods (Access = private, Static)
@@ -1418,6 +1553,25 @@ classdef LinearModel
       crit.Fpval         = Fpval;
     endfunction
 
+    function X_enc = lm_predict (X_raw, pred_names, cat_info)
+      n     = rows (X_raw);
+      X_enc = zeros (n, 0);
+      for j = 1:numel (pred_names)
+        cat_idx = [];
+        if (! isempty (cat_info.names))
+          cat_idx = find (strcmp (cat_info.names, pred_names{j}));
+        endif
+        if (isempty (cat_idx))
+          X_enc = [X_enc, X_raw(:, j)];
+        else
+          levels_j = cat_info.levels{cat_idx};
+          for L = 2:numel (levels_j)
+            X_enc = [X_enc, double(X_raw(:, j) == L)];
+          endfor
+        endif
+      endfor
+    endfunction
+
     function mdl2 = lm_refit (mdl, new_terms)
       opts = mdl.OrigOpts;
 
@@ -1502,6 +1656,11 @@ endclassdef
 %! assert (numel (mdl.Fitted), 20);
 %! assert (all (! isnan (mdl.Fitted)));
 %! assert (mdl.Fitted, y - mdl.Residuals.Raw, 1e-10);
+%! yp = predict (mdl, X);
+%! assert (size (yp), [20, 1]);
+%! assert (class (yp), 'double');
+%! assert (yp(1), 0.192669485827491, 1e-10);
+%! assert (yp(2), 0.171266760882256, 1e-10);
 
 %!test
 %! ## coefficient estimates SE tStat 
@@ -1650,7 +1809,10 @@ endclassdef
 %! assert (m2.ObservationInfo.Missing(2), true);
 %! assert (m2.ObservationInfo.Subset(2),  false);
 %! assert (isnan (m2.Fitted(2)));
-%! assert (m2.SSE + m2.SSR, m2.SST, 1e-8);
+%! assert (m2.SST, 547.6167961780454, 1e-8);
+%! yp2 = predict (m2, X2);
+%! assert (isnan (yp2(2)));
+%! assert (! isnan (yp2(1)));
 
 %!test
 %! ## NaN in response
@@ -1674,6 +1836,13 @@ endclassdef
 %! assert (me.NumObservations, 18);
 %! assert (sum (me.ObservationInfo.Excluded), 2);
 %! assert (isnan (me.Fitted(3)) && isnan (me.Fitted(7)));
+%! ype = predict (me);
+%! assert (size (ype), [20, 1]);
+%! assert (! isnan (ype(3)));
+%! assert (! isnan (ype(7)));
+%! [~, yci] = predict (me);
+%! assert (yci(1,1), -0.028312276245845, 1e-10);
+%! assert (yci(1,2),  0.412312049343719, 1e-10);
 
 %!test
 %! ## exclude by logical vector
@@ -1694,9 +1863,17 @@ endclassdef
 %! ## WLS SSE
 %! w  = abs (sin ((1:n)')) + 0.1;
 %! mw = fitlm (X, y, 'Weights', w);
-%! assert (mw.SSE, sum (w .* mw.Residuals.Raw.^2), 1e-10);
+%! assert (mw.SSE,    0.363519720897775, 1e-10);
 %! assert (mw.ObservationInfo.Weights, w, 1e-15);
-%! assert (mw.SSE + mw.SSR, mw.SST, 1e-8);
+%! assert (mw.SST, 4.419834786423099e+02, 1e-8);
+%! ypw = predict (mw, X);
+%! assert (size (ypw), [20, 1]);
+%! assert (class (ypw), 'double');
+%! [ypw2, yci] = predict (mw, [0.5 0.25; 1.0 1.0]);
+%! assert (ypw2(1),  1.106748776307639, 1e-10);
+%! assert (ypw2(2),  1.593185531572655, 1e-10);
+%! assert (yci(1,1), 0.763985050242272, 1e-10);
+%! assert (yci(1,2), 1.449512502373006, 1e-10);
 
 %!test
 %! ## uniform weights
@@ -1733,6 +1910,10 @@ endclassdef
 %! assert (mni.NumCoefficients, 2);
 %! assert (mni.Formula.HasIntercept, false);
 %! assert (! any (strcmp (mni.CoefficientNames, '(Intercept)')));
+%! [yp, yci] = predict (mni, [0.5 0.25; 1.0 1.0]);
+%! assert (yp(1), 1.231398619227234, 1e-10);
+%! assert (yp(2), 1.964172863732825, 1e-10);
+%! assert (yci(1,1), 1.001262470857215, 1e-10);
 
 %!test
 %! ## p-column terms matrix
@@ -1753,6 +1934,10 @@ endclassdef
 %! assert (mf.NumCoefficients, 3);
 %! assert (mf.ResponseName, 'resp');
 %! assert (mf.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-8);
+%! Xt = table ([0.5;1.0], [0.25;1.0], 'VariableNames', {'a','b'});
+%! yp = predict (mf, Xt);
+%! assert (yp(1), 1.125705590619342, 1e-10);
+%! assert (yp(2), 1.645804838535884, 1e-10);
 
 %!test
 %! ## matrix Wilkinson formula
@@ -1790,8 +1975,78 @@ endclassdef
 %! assert (numel (drop), 2);
 %! assert (all (isnan (m_rd.Coefficients.tStat(drop))));
 %! assert (all (isnan (m_rd.Coefficients.pValue(drop))));
-%! assert (m_rd.SSE + m_rd.SSR, m_rd.SST, 1e-8);
+%! assert (m_rd.SST, 5.839104200023459e+02, 1e-8);
 %! assert (all (all (m_rd.CoefficientCovariance(drop,:) == 0)));
+%! yp = predict (m_rd, X_rd);
+%! assert (size (yp), [n, 1]);
+%! assert (! any (isnan (yp)));
+
+%!test
+%! ## predict: ypred and default CI at new points
+%! [yp, yci] = predict (mdl, [0.5 0.25; 1.0 1.0]);
+%! assert (yp(1),    1.125705590619347, 1e-10);
+%! assert (yp(2),    1.645804838535894, 1e-10);
+%! assert (yci(1,1), 0.810180780547215, 1e-10);
+%! assert (yci(1,2), 1.441230400691478, 1e-10);
+%! assert (yci(2,1), 0.858229321851723, 1e-10);
+%! assert (yci(2,2), 2.433380355220066, 1e-10);
+
+%!test
+%! ## predict: observation interval
+%! [~, yci] = predict (mdl, [0.5 0.25; 1.0 1.0], 'Prediction', 'observation');
+%! assert (yci(1,1), 0.677632064105988, 1e-10);
+%! assert (yci(1,2), 1.573779117132706, 1e-10);
+
+%!test
+%! ## predict: alpha 0.01
+%! [~, yci] = predict (mdl, [0.5 0.25; 1.0 1.0], 'Alpha', 0.01);
+%! assert (yci(1,1), 0.692272619570008, 1e-10);
+%! assert (yci(1,2), 1.559138561668685, 1e-10);
+
+%!test
+%! ## predict: simultaneous CI
+%! [~, yci] = predict (mdl, [0.5 0.25; 1.0 1.0], 'Simultaneous', true);
+%! assert (yci(1,1), 0.662572505689338, 1e-10);
+%! assert (yci(1,2), 1.588838675549355, 1e-10);
+
+%!test
+%! ## predict: no Xnew returns all rows including training
+%! [yp, yci] = predict (mdl);
+%! assert (size (yp),  [20, 1]);
+%! assert (size (yci), [20, 2]);
+%! assert (yp(1),    0.192669485827490, 1e-10);
+%! assert (yp(2),    0.171266760882255, 1e-10);
+%! assert (yci(1,1), -0.001052067982566, 1e-10);
+%! assert (yci(1,2),  0.386391039637546, 1e-10);
+
+%!test
+%! ## predict: NaN predictor propagates to NaN output and CI
+%! [yp, yci] = predict (mdl, [0.5 0.25; NaN 1.0; 1.0 1.0]);
+%! assert (yp(1), 1.125705590619347, 1e-10);
+%! assert (isnan (yp(2)));
+%! assert (yp(3), 1.645804838535894, 1e-10);
+%! assert (isnan (yci(2,1)));
+%! assert (isnan (yci(2,2)));
+
+%!test
+%! ## predict: categorical model predictions at group centres
+%! Xc    = [1;1;1;2;2;2;3;3;3];
+%! yc    = [2.1;2.3;1.9; 4.1;3.9;4.2; 6.3;5.8;6.1];
+%! m_cat = fitlm (Xc, yc, 'linear', 'CategoricalVars', 1);
+%! [yp, yci] = predict (m_cat, [1;2;3]);
+%! assert (yp(1), 2.099999999999998, 1e-10);
+%! assert (yp(2), 4.066666666666667, 1e-10);
+%! assert (yp(3), 6.066666666666666, 1e-10);
+%! assert (yci(1,1), 1.809712563216691, 1e-10);
+%! assert (yci(1,2), 2.390287436783305, 1e-10);
+
+%!test
+%! ## predict: interaction model
+%! [yp, yci] = predict (fitlm (X, y, 'interactions'), [0.5 0.25; 1.0 1.0]);
+%! assert (yp(1),    0.964032452046850, 1e-10);
+%! assert (yp(2),    1.282176811827644, 1e-10);
+%! assert (yci(1,1), -0.110763003580605, 1e-10);
+%! assert (yci(1,2),  2.038827907674306, 1e-10);
 
 %!error <'full' is not a valid model specification> fitlm (X, y, 'full')
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
@@ -1811,3 +2066,11 @@ endclassdef
 %!error <Predictor and response variables must have the same length> fitlm (X, [1 2])
 %!error <indexing is not supported> mdl (1)
 %!error <indexing is not supported> mdl {1}
+%!error <unknown option> predict (mdl, [0.5 0.25], 'BadOption', 1)
+%!error <Alpha must be a scalar> predict (mdl, [0.5 0.25], 'Alpha', -0.1)
+%!error <Alpha must be a scalar> predict (mdl, [0.5 0.25], 'Alpha', 1.5)
+%!error <Alpha must be a scalar> predict (mdl, [0.5 0.25], 'Alpha', [0.01 0.05])
+%!error <Prediction must be> predict (mdl, [0.5 0.25], 'Prediction', 'bad')
+%!error <Xnew must have 2 columns> predict (mdl, ones (3, 5))
+%!error <Xnew must have 2 columns> predict (mdl, ones (3, 1))
+%!error <missing predictor> predict (mdl, table ([1;2], 'VariableNames', {'z'}))
