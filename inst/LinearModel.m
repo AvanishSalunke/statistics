@@ -1179,6 +1179,37 @@ classdef LinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn {LinearModel} {@var{ysim} =} random (@var{mdl}, @var{Xnew})
+    ##
+    ## Simulate responses with random noise for a fitted linear regression model.
+    ##
+    ## @code{@var{ysim} = random (@var{mdl}, @var{Xnew})} returns simulated
+    ## response values for predictor data in @var{Xnew}.  Each simulated value
+    ## equals the predicted response plus independent noise drawn from
+    ## @math{N(0, @var{mdl}.MSE)}, where @code{MSE} is the mean squared error of
+    ## the fitted model.
+    ##
+    ## @var{Xnew} must be a non-empty numeric matrix with the same number of
+    ## columns as the training predictors, or a table with matching predictor
+    ## column names.
+    ##
+    ## @seealso{fitlm, predict, LinearModel}
+    ## @end deftypefn
+    function ysim = random (mdl, Xnew, varargin)
+      if (nargin < 2)
+        error ('random: Not enough input arguments.');
+      endif
+      if (nargin > 2)
+        error ('random: Too many input arguments.');
+      endif
+      if (isempty (Xnew))
+        error ('random: Xnew must have %d columns.', mdl.NumPredictors);
+      endif
+      ypred = predict (mdl, Xnew);
+      ysim  = ypred + sqrt (mdl.MSE) .* randn (numel (ypred), 1);
+    endfunction
+
   endmethods
 
   methods (Access = private, Static)
@@ -2048,6 +2079,67 @@ endclassdef
 %! assert (yci(1,1), -0.110763003580605, 1e-10);
 %! assert (yci(1,2),  2.038827907674306, 1e-10);
 
+%!test
+%! ## output is 2x1 double column vector
+%! ysim = random (mdl, [0.5, 0.25; 1.0, 1.0]);
+%! assert (size (ysim), [2, 1]);
+%! assert (class (ysim), 'double');
+%! assert (iscolumn (ysim));
+
+%!test
+%! ## single row input gives 1x1 output
+%! assert (size (random (mdl, [0.5, 0.25])), [1, 1]);
+
+%!test
+%! ## predict values are exact and noise added is finite
+%! ypred = predict (mdl, [0.5, 0.25; 1.0, 1.0]);
+%! ysim  = random (mdl, [0.5, 0.25; 1.0, 1.0]);
+%! assert (ypred(1), 1.125705590619342, 1e-10);
+%! assert (ypred(2), 1.645804838535884, 1e-10);
+%! assert (all (isfinite (ysim - ypred)));
+
+%!test
+%! ## NaN predictor row gives NaN output, other rows stay finite
+%! ysim = random (mdl, [0.5, 0.25; NaN, 1.0; 1.0, 1.0]);
+%! assert (size (ysim), [3, 1]);
+%! assert (isfinite (ysim(1)));
+%! assert (isnan (ysim(2)));
+%! assert (isfinite (ysim(3)));
+
+%!test
+%! ## two sequential calls produce different output
+%! ya = random (mdl, [0.5, 0.25]);
+%! yb = random (mdl, [0.5, 0.25]);
+%! assert (! isequal (ya, yb));
+
+%!test
+%! ## table input gives same size and finite output as matrix
+%! Xt   = table ([0.5;1.0], [0.25;1.0], 'VariableNames', {'x1','x2'});
+%! ysim = random (mdl, Xt);
+%! assert (size (ysim), [2, 1]);
+%! assert (all (isfinite (ysim)));
+
+%!test
+%! ## full training data gives 20 row output with no NaN
+%! ysim = random (mdl, X);
+%! assert (size (ysim), [20, 1]);
+%! assert (sum (isnan (ysim)), 0);
+
+%!test
+%! ## weighted model gives correct size output
+%! w    = (1:n)' / sum (1:n);
+%! mw   = fitlm (X, y, 'Weights', w);
+%! ysim = random (mw, [0.5, 0.25; 1.0, 1.0]);
+%! assert (size (ysim), [2, 1]);
+%! assert (all (isfinite (ysim)));
+
+%!test
+%! ## no intercept model gives correct size output
+%! mni  = fitlm (X, y, 'Intercept', false);
+%! ysim = random (mni, [0.5, 0.25; 1.0, 1.0]);
+%! assert (size (ysim), [2, 1]);
+%! assert (all (isfinite (ysim)));
+
 %!error <'full' is not a valid model specification> fitlm (X, y, 'full')
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
@@ -2074,3 +2166,7 @@ endclassdef
 %!error <Xnew must have 2 columns> predict (mdl, ones (3, 5))
 %!error <Xnew must have 2 columns> predict (mdl, ones (3, 1))
 %!error <missing predictor> predict (mdl, table ([1;2], 'VariableNames', {'z'}))
+%!error <Not enough input arguments> random (mdl)
+%!error <Too many input arguments> random (mdl, [0.5, 0.25], 'extra')
+%!error <Xnew must have 2 columns> random (mdl, ones (3, 5))
+%!error <Xnew must have 2 columns> random (mdl, [])
