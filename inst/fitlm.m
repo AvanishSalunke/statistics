@@ -321,6 +321,8 @@ endfunction
 %! assert (class (fitlm (X, y, 'purequadratic')), 'LinearModel');
 %!test 
 %! assert (class (fitlm (X, y, 'quadratic')), 'LinearModel');
+%!test
+%! assert (class (fitlm (X, y, 'full')), 'LinearModel');
 %!test 
 %! assert (class (fitlm (X, y, [1 0; 0 1])), 'LinearModel');
 

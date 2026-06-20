@@ -1485,7 +1485,15 @@ function [terms, has_intercept, coef_names] = lm_parse_modelspec ( ...
     terms = [linear_part; quad_part; inter_part];
 
   elseif (ischar (modelspec) && strcmpi (modelspec, 'full'))
-    error ("fitlm: 'full' is not a valid model specification.");
+    terms = zeros (1, p+1);
+    for k = 1:p
+      idx_mat = nchoosek (1:p, k);
+      for j = 1:rows (idx_mat)
+        row               = zeros (1, p+1);
+        row(idx_mat(j,:)) = 1;
+        terms             = [terms; row];
+      endfor
+    endfor
 
   elseif (isnumeric (modelspec))
     terms = double (modelspec);
@@ -1930,6 +1938,27 @@ endfunction
 %! assert (fitlm (X, y, 'quadratic').NumCoefficients,     6);
 
 %!test
+%! ## full model with p=2: 2^2=4 terms, identical to interactions
+%! mf = fitlm (X, y, 'full');
+%! mi = fitlm (X, y, 'interactions');
+%! assert (mf.NumCoefficients, 4);
+%! assert (mf.Coefficients.Estimate, mi.Coefficients.Estimate, 1e-12);
+%! assert (mf.MSE, mi.MSE, 1e-12);
+
+%!test
+%! ## full model with p=3: 2^3=8 terms, includes 3-way interaction
+%! X3  = [X, cos((1:n)' * pi / n)];
+%! mf3 = fitlm (X3, y, 'full');
+%! assert (mf3.NumCoefficients, 8);
+%! assert (any (strcmp (mf3.CoefficientNames, 'x1:x2:x3')));
+
+%!test
+%! ## full no-intercept with p=2: 2^2-1=3 terms
+%! mfni = fitlm (X, y, 'full', 'Intercept', false);
+%! assert (mfni.NumCoefficients, 3);
+%! assert (! any (strcmp (mfni.CoefficientNames, '(Intercept)')));
+
+%!test
 %! ## SS partition holds
 %! for s = {'constant','linear','interactions','purequadratic','quadratic'}
 %!   ms = fitlm (X, y, s{1});
@@ -2141,7 +2170,6 @@ endfunction
 %! assert (size (ysim), [2, 1]);
 %! assert (all (isfinite (ysim)));
 
-%!error <'full' is not a valid model specification> fitlm (X, y, 'full')
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
 %!error <Terms matrix must have 2 or 3 columns> fitlm (X, y, [1 2 3 4; 5 6 7 8])
