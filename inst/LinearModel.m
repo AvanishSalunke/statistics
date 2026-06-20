@@ -1210,6 +1210,95 @@ classdef LinearModel
       ysim  = ypred + sqrt (mdl.MSE) .* randn (numel (ypred), 1);
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {@var{ypred} =} feval (@var{mdl}, @var{X})
+    ## @deftypefnx {LinearModel} {@var{ypred} =} feval (@var{mdl}, @var{x1}, @var{x2}, @dots{}, @var{xp})
+    ##
+    ## Predict responses of a fitted linear regression model using separate
+    ## predictor inputs.
+    ##
+    ## @code{@var{ypred} = feval (@var{mdl}, @var{X})} returns predicted
+    ## response values for predictor data in @var{X}, which can be a numeric
+    ## matrix with the same number of columns as the training predictors, or a
+    ## table with matching predictor column names.  The output is an
+    ## @math{n}-by-1 column vector.
+    ##
+    ## @code{@var{ypred} = feval (@var{mdl}, @var{x1}, @var{x2}, @dots{},
+    ## @var{xp})} accepts one argument per predictor variable.  All non-scalar
+    ## arguments must have the same size; scalar arguments are broadcast to
+    ## match that size.  The output shape mirrors the input orientation: column
+    ## vectors in produce a column vector out, row vectors in produce a row
+    ## vector out.
+    ##
+    ## @seealso{fitlm, predict, random}
+    ## @end deftypefn
+    function ypred = feval (mdl, varargin)
+      p_raw   = mdl.NumPredictors;
+      n_extra = nargin - 1;
+
+      if (n_extra < 1)
+        error ('feval: Not enough input arguments.');
+      endif
+
+      if (n_extra == 1)
+
+        Xnew = varargin{1};
+
+        if (istable (Xnew))
+          for j = 1:p_raw
+            if (! ismember (mdl.PredictorNames{j}, Xnew.Properties.VariableNames))
+              error (['feval: X does not contain one or more predictor ' ...
+                      'variables needed for this model.']);
+            endif
+          endfor
+        else
+          if (columns (double (Xnew)) != p_raw)
+            error ('feval: Predictor data matrix must have %d columns.', p_raw);
+          endif
+        endif
+
+        ypred = predict (mdl, Xnew);
+
+      elseif (n_extra == p_raw)
+
+        ref_size = [];
+        for i = 1:n_extra
+          if (! isscalar (varargin{i}))
+            s_i = size (varargin{i});
+            if (isempty (ref_size))
+              ref_size = s_i;
+            elseif (! isequal (s_i, ref_size))
+              error ('feval: All input arguments must be the same size.');
+            endif
+          endif
+        endfor
+        if (isempty (ref_size))
+          ref_size = [1, 1];
+        endif
+
+        n_pts = prod (ref_size);
+        Xmat  = zeros (n_pts, p_raw);
+        for i = 1:n_extra
+          ai = varargin{i};
+          if (isscalar (ai))
+            Xmat(:, i) = ai;
+          else
+            Xmat(:, i) = ai(:);
+          endif
+        endfor
+
+        ypred = reshape (predict (mdl, Xmat), ref_size);
+
+      else
+
+        error (['feval: Incorrect number of input arguments. You must provide ' ...
+                'either %d separate predictor variable arguments, or one ' ...
+                'predictor matrix with %d columns.'], p_raw, p_raw);
+
+      endif
+
+    endfunction
+
   endmethods
 
   methods (Access = private, Static)
@@ -2170,6 +2259,99 @@ endfunction
 %! assert (size (ysim), [2, 1]);
 %! assert (all (isfinite (ysim)));
 
+%!test
+%! yf = feval (mdl, [0.5 0.25; 1.0 1.0; 0.2 0.04]);
+%! assert (size (yf), [3, 1]);
+%! assert (class (yf), 'double');
+%! assert (yf(1), 1.125705590619342, 1e-10);
+%! assert (yf(2), 1.645804838535884, 1e-10);
+%! assert (yf(3), 0.578725562711373, 1e-10);
+%! assert (yf, predict (mdl, [0.5 0.25; 1.0 1.0; 0.2 0.04]), 1e-10);
+
+%!test
+%! yf = feval (mdl, [0.5; 1.0; 0.2], [0.25; 1.0; 0.04]);
+%! assert (size (yf), [3, 1]);
+%! assert (iscolumn (yf));
+%! assert (yf, predict (mdl, [0.5 0.25; 1.0 1.0; 0.2 0.04]), 1e-10);
+
+%!test
+%! yf = feval (mdl, [0.5, 1.0, 0.2], [0.25, 1.0, 0.04]);
+%! assert (size (yf), [1, 3]);
+%! assert (isrow (yf));
+%! assert (yf(:), predict (mdl, [0.5 0.25; 1.0 1.0; 0.2 0.04]), 1e-10);
+
+%!test
+%! yf = feval (mdl, 0.5, 0.25);
+%! assert (size (yf), [1, 1]);
+%! assert (yf, 1.125705590619342, 1e-10);
+%! assert (yf, predict (mdl, [0.5 0.25]), 1e-10);
+
+%!test
+%! yf = feval (mdl, 0.5, [0.1; 0.2; 0.3]);
+%! assert (size (yf), [3, 1]);
+%! assert (yf(1), 1.272530890093120, 1e-10);
+%! assert (yf(2), 1.174647357110602, 1e-10);
+%! assert (yf(3), 1.076763824128083, 1e-10);
+%! assert (yf, predict (mdl, [0.5 0.1; 0.5 0.2; 0.5 0.3]), 1e-10);
+
+%!test
+%! yf = feval (mdl, [0.1; 0.5; 0.9], 0.25);
+%! assert (size (yf), [3, 1]);
+%! assert (yf(1), 0.122324994390997, 1e-10);
+%! assert (yf(2), 1.125705590619342, 1e-10);
+%! assert (yf(3), 2.129086186847688, 1e-10);
+%! assert (yf, predict (mdl, [0.1 0.25; 0.5 0.25; 0.9 0.25]), 1e-10);
+
+%!test
+%! m = fitlm ((1:n)' / n, 2 * (1:n)' / n + 0.1 * sin ((1:n)'));
+%! assert (size (feval (m, 0.5)), [1, 1]);
+%! assert (size (feval (m, [0.3; 0.5; 0.9])), [3, 1]);
+%! assert (feval (m, 0.5), predict (m, 0.5), 1e-10);
+%! assert (feval (m, [0.3; 0.5; 0.9]), predict (m, [0.3; 0.5; 0.9]), 1e-10);
+
+%!test
+%! T  = table ([0.5; 1.0; 0.2], [0.25; 1.0; 0.04], 'VariableNames', {'x1', 'x2'});
+%! yf = feval (mdl, T);
+%! assert (size (yf), [3, 1]);
+%! assert (yf, predict (mdl, [0.5 0.25; 1.0 1.0; 0.2 0.04]), 1e-10);
+
+%!test
+%! yf = feval (mdl, [0.5 0.25; NaN 1.0; 1.0 1.0]);
+%! assert (isfinite (yf(1)));
+%! assert (isnan (yf(2)));
+%! assert (isfinite (yf(3)));
+
+%!test
+%! yf = feval (mdl, [0.5; NaN; 1.0], [0.25; 1.0; 1.0]);
+%! assert (isnan (yf(2)));
+%! yf = feval (mdl, [0.5; 1.0; 1.0], [0.25; NaN; 1.0]);
+%! assert (isnan (yf(2)));
+
+%!test
+%! yf = feval (mdl, X);
+%! assert (size (yf), [20, 1]);
+%! assert (yf, mdl.Fitted, 1e-10);
+
+%!test
+%! m  = fitlm (X, y, 'Intercept', false);
+%! yf = feval (m, [0.5 0.25; 1.0 1.0]);
+%! assert (yf, predict (m, [0.5 0.25; 1.0 1.0]), 1e-10);
+%! assert (feval (m, [0.5; 1.0], [0.25; 1.0]), yf, 1e-10);
+
+%!test
+%! m  = fitlm (X, y, 'interactions');
+%! yf = feval (m, [0.5 0.25; 1.0 1.0]);
+%! assert (yf, predict (m, [0.5 0.25; 1.0 1.0]), 1e-10);
+%! assert (feval (m, [0.5; 1.0], [0.25; 1.0]), yf, 1e-10);
+
+%!test
+%! m  = fitlm ([1;1;1;2;2;2;3;3;3], [2.1;2.3;1.9;4.1;3.9;4.2;6.3;5.8;6.1], ...
+%!             'linear', 'CategoricalVars', 1);
+%! yf = feval (m, [1; 2; 3]);
+%! assert (yf(1), 2.099999999999998, 1e-10);
+%! assert (yf(2), 4.066666666666667, 1e-10);
+%! assert (yf(3), 6.066666666666666, 1e-10);
+
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
 %!error <Terms matrix must have 2 or 3 columns> fitlm (X, y, [1 2 3 4; 5 6 7 8])
@@ -2199,3 +2381,9 @@ endfunction
 %!error <Too many input arguments> random (mdl, [0.5, 0.25], 'extra')
 %!error <Xnew must have 2 columns> random (mdl, ones (3, 5))
 %!error <Xnew must have 2 columns> random (mdl, [])
+%!error <Not enough input arguments> feval (mdl)
+%!error <Incorrect number of input arguments> feval (mdl, [0.5; 1.0], [0.25; 1.0], [0.1; 0.2])
+%!error <Predictor data matrix must have 2 columns> feval (mdl, ones (3, 1))
+%!error <All input arguments must be the same size> feval (mdl, [0.5; 1.0; 0.2], [0.25; 1.0])
+%!error <X does not contain one or more predictor> feval (mdl, table ([1; 2], 'VariableNames', {'z'}))
+%!error <Predictor data matrix must have 2 columns> feval (mdl, [])
