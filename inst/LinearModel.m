@@ -642,7 +642,7 @@ classdef LinearModel
       modelspec  = varargin{3};
       nv_args    = varargin(4:end);
 
-      opts       = LinearModel.lm_parse_nv (nv_args);
+      opts       = lm_parse_nv (nv_args);
       is_formula = ischar (modelspec) && any (modelspec == '~');
 
       if (! istable (data))
@@ -826,11 +826,11 @@ classdef LinearModel
         X_num_sub = X_num_full(subset_mask, :);
         y_sub     = y_full(subset_mask);
 
-        [X_enc_sub, enc_names, cat_info] = LinearModel.lm_encode_categorical ( ...
+        [X_enc_sub, enc_names, cat_info] = lm_encode_categorical ( ...
           X_num_sub, cat_logical, pred_names_raw, cat_str_levels);
         p_enc  = size (X_enc_sub, 2);
 
-        [terms, has_intercept, coef_names] = LinearModel.lm_parse_modelspec ( ...
+        [terms, has_intercept, coef_names] = lm_parse_modelspec ( ...
           modelspec, enc_names, p_enc, opts.Intercept);
         n_coef = rows (terms);
 
@@ -839,7 +839,7 @@ classdef LinearModel
       endif
 
       fit = LinearModel.lm_fit (X_design_sub, y_sub, w_sub);
-      D   = LinearModel.lm_diagnostics (X_design_sub, y_sub, fit);
+      D   = lm_diagnostics (X_design_sub, y_sub, fit);
 
       p    = fit.rank_X;
       SSE  = fit.SSE;
@@ -1214,168 +1214,6 @@ classdef LinearModel
 
   methods (Access = private, Static)
 
-    function opts = lm_parse_nv (nv_args)
-
-      opt_names = {'Intercept', 'Weights', 'Exclude', 'RobustOpts', ...
-                   'VarNames', 'CategoricalVars', 'ResponseVar', 'PredictorVars'};
-      def_vals  = {true, [], [], [], {}, [], '', {}};
-      [intercept, weights, exclude, robustopts, varnames, catvars, ...
-       respvar, predvars, rem_args] = parsePairedArguments (opt_names, def_vals, nv_args);
-
-      if (! isempty (rem_args))
-        error ("LinearModel: Unknown option '%s'.", rem_args{1});
-      endif
-      
-      opts.Intercept       = logical (intercept);
-      opts.Exclude         = exclude;
-      opts.RobustOpts      = robustopts;
-      opts.CategoricalVars = catvars;
-      opts.ResponseVar     = char (respvar);
-
-      if (isempty (weights))
-        opts.Weights = [];
-      else
-        opts.Weights = double (weights(:));
-      endif
-
-      if (isempty (varnames))
-        opts.VarNames = {};
-      else
-        opts.VarNames = cellstr (varnames);
-      endif
-
-      if (isempty (predvars))
-        opts.PredictorVars = {};
-      else
-        opts.PredictorVars = cellstr (predvars);
-      endif
-    endfunction
-
-    ## Parse modelspec into terms matrix.
-    function [terms, has_intercept, coef_names] = lm_parse_modelspec ( ...
-        modelspec, pred_names, n_preds, intercept_nv)
-
-      p = n_preds;
-
-      if (isempty (modelspec) || (ischar (modelspec) && strcmpi (modelspec, 'linear')))
-        terms = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
-
-      elseif (ischar (modelspec) && strcmpi (modelspec, 'constant'))
-        terms = zeros (1, p+1);
-
-      elseif (ischar (modelspec) && strcmpi (modelspec, 'interactions'))
-        linear_part = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
-        inter_part  = zeros (0, p+1);
-        for i = 1:p
-          for j = i+1:p
-            row = zeros (1, p+1); row(i) = 1; row(j) = 1;
-            inter_part = [inter_part; row];
-          endfor
-        endfor
-        terms = [linear_part; inter_part];
-
-      elseif (ischar (modelspec) && strcmpi (modelspec, 'purequadratic'))
-        linear_part = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
-        quad_part   = zeros (p, p+1);
-        for j = 1:p
-          quad_part(j, j) = 2;
-        endfor
-        terms = [linear_part; quad_part];
-
-      elseif (ischar (modelspec) && strcmpi (modelspec, 'quadratic'))
-        linear_part = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
-        quad_part   = zeros (p, p+1);
-        for j = 1:p
-          quad_part(j, j) = 2;
-        endfor
-        inter_part = zeros (0, p+1);
-        for i = 1:p
-          for j = i+1:p
-            row = zeros (1, p+1); row(i) = 1; row(j) = 1;
-            inter_part = [inter_part; row];
-          endfor
-        endfor
-        terms = [linear_part; quad_part; inter_part];
-
-      elseif (ischar (modelspec) && strcmpi (modelspec, 'full'))
-        error ("fitlm: 'full' is not a valid model specification.");
-
-      elseif (isnumeric (modelspec))
-        terms = double (modelspec);
-        if (size (terms, 2) == p)
-          terms = [terms, zeros(rows (terms), 1)];
-        elseif (size (terms, 2) == p + 1)
-          if (! all (terms(:, end) == 0))
-            error ('LinearModel: Last column of terms matrix must be all zeros.');
-          endif
-        else
-          error ('LinearModel: Terms matrix must have %d or %d columns.', p, p+1);
-        endif
-
-      else
-        error ('fitlm: Unknown model specification.');
-      endif
-
-      if (! intercept_nv)
-        int_rows = all (terms(:, 1:end-1) == 0, 2);
-        terms    = terms(! int_rows, :);
-      endif
-
-      has_intercept = any (all (terms(:, 1:end-1) == 0, 2));
-
-      n_terms    = rows (terms);
-      coef_names = cell (1, n_terms);
-      for t = 1:n_terms
-        term_row = terms(t, 1:end-1);
-        if (all (term_row == 0))
-          coef_names{t} = '(Intercept)';
-        else
-          parts_t = {};
-          for j = 1:numel (term_row)
-            if (term_row(j) != 0)
-              if (term_row(j) == 1)
-                parts_t{end+1} = pred_names{j};
-              else
-                parts_t{end+1} = sprintf ('%s^%d', pred_names{j}, term_row(j));
-              endif
-            endif
-          endfor
-          coef_names{t} = strjoin (parts_t, ':');
-        endif
-      endfor
-    endfunction
-
-    ## expand categorical columns into L-1 dummy variables
-    function [X_enc, enc_names, cat_info] = lm_encode_categorical ( ...
-        X_num, cat_cols, pred_names, cat_levels)
-
-      X_enc     = zeros (rows (X_num), 0);
-      enc_names = {};
-      cat_info.names  = {};
-      cat_info.levels = {};
-
-      for j = 1:numel (pred_names)
-        if (! cat_cols(j))
-          X_enc     = [X_enc, X_num(:, j)];
-          enc_names = [enc_names, pred_names{j}];
-        else
-          levels_j = cat_levels{j};
-          if (isempty (levels_j))
-            uvals    = sort (unique (X_num(isfinite (X_num(:,j)), j)));
-            levels_j = cellstr (num2str (uvals(:)));
-          endif
-          n_lev = numel (levels_j);
-          for L = 2:n_lev
-            dummy     = double (X_num(:, j) == L);
-            X_enc     = [X_enc, dummy];
-            enc_names = [enc_names, [pred_names{j}, '_', char(levels_j{L})]];
-          endfor
-          cat_info.names{end+1}  = pred_names{j};
-          cat_info.levels{end+1} = levels_j;
-        endif
-      endfor
-    endfunction
-
     ## weighted least-squares via pivoted QR; returns fit struct
     function fit = lm_fit (X, y, w, compute_H)
       if (nargin < 4)
@@ -1473,51 +1311,6 @@ classdef LinearModel
       fit.Raw         = Raw;
     endfunction
 
-    ## observation-level influence statistics; returns D struct
-    function D = lm_diagnostics (X, y, fit)
-      n    = rows (X);
-      p    = fit.rank_X;
-      h    = fit.leverage;
-      Raw  = fit.Raw;
-      DFE  = fit.DFE;
-      MSE  = fit.MSE;
-      RMSE = fit.RMSE;
-
-      S2_i = (DFE * MSE - Raw.^2 ./ max (1 - h, eps)) / max (DFE - 1, 1);
-
-      r_std = Raw ./ max (RMSE .* sqrt (max (1 - h, eps)), eps);
-      r_stu = Raw ./ max (sqrt (max (S2_i, eps)) .* sqrt (max (1 - h, eps)), eps);
-
-      CooksDistance = (1 / max (p, 1)) .* r_std.^2 .* h ./ max (1 - h, eps);
-      Dffits        = r_stu .* sqrt (h ./ max (1 - h, eps));
-      CovRatio      = (S2_i ./ max (MSE, eps)).^p ./ max (1 - h, eps);
-
-      active   = fit.active_cols;
-      CovB_act = fit.CovBeta(active, active);
-      XtXinv_d = diag (CovB_act) / max (MSE, eps);
-      Dfbetas  = zeros (n, p);
-
-      if (p > 0)
-        for i = 1:n
-          xi_act     = X(i, active)';
-          infl       = (CovB_act / max (MSE, eps)) * xi_act;
-          denom_base = (1 - h(i)) * sqrt (max (S2_i(i), eps));
-          for jj = 1:p
-            se_jj = sqrt (max (XtXinv_d(jj), eps));
-            Dfbetas(i, jj) = infl(jj) * Raw(i) / max (denom_base * se_jj, eps);
-          endfor
-        endfor
-      endif
-
-      D.Leverage      = h;
-      D.CooksDistance = CooksDistance;
-      D.Dffits        = Dffits;
-      D.S2_i          = S2_i;
-      D.CovRatio      = CovRatio;
-      D.Dfbetas       = Dfbetas;
-      D.HatMatrix     = fit.H;
-    endfunction
-
     function X_design = lm_build_design (terms, X_enc)
       n_obs    = rows (X_enc);
       n_coef   = rows (terms);
@@ -1603,33 +1396,241 @@ classdef LinearModel
       endfor
     endfunction
 
-    function mdl2 = lm_refit (mdl, new_terms)
-      opts = mdl.OrigOpts;
-
-      if (! isempty (mdl.CatLevelInfo) && isfield (mdl.CatLevelInfo, 'names') ...
-          && ! isempty (mdl.CatLevelInfo.names))
-        cat_vars = mdl.CatLevelInfo.names;
-      else
-        cat_vars = opts.CategoricalVars;
-      endif
-
-      nv_list = {'Intercept', opts.Intercept};
-      if (! isempty (opts.Weights))
-        nv_list = [nv_list, {'Weights', opts.Weights}];
-      endif
-      if (! isempty (opts.Exclude))
-        nv_list = [nv_list, {'Exclude', opts.Exclude}];
-      endif
-      if (! isempty (cat_vars))
-        nv_list = [nv_list, {'CategoricalVars', cat_vars}];
-      endif
-
-      mdl2 = fitlm (mdl.Variables, mdl.ResponseName, new_terms, nv_list{:});
-    endfunction
-
   endmethods
 
 endclassdef
+
+function opts = lm_parse_nv (nv_args)
+
+  opt_names = {'Intercept', 'Weights', 'Exclude', 'RobustOpts', ...
+               'VarNames', 'CategoricalVars', 'ResponseVar', 'PredictorVars'};
+  def_vals  = {true, [], [], [], {}, [], '', {}};
+  [intercept, weights, exclude, robustopts, varnames, catvars, ...
+   respvar, predvars, rem_args] = parsePairedArguments (opt_names, def_vals, nv_args);
+
+  if (! isempty (rem_args))
+    error ("LinearModel: Unknown option '%s'.", rem_args{1});
+  endif
+
+  opts.Intercept       = logical (intercept);
+  opts.Exclude         = exclude;
+  opts.RobustOpts      = robustopts;
+  opts.CategoricalVars = catvars;
+  opts.ResponseVar     = char (respvar);
+
+  if (isempty (weights))
+    opts.Weights = [];
+  else
+    opts.Weights = double (weights(:));
+  endif
+
+  if (isempty (varnames))
+    opts.VarNames = {};
+  else
+    opts.VarNames = cellstr (varnames);
+  endif
+
+  if (isempty (predvars))
+    opts.PredictorVars = {};
+  else
+    opts.PredictorVars = cellstr (predvars);
+  endif
+
+endfunction
+
+## Parse modelspec into terms matrix.
+function [terms, has_intercept, coef_names] = lm_parse_modelspec ( ...
+    modelspec, pred_names, n_preds, intercept_nv)
+
+  p = n_preds;
+
+  if (isempty (modelspec) || (ischar (modelspec) && strcmpi (modelspec, 'linear')))
+    terms = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
+
+  elseif (ischar (modelspec) && strcmpi (modelspec, 'constant'))
+    terms = zeros (1, p+1);
+
+  elseif (ischar (modelspec) && strcmpi (modelspec, 'interactions'))
+    linear_part = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
+    inter_part  = zeros (0, p+1);
+    for i = 1:p
+      for j = i+1:p
+        row = zeros (1, p+1); row(i) = 1; row(j) = 1;
+        inter_part = [inter_part; row];
+      endfor
+    endfor
+    terms = [linear_part; inter_part];
+
+  elseif (ischar (modelspec) && strcmpi (modelspec, 'purequadratic'))
+    linear_part = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
+    quad_part   = zeros (p, p+1);
+    for j = 1:p
+      quad_part(j, j) = 2;
+    endfor
+    terms = [linear_part; quad_part];
+
+  elseif (ischar (modelspec) && strcmpi (modelspec, 'quadratic'))
+    linear_part = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
+    quad_part   = zeros (p, p+1);
+    for j = 1:p
+      quad_part(j, j) = 2;
+    endfor
+    inter_part = zeros (0, p+1);
+    for i = 1:p
+      for j = i+1:p
+        row = zeros (1, p+1); row(i) = 1; row(j) = 1;
+        inter_part = [inter_part; row];
+      endfor
+    endfor
+    terms = [linear_part; quad_part; inter_part];
+
+  elseif (ischar (modelspec) && strcmpi (modelspec, 'full'))
+    error ("fitlm: 'full' is not a valid model specification.");
+
+  elseif (isnumeric (modelspec))
+    terms = double (modelspec);
+    if (size (terms, 2) == p)
+      terms = [terms, zeros(rows (terms), 1)];
+    elseif (size (terms, 2) == p + 1)
+      if (! all (terms(:, end) == 0))
+        error ('LinearModel: Last column of terms matrix must be all zeros.');
+      endif
+    else
+      error ('LinearModel: Terms matrix must have %d or %d columns.', p, p+1);
+    endif
+
+  else
+    error ('fitlm: Unknown model specification.');
+  endif
+
+  if (! intercept_nv)
+    int_rows = all (terms(:, 1:end-1) == 0, 2);
+    terms    = terms(! int_rows, :);
+  endif
+
+  has_intercept = any (all (terms(:, 1:end-1) == 0, 2));
+
+  n_terms    = rows (terms);
+  coef_names = cell (1, n_terms);
+  for t = 1:n_terms
+    term_row = terms(t, 1:end-1);
+    if (all (term_row == 0))
+      coef_names{t} = '(Intercept)';
+    else
+      parts_t = {};
+      for j = 1:numel (term_row)
+        if (term_row(j) != 0)
+          if (term_row(j) == 1)
+            parts_t{end+1} = pred_names{j};
+          else
+            parts_t{end+1} = sprintf ('%s^%d', pred_names{j}, term_row(j));
+          endif
+        endif
+      endfor
+      coef_names{t} = strjoin (parts_t, ':');
+    endif
+  endfor
+endfunction
+
+## expand categorical columns into L-1 dummy variables
+function [X_enc, enc_names, cat_info] = lm_encode_categorical ( ...
+    X_num, cat_cols, pred_names, cat_levels)
+
+  X_enc     = zeros (rows (X_num), 0);
+  enc_names = {};
+  cat_info.names  = {};
+  cat_info.levels = {};
+
+  for j = 1:numel (pred_names)
+    if (! cat_cols(j))
+      X_enc     = [X_enc, X_num(:, j)];
+      enc_names = [enc_names, pred_names{j}];
+    else
+      levels_j = cat_levels{j};
+      if (isempty (levels_j))
+        uvals    = sort (unique (X_num(isfinite (X_num(:,j)), j)));
+        levels_j = cellstr (num2str (uvals(:)));
+      endif
+      n_lev = numel (levels_j);
+      for L = 2:n_lev
+        dummy     = double (X_num(:, j) == L);
+        X_enc     = [X_enc, dummy];
+        enc_names = [enc_names, [pred_names{j}, '_', char(levels_j{L})]];
+      endfor
+      cat_info.names{end+1}  = pred_names{j};
+      cat_info.levels{end+1} = levels_j;
+    endif
+  endfor
+endfunction
+
+## observation-level influence statistics; returns D struct
+function D = lm_diagnostics (X, y, fit)
+  n    = rows (X);
+  p    = fit.rank_X;
+  h    = fit.leverage;
+  Raw  = fit.Raw;
+  DFE  = fit.DFE;
+  MSE  = fit.MSE;
+  RMSE = fit.RMSE;
+
+  S2_i = (DFE * MSE - Raw.^2 ./ max (1 - h, eps)) / max (DFE - 1, 1);
+
+  r_std = Raw ./ max (RMSE .* sqrt (max (1 - h, eps)), eps);
+  r_stu = Raw ./ max (sqrt (max (S2_i, eps)) .* sqrt (max (1 - h, eps)), eps);
+
+  CooksDistance = (1 / max (p, 1)) .* r_std.^2 .* h ./ max (1 - h, eps);
+  Dffits        = r_stu .* sqrt (h ./ max (1 - h, eps));
+  CovRatio      = (S2_i ./ max (MSE, eps)).^p ./ max (1 - h, eps);
+
+  active   = fit.active_cols;
+  CovB_act = fit.CovBeta(active, active);
+  XtXinv_d = diag (CovB_act) / max (MSE, eps);
+  Dfbetas  = zeros (n, p);
+
+  if (p > 0)
+    for i = 1:n
+      xi_act     = X(i, active)';
+      infl       = (CovB_act / max (MSE, eps)) * xi_act;
+      denom_base = (1 - h(i)) * sqrt (max (S2_i(i), eps));
+      for jj = 1:p
+        se_jj = sqrt (max (XtXinv_d(jj), eps));
+        Dfbetas(i, jj) = infl(jj) * Raw(i) / max (denom_base * se_jj, eps);
+      endfor
+    endfor
+  endif
+
+  D.Leverage      = h;
+  D.CooksDistance = CooksDistance;
+  D.Dffits        = Dffits;
+  D.S2_i          = S2_i;
+  D.CovRatio      = CovRatio;
+  D.Dfbetas       = Dfbetas;
+  D.HatMatrix     = fit.H;
+endfunction
+
+function mdl2 = lm_refit (mdl, new_terms)
+  opts = mdl.OrigOpts;
+
+  if (! isempty (mdl.CatLevelInfo) && isfield (mdl.CatLevelInfo, 'names') ...
+      && ! isempty (mdl.CatLevelInfo.names))
+    cat_vars = mdl.CatLevelInfo.names;
+  else
+    cat_vars = opts.CategoricalVars;
+  endif
+
+  nv_list = {'Intercept', opts.Intercept};
+  if (! isempty (opts.Weights))
+    nv_list = [nv_list, {'Weights', opts.Weights}];
+  endif
+  if (! isempty (opts.Exclude))
+    nv_list = [nv_list, {'Exclude', opts.Exclude}];
+  endif
+  if (! isempty (cat_vars))
+    nv_list = [nv_list, {'CategoricalVars', cat_vars}];
+  endif
+
+  mdl2 = fitlm (mdl.Variables, mdl.ResponseName, new_terms, nv_list{:});
+endfunction
 
 %!shared mdl, X, y, n
 %! n = 20;
