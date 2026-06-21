@@ -1299,6 +1299,56 @@ classdef LinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {@var{ci} =} coefCI (@var{mdl})
+    ## @deftypefnx {LinearModel} {@var{ci} =} coefCI (@var{mdl}, @var{alpha})
+    ##
+    ## Compute confidence intervals for the coefficients of a fitted linear
+    ## regression model.
+    ##
+    ## @code{@var{ci} = coefCI (@var{mdl})} returns 95% confidence intervals
+    ## for all model coefficients using a default significance level of 0.05.
+    ##
+    ## @code{@var{ci} = coefCI (@var{mdl}, @var{alpha})} uses significance
+    ## level @var{alpha}, a scalar in [0, 1].  Setting @var{alpha} to 0
+    ## produces infinite intervals; setting it to 1 collapses each interval to
+    ## the point estimate.
+    ##
+    ## Intervals are computed by the Wald method:
+    ## @math{b_i @pm t_{(1-alpha/2,\,DFE)}\,SE(b_i)}, where @var{DFE} is the
+    ## residual degrees of freedom.  The output @var{ci} is a @math{k}-by-2
+    ## matrix where @math{k = NumCoefficients}; column 1 is the lower bound
+    ## and column 2 is the upper bound.  Coefficients aliased to zero in
+    ## rank-deficient models return @code{[0, 0]}.
+    ##
+    ## @seealso{fitlm, coefTest, predict, LinearModel}
+    ## @end deftypefn
+    function ci = coefCI (mdl, alpha)
+      if (nargin > 2)
+        error ('coefCI: Too many input arguments.');
+      endif
+      if (nargin < 2)
+        alpha = 0.05;
+      endif
+      if (! isscalar (alpha))
+        error (['coefCI: Invalid argument at position 2. ' ...
+                'Value must be a scalar.']);
+      endif
+      if (! (alpha >= 0))
+        error (['coefCI: Invalid argument at position 2. ' ...
+                'Value must be greater than or equal to 0.']);
+      endif
+      if (alpha > 1)
+        error (['coefCI: Invalid argument at position 2. ' ...
+                'Value must be less than or equal to 1.']);
+      endif
+
+      t  = tinv (1 - alpha / 2, mdl.DFE);
+      b  = mdl.Coefficients.Estimate;
+      se = mdl.Coefficients.SE;
+      ci = [b - t .* se, b + t .* se];
+    endfunction
+
   endmethods
 
   methods (Access = private, Static)
@@ -2352,6 +2402,119 @@ endfunction
 %! assert (yf(2), 4.066666666666667, 1e-10);
 %! assert (yf(3), 6.066666666666666, 1e-10);
 
+%!test
+%! ci = coefCI (mdl);
+%! assert (size (ci), [3, 2]);
+%! assert (class (ci), 'double');
+%! assert (all (ci(:,1) < ci(:,2)));
+%! assert (ci(1,1), -0.120502736154050,  1e-10);
+%! assert (ci(1,2),  0.352880091734465, 1e-10);
+%! assert (ci(2,1),  1.470249604061007,  1e-10);
+%! assert (ci(2,2),  3.546653377080718,  1e-10);
+%! assert (ci(3,1), -1.026857022014626,  1e-10);
+%! assert (ci(3,2), -0.930813637635746, 1e-10);
+
+%!test
+%! ## midpoints equal estimates
+%! ci = coefCI (mdl);
+%! t  = tinv (0.975, mdl.DFE);
+%! assert ((ci(:,1) + ci(:,2)) / 2, mdl.Coefficients.Estimate, 1e-10);
+%! assert (ci(:,2) - ci(:,1), 2 * t * mdl.Coefficients.SE, 1e-10);
+
+%!test
+%! assert (coefCI (mdl, 0.05), coefCI (mdl));
+
+%!test
+%! ci   = coefCI (mdl);
+%! ci01 = coefCI (mdl, 0.01);
+%! assert (size (ci01), [3, 2]);
+%! assert (ci01(1,1), -0.208951721610638, 1e-10);
+%! assert (ci01(1,2),  0.441329077191052, 1e-10);
+%! assert (ci01(2,1),  1.08228494564489,  1e-10);
+%! assert (ci01(2,2),  3.934618035496833,  1e-10);
+%! assert (ci01(3,1), -1.044802201703589,  1e-10);
+%! assert (ci01(3,2), -0.912868457946783, 1e-10);
+%! assert (all ((ci01(:,2) - ci01(:,1)) > (ci(:,2) - ci(:,1))));
+
+%!test
+%! ## alpha=0.01 formula identity
+%! ci01 = coefCI (mdl, 0.01);
+%! t01  = tinv (0.995, mdl.DFE);
+%! assert (ci01(:,2) - ci01(:,1), 2 * t01 * mdl.Coefficients.SE, 1e-10);
+
+%!test
+%! ci0 = coefCI (mdl, 0);
+%! assert (all (ci0(:,1) == -Inf));
+%! assert (all (ci0(:,2) == +Inf));
+
+%!test
+%! ## alpha=1 collapses to point estimates
+%! ci1 = coefCI (mdl, 1);
+%! assert (ci1(:,1), mdl.Coefficients.Estimate, 1e-10);
+%! assert (ci1(:,2), mdl.Coefficients.Estimate, 1e-10);
+
+%!test
+%! m  = fitlm (X, y, 'Intercept', false);
+%! ci = coefCI (m);
+%! t  = tinv (0.975, m.DFE);
+%! assert (size (ci), [2, 2]);
+%! assert (ci(1,1), 2.486679110991696,  1e-10);
+%! assert (ci(1,2), 3.436164115360526, 1e-10);
+%! assert (ci(2,1), -1.027166590567854, 1e-10);
+%! assert (ci(2,2), -0.967330908318718, 1e-10);
+%! assert ((ci(:,1) + ci(:,2)) / 2, m.Coefficients.Estimate, 1e-10);
+%! assert (ci(:,2) - ci(:,1), 2 * t * m.Coefficients.SE, 1e-10);
+
+%!test
+%! m  = fitlm (X, y, 'interactions');
+%! ci = coefCI (m);
+%! t  = tinv (0.975, m.DFE);
+%! assert (size (ci), [4, 2]);
+%! assert (ci(1,1), -0.201030907566802, 1e-10);
+%! assert (ci(1,2),  0.516312363642881, 1e-10);
+%! assert ((ci(:,1) + ci(:,2)) / 2, m.Coefficients.Estimate, 1e-10);
+%! assert (ci(:,2) - ci(:,1), 2 * t * m.Coefficients.SE, 1e-10);
+
+%!test
+%! ## constant model (1 coefficient)
+%! m  = fitlm (X, y, 'constant');
+%! ci = coefCI (m);
+%! t  = tinv (0.975, m.DFE);
+%! assert (size (ci), [1, 2]);
+%! assert ((ci(1,1) + ci(1,2)) / 2, m.Coefficients.Estimate, 1e-10);
+%! assert (ci(1,2) - ci(1,1), 2 * t * m.Coefficients.SE, 1e-10);
+
+%!test
+%! m  = fitlm (X, y, 'Weights', (1:n)' / sum (1:n));
+%! ci = coefCI (m);
+%! t  = tinv (0.975, m.DFE);
+%! assert (size (ci), [3, 2]);
+%! assert (ci(1,1), -0.355978167660141, 1e-10);
+%! assert (ci(1,2),  0.516619434992026, 1e-10);
+%! assert ((ci(:,1) + ci(:,2)) / 2, m.Coefficients.Estimate, 1e-10);
+%! assert (ci(:,2) - ci(:,1), 2 * t * m.Coefficients.SE, 1e-10);
+
+%!test
+%! ## rank-deficient: dropped rows give [0,0], active rows are finite
+%! m    = fitlm ([ones(n,1), X, X(:,1)+X(:,2)], y);
+%! ci   = coefCI (m);
+%! drop = find (m.Coefficients.SE == 0);
+%! assert (size (ci), [5, 2]);
+%! assert (all (all (ci(drop, :) == 0)));
+%! assert (all (all (isfinite (ci(setdiff (1:5, drop'), :)))));
+
+%!test
+%! m  = fitlm ([1;1;1;2;2;2;3;3;3], [2.1;2.3;1.9;4.1;3.9;4.2;6.3;5.8;6.1], ...
+%!             'linear', 'CategoricalVars', 1);
+%! ci = coefCI (m);
+%! assert (size (ci), [3, 2]);
+%! assert (ci(1,1), 1.80971256321669,  1e-10);
+%! assert (ci(1,2), 2.3902874367833,   1e-10);
+%! assert (ci(2,1), 1.55613823658119,  1e-10);
+%! assert (ci(2,2), 2.37719509675214,  1e-10);
+%! assert (ci(3,1), 3.55613823658119,  1e-10);
+%! assert (ci(3,2), 4.37719509675214,  1e-10);
+
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
 %!error <Terms matrix must have 2 or 3 columns> fitlm (X, y, [1 2 3 4; 5 6 7 8])
@@ -2387,3 +2550,9 @@ endfunction
 %!error <All input arguments must be the same size> feval (mdl, [0.5; 1.0; 0.2], [0.25; 1.0])
 %!error <X does not contain one or more predictor> feval (mdl, table ([1; 2], 'VariableNames', {'z'}))
 %!error <Predictor data matrix must have 2 columns> feval (mdl, [])
+%!error <too many inputs> coefCI (mdl, 0.05, 'extra')
+%!error <Value must be less than or equal to 1> coefCI (mdl, 1.5)
+%!error <Value must be greater than or equal to 0> coefCI (mdl, -0.1)
+%!error <Value must be a scalar> coefCI (mdl, [0.01 0.05])
+%!error <Value must be greater than or equal to 0> coefCI (mdl, NaN)
+%!error <Value must be a scalar> coefCI (mdl, 'abc')
