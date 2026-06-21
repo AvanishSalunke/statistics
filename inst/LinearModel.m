@@ -1347,6 +1347,109 @@ classdef LinearModel
       b  = mdl.Coefficients.Estimate;
       se = mdl.Coefficients.SE;
       ci = [b - t .* se, b + t .* se];
+
+    endfunction
+
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {@var{p} =} coefTest (@var{mdl})
+    ## @deftypefnx {LinearModel} {@var{p} =} coefTest (@var{mdl}, @var{H})
+    ## @deftypefnx {LinearModel} {@var{p} =} coefTest (@var{mdl}, @var{H}, @var{C})
+    ## @deftypefnx {LinearModel} {[@var{p}, @var{F}] =} coefTest (@dots{})
+    ## @deftypefnx {LinearModel} {[@var{p}, @var{F}, @var{r}] =} coefTest (@dots{})
+    ##
+    ## Linear hypothesis test on linear regression model coefficients.
+    ##
+    ## @code{coefTest} tests whether a linear combination of the fitted
+    ## coefficients equals a specified constant vector.  The default call
+    ## tests the joint hypothesis that all non-intercept coefficients are
+    ## zero, which is equivalent to the overall model F-test reported in the
+    ## model summary.  Custom hypotheses are supplied through the contrast
+    ## matrix @var{H} and, optionally, the right-hand-side vector @var{C}.
+    ##
+    ## @code{@var{p} = coefTest (@var{mdl})} returns the p-value for an F-test
+    ## that all coefficient estimates except the intercept are zero.
+    ##
+    ## @code{@var{p} = coefTest (@var{mdl}, @var{H})} performs an F-test that
+    ## @math{H B = 0}, where @math{B} is the coefficient vector.  @var{H} must
+    ## be a numeric @math{r}-by-@math{k} matrix where @math{k =
+    ## NumCoefficients}.
+    ##
+    ## @code{@var{p} = coefTest (@var{mdl}, @var{H}, @var{C})} tests @math{H B
+    ## = C}.  @var{C} is a numeric vector with @math{r} elements; row and
+    ## column vectors are both accepted.
+    ##
+    ## The F-statistic is @math{F = (HB - C)' (H V H')^{-1} (HB - C) / r},
+    ## where @math{V} is @code{CoefficientCovariance}.  Under the null
+    ## hypothesis, @math{F} follows @math{F(r, DFE)}.  The p-value is the
+    ## upper-tail probability, computed via @code{betainc} to avoid
+    ## cancellation for large @math{F}.  Rank-deficient @var{H} (without
+    ## @code{NaN}) returns @code{NaN} results without an error.
+    ##
+    ## @seealso{fitlm, coefCI, LinearModel}
+    ## @end deftypefn
+    function [p, F, r] = coefTest (mdl, varargin)
+      if (nargout > 3)
+        error ('coefTest: Too many output arguments.');
+      endif
+      if (numel (varargin) > 2)
+        error ('coefTest: Too many input arguments.');
+      endif
+
+      k = mdl.NumCoefficients;
+
+      if (numel (varargin) >= 1 && ! isempty (varargin{1}))
+
+        H = varargin{1};
+        if (! isnumeric (H))
+          error ('coefTest: H must be a %d-by-%d numeric matrix.', size (H, 1), k);
+        endif
+        if (size (H, 2) != k)
+          error ('coefTest: H must be a %d-by-%d numeric matrix.', size (H, 1), k);
+        endif
+        if (any (any (isnan (H))))
+          error (['coefTest: H is not full rank and hypotheses ' ...
+                  'are not consistent.']);
+        endif
+        r = size (H, 1);
+
+        if (numel (varargin) == 2)
+          C = varargin{2};
+          if (! isnumeric (C))
+            error ('coefTest: C must be a numeric vector.');
+          endif
+          C = C(:);
+          if (numel (C) != r)
+            error ('coefTest: H must be a %d-by-%d numeric matrix.', numel (C), k);
+          endif
+        else
+          C = zeros (r, 1);
+        endif
+
+      else
+
+        if (mdl.HasIntercept && k > 1)
+          H = [zeros(k-1, 1), eye(k-1)];
+          r = k - 1;
+        else
+          H = eye (k);
+          r = k;
+        endif
+        C = zeros (r, 1);
+
+      endif
+
+      b    = mdl.Coefficients.Estimate;
+      V    = mdl.CoefficientCovariance;
+      HVH  = H * V * H';
+      Hb_c = H * b - C;
+      if (rcond (HVH) < eps (class (HVH)))
+        F = NaN;
+        p = NaN;
+      else
+        F = (Hb_c' * (HVH \ Hb_c)) / r;
+        p = betainc (mdl.DFE / (mdl.DFE + r * F), mdl.DFE / 2, r / 2);
+      endif
+
     endfunction
 
   endmethods
@@ -2515,6 +2618,155 @@ endfunction
 %! assert (ci(3,1), 3.55613823658119,  1e-10);
 %! assert (ci(3,2), 4.37719509675214,  1e-10);
 
+%!test
+%! [p, F, r] = coefTest (mdl);
+%! assert (size (p), [1, 1]);
+%! assert (class (p), 'double');
+%! assert (p >= 0 && p <= 1);
+%! assert (F >= 0);
+%! assert (r, 2);
+%! assert (p, 9.489880832170599e-28, -1e-8);
+%! assert (F, 1.283149098426142e+04, -1e-8);
+%! assert (r, 2);
+
+%!test
+%! ## formula identity
+%! [p, F] = coefTest (mdl);
+%! k   = mdl.NumCoefficients;
+%! H0  = [zeros(k-1, 1), eye(k-1)];
+%! b   = mdl.Coefficients.Estimate;
+%! V   = mdl.CoefficientCovariance;
+%! Hb  = H0 * b;
+%! Fm  = (Hb' * ((H0 * V * H0') \ Hb)) / (k - 1);
+%! pm  = betainc (mdl.DFE / (mdl.DFE + (k-1) * Fm), mdl.DFE/2, (k-1)/2);
+%! assert (F, Fm, -1e-10);
+%! assert (p, pm, -1e-10);
+
+%!test
+%! ## explicit H matches default
+%! k     = mdl.NumCoefficients;
+%! H_exp = [zeros(k-1, 1), eye(k-1)];
+%! [p1, F1, r1] = coefTest (mdl);
+%! [p2, F2, r2] = coefTest (mdl, H_exp);
+%! assert (p2, p1, -1e-10);
+%! assert (F2, F1, -1e-10);
+%! assert (r2, size (H_exp, 1));
+
+%!test
+%! ## pinned single and joint H
+%! [p1, F1, r1] = coefTest (mdl, [1 0 0]);
+%! assert (p1, 0.314859866747774, -1e-8);
+%! assert (F1, 1.072634101844537, -1e-8);
+%! assert (r1, 1);
+%! [p2, F2, r2] = coefTest (mdl, [0 1 0]);
+%! assert (p2, 8.937794169018252e-05, -1e-8);
+%! assert (F2, 25.985840929474932, -1e-8);
+%! assert (r2, 1);
+%! [p3, F3, r3] = coefTest (mdl, [0 0 1]);
+%! assert (p3, 8.656938305821102e-19, -1e-8);
+%! assert (F3, 1.849410599855684e+03, -1e-8);
+%! assert (r3, 1);
+%! [pm, Fm, rm] = coefTest (mdl, [0 1 0; 0 0 1]);
+%! assert (pm, 9.489880832170599e-28, -1e-8);
+%! assert (Fm, 1.283149098426142e+04, -1e-8);
+%! assert (rm, 2);
+
+%!test
+%! ## trivial hypothesis and C=0
+%! b        = mdl.Coefficients.Estimate;
+%! [p0, F0] = coefTest (mdl, [0 1 0], b(2));
+%! assert (F0 < 1e-12);
+%! assert (p0, 1, 1e-10);
+%! [pa, Fa] = coefTest (mdl, [0 1 0], 0);
+%! [pb, Fb] = coefTest (mdl, [0 1 0]);
+%! assert (pa, pb, -1e-10);
+%! assert (Fa, Fb, -1e-10);
+
+%!test
+%! ## H with C
+%! [pc, Fc, rc] = coefTest (mdl, [0 1 0; 0 0 1], [1.5; -1.0]);
+%! assert (pc, 2.833788304242915e-09, -1e-8);
+%! assert (Fc, 77.603887650386312, -1e-8);
+%! assert (rc, 2);
+%! [pr, Fr] = coefTest (mdl, [0 1 0; 0 0 1], [1.5, -1.0]);
+%! assert (pr, pc, -1e-10);
+%! assert (Fr, Fc, -1e-10);
+%! [ps, Fs] = coefTest (mdl, [0 1 0], 1.5);
+%! assert (ps, 0.056184159363707, -1e-8);
+%! assert (Fs, 4.199865537706047, -1e-8);
+
+%!test
+%! ## no-intercept model
+%! m = fitlm (X, y, 'Intercept', false);
+%! [p, F, r] = coefTest (m);
+%! assert (p, 6.060655830723051e-32, -1e-8);
+%! assert (F, 2.646694317541346e+04, -1e-8);
+%! assert (r, m.NumCoefficients);
+%! [p2, F2] = coefTest (m, eye (m.NumCoefficients));
+%! assert (p2, p, -1e-10);
+%! assert (F2, F, -1e-10);
+
+%!test
+%! ## interaction model
+%! m = fitlm (X, y, 'interactions');
+%! [p, F, r] = coefTest (m);
+%! assert (p, 1.164196605688161e-25, -1e-8);
+%! assert (F, 8.107508574885546e+03, -1e-8);
+%! assert (r, m.NumCoefficients - 1);
+%! assert (r != m.NumPredictors);
+
+%!test
+%! ## weighted model
+%! m = fitlm (X, y, 'Weights', (1:n)' / sum (1:n));
+%! [p, F, r] = coefTest (m);
+%! assert (p, 1.481920976389473e-27, -1e-8);
+%! assert (F, 1.217557180481257e+04, -1e-8);
+%! assert (r, 2);
+%! assert (p, m.ModelFitVsNullModel.Pvalue, -1e-8);
+
+%!test
+%! ## categorical model
+%! m = fitlm ([1;1;1;2;2;2;3;3;3], [2.1;2.3;1.9;4.1;3.9;4.2;6.3;5.8;6.1], ...
+%!            'linear', 'CategoricalVars', 1);
+%! [p, F, r] = coefTest (m);
+%! assert (p, 1.197590680415813e-06, -1e-8);
+%! assert (F, 2.795000000000035e+02, -1e-8);
+%! assert (r, 2);
+%! [p1, F1] = coefTest (m, [1 0 0]);
+%! assert (F1, 3.133421052631613e+02, -1e-8);
+%! assert (p1, 2.087464608380450e-06, -1e-8);
+%! [p2, F2] = coefTest (m, [0 1 0]);
+%! assert (F2, 1.374078947368438e+02, -1e-8);
+%! assert (p2, 2.325514143662469e-05, -1e-8);
+%! [p3, F3] = coefTest (m, [0 0 1]);
+%! assert (F3, 5.589868421052698e+02, -1e-8);
+%! assert (p3, 3.757733067786492e-07, -1e-8);
+
+%!test
+%! ## constant model
+%! m = fitlm (X, y, 'constant');
+%! [p, F, r] = coefTest (m);
+%! assert (p, 0.000239936408695073, -1e-8);
+%! assert (F, 20.3359164947506, -1e-8);
+%! assert (r, 1);
+
+%!test
+%! ## rank-deficient model
+%! m    = fitlm ([ones(n,1), X, X(:,1)+X(:,2)], y);
+%! [p, F] = coefTest (m);
+%! assert (isnan (p));
+%! assert (isnan (F));
+%! drop = find (m.Coefficients.SE == 0);
+%! keep = setdiff (2:m.NumCoefficients, drop');
+%! H    = zeros (numel (keep), m.NumCoefficients);
+%! for i = 1:numel (keep)
+%!   H(i, keep(i)) = 1;
+%! endfor
+%! [p2, F2, r2] = coefTest (m, H);
+%! assert (p2, 6.70657058643085e-30, -1e-8);
+%! assert (F2, 17716.1864263456, -1e-8);
+%! assert (r2, numel (keep));
+
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
 %!error <Terms matrix must have 2 or 3 columns> fitlm (X, y, [1 2 3 4; 5 6 7 8])
@@ -2556,3 +2808,10 @@ endfunction
 %!error <Value must be a scalar> coefCI (mdl, [0.01 0.05])
 %!error <Value must be greater than or equal to 0> coefCI (mdl, NaN)
 %!error <Value must be a scalar> coefCI (mdl, 'abc')
+%!error <H must be a 1-by-3 numeric matrix> coefTest (mdl, [1 0])
+%!error <H must be a 1-by-3 numeric matrix> coefTest (mdl, 'abc')
+%!error <C must be a numeric vector> coefTest (mdl, [0 1 0], 'abc')
+%!error <H must be a 1-by-3 numeric matrix> coefTest (mdl, [0 1 0; 0 0 1], [1])
+%!error <H is not full rank> coefTest (mdl, [0 NaN 0])
+%!error <Too many input arguments> coefTest (mdl, [0 1 0], 0, 'extra')
+%!error <too many outputs> [a, b, c, d] = coefTest (mdl)
