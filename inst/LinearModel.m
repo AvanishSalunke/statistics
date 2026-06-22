@@ -1452,6 +1452,98 @@ classdef LinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {@var{p} =} dwtest (@var{mdl})
+    ## @deftypefnx {LinearModel} {@var{p} =} dwtest (@var{mdl}, @var{method})
+    ## @deftypefnx {LinearModel} {@var{p} =} dwtest (@var{mdl}, @var{method}, @var{tail})
+    ## @deftypefnx {LinearModel} {[@var{p}, @var{DW}] =} dwtest (@dots{})
+    ##
+    ## Durbin-Watson test for autocorrelation of linear regression residuals.
+    ##
+    ## @code{dwtest} tests whether the raw residuals of @var{mdl} exhibit
+    ## serial autocorrelation using the Durbin-Watson statistic
+    ## @math{DW = \sum_{i=1}^{n-1}(e_{i+1}-e_i)^2 / \sum_{i=1}^{n}e_i^2}.
+    ## The statistic lies in [0,@math{4}]: values near 0 indicate positive
+    ## autocorrelation, values near 4 indicate negative autocorrelation, and
+    ## values near 2 indicate no autocorrelation.
+    ##
+    ## @var{method} (default @qcode{'exact'}) is @qcode{'exact'} to compute
+    ## the p-value via eigenvalues of the projected differencing matrix and
+    ## Imhof's numerical integration, or @qcode{'approximate'} to use a normal
+    ## approximation based on the first two moments of the DW statistic under
+    ## the null hypothesis.  The string is case-insensitive.
+    ##
+    ## @var{tail} (default @qcode{'both'}) selects the alternative:
+    ## @qcode{'right'} for positive autocorrelation, @qcode{'left'} for
+    ## negative autocorrelation, or @qcode{'both'} for either direction.
+    ## One-sided p-values satisfy @math{p_r + p_l = 1} and the two-sided
+    ## value equals @math{2\min(p_r, p_l)}.
+    ##
+    ## @seealso{fitlm, LinearModel}
+    ## @end deftypefn
+    function [p, DW] = dwtest (mdl, varargin)
+      if (nargout > 2)
+        error ('dwtest: Too many output arguments.');
+      endif
+      if (numel (varargin) > 2)
+        error ('dwtest: Too many input arguments.');
+      endif
+
+      method = 'exact';
+      tail   = 'both';
+      if (numel (varargin) >= 1)
+        method = varargin{1};
+      endif
+      if (numel (varargin) == 2)
+        tail = varargin{2};
+      endif
+
+      if (! ischar (method) || ! ismember (lower (method), {'exact', 'approximate'}))
+        error ('dwtest: The METHOD argument must be ''approximate'' or ''exact''.');
+      endif
+      method = lower (method);
+      tail   = lower (tail);
+
+      subset = logical (mdl.ObservationInfo.Subset);
+      r      = mdl.Residuals.Raw(subset);
+      r      = r(:);
+      n      = numel (r);
+      DW     = sum (diff (r).^2) / sum (r.^2);
+
+      e      = ones (n-1, 1);
+      A      = spdiags ([-e, e], [0, 1], n-1, n);
+      M      = full (A' * A);
+      [Q, R] = qr (mdl.DesignMatrix);
+      dr     = abs (diag (R));
+      tol    = max (size (mdl.DesignMatrix)) * eps (max (dr));
+      rnk    = sum (dr > tol);
+      Q2     = Q(:, rnk+1:size (Q, 2));
+      lam    = real (eig (Q2' * M * Q2));
+      k      = n - rnk;
+
+      if (strcmp (method, 'exact'))
+        a_row = (lam(:) - DW)';
+        f     = @(u) sin (0.5 * sum (atan (u(:) * a_row), 2)) ./ ...
+                     (u(:) .* prod ((1 + (u(:) * a_row).^2).^0.25, 2));
+        p_r   = 0.5 - integral (f, 0, Inf, 'AbsTol', 1e-10, 'RelTol', 1e-8) / pi;
+        p_r   = min (max (p_r, 0), 1);
+      else
+        mu_dw  = sum (lam) / k;
+        var_dw = 2 * (sum (lam.^2) - sum (lam)^2 / k) / (k * (k + 2));
+        p_r    = normcdf ((DW - mu_dw) / sqrt (var_dw));
+        p_r    = min (max (p_r, 0), 1);
+      endif
+
+      if (strcmp (tail, 'right'))
+        p = p_r;
+      elseif (strcmp (tail, 'left'))
+        p = 1 - p_r;
+      else
+        p = 2 * min (p_r, 1 - p_r);
+      endif
+
+    endfunction
+
   endmethods
 
   methods (Access = private, Static)
@@ -2767,6 +2859,97 @@ endfunction
 %! assert (F2, 17716.1864263456, -1e-8);
 %! assert (r2, numel (keep));
 
+%!test
+%! p = dwtest (mdl);
+%! assert (size (p),  [1, 1]);
+%! assert (class (p), 'double');
+%! [p, DW] = dwtest (mdl);
+%! assert (size (DW), [1, 1]);
+%! assert (p  >= 0 && p  <= 1);
+%! assert (DW >= 0 && DW <= 4);
+%! assert (p,  4.702593821571290e-04, -1e-6);
+%! assert (DW, 0.870000704251173, 1e-12);
+
+%!test
+%! [p1, DW1] = dwtest (mdl);
+%! [p2, DW2] = dwtest (mdl, 'exact', 'both');
+%! assert (p1, p2, 1e-14);
+%! assert (DW1, DW2, 1e-14);
+
+%!test
+%! ## DW is the same for all method and tail options
+%! [~, d1] = dwtest (mdl, 'exact', 'both');
+%! [~, d2] = dwtest (mdl, 'exact', 'right');
+%! [~, d3] = dwtest (mdl, 'exact', 'left');
+%! [~, d4] = dwtest (mdl, 'approximate', 'both');
+%! [~, d5] = dwtest (mdl, 'approximate', 'right');
+%! [~, d6] = dwtest (mdl, 'approximate', 'left');
+%! assert (d1, 0.870000704251173, 1e-12);
+%! assert (d2, 0.870000704251173, 1e-12);
+%! assert (d3, 0.870000704251173, 1e-12);
+%! assert (d4, 0.870000704251173, 1e-12);
+%! assert (d5, 0.870000704251173, 1e-12);
+%! assert (d6, 0.870000704251173, 1e-12);
+
+%!test
+%! ## one-sided p-values sum to 1 and two-sided equals twice the smaller
+%! pb = dwtest (mdl, 'exact', 'both');
+%! pr = dwtest (mdl, 'exact', 'right');
+%! pl = dwtest (mdl, 'exact', 'left');
+%! assert (pr + pl, 1, 1e-12);
+%! assert (pb, 4.702593821571290e-04, 1e-12);
+
+%!test
+%! ## all six method and tail combinations pinned
+%! assert (dwtest (mdl, 'exact', 'both'), 4.702593821571290e-04, -1e-6);
+%! assert (dwtest (mdl, 'exact', 'right'), 2.351296910785645e-04, -1e-6);
+%! assert (dwtest (mdl, 'exact', 'left'), 0.999764870308921, -1e-6);
+%! assert (dwtest (mdl, 'approximate', 'both'), 0.001058795514879, -1e-6);
+%! assert (dwtest (mdl, 'approximate', 'right'), 5.293977574395035e-04, -1e-6);
+%! assert (dwtest (mdl, 'approximate', 'left'), 0.999470602242560, -1e-6);
+
+%!test
+%! ## no-intercept model
+%! m = fitlm (X, y, 'Intercept', false);
+%! [p, DW] = dwtest (m, 'exact', 'both');
+%! assert (DW, 0.841468411374128, 1e-12);
+%! assert (p, 0.001402191159200, -1e-6);
+%! assert (dwtest (m, 'exact', 'right'), 7.010955795999754e-04, -1e-6);
+%! assert (dwtest (m, 'approximate', 'right'), 0.001350534002321, -1e-6);
+
+%!test
+%! ## weighted model
+%! m = fitlm (X, y, 'Weights', (1:n)' / sum (1:n));
+%! [p, DW] = dwtest (m, 'exact', 'both');
+%! assert (DW, 0.871162354803032, 1e-12);
+%! assert (p, 4.771641146603785e-04, -1e-6);
+%! assert (dwtest (m, 'exact', 'right'), 2.385820573301892e-04, -1e-6);
+%! assert (dwtest (m, 'approximate', 'right'), 5.346779629058873e-04, -1e-6);
+
+%!test
+%! ## positive autocorrelation model
+%! m = fitlm ((1:n)'/n, sin (pi * (1:n)'/n));
+%! [~, DW] = dwtest (m, 'exact', 'both');
+%! pr = dwtest (m, 'exact', 'right');
+%! pl = dwtest (m, 'exact', 'left');
+%! assert (DW, 0.118112272685229, 1e-10);
+%! assert (DW < 1);
+%! assert (pr < pl);
+%! assert (pr < 1e-10);
+
+%!test
+%! ## negative autocorrelation model
+%! m = fitlm ((1:n)'/n, 2*(1:n)'/n + repmat ([1; -1], n/2, 1));
+%! [pb, DW] = dwtest (m, 'exact', 'both');
+%! pl = dwtest (m, 'exact', 'left');
+%! pr = dwtest (m, 'exact', 'right');
+%! assert (pb, 4.205713999283489e-09, 1e-10);
+%! assert (DW, 3.825974025974026, 1e-10);
+%! assert (DW > 2);
+%! assert (pl < pr);
+%! assert (pb, 2 * pl, 1e-10);
+%! assert (pb < 1e-7);
+
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
 %!error <Terms matrix must have 2 or 3 columns> fitlm (X, y, [1 2 3 4; 5 6 7 8])
@@ -2815,3 +2998,7 @@ endfunction
 %!error <H is not full rank> coefTest (mdl, [0 NaN 0])
 %!error <Too many input arguments> coefTest (mdl, [0 1 0], 0, 'extra')
 %!error <too many outputs> [a, b, c, d] = coefTest (mdl)
+%!error <The METHOD argument must be> dwtest (mdl, 'badmethod', 'both')
+%!error <The METHOD argument must be> dwtest (mdl, 123, 'both')
+%!error <Too many input arguments> dwtest (mdl, 'exact', 'both', 'extra')
+%!error <too many outputs> [a, b, c] = dwtest (mdl)
