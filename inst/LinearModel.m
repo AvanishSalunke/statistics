@@ -1951,7 +1951,8 @@ function D = lm_diagnostics (X, y, fit)
 endfunction
 
 function mdl2 = lm_refit (mdl, new_terms)
-  opts = mdl.OrigOpts;
+  opts    = mdl.OrigOpts;
+  has_int = any (all (new_terms(:, 1:end-1) == 0, 2));
 
   if (! isempty (mdl.CatLevelInfo) && isfield (mdl.CatLevelInfo, 'names') ...
       && ! isempty (mdl.CatLevelInfo.names))
@@ -1960,7 +1961,7 @@ function mdl2 = lm_refit (mdl, new_terms)
     cat_vars = opts.CategoricalVars;
   endif
 
-  nv_list = {'Intercept', opts.Intercept};
+  nv_list = {'Intercept', has_int};
   if (! isempty (opts.Weights))
     nv_list = [nv_list, {'Weights', opts.Weights}];
   endif
