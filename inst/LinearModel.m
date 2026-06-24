@@ -1544,6 +1544,138 @@ classdef LinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn {LinearModel} {@var{NewMdl} =} addTerms (@var{mdl}, @var{terms})
+    ##
+    ## Add terms to a fitted linear regression model.
+    ##
+    ## @code{addTerms} returns a new @code{LinearModel} fitted on the same
+    ## data and settings as @var{mdl} with the specified @var{terms} added.
+    ## The original model @var{mdl} is not modified.  All original settings
+    ## such as observation weights, excluded rows, and categorical variables
+    ## are automatically preserved in the new model.
+    ##
+    ## @var{terms} may be a character vector in Wilkinson notation
+    ## (e.g., @code{'x1:x2'} for an interaction, @code{'x1^2'} for a
+    ## quadratic, @code{'x1*x2'} to add main effects and interaction together,
+    ## or @code{'x1 + x2^2'} for multiple terms at once) or a numeric matrix
+    ## with @code{mdl.NumVariables} columns where each row encodes one term as
+    ## predictor exponents.  A matrix with @code{mdl.NumPredictors} columns is
+    ## also accepted and is automatically padded with a zero response column.
+    ## Terms already present in the model are silently ignored; if no genuinely
+    ## new terms exist a warning is issued and the original model is returned.
+    ##
+    ## @seealso{fitlm, LinearModel}
+    ## @end deftypefn
+    function NewMdl = addTerms (mdl, terms)
+      if (nargin < 2)
+        error ('addTerms: Not enough input arguments.');
+      endif
+      if (nargin > 2)
+        error ('addTerms: Too many input arguments.');
+      endif
+
+      nv   = mdl.NumVariables;
+      pred = mdl.PredictorNames;
+
+      if (isnumeric (terms) || islogical (terms))
+
+        T = double (terms);
+        if (isempty (T))
+          error ('addTerms: Terms matrix must have %d columns.', nv);
+        endif
+        if (columns (T) == nv - 1)
+          T = [T, zeros(rows (T), 1)];
+        endif
+        if (columns (T) != nv)
+          error ('addTerms: Terms matrix must have %d columns.', nv);
+        endif
+
+      elseif (ischar (terms) || isstring (terms))
+
+        terms_str   = strtrim (char (terms));
+        T           = zeros (0, nv);
+        plus_tokens = strsplit (terms_str, '+');
+
+        for ti = 1:numel (plus_tokens)
+          tok = strtrim (plus_tokens{ti});
+          if (isempty (tok)); continue; endif
+
+          if (! isempty (strfind (tok, '*')))
+            star_parts = cellfun (@strtrim, strsplit (tok, '*'), ...
+                                  'UniformOutput', false);
+            n_sp       = numel (star_parts);
+            colon_toks = {};
+            for mask = 1:(2^n_sp - 1)
+              sub = {};
+              for bit = 1:n_sp
+                if (bitand (mask, 2^(bit-1)))
+                  sub{end+1} = star_parts{bit};
+                endif
+              endfor
+              colon_toks{end+1} = strjoin (sub, ':');
+            endfor
+          else
+            colon_toks = {tok};
+          endif
+
+          for ci = 1:numel (colon_toks)
+            ctok = strtrim (colon_toks{ci});
+            if (strcmp (ctok, '1'))
+              T = [T; zeros(1, nv)];
+            else
+              row   = zeros (1, nv);
+              parts = cellfun (@strtrim, strsplit (ctok, ':'), ...
+                               'UniformOutput', false);
+              for pi = 1:numel (parts)
+                part = parts{pi};
+                hat  = strfind (part, '^');
+                if (isempty (hat))
+                  vname = part;
+                  exp   = 1;
+                else
+                  vname = strtrim (part(1:hat(1)-1));
+                  exp   = str2double (strtrim (part(hat(1)+1:end)));
+                endif
+                idx = find (strcmp (pred, vname));
+                if (isempty (idx))
+                  error ('addTerms: Unrecognized variable: ''%s''.', vname);
+                endif
+                row(idx(1)) = row(idx(1)) + exp;
+              endfor
+              T = [T; row];
+            endif
+          endfor
+
+        endfor
+
+      else
+        error (['addTerms: Model update specification must be a model formula', ...
+                ' character vector or string scalar, or a terms matrix']);
+      endif
+
+      existing = mdl.TermsMatrix;
+      is_new   = false (rows (T), 1);
+      for i = 1:rows (T)
+        is_new(i) = ! any (all (existing == T(i,:), 2));
+      endfor
+      new_rows = T(is_new, :);
+
+      if (isempty (new_rows))
+        warning ('addTerms: There are no new terms among the terms you specified.');
+        NewMdl = mdl;
+        return;
+      endif
+
+      combined = [existing; new_rows];
+      int_mask = all (combined(:, 1:end-1) == 0, 2);
+      if (any (int_mask) && ! int_mask(1))
+        combined = [combined(int_mask, :); combined(! int_mask, :)];
+      endif
+      NewMdl   = lm_refit (mdl, combined);
+
+    endfunction
+
   endmethods
 
   methods (Access = private, Static)
@@ -1690,13 +1822,17 @@ classdef LinearModel
       if (has_intercept && p > 1)
         df1   = p - 1;
         Fstat = (SSR / df1) / max (MSE, eps);
-        Fpval = 1 - fcdf (Fstat, df1, DFE);
       elseif (! has_intercept && p > 0)
         df1   = p;
         Fstat = (SSR / df1) / max (MSE, eps);
-        Fpval = 1 - fcdf (Fstat, df1, DFE);
       else
+        df1   = 0;
         Fstat = NaN;
+      endif
+
+      if (df1 > 0 && DFE > 0 && Fstat >= 0)
+        Fpval = betainc (DFE / (DFE + df1 * Fstat), DFE / 2, df1 / 2);
+      else
         Fpval = NaN;
       endif
 
@@ -2951,6 +3087,205 @@ endfunction
 %! assert (pb, 2 * pl, 1e-10);
 %! assert (pb < 1e-7);
 
+%!test
+%! m = addTerms (mdl, 'x1:x2');
+%! assert (isa (m, 'LinearModel'));
+%! assert (mdl.NumCoefficients, 3);
+%! assert (m.NumCoefficients, 4);
+%! assert (m.NumPredictors, 2);
+%! assert (m.NumObservations, 20);
+%! assert (m.DFE, 16);
+%! assert (m.Coefficients.Estimate(1), 0.157640728038039, -1e-8);
+%! assert (m.Coefficients.Estimate(2), 2.085426803117909, -1e-8);
+%! assert (m.Coefficients.Estimate(3), -0.929682701072813, -1e-8);
+%! assert (m.Coefficients.Estimate(4), -0.031208018255475, -1e-8);
+%! assert (m.Coefficients.SE(1), 0.169192291625763, -1e-8);
+%! assert (m.Coefficients.SE(2), 1.361534257888685, -1e-8);
+%! assert (m.Coefficients.SE(3), 0.148744319911833, -1e-8);
+%! assert (m.Coefficients.SE(4), 0.0932669056882381, -1e-8);
+%! assert (m.Coefficients.tStat(1), 0.931725237144526, -1e-8);
+%! assert (m.Coefficients.tStat(2), 1.531674132351069, -1e-8);
+%! assert (m.Coefficients.tStat(3), -6.250206405353000, -1e-8);
+%! assert (m.Coefficients.tStat(4), -0.334609774230031, -1e-8);
+%! assert (m.Coefficients.pValue(1), 0.365325503492671, -1e-8);
+%! assert (m.Coefficients.pValue(2), 0.145134783727025, -1e-8);
+%! assert (m.Coefficients.pValue(3), 1.159217784590233e-05, -1e-8);
+%! assert (m.Coefficients.pValue(4), 0.742265736761240, -1e-8);
+%! assert (m.SSE, 0.383859187927621, -1e-8);
+%! assert (m.MSE, 0.023991199245515, -1e-8);
+%! assert (m.RMSE, 0.154890926930905, -1e-8);
+%! assert (m.Rsquared.Ordinary, 0.999342606032059, -1e-8);
+%! assert (m.Rsquared.Adjusted, 0.999219344663070, -1e-8);
+%! assert (m.LogLikelihood, 11.153346988927943, -1e-8);
+%! assert (m.ModelFitVsNullModel.Fstat, 8.107508574898859e+03, -1e-6);
+%! assert (m.ModelFitVsNullModel.Pvalue, 1.164196605672873e-25, -1e-6);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.CoefficientNames{3}, 'x2');
+%! assert (m.CoefficientNames{4}, 'x1:x2');
+
+%!test
+%! ## x1*x2 crossing gives same result as x1:x2 when main effects exist
+%! m = addTerms (mdl, 'x1*x2');
+%! assert (m.NumCoefficients, 4);
+%! assert (m.DFE, 16);
+%! assert (m.SSE, 0.383859187927621, -1e-8);
+%! assert (m.Coefficients.Estimate(1), 0.157640728038039, -1e-8);
+%! assert (m.Coefficients.Estimate(2), 2.085426803117909, -1e-8);
+%! assert (m.Coefficients.Estimate(3), -0.929682701072813, -1e-8);
+%! assert (m.Coefficients.Estimate(4), -0.031208018255475, -1e-8);
+%! assert (m.CoefficientNames{4}, 'x1:x2');
+
+%!test
+%! m = addTerms (mdl, 'x1 + x1:x2');
+%! assert (m.NumCoefficients, 4);
+%! assert (m.DFE, 16);
+%! assert (m.SSE, 0.383859187927621, -1e-8);
+%! assert (m.Coefficients.Estimate(1), 0.157640728038039, -1e-8);
+%! assert (m.Coefficients.Estimate(2), 2.085426803117909, -1e-8);
+%! assert (m.Coefficients.Estimate(3), -0.929682701072813, -1e-8);
+%! assert (m.Coefficients.Estimate(4), -0.031208018255475, -1e-8);
+
+%!test
+%! ## adding existing term returns equivalent model
+%! ws = warning ('off', 'all');
+%! m  = addTerms (mdl, 'x1');
+%! warning (ws);
+%! assert (m.NumCoefficients, 3);
+%! assert (m.DFE, 17);
+%! assert (m.Coefficients.Estimate(1), 0.116188677790207, 1e-7);
+%! assert (m.Coefficients.Estimate(2), 2.508451490570863, 1e-7);
+%! assert (m.Coefficients.Estimate(3), -0.978835329825186, 1e-7);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.CoefficientNames{3}, 'x2');
+
+%!test
+%! m = addTerms (mdl, 'x2^2');
+%! assert (m.NumCoefficients, 4);
+%! assert (m.DFE, 16);
+%! assert (m.SSE, 0.386103933724971, -1e-8);
+%! assert (m.Coefficients.Estimate(1), 0.130152473216993, -1e-8);
+%! assert (m.Coefficients.Estimate(2), 2.380771990884563, -1e-8);
+%! assert (m.Coefficients.Estimate(3), -0.967672823484773, -1e-8);
+%! assert (m.Coefficients.Estimate(4), -2.991483322469043e-04, -1e-8);
+%! assert (m.Coefficients.SE(1), 0.154974488176692, -1e-8);
+%! assert (m.Coefficients.SE(2), 1.071554310049276, -1e-8);
+%! assert (m.Coefficients.SE(3), 0.085801310569364, -1e-8);
+%! assert (m.Coefficients.SE(4), 0.002211890858232, -1e-8);
+%! assert (m.CoefficientNames{4}, 'x2^2');
+
+%!test
+%! ## x1^2 rank-deficient: DFE unchanged SE zero for dropped term
+%! m = addTerms (mdl, 'x1^2');
+%! assert (m.NumCoefficients, 4);
+%! assert (m.DFE, 17);
+%! assert (m.SSE, 0.386545331386823, -1e-8);
+%! assert (m.Coefficients.Estimate(4), 0);
+%! assert (m.Coefficients.SE(4), 0);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.CoefficientNames{3}, 'x2');
+%! assert (m.CoefficientNames{4}, 'x1^2');
+
+
+%!test
+%! ## numeric matrix [1,1,0] same as string x1:x2
+%! m = addTerms (mdl, [1, 1, 0]);
+%! assert (m.NumCoefficients, 4);
+%! assert (m.DFE, 16);
+%! assert (m.SSE, 0.383859187927621, -1e-8);
+%! assert (m.Coefficients.Estimate(1), 0.157640728038039, -1e-8);
+%! assert (m.Coefficients.Estimate(2), 2.085426803117909, -1e-8);
+%! assert (m.Coefficients.Estimate(3), -0.929682701072813, -1e-8);
+%! assert (m.Coefficients.Estimate(4), -0.031208018255475, -1e-8);
+
+%!test
+%! ## numeric matrix [1,1] auto-padded to [1,1,0]
+%! m = addTerms (mdl, [1, 1]);
+%! assert (m.NumCoefficients, 4);
+%! assert (m.DFE, 16);
+%! assert (m.SSE, 0.383859187927621, -1e-8);
+%! assert (m.Coefficients.Estimate(1), 0.157640728038039, -1e-8);
+%! assert (m.Coefficients.Estimate(2), 2.085426803117909, -1e-8);
+%! assert (m.Coefficients.Estimate(3), -0.929682701072813, -1e-8);
+%! assert (m.Coefficients.Estimate(4), -0.031208018255475, -1e-8);
+
+%!test
+%! m = addTerms (mdl, [1, 1, 0; 0, 2, 0]);
+%! assert (m.NumCoefficients, 5);
+%! assert (m.DFE, 15);
+%! assert (m.SSE, 0.315784637443501, -1e-8);
+%! assert (m.CoefficientNames{4}, 'x1:x2');
+%! assert (m.CoefficientNames{5}, 'x2^2');
+
+%!test
+%! mc = fitlm (X, y, 'constant');
+%! m  = addTerms (mc, 'x1');
+%! assert (m.NumCoefficients, 2);
+%! assert (m.DFE, 18);
+%! assert (m.Coefficients.Estimate(1), 3.884704697617172, -1e-8);
+%! assert (m.Coefficients.Estimate(2), -18.047090435758047, -1e-8);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+
+%!test
+%! ## step from constant to full linear model
+%! mc  = fitlm (X, y, 'constant');
+%! mc1 = addTerms (mc, 'x1');
+%! mc2 = addTerms (mc1, 'x2');
+%! assert (mc2.NumCoefficients, 3);
+%! assert (mc2.DFE, 17);
+%! assert (mc2.Coefficients.Estimate(1), 0.116188677790207, 1e-7);
+%! assert (mc2.Coefficients.Estimate(2), 2.508451490570863, 1e-7);
+%! assert (mc2.Coefficients.Estimate(3), -0.978835329825186, 1e-7);
+%! assert (mc2.CoefficientNames{1}, '(Intercept)');
+%! assert (mc2.CoefficientNames{2}, 'x1');
+%! assert (mc2.CoefficientNames{3}, 'x2');
+
+%!test
+%! ## adding intercept to no-intercept model
+%! mni = fitlm (X, y, 'Intercept', false);
+%! m   = addTerms (mni, '1');
+%! assert (m.NumCoefficients, 3);
+%! assert (m.DFE, 17);
+%! assert (m.Coefficients.Estimate(1), 0.116188677790207, 1e-7);
+%! assert (m.Coefficients.Estimate(2), 2.508451490570863, 1e-7);
+%! assert (m.Coefficients.Estimate(3), -0.978835329825186, 1e-7);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.CoefficientNames{3}, 'x2');
+
+%!test
+%! ## weighted model weights preserved
+%! mw = fitlm (X, y, 'Weights', (1:n)' / sum (1:n));
+%! m  = addTerms (mw, 'x1:x2');
+%! assert (m.NumCoefficients, 4);
+%! assert (m.DFE, 16);
+%! assert (m.SSE, 0.019230053719402, -1e-8);
+%! assert (m.Coefficients.Estimate(1), -0.122645849510537, -1e-8);
+%! assert (m.Coefficients.Estimate(2), 4.125799311652051, -1e-8);
+%! assert (m.Coefficients.Estimate(3), -1.128467507844852, -1e-8);
+%! assert (m.Coefficients.Estimate(4), 0.081921546574140, -1e-8);
+%! assert (m.Coefficients.SE(1), 0.354926338845420, -1e-8);
+%! assert (m.Coefficients.SE(2), 2.205951720932299, -1e-8);
+%! assert (m.Coefficients.SE(3), 0.205033663966776, -1e-8);
+%! assert (m.Coefficients.SE(4), 0.115523382309399, -1e-8);
+%! assert (m.CoefficientNames{4}, 'x1:x2');
+
+%!test
+%! ## excluded observations preserved
+%! me = fitlm (X, y, 'Exclude', [1, 2]);
+%! m  = addTerms (me, 'x1:x2');
+%! assert (m.NumObservations, 18);
+%! assert (m.DFE, 14);
+%! assert (m.NumCoefficients, 4);
+%! assert (m.Coefficients.Estimate(1), -0.345521184099998, -1e-8);
+%! assert (m.Coefficients.Estimate(2), 5.139185607268283, -1e-8);
+%! assert (m.Coefficients.Estimate(3), -1.198851436671170, -1e-8);
+%! assert (m.Coefficients.Estimate(4), 0.112619530301200, -1e-8);
+%! assert (m.CoefficientNames{4}, 'x1:x2');
+
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
 %!error <Terms matrix must have 2 or 3 columns> fitlm (X, y, [1 2 3 4; 5 6 7 8])
@@ -3003,3 +3338,12 @@ endfunction
 %!error <The METHOD argument must be> dwtest (mdl, 123, 'both')
 %!error <Too many input arguments> dwtest (mdl, 'exact', 'both', 'extra')
 %!error <too many outputs> [a, b, c] = dwtest (mdl)
+%!error <Not enough input arguments> addTerms (mdl)
+%!error <too many inputs> addTerms (mdl, 'x1:x2', 'extra')
+%!error <Unrecognized variable> addTerms (mdl, 'z')
+%!error <Unrecognized variable> addTerms (mdl, 'X1')
+%!error <Unrecognized variable> addTerms (mdl, 'x1:z')
+%!error <Unrecognized variable> addTerms (mdl, 'x1*z')
+%!error <Terms matrix must have> addTerms (mdl, [1, 1, 1, 0])
+%!error <Terms matrix must have> addTerms (mdl, [])
+%!error <Model update specification> addTerms (mdl, {})
