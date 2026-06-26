@@ -1676,6 +1676,215 @@ classdef LinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn {LinearModel} {@var{NewMdl} =} removeTerms (@var{mdl}, @var{terms})
+    ##
+    ## Remove terms from a fitted linear regression model.
+    ##
+    ## @code{removeTerms} returns a new @code{LinearModel} fitted on the same
+    ## data and settings as @var{mdl}, but with the specified @var{terms} removed.
+    ## The original model @var{mdl} is not modified.  All original settings such
+    ## as observation weights, excluded rows, and categorical variables are
+    ## automatically preserved in the refitted model.
+    ##
+    ## If none of the specified @var{terms} exist in @var{mdl}, a warning is
+    ## issued and @var{mdl} is returned unchanged.  Specified terms that are valid
+    ## predictor names but absent from the current model are silently skipped;
+    ## the warning fires only when every single specified term is missing.
+    ##
+    ## @var{terms} may be a character vector in Wilkinson notation.  A single
+    ## predictor such as @code{'x2'}, an interaction such as @code{'x1:x2'},
+    ## a polynomial power such as @code{'x1^2'}, the intercept as @code{'1'},
+    ## or several terms joined by @code{+} such as @code{'x1 + x2^2'} are all
+    ## accepted.  The star operator @code{'x1*x2'} removes the main effects
+    ## @code{x1} and @code{x2} together with their interaction @code{x1:x2} in
+    ## a single call, following the same expansion rule as @code{addTerms}.
+    ## All variable names must be valid predictor names of @var{mdl}.
+    ##
+    ## @var{terms} may also be a numeric matrix of size @var{t}-by-@var{v},
+    ## where @var{t} is the number of terms to remove and @var{v} equals
+    ## @code{mdl.NumVariables}.  Element @code{T(i,j)} gives the exponent of
+    ## variable @var{j} in term @var{i}: a row of all zeros encodes the
+    ## intercept, @code{[0 1 0]} encodes the second predictor alone, and
+    ## @code{[1 1 0]} encodes the interaction of the first two predictors.
+    ## A matrix with @code{mdl.NumPredictors} columns is also accepted and is
+    ## automatically padded with a trailing zero response column.
+    ##
+    ## @seealso{fitlm, addTerms, LinearModel}
+    ## @end deftypefn
+    function NewMdl = removeTerms (mdl, terms)
+      if (nargin < 2)
+        error ('removeTerms: Not enough input arguments.');
+      endif
+      if (nargin > 2)
+        error ('removeTerms: Too many input arguments.');
+      endif
+
+      nv   = mdl.NumVariables;
+      pred = mdl.PredictorNames;
+
+      if (isnumeric (terms) || islogical (terms))
+
+        T = double (terms);
+        if (isempty (T))
+          error ('removeTerms: Terms matrix must have %d columns.', nv);
+        endif
+        if (columns (T) == nv - 1)
+          T = [T, zeros(rows (T), 1)];
+        endif
+        if (columns (T) != nv)
+          error ('removeTerms: Terms matrix must have %d columns.', nv);
+        endif
+
+      elseif (ischar (terms) || isstring (terms))
+
+        terms_str   = strtrim (char (terms));
+        T           = zeros (0, nv);
+        plus_tokens = strsplit (terms_str, '+');
+
+        for ti = 1:numel (plus_tokens)
+          tok = strtrim (plus_tokens{ti});
+          if (isempty (tok)); continue; endif
+
+          if (! isempty (strfind (tok, '*')))
+            star_parts = cellfun (@strtrim, strsplit (tok, '*'), ...
+                                  'UniformOutput', false);
+            n_sp       = numel (star_parts);
+            colon_toks = {};
+            for mask = 1:(2^n_sp - 1)
+              sub = {};
+              for bit = 1:n_sp
+                if (bitand (mask, 2^(bit-1)))
+                  sub{end+1} = star_parts{bit};
+                endif
+              endfor
+              colon_toks{end+1} = strjoin (sub, ':');
+            endfor
+          else
+            colon_toks = {tok};
+          endif
+
+          for ci = 1:numel (colon_toks)
+            ctok = strtrim (colon_toks{ci});
+            if (strcmp (ctok, '1'))
+              T = [T; zeros(1, nv)];
+            else
+              row   = zeros (1, nv);
+              parts = cellfun (@strtrim, strsplit (ctok, ':'), ...
+                               'UniformOutput', false);
+              for pi = 1:numel (parts)
+                part = parts{pi};
+                hat  = strfind (part, '^');
+                if (isempty (hat))
+                  vname = part;
+                  exp   = 1;
+                else
+                  vname = strtrim (part(1:hat(1)-1));
+                  exp   = str2double (strtrim (part(hat(1)+1:end)));
+                endif
+                idx = find (strcmp (pred, vname));
+                if (isempty (idx))
+                  error ('removeTerms: Unrecognized variable: ''%s''.', vname);
+                endif
+                row(idx(1)) = row(idx(1)) + exp;
+              endfor
+              T = [T; row];
+            endif
+          endfor
+
+        endfor
+
+      else
+        error (['removeTerms: Model update specification must be a model formula', ...
+                ' character vector or string scalar, or a terms matrix']);
+      endif
+
+      nc = columns (mdl.TermsMatrix);
+      if (nc != nv)
+        cat_info    = mdl.CatLevelInfo;
+        n_pred      = nv - 1;
+        orig_to_enc = cell (n_pred, 1);
+        ecol        = 1;
+        for j = 1:n_pred
+          ci = [];
+          if (! isempty (cat_info) && isfield (cat_info, 'names') ...
+              && ! isempty (cat_info.names))
+            ci = find (strcmp (cat_info.names, pred{j}));
+          endif
+          if (isempty (ci))
+            orig_to_enc{j} = ecol;
+            ecol            = ecol + 1;
+          else
+            n_lev           = numel (cat_info.levels{ci});
+            orig_to_enc{j}  = ecol:(ecol + n_lev - 2);
+            ecol            = ecol + n_lev - 1;
+          endif
+        endfor
+
+        T_enc = zeros (0, nc);
+        for i = 1:rows (T)
+          orig_row = T(i, 1:n_pred);
+          any_cat  = false;
+          cat_rows = zeros (0, nc);
+          cont_row = zeros (1, nc);
+          for j = 1:n_pred
+            if (orig_row(j) != 0)
+              ecols = orig_to_enc{j};
+              if (numel (ecols) > 1)
+                any_cat = true;
+                for k = 1:numel (ecols)
+                  r        = zeros (1, nc);
+                  r(ecols(k)) = 1;
+                  cat_rows = [cat_rows; r];
+                endfor
+              else
+                cont_row(ecols) = orig_row(j);
+              endif
+            endif
+          endfor
+          if (any_cat)
+            for k = 1:rows (cat_rows)
+              T_enc = [T_enc; cat_rows(k,:) + cont_row];
+            endfor
+          else
+            T_enc = [T_enc; cont_row];
+          endif
+        endfor
+        T = T_enc;
+      endif
+
+      existing = mdl.TermsMatrix;
+      n_exist  = rows (existing);
+      n_req    = rows (T);
+
+      found = false (n_req, 1);
+      for i = 1:n_req
+        found(i) = any (all (existing == T(i,:), 2));
+      endfor
+
+      if (! any (found))
+        warning ('removeTerms: No specified terms appear in the model.');
+        NewMdl = mdl;
+        return;
+      endif
+
+      keep = true (n_exist, 1);
+      for i = 1:n_req
+        if (found(i))
+          for j = 1:n_exist
+            if (keep(j) && all (existing(j,:) == T(i,:)))
+              keep(j) = false;
+              break;
+            endif
+          endfor
+        endif
+      endfor
+
+      remaining = existing(keep, :);
+      NewMdl    = lm_refit (mdl, remaining);
+
+    endfunction
+
   endmethods
 
   methods (Access = private, Static)
@@ -3286,6 +3495,488 @@ endfunction
 %! assert (m.Coefficients.Estimate(4), 0.112619530301200, -1e-8);
 %! assert (m.CoefficientNames{4}, 'x1:x2');
 
+%!test
+%! ## remove two predictors by string from a 4-predictor model
+%! Xh = [7 26 6 60; 1 29 15 52; 11 56 8 20; 11 31 8 47; 7 52 6 33; ...
+%!        11 55 9 22; 3 71 17 6; 1 31 22 44; 2 54 18 22; 21 47 4 26; ...
+%!        1 40 23 34; 11 66 9 12; 10 68 8 12];
+%! yh = [78.5;74.3;104.3;87.6;95.9;109.2;102.7;72.5;93.1;115.9;83.8;113.3;109.4];
+%! m  = removeTerms (fitlm (Xh, yh), 'x3 + x4');
+%! assert (m.NumCoefficients, 3);
+%! assert (m.NumEstimatedCoefficients, 3);
+%! assert (m.DFE, 10);
+%! assert (m.NumObservations, 13);
+%! assert (m.NumVariables, 5);
+%! assert (m.Coefficients.Estimate(1), 52.577348882089481, -1e-8);
+%! assert (m.Coefficients.Estimate(2), 1.468305742215555, -1e-8);
+%! assert (m.Coefficients.Estimate(3), 0.662250491274645, -1e-8);
+%! assert (m.Coefficients.SE(1), 2.286174334503340, -1e-8);
+%! assert (m.Coefficients.SE(2), 0.121300923606266, -1e-8);
+%! assert (m.Coefficients.SE(3), 0.045854721468522, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.Coefficients.tStat(1), 22.997961305305111, -1e-8);
+%! assert (m.Coefficients.tStat(2), 12.104654264476748, -1e-8);
+%! assert (m.Coefficients.tStat(3), 14.442362096327519, -1e-8);
+%! assert (m.Coefficients.pValue(1), 5.456570901490983e-10, -1e-7);
+%! assert (m.Coefficients.pValue(2), 2.692212179685427e-07, -1e-8);
+%! assert (m.Coefficients.pValue(3), 5.028960315638413e-08, -1e-8);
+%! assert (m.SSE, 57.904483176113658, -1e-8);
+%! assert (m.RMSE, 2.40633503852047, -1e-8);
+%! assert (m.MSE, 5.790448317611299, 1e-12);
+%! assert (m.SST, 2.715763076923078e+03, 1e-8);
+%! assert (m.Rsquared.Ordinary, 0.978678374535632, -1e-8);
+%! assert (m.Rsquared.Adjusted, 0.974414049442758, -1e-8);
+%! assert (size (m.CoefficientCovariance), [3, 3]);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.CoefficientNames{3}, 'x2');
+%! assert (m.Formula.HasIntercept, true);
+%! assert (m.Formula.LinearPredictor, '1 + x1 + x2');
+%! assert (height (m.Diagnostics), 13);
+%! assert (sum (m.Diagnostics.Leverage), 3);
+%! assert (m.Residuals.Raw, yh - m.Fitted, 1e-10);
+
+%!test
+%! m = removeTerms (mdl, 'x2');
+%! assert (m.NumCoefficients, 2);
+%! assert (m.NumEstimatedCoefficients, 2);
+%! assert (m.DFE, 18);
+%! assert (m.NumObservations, 20);
+%! assert (m.Coefficients.Estimate(1), 3.88470469761717, -1e-8);
+%! assert (m.Coefficients.Estimate(2), -18.047090435758, -1e-8);
+%! assert (m.Coefficients.SE(2), 1.19086428900602, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.Coefficients.tStat(2), -15.1546155194741, -1e-8);
+%! assert (m.SSE, 42.4383708132815, -1e-8);
+%! assert (m.SST, 583.910420002346, -1e-8);
+%! assert (m.Rsquared.Ordinary, 0.927320408474452, -1e-8);
+%! assert (size (m.CoefficientCovariance), [2, 2]);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.Formula.HasIntercept, true);
+%! assert (m.Formula.LinearPredictor, '1 + x1');
+%! assert (height (m.Diagnostics), 20);
+%! assert (m.Residuals.Raw, y - m.Fitted, 1e-10);
+
+%!test
+%! ## removing the intercept via string '1'
+%! m = removeTerms (mdl, '1');
+%! assert (m.NumCoefficients, 2);
+%! assert (m.NumEstimatedCoefficients, 2);
+%! assert (m.DFE, 18);
+%! assert (m.NumObservations, 20);
+%! assert (m.Formula.HasIntercept, false);
+%! assert (m.Formula.LinearPredictor, 'x1 + x2');
+%! assert (m.Coefficients.Estimate(1), 2.96142161317611, -1e-8);
+%! assert (m.Coefficients.Estimate(2), -0.997248749443286, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.SSE, 0.410934843407688, -1e-8);
+%! assert (size (m.CoefficientCovariance), [2, 2]);
+%! assert (m.CoefficientNames{1}, 'x1');
+%! assert (m.CoefficientNames{2}, 'x2');
+%! assert (! any (strcmp (m.CoefficientNames, '(Intercept)')));
+%! assert (height (m.Diagnostics), 20);
+
+%!test
+%! ## removing both predictors leaves only the intercept
+%! m = removeTerms (mdl, 'x1 + x2');
+%! assert (m.NumCoefficients, 1);
+%! assert (m.NumEstimatedCoefficients, 1);
+%! assert (m.DFE, 19);
+%! assert (m.NumObservations, 20);
+%! assert (m.Formula.HasIntercept, true);
+%! assert (m.Formula.LinearPredictor, '1');
+%! assert (m.Coefficients.Estimate(1), -5.5900177811558, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.SSE, 583.910420002346, -1e-8);
+%! assert (m.SST, 583.910420002346, -1e-8);
+%! assert (m.SSR, 0, 1e-20);
+%! assert (size (m.CoefficientCovariance), [1, 1]);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (height (m.Diagnostics), 20);
+%! assert (sum (m.Diagnostics.Leverage), 1, 1e-10);
+%! assert (m.Residuals.Raw, y - m.Fitted, 1e-10);
+
+%!test
+%! warning ('off', 'all');
+%! lastwarn ('');
+%! m = removeTerms (mdl, 'x1:x2');
+%! wmsg = lastwarn ();
+%! warning ('on', 'all');
+%! assert (! isempty (strfind (wmsg, 'No specified terms appear in the model')));
+%! assert (m.NumCoefficients, mdl.NumCoefficients);
+%! assert (m.NumEstimatedCoefficients, mdl.NumEstimatedCoefficients);
+%! assert (m.DFE, mdl.DFE);
+%! assert (m.SSE, mdl.SSE, 1e-15);
+%! assert (m.SSR, mdl.SSR, 1e-15);
+%! assert (m.SST, mdl.SST, 1e-15);
+%! assert (m.RMSE, mdl.RMSE, 1e-15);
+%! assert (m.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-15);
+%! assert (m.Coefficients.SE, mdl.Coefficients.SE, 1e-15);
+%! assert (m.CoefficientCovariance, mdl.CoefficientCovariance, 1e-15);
+%! assert (isequal (m.CoefficientNames, mdl.CoefficientNames));
+%! assert (m.Formula.LinearPredictor, mdl.Formula.LinearPredictor);
+%! assert (m.Formula.HasIntercept, mdl.Formula.HasIntercept);
+
+%!test
+%! m = removeTerms (mdl, [0 1 0]);
+%! assert (m.NumCoefficients, 2);
+%! assert (m.NumEstimatedCoefficients, 2);
+%! assert (m.DFE, 18);
+%! assert (m.NumObservations, 20);
+%! assert (m.Coefficients.Estimate(1), 3.88470469761717, -1e-8);
+%! assert (m.Coefficients.Estimate(2), -18.047090435758, -1e-8);
+%! assert (m.Coefficients.SE(2), 1.19086428900602, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.Coefficients.tStat(2), -15.1546155194741, -1e-8);
+%! assert (m.SSE, 42.4383708132815, -1e-8);
+%! assert (m.SST, 583.910420002346, -1e-8);
+%! assert (m.Rsquared.Ordinary, 0.927320408474452, -1e-8);
+%! assert (size (m.CoefficientCovariance), [2, 2]);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.Formula.HasIntercept, true);
+%! assert (m.Formula.LinearPredictor, '1 + x1');
+%! assert (height (m.Diagnostics), 20);
+%! assert (sum (m.Diagnostics.Leverage), 2, 1e-10);
+
+%!test
+%! ## auto-padded matrix [0 1] gives identical result to [0 1 0]
+%! m = removeTerms (mdl, [0 1]);
+%! assert (m.NumCoefficients, 2);
+%! assert (m.NumEstimatedCoefficients, 2);
+%! assert (m.DFE, 18);
+%! assert (m.Coefficients.Estimate(1), 3.88470469761717, -1e-8);
+%! assert (m.Coefficients.Estimate(2), -18.047090435758, -1e-8);
+%! assert (m.Coefficients.SE(2), 1.19086428900602, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.SSE, 42.4383708132815, -1e-8);
+%! assert (m.SST, 583.910420002346, -1e-8);
+%! assert (m.Rsquared.Ordinary, 0.927320408474452, -1e-8);
+%! assert (size (m.CoefficientCovariance), [2, 2]);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.Formula.LinearPredictor, '1 + x1');
+%! assert (height (m.Diagnostics), 20);
+%! assert (sum (m.Diagnostics.Leverage), 2, 1e-10);
+
+%!test
+%! ## multi-row matrix removes two terms same as the string form
+%! Xh = [7 26 6 60; 1 29 15 52; 11 56 8 20; 11 31 8 47; 7 52 6 33; ...
+%!        11 55 9 22; 3 71 17 6; 1 31 22 44; 2 54 18 22; 21 47 4 26; ...
+%!        1 40 23 34; 11 66 9 12; 10 68 8 12];
+%! yh = [78.5;74.3;104.3;87.6;95.9;109.2;102.7;72.5;93.1;115.9;83.8;113.3;109.4];
+%! m = removeTerms (fitlm (Xh, yh), [0 0 1 0 0; 0 0 0 1 0]);
+%! assert (m.NumCoefficients, 3);
+%! assert (m.NumEstimatedCoefficients, 3);
+%! assert (m.DFE, 10);
+%! assert (m.NumObservations, 13);
+%! assert (m.Coefficients.Estimate(1), 52.577348882089481, -1e-8);
+%! assert (m.Coefficients.Estimate(2), 1.468305742215555, -1e-8);
+%! assert (m.Coefficients.Estimate(3), 0.662250491274645, -1e-8);
+%! assert (m.Coefficients.SE(1), 2.286174334503340, -1e-8);
+%! assert (m.Coefficients.SE(2), 0.121300923606266, -1e-8);
+%! assert (m.Coefficients.SE(3), 0.045854721468522, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.Coefficients.tStat(2), 12.104654264476748, -1e-8);
+%! assert (m.Coefficients.tStat(3), 14.442362096327519, -1e-8);
+%! assert (m.Coefficients.pValue(2), 2.692212179685427e-07, -1e-8);
+%! assert (m.SSE, 57.904483176113658, -1e-8);
+%! assert (m.Rsquared.Ordinary, 0.978678374535632, -1e-8);
+%! assert (m.Rsquared.Adjusted, 0.974414049442758, -1e-8);
+%! assert (size (m.CoefficientCovariance), [3, 3]);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.CoefficientNames{3}, 'x2');
+%! assert (m.Formula.HasIntercept, true);
+%! assert (m.Formula.LinearPredictor, '1 + x1 + x2');
+%! assert (height (m.Diagnostics), 13);
+%! assert (sum (m.Diagnostics.Leverage), 3, 1e-10);
+%! assert (m.Residuals.Raw, yh - m.Fitted, 1e-10);
+
+%!test
+%! ## observation weights carry through to the refitted model
+%! w = (1:n)' / sum (1:n);
+%! mw = fitlm (X, y, 'Weights', w);
+%! m = removeTerms (mw, 'x2');
+%! assert (m.NumCoefficients, 2);
+%! assert (m.NumEstimatedCoefficients, 2);
+%! assert (m.DFE, 18);
+%! assert (m.NumObservations, 20);
+%! assert (m.Coefficients.Estimate(1), 6.29263960898714, -1e-8);
+%! assert (m.Coefficients.Estimate(2), -21.5708976231287, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.SSE, 1.41763159723151, -1e-8);
+%! assert (size (m.CoefficientCovariance), [2, 2]);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.Formula.HasIntercept, true);
+%! assert (m.Formula.LinearPredictor, '1 + x1');
+%! assert (m.ObservationInfo.Weights, w, 1e-15);
+%! assert (sum (m.ObservationInfo.Weights), 1, 1e-12);
+%! assert (height (m.Diagnostics), 20);
+%! assert (sum (m.Diagnostics.Leverage), 2, 1e-10);
+%! assert (m.SSE != removeTerms (mdl, 'x2').SSE);
+
+%!test
+%! ## excluded rows are preserved and reduce effective sample size
+%! me = fitlm (X, y, 'Exclude', [1, 3]);
+%! m = removeTerms (me, 'x2');
+%! assert (m.NumObservations, 18);
+%! assert (m.DFE, 16);
+%! assert (m.NumCoefficients, 2);
+%! assert (m.NumEstimatedCoefficients, 2);
+%! assert (m.Coefficients.Estimate(1), 4.96609542902066, -1e-8);
+%! assert (m.Coefficients.Estimate(2), -19.5618050042778, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (size (m.CoefficientCovariance), [2, 2]);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.Formula.LinearPredictor, '1 + x1');
+%! assert (m.ObservationInfo.Excluded(1), true);
+%! assert (m.ObservationInfo.Excluded(3), true);
+%! assert (m.ObservationInfo.Excluded(2), false);
+%! assert (m.ObservationInfo.Missing(1), false);
+%! assert (height (m.Diagnostics), 20);
+%! assert (isnan (m.Fitted(1)));
+%! assert (isnan (m.Fitted(3)));
+%! assert (isfinite (m.Fitted(2)));
+
+%!test
+%! ## removing x2 from a no-intercept model gives one slope term
+%! mni = fitlm (X, y, 'Intercept', false);
+%! m = removeTerms (mni, 'x2');
+%! assert (m.NumCoefficients, 1);
+%! assert (m.NumEstimatedCoefficients, 1);
+%! assert (m.DFE, 19);
+%! assert (m.NumObservations, 20);
+%! assert (m.Formula.HasIntercept, false);
+%! assert (m.Formula.LinearPredictor, 'x1');
+%! assert (m.Coefficients.Estimate(1), -12.362156731928, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.SSE, 112.371951585499, -1e-8);
+%! assert (size (m.CoefficientCovariance), [1, 1]);
+%! assert (m.CoefficientCovariance(1,1) > 0);
+%! assert (m.CoefficientNames{1}, 'x1');
+%! assert (! any (strcmp (m.CoefficientNames, '(Intercept)')));
+%! assert (height (m.Diagnostics), 20);
+%! assert (all (isfinite (m.Fitted)));
+%! assert (sum (m.Diagnostics.Leverage), 1, 1e-10);
+
+%!test
+%! ## removing the interaction term recovers the plain linear model
+%! mi = fitlm (X, y, 'interactions');
+%! m = removeTerms (mi, 'x1:x2');
+%! assert (m.NumCoefficients, 3);
+%! assert (m.NumEstimatedCoefficients, 3);
+%! assert (m.DFE, 17);
+%! assert (m.NumObservations, 20);
+%! assert (m.Coefficients.Estimate(1), 0.116188677790207, -1e-8);
+%! assert (m.Coefficients.Estimate(2), 2.508451490570863, -1e-8);
+%! assert (m.Coefficients.Estimate(3), -0.978835329825186, -1e-8);
+%! assert (m.Coefficients.SE(1), 0.112185831, -1e-7);
+%! assert (m.Coefficients.SE(2), 0.4920818186, -1e-7);
+%! assert (m.Coefficients.SE(3), 0.02276108523, -1e-7);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.Coefficients.tStat(1), 1.035680502, -1e-6);
+%! assert (m.Coefficients.tStat(2), 5.097630913, -1e-6);
+%! assert (m.Coefficients.tStat(3), -43.00477415, -1e-6);
+%! assert (m.SSE, 0.386545331386823, -1e-8);
+%! assert (size (m.CoefficientCovariance), [3, 3]);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.CoefficientNames{3}, 'x2');
+%! assert (m.Formula.HasIntercept, true);
+%! assert (m.Formula.LinearPredictor, '1 + x1 + x2');
+%! assert (height (m.Diagnostics), 20);
+%! assert (sum (m.Diagnostics.Leverage), 3, 1e-10);
+
+%!test
+%! ## removing a quadratic term refits on the remaining terms
+%! mq = fitlm (X, y, 'quadratic');
+%! m = removeTerms (mq, 'x2^2');
+%! assert (m.NumEstimatedCoefficients, 4);
+%! assert (m.DFE, 16);
+%! assert (m.SSE, 0.383859187927621, -1e-8);
+%! assert (size (m.CoefficientCovariance, 1), m.NumCoefficients);
+%! assert (size (m.CoefficientCovariance, 2), m.NumCoefficients);
+%! assert (m.Formula.HasIntercept, true);
+%! assert (height (m.Diagnostics), 20);
+%! assert (sum (m.Diagnostics.Leverage), 4, 1e-10);
+%! assert (m.SSE >= mq.SSE);
+%! assert (! any (strcmp (m.CoefficientNames, 'x2^2')));
+
+%!test
+%! ## star notation removes main effects and interaction in one call
+%! mi = fitlm (X, y, 'interactions');
+%! m = removeTerms (mi, 'x1*x2');
+%! assert (m.NumCoefficients, 1);
+%! assert (m.NumEstimatedCoefficients, 1);
+%! assert (m.DFE, 19);
+%! assert (m.NumObservations, 20);
+%! assert (m.Formula.HasIntercept, true);
+%! assert (m.Formula.LinearPredictor, '1');
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.Coefficients.Estimate(1), -5.5900177811558, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.SSE, 583.910420002346, -1e-8);
+%! assert (m.SST, 583.910420002346, -1e-8);
+%! assert (m.SSR, 0, 1e-20);
+%! assert (size (m.CoefficientCovariance), [1, 1]);
+%! assert (height (m.Diagnostics), 20);
+%! assert (sum (m.Diagnostics.Leverage), 1, 1e-10);
+
+%!test
+%! ## 3-predictor model: removing one term matches a direct two-predictor fit
+%! X3 = [X, sin((1:n)' * pi / n)];
+%! y3 = X3 * [3; -1; 2] + 0.1 * cos ((1:n)' * pi / 7);
+%! m = removeTerms (fitlm (X3, y3), 'x3');
+%! r = fitlm (X, y3);
+%! assert (m.NumCoefficients, 3);
+%! assert (m.NumEstimatedCoefficients, 3);
+%! assert (m.DFE, 17);
+%! assert (m.NumObservations, 20);
+%! assert (m.Coefficients.Estimate, r.Coefficients.Estimate, 1e-10);
+%! assert (m.Coefficients.SE, r.Coefficients.SE, 1e-10);
+%! assert (m.Coefficients.tStat, r.Coefficients.tStat, 1e-10);
+%! assert (m.Coefficients.pValue, r.Coefficients.pValue, 1e-10);
+%! assert (m.SSE, r.SSE, 1e-12);
+%! assert (m.SSR, r.SSR, 1e-12);
+%! assert (m.SST, r.SST, 1e-12);
+%! assert (m.MSE, r.MSE, 1e-12);
+%! assert (m.RMSE, r.RMSE, 1e-12);
+%! assert (m.Rsquared.Ordinary, r.Rsquared.Ordinary, 1e-12);
+%! assert (m.Rsquared.Adjusted, r.Rsquared.Adjusted, 1e-12);
+%! assert (m.CoefficientCovariance, r.CoefficientCovariance, 1e-12);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.CoefficientNames{3}, 'x2');
+%! assert (m.Formula.HasIntercept, true);
+%! assert (m.Formula.LinearPredictor, '1 + x1 + x2');
+%! assert (height (m.Diagnostics), 20);
+%! assert (sum (m.Diagnostics.Leverage), 3, 1e-10);
+
+%!test
+%! ## 3-predictor model: removing two terms matches a direct one-predictor fit
+%! X3 = [X, sin((1:n)' * pi / n)];
+%! y3 = X3 * [3; -1; 2] + 0.1 * cos ((1:n)' * pi / 7);
+%! m = removeTerms (fitlm (X3, y3), 'x2 + x3');
+%! r = fitlm (X(:,1), y3);
+%! assert (m.NumCoefficients, 2);
+%! assert (m.NumEstimatedCoefficients, 2);
+%! assert (m.DFE, 18);
+%! assert (m.NumObservations, 20);
+%! assert (m.Coefficients.Estimate, r.Coefficients.Estimate, 1e-10);
+%! assert (m.Coefficients.SE, r.Coefficients.SE, 1e-10);
+%! assert (m.Coefficients.tStat, r.Coefficients.tStat, 1e-10);
+%! assert (m.Coefficients.pValue, r.Coefficients.pValue, 1e-10);
+%! assert (m.SSE, r.SSE, 1e-12);
+%! assert (m.SST, r.SST, 1e-12);
+%! assert (m.MSE, r.MSE, 1e-12);
+%! assert (m.RMSE, r.RMSE, 1e-12);
+%! assert (m.Rsquared.Ordinary, r.Rsquared.Ordinary, 1e-12);
+%! assert (m.Rsquared.Adjusted, r.Rsquared.Adjusted, 1e-12);
+%! assert (m.CoefficientCovariance, r.CoefficientCovariance, 1e-12);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.Formula.HasIntercept, true);
+%! assert (m.Formula.LinearPredictor, '1 + x1');
+%! assert (height (m.Diagnostics), 20);
+%! assert (sum (m.Diagnostics.Leverage), 2, 1e-10);
+
+%!test
+%! Xh = [7 26 6 60; 1 29 15 52; 11 56 8 20; 11 31 8 47; 7 52 6 33; ...
+%!        11 55 9 22; 3 71 17 6; 1 31 22 44; 2 54 18 22; 21 47 4 26; ...
+%!        1 40 23 34; 11 66 9 12; 10 68 8 12];
+%! yh = [78.5;74.3;104.3;87.6;95.9;109.2;102.7;72.5;93.1;115.9;83.8;113.3;109.4];
+%! m = removeTerms (fitlm (Xh, yh), 'x3 + x4');
+%! r = removeTerms (removeTerms (fitlm (Xh, yh), 'x4'), 'x3');
+%! assert (r.NumCoefficients, 3);
+%! assert (r.DFE, 10);
+%! assert (r.SSE, m.SSE, 1e-12);
+%! assert (r.SSR, m.SSR, 1e-12);
+%! assert (r.SST, m.SST, 1e-12);
+%! assert (r.RMSE, m.RMSE, 1e-12);
+%! assert (r.Coefficients.Estimate, m.Coefficients.Estimate, 1e-10);
+%! assert (r.Coefficients.SE, m.Coefficients.SE, 1e-10);
+%! assert (r.Coefficients.tStat, m.Coefficients.tStat, 1e-10);
+%! assert (r.Coefficients.pValue, m.Coefficients.pValue, 1e-10);
+%! assert (r.CoefficientCovariance, m.CoefficientCovariance, 1e-12);
+%! assert (isequal (r.CoefficientNames, m.CoefficientNames));
+%! assert (r.Rsquared.Ordinary, m.Rsquared.Ordinary, 1e-12);
+%! assert (r.Rsquared.Adjusted, m.Rsquared.Adjusted, 1e-12);
+%! assert (r.Formula.LinearPredictor, m.Formula.LinearPredictor);
+
+%!test
+%! m = removeTerms (mdl, [0 0 0]);
+%! r = removeTerms (mdl, '1');
+%! assert (m.NumCoefficients, 2);
+%! assert (m.Formula.HasIntercept, false);
+%! assert (m.Formula.LinearPredictor, 'x1 + x2');
+%! assert (m.Coefficients.Estimate(1), 2.96142161317611, -1e-8);
+%! assert (m.Coefficients.Estimate(2), -0.997248749443286, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.SSE, r.SSE, 1e-15);
+%! assert (m.SSR, r.SSR, 1e-15);
+%! assert (m.SST, r.SST, 1e-15);
+%! assert (m.Coefficients.Estimate, r.Coefficients.Estimate, 1e-15);
+%! assert (m.Coefficients.SE, r.Coefficients.SE, 1e-15);
+%! assert (m.CoefficientCovariance, r.CoefficientCovariance, 1e-15);
+%! assert (isequal (m.CoefficientNames, r.CoefficientNames));
+%! assert (height (m.Diagnostics), 20);
+%! assert (sum (m.Diagnostics.Leverage), 2, 1e-10);
+
+%!test
+%! ## removing a categorical predictor drops all its indicator variables at once
+%! Xc = [1;1;1;2;2;2;3;3;3];
+%! yc = [2.1;2.3;1.9; 4.1;3.9;4.2; 6.3;5.8;6.1];
+%! mc = fitlm (Xc, yc, 'linear', 'CategoricalVars', 1);
+%! m = removeTerms (mc, 'x1');
+%! assert (m.NumCoefficients, 1);
+%! assert (m.NumEstimatedCoefficients, 1);
+%! assert (m.DFE, 8);
+%! assert (m.NumObservations, 9);
+%! assert (m.Formula.HasIntercept, true);
+%! assert (m.Formula.LinearPredictor, '1');
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.Coefficients.Estimate(1), 4.07777777777778, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.SSR, 0, 1e-20);
+%! assert (size (m.CoefficientCovariance), [1, 1]);
+%! assert (height (m.Diagnostics), 9);
+%! assert (all (isfinite (m.Fitted)));
+%! assert (sum (m.Diagnostics.Leverage), 1, 1e-10);
+%! assert (m.Residuals.Raw, yc - m.Fitted, 1e-10);
+
+%!test
+%! ## matrix row removes x4 from hald leaving intercept plus x1 x2 x3
+%! Xh = [7 26 6 60; 1 29 15 52; 11 56 8 20; 11 31 8 47; 7 52 6 33; ...
+%!        11 55 9 22; 3 71 17 6; 1 31 22 44; 2 54 18 22; 21 47 4 26; ...
+%!        1 40 23 34; 11 66 9 12; 10 68 8 12];
+%! yh = [78.5;74.3;104.3;87.6;95.9;109.2;102.7;72.5;93.1;115.9;83.8;113.3;109.4];
+%! m = removeTerms (fitlm (Xh, yh), [0 0 0 1 0]);
+%! assert (m.NumCoefficients, 4);
+%! assert (m.NumEstimatedCoefficients, 4);
+%! assert (m.DFE, 9);
+%! assert (m.NumObservations, 13);
+%! assert (m.Coefficients.Estimate(1), 48.1936343180437, -1e-8);
+%! assert (m.Coefficients.Estimate(2), 1.69589016748479, -1e-8);
+%! assert (m.Coefficients.Estimate(3), 0.656914878270554, -1e-8);
+%! assert (m.Coefficients.Estimate(4), 0.250017606680009, -1e-8);
+%! assert (m.Coefficients.tStat, m.Coefficients.Estimate ./ m.Coefficients.SE, 1e-10);
+%! assert (m.SSE, 48.1106140726532, -1e-8);
+%! assert (size (m.CoefficientCovariance), [4, 4]);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.CoefficientNames{2}, 'x1');
+%! assert (m.CoefficientNames{3}, 'x2');
+%! assert (m.CoefficientNames{4}, 'x3');
+%! assert (m.Formula.HasIntercept, true);
+%! assert (m.Formula.LinearPredictor, '1 + x1 + x2 + x3');
+%! assert (height (m.Diagnostics), 13);
+%! assert (all (isfinite (m.Fitted)));
+%! assert (sum (m.Diagnostics.Leverage), 4, 1e-10);
+%! assert (m.Residuals.Raw, yh - m.Fitted, 1e-10);
+
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
 %!error <Terms matrix must have 2 or 3 columns> fitlm (X, y, [1 2 3 4; 5 6 7 8])
@@ -3347,3 +4038,9 @@ endfunction
 %!error <Terms matrix must have> addTerms (mdl, [1, 1, 1, 0])
 %!error <Terms matrix must have> addTerms (mdl, [])
 %!error <Model update specification> addTerms (mdl, {})
+%!error <Not enough input arguments> removeTerms (mdl)
+%!error <too many inputs> removeTerms (mdl, 'x1', 'extra')
+%!error <Unrecognized variable> removeTerms (mdl, 'z1')
+%!error <Terms matrix must have 3 columns> removeTerms (mdl, [0 1 0 0])
+%!error <Terms matrix must have 3 columns> removeTerms (mdl, [])
+%!error <Model update specification> removeTerms (mdl, {'x1'})
