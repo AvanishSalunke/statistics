@@ -1050,36 +1050,50 @@ classdef LinearModel
     ## @deftypefnx {LinearModel} {[@var{ypred}, @var{yci}] =} predict (@var{mdl}, @var{Xnew})
     ## @deftypefnx {LinearModel} {[@var{ypred}, @var{yci}] =} predict (@var{mdl}, @var{Xnew}, @var{Name}, @var{Value})
     ##
-    ## Predict responses of a fitted linear regression model.
+    ## Predict responses from a fitted linear regression model.
     ##
-    ## @code{@var{ypred} = predict (@var{mdl}, @var{Xnew})} returns predicted
-    ## response values for the predictor data in @var{Xnew} using the fitted
-    ## linear model @var{mdl}.  @var{Xnew} can be a numeric matrix or a table.
+    ## @code{@var{ypred} = predict (@var{mdl}, @var{Xnew})} returns the fitted
+    ## response values at the new predictor locations in @var{Xnew}.  @var{Xnew}
+    ## can be a numeric matrix with one column per predictor in the same order as
+    ## the training data, or a table whose column names match
+    ## @code{@var{mdl}.PredictorNames}.  Rows containing @code{NaN} are returned
+    ## as @code{NaN} without error.
     ##
-    ## @code{@var{ypred} = predict (@var{mdl})} returns predicted values for
-    ## all observations in the training data, including excluded rows.
+    ## @code{@var{ypred} = predict (@var{mdl})} omits @var{Xnew} and returns
+    ## fitted values for the original training observations in their original row
+    ## order.  Rows that were excluded or contained missing values are returned as
+    ## @code{NaN}.  The result is identical to @code{@var{mdl}.Fitted}.
     ##
     ## @code{[@var{ypred}, @var{yci}] = predict (@dots{})} also returns
-    ## confidence intervals @var{yci} as an @math{n} x @math{2} matrix.
+    ## @var{yci}, an @math{n}-by-2 matrix of confidence bounds where column 1 is
+    ## the lower bound and column 2 is the upper bound.  By default these are
+    ## 95% pointwise confidence intervals on the mean response.
     ##
     ## Name-Value pair arguments:
     ##
     ## @multitable @columnfractions 0.2 0.02 0.78
     ## @headitem @var{Name} @tab @tab @var{Value}
     ##
-    ## @item @qcode{"Alpha"} @tab @tab Significance level, scalar in @math{[0,1]}.
-    ## Default is @code{0.05}.
+    ## @item @qcode{"Alpha"} @tab @tab Significance level for the confidence
+    ## interval, specified as a scalar in @math{[0,1]}.  The interval has
+    ## coverage @math{100(1-\alpha)\%}.  Default is @code{0.05}, giving a 95%
+    ## interval.
     ##
-    ## @item @qcode{"Prediction"} @tab @tab @code{"curve"} (default) for
-    ## confidence interval on the mean response, or @code{"observation"} for a
-    ## prediction interval for a new observation.
+    ## @item @qcode{"Prediction"} @tab @tab Type of interval to compute.
+    ## @code{"curve"} (default) gives a confidence interval on the mean response
+    ## @math{f(x)}.  @code{"observation"} gives a wider prediction interval for
+    ## a single future observation @math{y = f(x) + \varepsilon}, which accounts
+    ## for both estimation uncertainty and irreducible noise; it adds
+    ## @code{@var{mdl}.MSE} to the variance before computing the half-width.
     ##
-    ## @item @qcode{"Simultaneous"} @tab @tab Logical flag.  If @code{true},
-    ## compute simultaneous bounds using Scheff@'{e}'s method.  Default is
-    ## @code{false}.
+    ## @item @qcode{"Simultaneous"} @tab @tab Logical flag controlling whether
+    ## the bounds are simultaneous or pointwise.  When @code{true}, Scheff@'{e}'s
+    ## method is used so the entire predicted curve lies within the band with
+    ## @math{100(1-\alpha)\%} confidence; these bands are always wider than
+    ## pointwise ones.  Default is @code{false}.
     ## @end multitable
     ##
-    ## @seealso{fitlm, LinearModel}
+    ## @seealso{fitlm, feval, random, coefCI, LinearModel}
     ## @end deftypefn
     function [ypred, yci] = predict (mdl, Xnew, varargin)
 
@@ -1182,19 +1196,31 @@ classdef LinearModel
     ## -*- texinfo -*-
     ## @deftypefn {LinearModel} {@var{ysim} =} random (@var{mdl}, @var{Xnew})
     ##
-    ## Simulate responses with random noise for a fitted linear regression model.
+    ## Simulate responses with random noise from a fitted linear regression model.
     ##
-    ## @code{@var{ysim} = random (@var{mdl}, @var{Xnew})} returns simulated
-    ## response values for predictor data in @var{Xnew}.  Each simulated value
-    ## equals the predicted response plus independent noise drawn from
-    ## @math{N(0, @var{mdl}.MSE)}, where @code{MSE} is the mean squared error of
-    ## the fitted model.
+    ## @code{@var{ysim} = random (@var{mdl}, @var{Xnew})} computes the fitted
+    ## response at each row of @var{Xnew} and then adds independent Gaussian
+    ## noise to each value.  The noise is drawn from @math{N(0, \sigma^2)} where
+    ## @math{\sigma^2} is the estimated error variance @code{@var{mdl}.MSE}
+    ## (mean squared error of the fit).  The result is a column vector of the
+    ## same length as the number of rows in @var{Xnew}.
     ##
-    ## @var{Xnew} must be a non-empty numeric matrix with the same number of
-    ## columns as the training predictors, or a table with matching predictor
-    ## column names.
+    ## @var{Xnew} is required and must be non-empty.  It can be a numeric matrix
+    ## with one column per predictor in the same order as the training data, or a
+    ## table whose column names match @code{@var{mdl}.PredictorNames}.  Unlike
+    ## @code{predict}, there is no no-argument form; the predictor locations must
+    ## always be supplied explicitly.
     ##
-    ## @seealso{fitlm, predict, LinearModel}
+    ## Because the added noise is drawn freshly on every call, two calls with the
+    ## same @var{Xnew} will generally produce different output.  To get
+    ## reproducible results, set the random seed with @code{rand ('state', s)}
+    ## before calling @code{random}.
+    ##
+    ## For deterministic predictions without noise, use @code{predict} or
+    ## @code{feval}.  @code{predict} also provides confidence intervals on the
+    ## mean response.
+    ##
+    ## @seealso{fitlm, predict, feval, LinearModel}
     ## @end deftypefn
     function ysim = random (mdl, Xnew, varargin)
       if (nargin < 2)
@@ -1217,20 +1243,31 @@ classdef LinearModel
     ## Predict responses of a fitted linear regression model using separate
     ## predictor inputs.
     ##
-    ## @code{@var{ypred} = feval (@var{mdl}, @var{X})} returns predicted
-    ## response values for predictor data in @var{X}, which can be a numeric
-    ## matrix with the same number of columns as the training predictors, or a
-    ## table with matching predictor column names.  The output is an
-    ## @math{n}-by-1 column vector.
+    ## @code{@var{ypred} = feval (@var{mdl}, @var{X})} accepts a single
+    ## numeric matrix @var{X} with one column per predictor in the same order
+    ## as the training data, or a table whose column names match
+    ## @code{@var{mdl}.PredictorNames}.  The output is an @math{n}-by-1 column
+    ## vector.  Rows that contain @code{NaN} in any predictor column are
+    ## returned as @code{NaN}.
     ##
     ## @code{@var{ypred} = feval (@var{mdl}, @var{x1}, @var{x2}, @dots{},
-    ## @var{xp})} accepts one argument per predictor variable.  All non-scalar
-    ## arguments must have the same size; scalar arguments are broadcast to
-    ## match that size.  The output shape mirrors the input orientation: column
-    ## vectors in produce a column vector out, row vectors in produce a row
-    ## vector out.
+    ## @var{xp})} accepts exactly @code{@var{mdl}.NumPredictors} separate
+    ## arguments, one per predictor variable.  All non-scalar arguments must
+    ## have the same size; a scalar argument is broadcast to that size
+    ## automatically.  The output shape follows the shape of the non-scalar
+    ## inputs: column vector inputs give a column vector output, row vector
+    ## inputs give a row vector output, and all-scalar inputs give a scalar.
+    ## This form is convenient when predictor data is already stored in separate
+    ## vectors rather than a combined matrix.
     ##
-    ## @seealso{fitlm, predict, random}
+    ## @code{feval} gives the same numerical predictions as @code{predict} but
+    ## does not support confidence intervals.  Use @code{predict} when you also
+    ## need bounds on the response.  Because a @code{LinearModel} object behaves
+    ## like a function through @code{feval}, it can be passed directly to
+    ## routines that accept a function handle, such as @code{fminsearch} or
+    ## @code{integral}.
+    ##
+    ## @seealso{fitlm, predict, random, LinearModel}
     ## @end deftypefn
     function ypred = feval (mdl, varargin)
       p_raw   = mdl.NumPredictors;
@@ -1303,23 +1340,34 @@ classdef LinearModel
     ## @deftypefn  {LinearModel} {@var{ci} =} coefCI (@var{mdl})
     ## @deftypefnx {LinearModel} {@var{ci} =} coefCI (@var{mdl}, @var{alpha})
     ##
-    ## Compute confidence intervals for the coefficients of a fitted linear
+    ## Confidence intervals for the coefficient estimates of a fitted linear
     ## regression model.
     ##
     ## @code{@var{ci} = coefCI (@var{mdl})} returns 95% confidence intervals
-    ## for all model coefficients using a default significance level of 0.05.
+    ## for every coefficient in @var{mdl} using a default significance level of
+    ## @code{0.05}.
     ##
-    ## @code{@var{ci} = coefCI (@var{mdl}, @var{alpha})} uses significance
-    ## level @var{alpha}, a scalar in [0, 1].  Setting @var{alpha} to 0
-    ## produces infinite intervals; setting it to 1 collapses each interval to
-    ## the point estimate.
+    ## @code{@var{ci} = coefCI (@var{mdl}, @var{alpha})} uses the significance
+    ## level @var{alpha}, a scalar in @math{[0, 1]}.  The resulting intervals
+    ## have coverage @math{100(1-\alpha)\%}.  Setting @var{alpha} to @code{0}
+    ## produces intervals of infinite width; setting it to @code{1} collapses
+    ## each interval to the corresponding point estimate.
     ##
-    ## Intervals are computed by the Wald method:
-    ## @math{b_i @pm t_{(1-alpha/2,\,DFE)}\,SE(b_i)}, where @var{DFE} is the
-    ## residual degrees of freedom.  The output @var{ci} is a @math{k}-by-2
-    ## matrix where @math{k = NumCoefficients}; column 1 is the lower bound
-    ## and column 2 is the upper bound.  Coefficients aliased to zero in
-    ## rank-deficient models return @code{[0, 0]}.
+    ## The output @var{ci} is a @math{k}-by-2 numeric matrix where
+    ## @math{k = } @code{@var{mdl}.NumCoefficients}.  Row @math{j} contains
+    ## the interval for the @math{j}-th coefficient, whose name is stored in
+    ## @code{@var{mdl}.CoefficientNames@{j@}}.  Column 1 is the lower bound and
+    ## column 2 is the upper bound.  The midpoint of each interval equals the
+    ## corresponding point estimate in @code{@var{mdl}.Coefficients.Estimate}.
+    ##
+    ## Intervals use the Wald method:
+    ## @math{b_j \pm t_{(1-\alpha/2,\,\mathrm{DFE})}\,\mathrm{SE}(b_j)},
+    ## where @math{b_j} is the coefficient estimate, @math{\mathrm{SE}(b_j)} is
+    ## its standard error from @code{@var{mdl}.Coefficients.SE}, and the
+    ## critical value is the @math{1-\alpha/2} quantile of the
+    ## @math{t}-distribution with @code{@var{mdl}.DFE} degrees of freedom.
+    ## In rank-deficient models, aliased coefficients have @math{\mathrm{SE} = 0}
+    ## and their row in @var{ci} is @code{[0, 0]}.
     ##
     ## @seealso{fitlm, coefTest, predict, LinearModel}
     ## @end deftypefn
@@ -1357,35 +1405,47 @@ classdef LinearModel
     ## @deftypefnx {LinearModel} {[@var{p}, @var{F}] =} coefTest (@dots{})
     ## @deftypefnx {LinearModel} {[@var{p}, @var{F}, @var{r}] =} coefTest (@dots{})
     ##
-    ## Linear hypothesis test on linear regression model coefficients.
+    ## Linear hypothesis test on the coefficients of a fitted linear regression
+    ## model.
     ##
-    ## @code{coefTest} tests whether a linear combination of the fitted
-    ## coefficients equals a specified constant vector.  The default call
-    ## tests the joint hypothesis that all non-intercept coefficients are
-    ## zero, which is equivalent to the overall model F-test reported in the
-    ## model summary.  Custom hypotheses are supplied through the contrast
-    ## matrix @var{H} and, optionally, the right-hand-side vector @var{C}.
+    ## @code{coefTest} tests whether one or more linear combinations of the
+    ## fitted coefficients equal specified constants.  Each linear combination
+    ## is encoded as a row of the contrast matrix @var{H}, and the right-hand
+    ## side is given by @var{C}.
     ##
-    ## @code{@var{p} = coefTest (@var{mdl})} returns the p-value for an F-test
-    ## that all coefficient estimates except the intercept are zero.
+    ## @code{@var{p} = coefTest (@var{mdl})} performs the overall model F-test:
+    ## it tests the joint null hypothesis that every coefficient except the
+    ## intercept is zero.  The returned p-value matches the F-statistic line
+    ## printed at the bottom of the model display.
     ##
-    ## @code{@var{p} = coefTest (@var{mdl}, @var{H})} performs an F-test that
-    ## @math{H B = 0}, where @math{B} is the coefficient vector.  @var{H} must
-    ## be a numeric @math{r}-by-@math{k} matrix where @math{k =
-    ## NumCoefficients}.
+    ## @code{@var{p} = coefTest (@var{mdl}, @var{H})} tests the null hypothesis
+    ## @math{H \beta = 0}, where @math{\beta} is the full coefficient vector
+    ## of length @math{k = } @code{@var{mdl}.NumCoefficients}.  @var{H} must be
+    ## a full-rank numeric matrix with @math{k} columns; each row specifies one
+    ## linear constraint.  To test a single coefficient, use a row vector with a
+    ## @code{1} in that coefficient's position and zeros elsewhere; the resulting
+    ## F-statistic equals the square of the corresponding t-statistic in
+    ## @code{@var{mdl}.Coefficients}.  To test a categorical predictor that
+    ## expands to multiple indicator columns, include one row per indicator in
+    ## @var{H}.
     ##
-    ## @code{@var{p} = coefTest (@var{mdl}, @var{H}, @var{C})} tests @math{H B
-    ## = C}.  @var{C} is a numeric vector with @math{r} elements; row and
-    ## column vectors are both accepted.
+    ## @code{@var{p} = coefTest (@var{mdl}, @var{H}, @var{C})} tests
+    ## @math{H \beta = C} instead of zero.  @var{C} must be a numeric vector
+    ## with the same number of elements as rows of @var{H}; both row and column
+    ## vectors are accepted.
     ##
-    ## The F-statistic is @math{F = (HB - C)' (H V H')^{-1} (HB - C) / r},
-    ## where @math{V} is @code{CoefficientCovariance}.  Under the null
-    ## hypothesis, @math{F} follows @math{F(r, DFE)}.  The p-value is the
-    ## upper-tail probability, computed via @code{betainc} to avoid
-    ## cancellation for large @math{F}.  Rank-deficient @var{H} (without
-    ## @code{NaN}) returns @code{NaN} results without an error.
+    ## The second output @var{F} is the value of the F-statistic:
+    ## @math{F = (H\hat{\beta} - C)^\prime (H V H^\prime)^{-1}
+    ## (H\hat{\beta} - C) / r}, where @math{V} is
+    ## @code{@var{mdl}.CoefficientCovariance} and @math{r} is the number of
+    ## rows of @var{H}.  The third output @var{r} is that numerator degrees of
+    ## freedom; the denominator degrees of freedom is @code{@var{mdl}.DFE}.
+    ## Under the null hypothesis @math{F} follows an @math{F(r, \mathrm{DFE})}
+    ## distribution and the p-value is the upper-tail probability.  When
+    ## @var{H} is rank-deficient but contains no @code{NaN}, both @var{p} and
+    ## @var{F} are returned as @code{NaN} without an error.
     ##
-    ## @seealso{fitlm, coefCI, LinearModel}
+    ## @seealso{fitlm, coefCI, predict, LinearModel}
     ## @end deftypefn
     function [p, F, r] = coefTest (mdl, varargin)
       if (nargout > 3)
@@ -1458,28 +1518,47 @@ classdef LinearModel
     ## @deftypefnx {LinearModel} {@var{p} =} dwtest (@var{mdl}, @var{method}, @var{tail})
     ## @deftypefnx {LinearModel} {[@var{p}, @var{DW}] =} dwtest (@dots{})
     ##
-    ## Durbin-Watson test for autocorrelation of linear regression residuals.
+    ## Durbin-Watson test for serial autocorrelation of linear regression
+    ## residuals.
     ##
-    ## @code{dwtest} tests whether the raw residuals of @var{mdl} exhibit
-    ## serial autocorrelation using the Durbin-Watson statistic
-    ## @math{DW = \sum_{i=1}^{n-1}(e_{i+1}-e_i)^2 / \sum_{i=1}^{n}e_i^2}.
-    ## The statistic lies in [0,@math{4}]: values near 0 indicate positive
-    ## autocorrelation, values near 4 indicate negative autocorrelation, and
-    ## values near 2 indicate no autocorrelation.
+    ## @code{dwtest} checks whether the raw residuals of @var{mdl} are
+    ## correlated with their immediate neighbours in observation order, which
+    ## would violate the independence assumption of ordinary least squares.
+    ## The null hypothesis is that there is no autocorrelation.  A small
+    ## p-value gives evidence against this and suggests that the residuals are
+    ## not independent.  This test is most meaningful when the observations
+    ## have a natural ordering, such as a time series.
     ##
-    ## @var{method} (default @qcode{'exact'}) is @qcode{'exact'} to compute
-    ## the p-value via eigenvalues of the projected differencing matrix and
-    ## Imhof's numerical integration, or @qcode{'approximate'} to use a normal
-    ## approximation based on the first two moments of the DW statistic under
-    ## the null hypothesis.  The string is case-insensitive.
+    ## The test is based on the Durbin-Watson statistic
+    ## @math{DW = \sum_{i=1}^{n-1}(e_{i+1}-e_i)^2 / \sum_{i=1}^{n}e_i^2},
+    ## where @math{e_i} are the raw residuals of the active (non-excluded)
+    ## observations.  The statistic always lies in @math{[0, 4]}: values near
+    ## @math{2} indicate no autocorrelation, values well below @math{2}
+    ## indicate positive autocorrelation (adjacent residuals tend to have the
+    ## same sign), and values well above @math{2} indicate negative
+    ## autocorrelation (adjacent residuals tend to alternate in sign).
     ##
-    ## @var{tail} (default @qcode{'both'}) selects the alternative:
-    ## @qcode{'right'} for positive autocorrelation, @qcode{'left'} for
-    ## negative autocorrelation, or @qcode{'both'} for either direction.
-    ## One-sided p-values satisfy @math{p_r + p_l = 1} and the two-sided
-    ## value equals @math{2\min(p_r, p_l)}.
+    ## @var{method} controls how the p-value is computed and defaults to
+    ## @qcode{'exact'}.  @qcode{'exact'} uses the eigenvalues of the
+    ## projected differencing matrix together with Imhof's numerical
+    ## integration to obtain a precise p-value; this is slower but accurate
+    ## for any sample size.  @qcode{'approximate'} uses a normal approximation
+    ## based on the first two moments of the DW distribution under the null;
+    ## this is faster and adequate for large samples but less reliable for
+    ## small ones.  The argument is case-insensitive.
     ##
-    ## @seealso{fitlm, LinearModel}
+    ## @var{tail} selects the alternative hypothesis and defaults to
+    ## @qcode{'both'}.  @qcode{'right'} tests for positive autocorrelation
+    ## (@math{DW < 2}), @qcode{'left'} tests for negative autocorrelation
+    ## (@math{DW > 2}), and @qcode{'both'} tests for autocorrelation in
+    ## either direction.  The one-sided p-values always satisfy
+    ## @math{p_{\mathrm{right}} + p_{\mathrm{left}} = 1}, and the two-sided
+    ## p-value equals @math{2\min(p_{\mathrm{right}}, p_{\mathrm{left}})}.
+    ##
+    ## The second output @var{DW} is the value of the Durbin-Watson statistic
+    ## itself; it does not depend on @var{method} or @var{tail}.
+    ##
+    ## @seealso{fitlm, coefTest, LinearModel}
     ## @end deftypefn
     function [p, DW] = dwtest (mdl, varargin)
       if (nargout > 2)
@@ -1549,23 +1628,40 @@ classdef LinearModel
     ##
     ## Add terms to a fitted linear regression model.
     ##
-    ## @code{addTerms} returns a new @code{LinearModel} fitted on the same
-    ## data and settings as @var{mdl} with the specified @var{terms} added.
-    ## The original model @var{mdl} is not modified.  All original settings
-    ## such as observation weights, excluded rows, and categorical variables
-    ## are automatically preserved in the new model.
+    ## @code{addTerms} returns a new @code{LinearModel} refitted on the same
+    ## data and settings as @var{mdl} with the specified @var{terms} appended
+    ## to the model formula.  The original model @var{mdl} is never modified;
+    ## all settings including observation weights, excluded rows, and
+    ## categorical variable encodings are carried over automatically.  To
+    ## update a model in place, reassign the result:
+    ## @code{@var{mdl} = addTerms (@var{mdl}, @var{terms})}.
     ##
-    ## @var{terms} may be a character vector in Wilkinson notation
-    ## (e.g., @code{'x1:x2'} for an interaction, @code{'x1^2'} for a
-    ## quadratic, @code{'x1*x2'} to add main effects and interaction together,
-    ## or @code{'x1 + x2^2'} for multiple terms at once) or a numeric matrix
-    ## with @code{mdl.NumVariables} columns where each row encodes one term as
-    ## predictor exponents.  A matrix with @code{mdl.NumPredictors} columns is
-    ## also accepted and is automatically padded with a zero response column.
-    ## Terms already present in the model are silently ignored; if no genuinely
-    ## new terms exist a warning is issued and the original model is returned.
+    ## @var{terms} may be a character vector in Wilkinson notation.  Use
+    ## @code{'x1'} for a main effect, @code{'x1:x2'} for a two-way
+    ## interaction, @code{'x1^2'} for a quadratic (polynomial) term,
+    ## @code{'x1*x2'} to add both main effects and their interaction in one
+    ## step, @code{'x1 + x2^2'} to add several terms at once, or @code{'1'}
+    ## to add an intercept to a no-intercept model.  All variable names must
+    ## match entries in @code{@var{mdl}.PredictorNames}.
     ##
-    ## @seealso{fitlm, LinearModel}
+    ## @var{terms} may also be a numeric matrix of size @var{t}-by-@var{v},
+    ## where @var{t} is the number of terms to add and @var{v} equals
+    ## @code{@var{mdl}.NumVariables}.  Entry @code{T(i,j)} is the exponent of
+    ## variable @var{j} in term @var{i}.  For example, in a model with
+    ## variables @code{x1}, @code{x2}, @code{y}: @code{[0 0 0]} is the
+    ## intercept, @code{[0 1 0]} is @code{x2}, @code{[1 1 0]} is
+    ## @code{x1:x2}, and @code{[2 0 0]} is @code{x1^2}.  The last column
+    ## (response) is always zero.  A matrix with @code{@var{mdl}.NumPredictors}
+    ## columns is also accepted and is automatically padded with a trailing
+    ## zero column for the response.
+    ##
+    ## Terms that are already present in @var{mdl} are silently skipped.  If
+    ## every specified term already exists, a warning is issued and @var{mdl}
+    ## is returned unchanged.  For a categorical predictor, @code{addTerms}
+    ## adds the full group of indicator variables for that predictor in one
+    ## step rather than adding individual indicator columns.
+    ##
+    ## @seealso{fitlm, removeTerms, LinearModel}
     ## @end deftypefn
     function NewMdl = addTerms (mdl, terms)
       if (nargin < 2)
@@ -1681,34 +1777,39 @@ classdef LinearModel
     ##
     ## Remove terms from a fitted linear regression model.
     ##
-    ## @code{removeTerms} returns a new @code{LinearModel} fitted on the same
-    ## data and settings as @var{mdl}, but with the specified @var{terms} removed.
-    ## The original model @var{mdl} is not modified.  All original settings such
-    ## as observation weights, excluded rows, and categorical variables are
-    ## automatically preserved in the refitted model.
+    ## @code{removeTerms} returns a new @code{LinearModel} refitted on the same
+    ## data and settings as @var{mdl}, but with the specified @var{terms}
+    ## dropped from the model formula.  The original model @var{mdl} is never
+    ## modified; all settings including observation weights, excluded rows, and
+    ## categorical variable encodings are carried over automatically.  To
+    ## update a model in place, reassign the result:
+    ## @code{@var{mdl} = removeTerms (@var{mdl}, @var{terms})}.
     ##
-    ## If none of the specified @var{terms} exist in @var{mdl}, a warning is
-    ## issued and @var{mdl} is returned unchanged.  Specified terms that are valid
-    ## predictor names but absent from the current model are silently skipped;
-    ## the warning fires only when every single specified term is missing.
-    ##
-    ## @var{terms} may be a character vector in Wilkinson notation.  A single
-    ## predictor such as @code{'x2'}, an interaction such as @code{'x1:x2'},
-    ## a polynomial power such as @code{'x1^2'}, the intercept as @code{'1'},
-    ## or several terms joined by @code{+} such as @code{'x1 + x2^2'} are all
-    ## accepted.  The star operator @code{'x1*x2'} removes the main effects
-    ## @code{x1} and @code{x2} together with their interaction @code{x1:x2} in
-    ## a single call, following the same expansion rule as @code{addTerms}.
-    ## All variable names must be valid predictor names of @var{mdl}.
+    ## @var{terms} may be a character vector in Wilkinson notation.  Use
+    ## @code{'x2'} to remove a main effect, @code{'x1:x2'} to remove an
+    ## interaction, @code{'x1^2'} to remove a polynomial term, @code{'1'} to
+    ## remove the intercept, or @code{'x1 + x2^2'} to remove several terms at
+    ## once.  The star operator @code{'x1*x2'} removes the main effects
+    ## @code{x1} and @code{x2} together with their interaction @code{x1:x2}
+    ## in a single call, following the same expansion rule as @code{addTerms}.
+    ## All variable names must match entries in
+    ## @code{@var{mdl}.PredictorNames}.
     ##
     ## @var{terms} may also be a numeric matrix of size @var{t}-by-@var{v},
     ## where @var{t} is the number of terms to remove and @var{v} equals
-    ## @code{mdl.NumVariables}.  Element @code{T(i,j)} gives the exponent of
-    ## variable @var{j} in term @var{i}: a row of all zeros encodes the
-    ## intercept, @code{[0 1 0]} encodes the second predictor alone, and
-    ## @code{[1 1 0]} encodes the interaction of the first two predictors.
-    ## A matrix with @code{mdl.NumPredictors} columns is also accepted and is
-    ## automatically padded with a trailing zero response column.
+    ## @code{@var{mdl}.NumVariables}.  Entry @code{T(i,j)} is the exponent of
+    ## variable @var{j} in term @var{i}.  For example, in a model with
+    ## variables @code{x1}, @code{x2}, @code{y}: @code{[0 0 0]} is the
+    ## intercept, @code{[0 1 0]} is @code{x2}, @code{[1 1 0]} is
+    ## @code{x1:x2}, and @code{[2 0 0]} is @code{x1^2}.  A matrix with
+    ## @code{@var{mdl}.NumPredictors} columns is also accepted and is
+    ## automatically padded with a trailing zero column for the response.
+    ##
+    ## Terms specified but absent from @var{mdl} are silently skipped.  A
+    ## warning is issued and @var{mdl} is returned unchanged only when every
+    ## single specified term is absent from the model.  For a categorical
+    ## predictor, @code{removeTerms} removes the full group of indicator
+    ## variables for that predictor in one step.
     ##
     ## @seealso{fitlm, addTerms, LinearModel}
     ## @end deftypefn
