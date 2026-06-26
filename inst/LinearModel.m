@@ -2421,6 +2421,37 @@ function mdl2 = lm_refit (mdl, new_terms)
   mdl2 = fitlm (mdl.Variables, mdl.ResponseName, new_terms, nv_list{:});
 endfunction
 
+function [ax, mdl, args] = lm_plot_axes (this, rest)
+
+  if (isscalar (this) && isgraphics (this, 'axes'))
+    ax   = this;
+    mdl  = rest{1};
+    args = rest(2:end);
+  else
+    ax   = [];
+    mdl  = this;
+    args = rest;
+  endif
+endfunction
+
+function props = lm_plot_props (nv_args)
+
+  opt_names = {'Color', 'Marker', 'MarkerSize', 'MarkerEdgeColor', ...
+               'MarkerFaceColor', 'LineWidth'};
+  def_vals  = {[0.1490, 0.5490, 0.8660], 'x', 6, 'auto', 'none', 0.5};
+  [color, marker, markersize, mec, mfc, lw, rem_args] = ...
+    parsePairedArguments (opt_names, def_vals, nv_args);
+  if (! isempty (rem_args))
+    error ('lm_plot_props: unrecognized property ''%s''.', rem_args{1});
+  endif
+  props.Color           = color;
+  props.Marker          = marker;
+  props.MarkerSize      = markersize;
+  props.MarkerEdgeColor = mec;
+  props.MarkerFaceColor = mfc;
+  props.LineWidth       = lw;
+endfunction
+
 %!shared mdl, X, y, n
 %! n = 20;
 %! X = [1:n; (1:n).^2]' / n;
