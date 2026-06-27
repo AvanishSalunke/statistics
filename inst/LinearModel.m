@@ -1986,6 +1986,326 @@ classdef LinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {} plotResiduals (@var{mdl})
+    ## @deftypefnx {LinearModel} {} plotResiduals (@var{mdl}, @var{plottype})
+    ## @deftypefnx {LinearModel} {} plotResiduals (@var{mdl}, @var{plottype}, @var{Name}, @var{Value})
+    ## @deftypefnx {LinearModel} {} plotResiduals (@var{ax}, @dots{})
+    ## @deftypefnx {LinearModel} {@var{h} =} plotResiduals (@dots{})
+    ##
+    ## Plot residuals of a fitted linear regression model.
+    ##
+    ## @code{plotResiduals (@var{mdl})} creates a histogram of the raw residuals
+    ## with probability density scaling so that the bar areas sum to 1.
+    ## The number of bins equals @code{ceil (sqrt (n))} where @code{n} is the
+    ## number of active (non-excluded, non-missing) observations.
+    ##
+    ## @code{plotResiduals (@var{mdl}, @var{plottype})} creates the plot type
+    ## specified by @var{plottype}.  Excluded and missing rows appear as gaps
+    ## in all plot types except @code{"histogram"} and @code{"probability"},
+    ## which use only the active observations.  Valid @var{plottype} values are:
+    ##
+    ## @table @asis
+    ## @item @qcode{"histogram"} (default)
+    ## Histogram of residuals with probability density scaling.
+    ##
+    ## @item @qcode{"fitted"}
+    ## Residuals versus fitted values.  A dotted reference line marks zero.
+    ##
+    ## @item @qcode{"caseorder"}
+    ## Residuals versus observation row number.  A dotted reference line marks
+    ## zero.  Excluded rows appear as gaps.
+    ##
+    ## @item @qcode{"lagged"}
+    ## Residual @math{r(t)} versus the previous residual @math{r(t-1)}.  Two
+    ## dotted reference lines mark @math{x = 0} and @math{y = 0}.
+    ##
+    ## @item @qcode{"probability"}
+    ## Normal probability plot of the active residuals using @code{normplot}.
+    ##
+    ## @item @qcode{"observed"}
+    ## Observed response versus fitted values with a dotted @math{y = x}
+    ## reference line.  Vertical segments connect each observed point to the
+    ## reference line.
+    ##
+    ## @item @qcode{"symmetry"}
+    ## Upper-tail deviations from the median plotted against lower-tail
+    ## deviations.  Points near the dotted @math{y = x} reference line
+    ## indicate a symmetric residual distribution.
+    ## @end table
+    ##
+    ## @code{plotResiduals (@var{ax}, @dots{})} creates the plot in the axes
+    ## @var{ax} instead of the current axes.
+    ##
+    ## @code{@var{h} = plotResiduals (@dots{})} returns a graphics handle or
+    ## array of handles.  Name-Value arguments apply to @code{h(1)} only and
+    ## do not affect reference lines.
+    ##
+    ## Name-Value pair arguments:
+    ##
+    ## @multitable @columnfractions 0.25 0.02 0.73
+    ## @headitem @var{Name} @tab @tab @var{Value}
+    ##
+    ## @item @qcode{"ResidualType"} @tab @tab Type of residual to plot.
+    ## One of @qcode{'raw'} (default), @qcode{'pearson'},
+    ## @qcode{'standardized'}, or @qcode{'studentized'}.  Case-insensitive.
+    ## The corresponding column of @code{mdl.Residuals} is used.
+    ##
+    ## @item @qcode{"FaceColor"} @tab @tab Bar fill color for the histogram
+    ## plot type only.  Passed directly to the underlying @code{patch} object.
+    ##
+    ## @item @qcode{"EdgeColor"} @tab @tab Bar edge color for the histogram.
+    ##
+    ## @item @qcode{"Color"} @tab @tab Marker color for non-histogram plot
+    ## types.  Default is @code{[0.1490 0.5490 0.8660]}.
+    ##
+    ## @item @qcode{"Marker"} @tab @tab Marker symbol for the data handle.
+    ## Default is @code{'x'}.
+    ##
+    ## @item @qcode{"MarkerSize"} @tab @tab Marker size in points.
+    ## Default is @code{6}.
+    ##
+    ## @item @qcode{"MarkerEdgeColor"} @tab @tab Marker edge color.
+    ## Default is @code{'auto'}.
+    ##
+    ## @item @qcode{"MarkerFaceColor"} @tab @tab Marker fill color.
+    ## Default is @code{'none'}.
+    ##
+    ## @item @qcode{"LineWidth"} @tab @tab Line width in points.
+    ## Default is @code{0.5}.
+    ## @end multitable
+    ##
+    ## @seealso{fitlm, plotDiagnostics, plotAdded, normplot, LinearModel}
+    ## @end deftypefn
+    function h = plotResiduals (this, varargin)
+      [ax, mdl, args] = lm_plot_axes (this, varargin);
+
+      DEF_COLOR = [0.1490, 0.5490, 0.8660];
+      REF_COLOR = [0.8510, 0.8510, 0.8510];
+
+      valid_pt  = {'histogram', 'fitted', 'lagged', 'caseorder', ...
+                   'probability', 'observed', 'symmetry'};
+      known_nv  = {'residualtype', 'color', 'marker', 'markersize', ...
+                   'markeredgecolor', 'markerfacecolor', 'linewidth', ...
+                   'facecolor', 'edgecolor', 'facealpha'};
+
+      if (! isempty (args) && ischar (args{1}) ...
+          && ! any (strcmpi (args{1}, known_nv)))
+        pt_str = args{1};
+        args   = args(2:end);
+        try
+          plottype = validatestring (pt_str, valid_pt);
+        catch
+          error ('plotResiduals: Bad residuals plot type.');
+        end_try_catch
+      else
+        plottype = 'histogram';
+      endif
+
+      residtype    = 'raw';
+      nv_remaining = {};
+      i            = 1;
+      while (i <= numel (args))
+        if (ischar (args{i}) && strcmpi (args{i}, 'ResidualType'))
+          if (i + 1 > numel (args))
+            error ('plotResiduals: ResidualType requires a value.');
+          endif
+          rt_val   = lower (char (args{i+1}));
+          valid_rt = {'raw', 'pearson', 'standardized', 'studentized'};
+          if (! any (strcmp (rt_val, valid_rt)))
+            error (['plotResiduals: invalid ResidualType ''%s''. ', ...
+                    'Valid values are: ''Raw'', ''Pearson'', ', ...
+                    '''Standardized'', ''Studentized''.'], args{i+1});
+          endif
+          residtype = rt_val;
+          i         = i + 2;
+        else
+          nv_remaining{end+1} = args{i};
+          i = i + 1;
+        endif
+      endwhile
+
+      if (isempty (ax))
+        ax = gca ();
+      endif
+
+      switch (residtype)
+        case 'raw';          rf = 'Raw';
+        case 'pearson';      rf = 'Pearson';
+        case 'standardized'; rf = 'Standardized';
+        case 'studentized';  rf = 'Studentized';
+      endswitch
+      r = mdl.Residuals.(rf);
+
+      switch (plottype)
+
+        case 'histogram'
+          r_act = r(! isnan (r));
+        n_act = numel (r_act);
+        s     = std (r_act);
+        if (n_act <= 1 || s == 0)
+          bw = 1;
+          lo = floor (min (r_act)) - 0.5;
+          hi = lo + 1;
+        else
+          bw_raw = 3.5 * s / (n_act ^ (1/3));
+          mag    = 10 ^ floor (log10 (bw_raw));
+          frac   = bw_raw / mag;
+          if     (frac <= 1); nice = 1;
+          elseif (frac <= 2); nice = 2;
+          elseif (frac <= 5); nice = 5;
+          else;                nice = 10;
+          endif
+          bw = nice * mag;
+          lo = floor (min (r_act) / bw) * bw;
+          hi = ceil  (max (r_act) / bw) * bw;
+        endif
+        n_bins  = max (1, round ((hi - lo) / bw));
+        centers = lo + bw/2 : bw : lo + bw * (n_bins - 0.5);
+        [counts, ~] = hist (r_act, centers);
+        dens  = counts / (n_act * bw);
+        left  = lo + (0:n_bins-1) * bw;
+        right = left + bw;
+          Xp    = [left; left; right; right];
+          Yp    = [zeros(1, n_bins); dens; dens; zeros(1, n_bins)];
+          h     = patch (Xp, Yp, DEF_COLOR, 'FaceColor', DEF_COLOR, ...
+                         nv_remaining{:}, 'Parent', ax);
+          xlabel (ax, 'Residuals');
+          ylabel (ax, 'Probability density');
+          title  (ax, 'Histogram of residuals');
+
+        case 'fitted'
+          fit   = mdl.Fitted;
+          fin   = fit(! isnan (fit));
+          props = lm_plot_props (nv_remaining);
+          hold (ax, 'on');
+          h(1)  = plot (ax, fit, r, ...
+                        'LineStyle',      'none', ...
+                        'Color',           props.Color, ...
+                        'Marker',          props.Marker, ...
+                        'MarkerSize',      props.MarkerSize, ...
+                        'MarkerEdgeColor', props.MarkerEdgeColor, ...
+                        'MarkerFaceColor', props.MarkerFaceColor, ...
+                        'LineWidth',       props.LineWidth);
+          h(2)  = line ([min(fin), max(fin)], [0, 0], ...
+                        'LineStyle', ':', 'Color', REF_COLOR, 'Parent', ax);
+          hold (ax, 'off');
+          xlabel (ax, 'Fitted values');
+          ylabel (ax, 'Residuals');
+          title  (ax, 'Plot of residuals vs. fitted values');
+
+        case 'caseorder'
+          n_tot = numel (r);
+          props = lm_plot_props (nv_remaining);
+          hold (ax, 'on');
+          h(1)  = plot (ax, 1:n_tot, r, ...
+                        'LineStyle',      'none', ...
+                        'Color',           props.Color, ...
+                        'Marker',          props.Marker, ...
+                        'MarkerSize',      props.MarkerSize, ...
+                        'MarkerEdgeColor', props.MarkerEdgeColor, ...
+                        'MarkerFaceColor', props.MarkerFaceColor, ...
+                        'LineWidth',       props.LineWidth);
+          h(2)  = line ([1, n_tot], [0, 0], ...
+                        'LineStyle', ':', 'Color', REF_COLOR, 'Parent', ax);
+          hold (ax, 'off');
+          xlabel (ax, 'Row number');
+          ylabel (ax, 'Residuals');
+          title  (ax, 'Case order plot of residuals');
+
+        case 'lagged'
+          r_x    = r(1:end-1);
+          r_y    = r(2:end);
+          rx_fin = r_x(! isnan (r_x));
+          ry_fin = r_y(! isnan (r_y));
+          props  = lm_plot_props (nv_remaining);
+          hold (ax, 'on');
+          h(1)   = plot (ax, r_x, r_y, ...
+                         'LineStyle',      'none', ...
+                         'Color',           props.Color, ...
+                         'Marker',          props.Marker, ...
+                         'MarkerSize',      props.MarkerSize, ...
+                         'MarkerEdgeColor', props.MarkerEdgeColor, ...
+                         'MarkerFaceColor', props.MarkerFaceColor, ...
+                         'LineWidth',       props.LineWidth);
+          h(2)   = line ([min(rx_fin), max(rx_fin)], [0, 0], ...
+                         'LineStyle', ':', 'Color', REF_COLOR, 'Parent', ax);
+          h(3)   = line ([0, 0], [min(ry_fin), max(ry_fin)], ...
+                         'LineStyle', ':', 'Color', REF_COLOR, 'Parent', ax);
+          hold (ax, 'off');
+          xlabel (ax, 'Residual(t-1)');
+          ylabel (ax, 'Residual(t)');
+          title  (ax, 'Plot of residuals vs. lagged residuals');
+
+        case 'probability'
+          r_act = r(! isnan (r));
+          r_s   = sort (r_act);
+          h     = normplot (ax, r_s);
+          title  (ax, 'Normal probability plot of residuals');
+          xlabel (ax, 'Residuals');
+          ylabel (ax, 'Probability');
+
+        case 'observed'
+          fit   = mdl.Fitted;
+          obs   = mdl.Variables{:, mdl.ResponseName};
+          fin   = fit(! isnan (fit));
+          av    = [fin(:); obs(! isnan (fit))];
+          xl    = [min(av), max(av)];
+          n_tot = numel (fit);
+          xv    = reshape ([fit(:)'; fit(:)'; NaN(1, n_tot)], 1, []);
+          yv    = reshape ([fit(:)'; obs(:)'; NaN(1, n_tot)], 1, []);
+          props = lm_plot_props (nv_remaining);
+          hold (ax, 'on');
+          h(1)  = plot (ax, fit, obs, ...
+                        'LineStyle',      'none', ...
+                        'Color',           props.Color, ...
+                        'Marker',          props.Marker, ...
+                        'MarkerSize',      props.MarkerSize, ...
+                        'MarkerEdgeColor', props.MarkerEdgeColor, ...
+                        'MarkerFaceColor', props.MarkerFaceColor, ...
+                        'LineWidth',       props.LineWidth);
+          h(2)  = line (xl, xl, ...
+                        'LineStyle', ':', 'Color', REF_COLOR, 'Parent', ax);
+          h(3)  = line (xv, yv, ...
+                        'LineStyle', '-', 'Color', REF_COLOR, 'Parent', ax);
+          hold (ax, 'off');
+          xlabel (ax, 'Fitted values');
+          ylabel (ax, 'Observed response values');
+          title  (ax, 'Plot of observed vs. fitted values');
+
+        case 'symmetry'
+          r_act = r(! isnan (r));
+          r_s   = sort (r_act);
+          med   = median (r_s);
+          m     = floor (numel (r_s) / 2);
+          x_sym = sort (med - r_s(1:m));
+          y_sym = sort (r_s(end-m+1:end) - med);
+          mx    = max ([x_sym(:); y_sym(:)]);
+          props = lm_plot_props (nv_remaining);
+          hold (ax, 'on');
+          h(1)  = plot (ax, x_sym, y_sym, ...
+                        'LineStyle',      'none', ...
+                        'Color',           props.Color, ...
+                        'Marker',          props.Marker, ...
+                        'MarkerSize',      props.MarkerSize, ...
+                        'MarkerEdgeColor', props.MarkerEdgeColor, ...
+                        'MarkerFaceColor', props.MarkerFaceColor, ...
+                        'LineWidth',       props.LineWidth);
+          h(2)  = line ([0, mx], [0, mx], ...
+                        'LineStyle', ':', 'Color', REF_COLOR, 'Parent', ax);
+          hold (ax, 'off');
+          xlabel (ax, 'Lower tail');
+          ylabel (ax, 'Upper tail');
+          title  (ax, 'Symmetry plot of residuals around their median');
+
+      endswitch
+
+      if (nargout == 0)
+        clear h;
+      endif
+
+    endfunction
+
   endmethods
 
   methods (Access = private, Static)
@@ -4109,6 +4429,206 @@ endfunction
 %! assert (sum (m.Diagnostics.Leverage), 4, 1e-10);
 %! assert (m.Residuals.Raw, yh - m.Fitted, 1e-10);
 
+%!test
+%! ## default call creates a histogram with correct bin count and density
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, mdl);
+%! xd = get (h(1), 'XData');
+%! yd = get (h(1), 'YData');
+%! r = mdl.Residuals.Raw(! isnan (mdl.Residuals.Raw));
+%! bw = xd(3,1) - xd(1,1);
+%! assert (numel (h), 1);
+%! assert (get (h(1), 'type'), 'patch');
+%! assert (size (xd, 2) > 0);
+%! assert (sum (yd(2,:)) * bw, 1, 1e-10);
+%! assert (all (yd(1,:) == 0) && all (yd(4,:) == 0));
+%! assert (get (get (ax, 'xlabel'), 'string'), 'Residuals');
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Probability density');
+%! assert (get (get (ax, 'title'), 'string'), 'Histogram of residuals');
+%! close (fig);
+
+%!test
+%! ## histogram bar color changes when FaceColor is passed
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, mdl, 'histogram', 'FaceColor', [0 1 0]);
+%! assert (get (h(1), 'FaceColor'), [0 1 0], 1e-10);
+%! close (fig);
+
+%!test
+%! ## fitted plot shows residuals against fitted values with a zero reference line
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, mdl, 'fitted');
+%! assert (numel (h), 2);
+%! assert (get (h(1), 'XData'), mdl.Fitted', 1e-15);
+%! assert (get (h(1), 'YData'), mdl.Residuals.Raw', 1e-15);
+%! assert (get (h(1), 'LineStyle'), 'none');
+%! assert (get (h(1), 'Marker'), 'x');
+%! assert (get (h(2), 'YData'), [0 0]);
+%! assert (get (h(2), 'LineStyle'), ':');
+%! assert (get (get (ax, 'xlabel'), 'string'), 'Fitted values');
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Residuals');
+%! assert (get (get (ax, 'title'), 'string'), 'Plot of residuals vs. fitted values');
+%! close (fig);
+
+%!test
+%! ## custom color applies to data points but leaves the reference line unchanged
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, mdl, 'fitted', 'Color', [1 0 0]);
+%! assert (get (h(1), 'Color'), [1 0 0], 1e-10);
+%! assert (get (h(2), 'Color'), [0.8510 0.8510 0.8510], 1e-4);
+%! assert (get (h(2), 'LineStyle'), ':');
+%! close (fig);
+
+%!test
+%! ## excluded rows appear as gaps in the fitted plot
+%! me = fitlm (X, y, 'Exclude', [3, 8]);
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, me, 'fitted');
+%! yd = get (h(1), 'YData');
+%! assert (numel (yd), 20);
+%! assert (isnan (yd(3)));
+%! assert (isnan (yd(8)));
+%! assert (! isnan (yd(1)));
+%! close (fig);
+
+%!test
+%! ## case order plot covers all rows and shows gaps where rows were excluded
+%! me = fitlm (X, y, 'Exclude', [2, 5]);
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, me, 'caseorder');
+%! xd = get (h(1), 'XData');
+%! yd = get (h(1), 'YData');
+%! assert (xd, 1:20);
+%! assert (isnan (yd(2)));
+%! assert (isnan (yd(5)));
+%! assert (! isnan (yd(1)));
+%! assert (get (h(2), 'YData'), [0 0]);
+%! assert (get (get (ax, 'xlabel'), 'string'), 'Row number');
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Residuals');
+%! assert (get (get (ax, 'title'), 'string'), 'Case order plot of residuals');
+%! close (fig);
+
+%!test
+%! ## lagged plot shows each residual against the previous one with two reference lines
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, mdl, 'lagged');
+%! r = mdl.Residuals.Raw;
+%! assert (numel (h), 3);
+%! assert (get (h(1), 'XData'), r(1:end-1)', 1e-15);
+%! assert (get (h(1), 'YData'), r(2:end)', 1e-15);
+%! assert (get (h(2), 'YData'), [0 0]);
+%! assert (get (h(3), 'XData'), [0 0]);
+%! assert (get (h(2), 'LineStyle'), ':');
+%! assert (get (get (ax, 'xlabel'), 'string'), 'Residual(t-1)');
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Residual(t)');
+%! assert (get (get (ax, 'title'), 'string'), 'Plot of residuals vs. lagged residuals');
+%! close (fig);
+
+%!test
+%! ## probability plot uses sorted active residuals as its data
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, mdl, 'probability');
+%! r_s = sort (mdl.Residuals.Raw(! isnan (mdl.Residuals.Raw)));
+%! assert (get (h(1), 'XData'), r_s', 1e-15);
+%! assert (get (get (ax, 'xlabel'), 'string'), 'Residuals');
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Probability');
+%! assert (get (get (ax, 'title'), 'string'), 'Normal probability plot of residuals');
+%! close (fig);
+
+%!test
+%! ## observed plot connects each point to the reference line with a vertical segment
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, mdl, 'observed');
+%! obs = mdl.Variables{:, mdl.ResponseName};
+%! assert (numel (h), 3);
+%! assert (get (h(1), 'XData'), mdl.Fitted', 1e-15);
+%! assert (get (h(1), 'YData'), obs', 1e-15);
+%! assert (isequal (get (h(2), 'XData'), get (h(2), 'YData')));
+%! xd3 = get (h(3), 'XData');
+%! assert (numel (xd3), 3 * mdl.NumObservations);
+%! assert (sum (isnan (xd3)), mdl.NumObservations);
+%! assert (get (get (ax, 'xlabel'), 'string'), 'Fitted values');
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Observed response values');
+%! assert (get (get (ax, 'title'), 'string'), 'Plot of observed vs. fitted values');
+%! close (fig);
+
+%!test
+%! ## symmetry plot measures distance from median in both tails
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, mdl, 'symmetry');
+%! r_s = sort (mdl.Residuals.Raw(! isnan (mdl.Residuals.Raw)));
+%! med = median (r_s);
+%! m = floor (numel (r_s) / 2);
+%! x_sym = sort (med - r_s(1:m));
+%! y_sym = sort (r_s(end-m+1:end) - med);
+%! assert (numel (h), 2);
+%! assert (get (h(1), 'XData'), x_sym', 1e-15);
+%! assert (get (h(1), 'YData'), y_sym', 1e-15);
+%! assert (isequal (get (h(2), 'XData'), get (h(2), 'YData')));
+%! assert (get (h(2), 'LineStyle'), ':');
+%! assert (get (get (ax, 'xlabel'), 'string'), 'Lower tail');
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Upper tail');
+%! close (fig);
+
+%!test
+%! ## switching to pearson residuals changes plotted values but not x positions
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, mdl, 'fitted', 'ResidualType', 'pearson');
+%! assert (get (h(1), 'YData'), mdl.Residuals.Pearson', 1e-15);
+%! assert (get (h(1), 'XData'), mdl.Fitted', 1e-15);
+%! assert (! isequal (get (h(1), 'YData'), mdl.Residuals.Raw'));
+%! close (fig);
+
+%!test
+%! ## standardized and studentized residuals produce different values
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h1 = plotResiduals (ax, mdl, 'caseorder', 'ResidualType', 'standardized');
+%! h2 = plotResiduals (ax, mdl, 'caseorder', 'ResidualType', 'studentized');
+%! assert (get (h1(1), 'YData'), mdl.Residuals.Standardized', 1e-15);
+%! assert (get (h2(1), 'YData'), mdl.Residuals.Studentized', 1e-15);
+%! assert (! isequal (get (h1(1), 'YData'), get (h2(1), 'YData')));
+%! close (fig);
+
+%!test
+%! ## marker style and size apply to data points but not to the reference line
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, mdl, 'fitted', 'Marker', 's', 'MarkerSize', 10);
+%! assert (get (h(1), 'Marker'), 's');
+%! assert (get (h(1), 'MarkerSize'), 10);
+%! assert (get (h(2), 'Marker'), 'none');
+%! close (fig);
+
+%!test
+%! ## weighted model residuals differ from unweighted residuals in the fitted plot
+%! mw = fitlm (X, y, 'Weights', (1:n)' / sum (1:n));
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotResiduals (ax, mw, 'fitted');
+%! assert (get (h(1), 'YData'), mw.Residuals.Raw', 1e-15);
+%! assert (! isequal (get (h(1), 'YData'), mdl.Residuals.Raw'));
+%! close (fig);
+
+%!test
+%! ## calling without an axes handle plots into the current axes
+%! fig = figure ('visible', 'off');
+%! h = plotResiduals (mdl, 'fitted');
+%! assert (isgraphics (get (h(1), 'Parent'), 'axes'));
+%! assert (isequal (get (h(1), 'Parent'), gca ()));
+%! close (fig);
+
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
 %!error <Terms matrix must have 2 or 3 columns> fitlm (X, y, [1 2 3 4; 5 6 7 8])
@@ -4176,3 +4696,5 @@ endfunction
 %!error <Terms matrix must have 3 columns> removeTerms (mdl, [0 1 0 0])
 %!error <Terms matrix must have 3 columns> removeTerms (mdl, [])
 %!error <Model update specification> removeTerms (mdl, {'x1'})
+%!error <Bad residuals plot type> plotResiduals (mdl, 'badtype')
+%!error <invalid ResidualType> plotResiduals (mdl, 'fitted', 'ResidualType', 'bad')
