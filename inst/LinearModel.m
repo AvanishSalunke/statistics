@@ -2093,11 +2093,11 @@ classdef LinearModel
           && ! any (strcmpi (args{1}, known_nv)))
         pt_str = args{1};
         args   = args(2:end);
-        try
-          plottype = validatestring (pt_str, valid_pt);
-        catch
+        idx = find (strcmpi (pt_str, valid_pt));
+        if (isempty (idx))
           error ('plotResiduals: Bad residuals plot type.');
-        end_try_catch
+        endif
+        plottype = valid_pt{idx(1)};
       else
         plottype = 'histogram';
       endif
