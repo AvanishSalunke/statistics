@@ -1995,87 +1995,124 @@ classdef LinearModel
     ##
     ## Plot residuals of a fitted linear regression model.
     ##
-    ## @code{plotResiduals (@var{mdl})} creates a histogram of the raw residuals
-    ## with probability density scaling so that the bar areas sum to 1.
-    ## The number of bins equals @code{ceil (sqrt (n))} where @code{n} is the
-    ## number of active (non-excluded, non-missing) observations.
+    ## @code{plotResiduals (@var{mdl})} creates a probability density histogram
+    ## of the raw residuals.  Bin width follows Scott's rule
+    ## @math{h = 3.5 \hat\sigma n^{-1/3}} and is rounded to a visually clean
+    ## value.  The bar areas sum to 1.
     ##
-    ## @code{plotResiduals (@var{mdl}, @var{plottype})} creates the plot type
-    ## specified by @var{plottype}.  Excluded and missing rows appear as gaps
-    ## in all plot types except @code{"histogram"} and @code{"probability"},
-    ## which use only the active observations.  Valid @var{plottype} values are:
+    ## @code{plotResiduals (@var{mdl}, @var{plottype})} creates the type of
+    ## residual plot given by @var{plottype}.  For all types except
+    ## @code{"histogram"} and @code{"probability"}, the full observation vector
+    ## including excluded rows is passed to the plot.  Excluded or missing rows
+    ## appear as @code{NaN} in the plotted data and produce visible gaps.
+    ## @var{plottype} must be one of:
     ##
     ## @table @asis
     ## @item @qcode{"histogram"} (default)
-    ## Histogram of residuals with probability density scaling.
+    ## Probability density histogram.  Only active observations are used.
+    ## Returns one @code{patch} handle.  Accepts @code{FaceColor},
+    ## @code{EdgeColor}, @code{FaceAlpha}, and @code{LineWidth} Name-Value
+    ## arguments.
     ##
     ## @item @qcode{"fitted"}
-    ## Residuals versus fitted values.  A dotted reference line marks zero.
+    ## Residuals on the y-axis against fitted values on the x-axis.  A dotted
+    ## horizontal reference line marks @math{y = 0}.  Returns two line handles:
+    ## @code{h(1)} is the data scatter and @code{h(2)} is the reference line.
     ##
     ## @item @qcode{"caseorder"}
-    ## Residuals versus observation row number.  A dotted reference line marks
-    ## zero.  Excluded rows appear as gaps.
+    ## Residuals on the y-axis against observation row number on the x-axis,
+    ## covering all rows from 1 to @code{n_total}.  A dotted horizontal reference
+    ## line marks @math{y = 0}.  Returns two line handles: @code{h(1)} is the
+    ## data and @code{h(2)} is the reference line.
     ##
     ## @item @qcode{"lagged"}
-    ## Residual @math{r(t)} versus the previous residual @math{r(t-1)}.  Two
-    ## dotted reference lines mark @math{x = 0} and @math{y = 0}.
+    ## Each residual @math{r(t)} on the y-axis against the preceding residual
+    ## @math{r(t-1)} on the x-axis.  Two dotted reference lines mark
+    ## @math{y = 0} and @math{x = 0}.  Returns three line handles: @code{h(1)}
+    ## is the scatter, @code{h(2)} is the horizontal reference, and @code{h(3)}
+    ## is the vertical reference.
     ##
     ## @item @qcode{"probability"}
-    ## Normal probability plot of the active residuals using @code{normplot}.
+    ## Normal probability plot of the sorted active residuals produced by
+    ## @code{normplot}.  Returns two handles: @code{h(1)} is the data line and
+    ## @code{h(2)} is the fitted reference line produced by @code{normplot}.
+    ## Name-Value arguments are not applied for this plot type.
     ##
     ## @item @qcode{"observed"}
-    ## Observed response versus fitted values with a dotted @math{y = x}
-    ## reference line.  Vertical segments connect each observed point to the
-    ## reference line.
+    ## Observed response values on the y-axis against fitted values on the
+    ## x-axis.  A dotted @math{y = x} reference line is drawn through the origin.
+    ## Vertical segments connect each observed point down to the reference line.
+    ## Returns three handles: @code{h(1)} is the scatter, @code{h(2)} is the
+    ## @math{y = x} reference, and @code{h(3)} is the vertical segment line
+    ## (stored as a single @code{NaN}-separated line object).
     ##
     ## @item @qcode{"symmetry"}
-    ## Upper-tail deviations from the median plotted against lower-tail
-    ## deviations.  Points near the dotted @math{y = x} reference line
-    ## indicate a symmetric residual distribution.
+    ## Upper-tail distances from the median plotted against lower-tail distances
+    ## from the median.  Each point @code{(x, y)} satisfies @math{x = \mathrm{med}
+    ## - r_{(i)}} and @math{y = r_{(n+1-i)} - \mathrm{med}}, using the
+    ## @math{\lfloor n/2 \rfloor} most extreme observations on each side.  A
+    ## perfectly symmetric distribution falls on the dotted @math{y = x}
+    ## reference line.  Returns two handles: @code{h(1)} is the scatter and
+    ## @code{h(2)} is the reference line.
     ## @end table
     ##
-    ## @code{plotResiduals (@var{ax}, @dots{})} creates the plot in the axes
-    ## @var{ax} instead of the current axes.
+    ## @code{plotResiduals (@var{ax}, @dots{})} targets the axes object @var{ax}
+    ## instead of the current axes returned by @code{gca}.
     ##
-    ## @code{@var{h} = plotResiduals (@dots{})} returns a graphics handle or
-    ## array of handles.  Name-Value arguments apply to @code{h(1)} only and
-    ## do not affect reference lines.
+    ## @code{@var{h} = plotResiduals (@dots{})} returns a vector of graphics
+    ## handles.  The number of handles depends on @var{plottype} as described
+    ## above.  Name-Value arguments are applied to the data handle @code{h(1)}
+    ## only.  Reference lines are always drawn with the default style and are
+    ## not affected by Name-Value arguments.
     ##
-    ## Name-Value pair arguments:
+    ## The following Name-Value arguments are accepted.  Arguments marked
+    ## @emph{histogram only} are passed directly to the @code{patch} object and
+    ## have no effect on other plot types.  Arguments marked @emph{non-histogram}
+    ## are applied to the scatter marker and have no effect on the histogram.
     ##
-    ## @multitable @columnfractions 0.25 0.02 0.73
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.28 0.02 0.70
+    ## @headitem Name @tab @tab Description and default
     ##
-    ## @item @qcode{"ResidualType"} @tab @tab Type of residual to plot.
-    ## One of @qcode{'raw'} (default), @qcode{'pearson'},
-    ## @qcode{'standardized'}, or @qcode{'studentized'}.  Case-insensitive.
-    ## The corresponding column of @code{mdl.Residuals} is used.
+    ## @item @qcode{"ResidualType"} @tab @tab
+    ## Type of residual to plot.  One of @qcode{"raw"} (default),
+    ## @qcode{"pearson"}, @qcode{"standardized"}, or @qcode{"studentized"}.
+    ## Case-insensitive.  Selects the corresponding column of
+    ## @code{mdl.Residuals}.
     ##
-    ## @item @qcode{"FaceColor"} @tab @tab Bar fill color for the histogram
-    ## plot type only.  Passed directly to the underlying @code{patch} object.
+    ## @item @qcode{"Color"} @tab @tab
+    ## (@emph{non-histogram}) Marker color.
+    ## Default: @code{[0.1490 0.5490 0.8660]}.
     ##
-    ## @item @qcode{"EdgeColor"} @tab @tab Bar edge color for the histogram.
+    ## @item @qcode{"Marker"} @tab @tab
+    ## (@emph{non-histogram}) Marker symbol.  Any symbol accepted by
+    ## @code{plot} is valid.  Default: @qcode{"x"}.
     ##
-    ## @item @qcode{"Color"} @tab @tab Marker color for non-histogram plot
-    ## types.  Default is @code{[0.1490 0.5490 0.8660]}.
+    ## @item @qcode{"MarkerSize"} @tab @tab
+    ## (@emph{non-histogram}) Marker size in points.  Default: @code{6}.
     ##
-    ## @item @qcode{"Marker"} @tab @tab Marker symbol for the data handle.
-    ## Default is @code{'x'}.
+    ## @item @qcode{"MarkerEdgeColor"} @tab @tab
+    ## (@emph{non-histogram}) Marker edge color.  Default: @qcode{"auto"}.
     ##
-    ## @item @qcode{"MarkerSize"} @tab @tab Marker size in points.
-    ## Default is @code{6}.
+    ## @item @qcode{"MarkerFaceColor"} @tab @tab
+    ## (@emph{non-histogram}) Marker fill color.  Default: @qcode{"none"}.
     ##
-    ## @item @qcode{"MarkerEdgeColor"} @tab @tab Marker edge color.
-    ## Default is @code{'auto'}.
+    ## @item @qcode{"LineWidth"} @tab @tab
+    ## (@emph{non-histogram}) Width of the marker edge in points.
+    ## Default: @code{0.5}.
     ##
-    ## @item @qcode{"MarkerFaceColor"} @tab @tab Marker fill color.
-    ## Default is @code{'none'}.
+    ## @item @qcode{"FaceColor"} @tab @tab
+    ## (@emph{histogram only}) Fill color of the histogram bars.
+    ## Default: @code{[0.1490 0.5490 0.8660]}.
     ##
-    ## @item @qcode{"LineWidth"} @tab @tab Line width in points.
-    ## Default is @code{0.5}.
+    ## @item @qcode{"EdgeColor"} @tab @tab
+    ## (@emph{histogram only}) Edge color of the histogram bars.
+    ##
+    ## @item @qcode{"FaceAlpha"} @tab @tab
+    ## (@emph{histogram only}) Transparency of the histogram bars,
+    ## specified as a scalar in @math{[0, 1]}.
     ## @end multitable
     ##
-    ## @seealso{fitlm, plotDiagnostics, plotAdded, normplot, LinearModel}
+    ## @seealso{fitlm, plotDiagnostics, plotAdded, LinearModel}
     ## @end deftypefn
     function h = plotResiduals (this, varargin)
       [ax, mdl, args] = lm_plot_axes (this, varargin);
