@@ -889,7 +889,7 @@ classdef LinearModel
 
       se_full(active)    = sqrt (cov_diag(active));
       tstat_full(active) = beta_full(active) ./ se_full(active);
-      pval_full(active)  = 2 * (1 - tcdf (abs (tstat_full(active)), DFE));
+      pval_full(active)  = 2 * tcdf (-abs (tstat_full(active)), DFE);
 
       CoeffTable = table (beta_full, se_full, tstat_full, pval_full, ...
         'VariableNames', {'Estimate', 'SE', 'tStat', 'pValue'}, ...
