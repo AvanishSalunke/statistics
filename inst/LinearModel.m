@@ -2308,6 +2308,263 @@ classdef LinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {} plotDiagnostics (@var{mdl})
+    ## @deftypefnx {LinearModel} {} plotDiagnostics (@var{mdl}, @var{plottype})
+    ## @deftypefnx {LinearModel} {} plotDiagnostics (@var{mdl}, @var{plottype}, @var{Name}, @var{Value})
+    ## @deftypefnx {LinearModel} {} plotDiagnostics (@var{ax}, @dots{})
+    ## @deftypefnx {LinearModel} {@var{h} =} plotDiagnostics (@dots{})
+    ##
+    ## Plot observation diagnostics of a fitted linear regression model.
+    ##
+    ## @code{plotDiagnostics (@var{mdl})} creates a case-order plot of the
+    ## leverage of each observation.  The x-axis is the observation row number
+    ## running from 1 to the total number of rows including any excluded rows.
+    ## A dotted horizontal reference line marks the recommended threshold
+    ## @math{2p/n}, where @math{p} is @code{mdl.NumCoefficients} and @math{n}
+    ## is @code{mdl.NumObservations}.
+    ##
+    ## @code{plotDiagnostics (@var{mdl}, @var{plottype})} creates the diagnostic
+    ## plot specified by @var{plottype}.  For all types except @code{"contour"},
+    ## the x-axis is the row number and covers all rows including excluded ones.
+    ## Excluded rows produce @code{NaN} values in the diagnostic vectors, which
+    ## appear as natural gaps in the plot with no special handling required.
+    ## @var{plottype} must be one of:
+    ##
+    ## @table @asis
+    ## @item @qcode{"leverage"} (default)
+    ## Leverage of each observation (@code{mdl.Diagnostics.Leverage}).
+    ## One dotted horizontal reference line at @math{2p/n}.
+    ## Returns two handles: @code{h(1)} is the data scatter and @code{h(2)}
+    ## is the reference line.
+    ##
+    ## @item @qcode{"cookd"}
+    ## Cook's distance for each observation
+    ## (@code{mdl.Diagnostics.CooksDistance}).  One dotted reference line at
+    ## @math{3 \times \mathrm{mean(CooksDistance)}}, where the mean ignores
+    ## @code{NaN} values.  Returns two handles: @code{h(1)} data, @code{h(2)}
+    ## reference.
+    ##
+    ## @item @qcode{"covratio"}
+    ## Delete-1 ratio of the determinant of the coefficient covariance matrix
+    ## (@code{mdl.Diagnostics.CovRatio}).  Two dotted reference lines at
+    ## @math{1 - 3p/n} (lower bound) and @math{1 + 3p/n} (upper bound).
+    ## Both bounds are stored as a single @code{NaN}-separated line object.
+    ## Returns two handles: @code{h(1)} data, @code{h(2)} combined reference.
+    ##
+    ## @item @qcode{"dfbetas"}
+    ## Delete-1 scaled change in each coefficient estimate
+    ## (@code{mdl.Diagnostics.Dfbetas}, one column per coefficient).
+    ## One line object is drawn per coefficient.  Two dotted reference lines
+    ## at @math{\pm 3/\sqrt{n}} are stored as a single @code{NaN}-separated
+    ## line object.  Returns @math{p+1} handles: @code{h(1)} through
+    ## @code{h(p)} are the per-coefficient data lines and @code{h(p+1)} is
+    ## the combined reference.  Name-Value arguments are applied to all
+    ## @math{p} data handles.
+    ##
+    ## @item @qcode{"dffits"}
+    ## Delete-1 scaled change in the fitted value
+    ## (@code{mdl.Diagnostics.Dffits}).  Two dotted reference lines at
+    ## @math{\pm 2\sqrt{p/n}} stored as a single @code{NaN}-separated line.
+    ## Returns two handles: @code{h(1)} data, @code{h(2)} combined reference.
+    ##
+    ## @item @qcode{"s2_i"}
+    ## Delete-1 variance estimate (@code{mdl.Diagnostics.S2_i}).  One dotted
+    ## reference line at @code{mdl.MSE}.  Returns two handles: @code{h(1)}
+    ## data, @code{h(2)} reference.
+    ##
+    ## @item @qcode{"contour"}
+    ## Standardized residuals on the y-axis against leverage on the x-axis,
+    ## with Cook's distance contours overlaid at levels
+    ## @math{[0.05, 0.10, 0.15, 0.20, 0.25]}.  The contour surface is
+    ## computed on a 31-by-30 grid over the range of the active leverage and
+    ## residual values.  Returns two handles: @code{h(1)} is the data scatter
+    ## (a @code{line} object) and @code{h(2)} is the contour object.
+    ## @end table
+    ##
+    ## @code{plotDiagnostics (@var{ax}, @dots{})} targets the axes object
+    ## @var{ax} instead of the current axes returned by @code{gca}.
+    ##
+    ## @code{@var{h} = plotDiagnostics (@dots{})} returns a vector of graphics
+    ## handles.  The number of handles depends on @var{plottype} as described
+    ## above.  Name-Value arguments are applied to the data handle @code{h(1)},
+    ## except for @code{"dfbetas"} where they are applied to all @math{p}
+    ## coefficient handles.  Reference line handles are never affected by
+    ## Name-Value arguments.
+    ##
+    ## @multitable @columnfractions 0.28 0.02 0.70
+    ## @headitem Name @tab @tab Description and default
+    ##
+    ## @item @qcode{"Color"} @tab @tab
+    ## Marker color for data points.  For @code{"dfbetas"} this color is
+    ## applied to all @math{p} coefficient line objects.
+    ## Default: @code{[0.1490 0.5490 0.8660]}.
+    ##
+    ## @item @qcode{"Marker"} @tab @tab
+    ## Marker symbol.  Any symbol accepted by @code{plot} is valid.
+    ## Default: @qcode{"x"}.
+    ##
+    ## @item @qcode{"MarkerSize"} @tab @tab
+    ## Marker size in points.  Default: @code{6}.
+    ##
+    ## @item @qcode{"MarkerEdgeColor"} @tab @tab
+    ## Marker edge color.  Default: @qcode{"auto"}.
+    ##
+    ## @item @qcode{"MarkerFaceColor"} @tab @tab
+    ## Marker fill color.  Default: @qcode{"none"}.
+    ##
+    ## @item @qcode{"LineWidth"} @tab @tab
+    ## Width of the marker edge in points.  Default: @code{0.5}.
+    ## @end multitable
+    ##
+    ## @seealso{fitlm, plotResiduals, plotAdded, LinearModel}
+    ## @end deftypefn
+    function h = plotDiagnostics (this, varargin)
+      [ax, mdl, args] = lm_plot_axes (this, varargin);
+
+      REF_COLOR = [0.8510, 0.8510, 0.8660];
+
+      valid_pt = {'leverage', 'cookd', 'covratio', 'dfbetas', ...
+                  'dffits', 's2_i', 'contour'};
+
+      if (! isempty (args) && ischar (args{1}) ...
+          && ! any (strcmpi (args{1}, ...
+                    {'color','marker','markersize','markeredgecolor', ...
+                     'markerfacecolor','linewidth'})))
+        pt_str = args{1};
+        args   = args(2:end);
+        idx = find (strcmpi (pt_str, valid_pt));
+        if (isempty (idx))
+          error ('plotDiagnostics: Bad diagnostics plot type.');
+        endif
+        plottype = valid_pt{idx(1)};
+      else
+        plottype = 'leverage';
+      endif
+
+      props = lm_plot_props (args);
+
+      if (isempty (ax))
+        ax = gca ();
+      endif
+
+      diag_t = mdl.Diagnostics;
+      p      = mdl.NumCoefficients;
+      n_obs  = mdl.NumObservations;
+      mse    = mdl.MSE;
+      n      = numel (diag_t.Leverage);
+
+      switch (plottype)
+
+        case 'leverage'
+          lev = diag_t.Leverage;
+          ref = 2 * p / n_obs;
+          hold (ax, 'on');
+          h(1) = lm_plot_data (ax, 1:n, lev, props);
+          h(2) = line ([0, n], [ref, ref], ...
+                       'LineStyle', ':', 'Color', REF_COLOR, 'Parent', ax);
+          hold (ax, 'off');
+          xlabel (ax, 'Row number');
+          ylabel (ax, 'Leverage');
+          title  (ax, 'Case order plot of leverage');
+
+        case 'cookd'
+          cd_ = diag_t.CooksDistance;
+          ref = 3 * mean (cd_, 'omitnan');
+          hold (ax, 'on');
+          h(1) = lm_plot_data (ax, 1:n, cd_, props);
+          h(2) = line ([0, n], [ref, ref], ...
+                       'LineStyle', ':', 'Color', REF_COLOR, 'Parent', ax);
+          hold (ax, 'off');
+          xlabel (ax, 'Row number');
+          ylabel (ax, 'Cook''s distance');
+          title  (ax, 'Case order plot of Cook''s distance');
+
+        case 'covratio'
+          cv = diag_t.CovRatio;
+          lo = 1 - 3*p/n_obs;
+          hi = 1 + 3*p/n_obs;
+          xv = [0, n, NaN, 0, n];
+          yv = [lo, lo, NaN, hi, hi];
+          hold (ax, 'on');
+          h(1) = lm_plot_data (ax, 1:n, cv, props);
+          h(2) = line (xv, yv, ...
+                       'LineStyle', ':', 'Color', REF_COLOR, 'Parent', ax);
+          hold (ax, 'off');
+          xlabel (ax, 'Row number');
+          ylabel (ax, 'Covariance ratio');
+          title  (ax, 'Case order plot of covariance ratio');
+
+        case 'dfbetas'
+          db  = diag_t.Dfbetas;
+          thr = 3 / sqrt (n_obs);
+          xv  = [0, n, NaN, 0, n];
+          yv  = [-thr, -thr, NaN, thr, thr];
+          hold (ax, 'on');
+          for k = 1:p
+            h(k) = lm_plot_data (ax, (1:n)', db(:,k), props);
+          endfor
+          h(p+1) = line (xv, yv, ...
+                         'LineStyle', ':', 'Color', REF_COLOR, 'Parent', ax);
+          hold (ax, 'off');
+          xlabel (ax, 'Row number');
+          ylabel (ax, 'Scaled change in coefficients');
+          title  (ax, 'Case order plot of scaled change in coefficients');
+
+        case 'dffits'
+          df  = diag_t.Dffits;
+          thr = 2 * sqrt (p / n_obs);
+          xv  = [0, n, NaN, 0, n];
+          yv  = [-thr, -thr, NaN, thr, thr];
+          hold (ax, 'on');
+          h(1) = lm_plot_data (ax, 1:n, df, props);
+          h(2) = line (xv, yv, ...
+                       'LineStyle', ':', 'Color', REF_COLOR, 'Parent', ax);
+          hold (ax, 'off');
+          xlabel (ax, 'Row number');
+          ylabel (ax, 'Scaled change in fit');
+          title  (ax, 'Case order plot of scaled change in fit');
+
+        case 's2_i'
+          s2 = diag_t.S2_i;
+          hold (ax, 'on');
+          h(1) = lm_plot_data (ax, 1:n, s2, props);
+          h(2) = line ([0, n], [mse, mse], ...
+                       'LineStyle', ':', 'Color', REF_COLOR, 'Parent', ax);
+          hold (ax, 'off');
+          xlabel (ax, 'Row number');
+          ylabel (ax, 'Leave-one-out variance');
+          title  (ax, 'Case order plot of leave-one-out variance');
+
+        case 'contour'
+          lev    = diag_t.Leverage;
+          r_raw  = mdl.Residuals.Raw;
+          act    = ! isnan (lev);
+          lev_a  = lev(act);
+          r_a    = r_raw(act);
+          x_grid = linspace (min (lev_a), max (lev_a), 31);
+          y_grid = linspace (min (r_a),   max (r_a),   30);
+          [Hg, Rg] = meshgrid (x_grid, y_grid);
+          Hg     = min (Hg, 1 - 1e-10);
+          Zg     = Rg.^2 .* Hg ./ (p .* mse .* (1 - Hg).^2);
+          levels = [0.05, 0.10, 0.15, 0.20, 0.25];
+          hold (ax, 'on');
+          h(1) = lm_plot_data (ax, lev, r_raw, props);
+          [~, h_ct] = contour (ax, x_grid, y_grid, Zg, levels);
+          h(2) = h_ct;
+          hold (ax, 'off');
+          xlabel (ax, 'Leverage');
+          ylabel (ax, 'Residual');
+          title  (ax, 'Cook''s distance factorization');
+
+      endswitch
+
+      if (nargout == 0)
+        clear h;
+      endif
+
+    endfunction
+
   endmethods
 
   methods (Access = private, Static)
@@ -4642,6 +4899,198 @@ endfunction
 %! assert (isequal (get (h(1), 'Parent'), gca ()));
 %! close (fig);
 
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotDiagnostics (ax, mdl);
+%! yd = get (h(1), 'YData');
+%! assert (numel (h), 2);
+%! assert (get (h(1), 'XData'), 1:n);
+%! assert (yd(1), 0.370779220779221, -1e-10);
+%! assert (yd(2), 0.245283663704716, -1e-10);
+%! assert (yd(3), 0.164718614718615, -1e-10);
+%! assert (yd(4), 0.118147641831852, -1e-10);
+%! assert (yd(5), 0.0960013670539986, -1e-10);
+%! assert (yd(6), 0.0900774663932558, -1e-10);
+%! assert (yd(7), 0.0935406698564593, -1e-10);
+%! assert (yd(8), 0.100922761449077, -1e-10);
+%! assert (yd(9), 0.108122579175211, -1e-10);
+%! assert (yd(10), 0.112406015037594, -1e-10);
+%! assert (yd(11), 0.112406015037594, -1e-10);
+%! assert (yd(12), 0.108122579175211, -1e-10);
+%! assert (yd(13), 0.100922761449077, -1e-10);
+%! assert (yd(14), 0.0935406698564592, -1e-10);
+%! assert (yd(15), 0.0900774663932559, -1e-10);
+%! assert (yd(16), 0.0960013670539986, -1e-10);
+%! assert (yd(17), 0.118147641831852, -1e-10);
+%! assert (yd(18), 0.164718614718615, -1e-10);
+%! assert (yd(19), 0.245283663704716, -1e-10);
+%! assert (yd(20), 0.370779220779221, -1e-10);
+%! assert (get (h(2), 'YData'), [0.3, 0.3], 1e-12);
+%! assert (get (h(2), 'XData'), [0, n]);
+%! assert (get (h(2), 'LineStyle'), ':');
+%! assert (get (get (ax, 'xlabel'), 'string'), 'Row number');
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Leverage');
+%! assert (get (get (ax, 'title'), 'string'), 'Case order plot of leverage');
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotDiagnostics (ax, mdl, 'leverage', 'Color', [1 0 0]);
+%! assert (get (h(1), 'Color'), [1 0 0], 1e-10);
+%! assert (get (h(2), 'Color'), [0.8510 0.8510 0.8660], 1e-4);
+%! assert (get (h(2), 'LineStyle'), ':');
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotDiagnostics (ax, mdl, 'cookd');
+%! yd = get (h(1), 'YData');
+%! assert (numel (h), 2);
+%! assert (yd(1), 0.078517048682575, -1e-8);
+%! assert (yd(2), 0.077211407930332, -1e-8);
+%! assert (yd(3), 0.001953301452841, -1e-7);
+%! assert (get (h(2), 'YData'), [0.1668641787, 0.1668641787], -1e-8);
+%! assert (get (h(2), 'XData'), [0, n]);
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Cook''s distance');
+%! assert (get (get (ax, 'title'), 'string'), 'Case order plot of Cook''s distance');
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotDiagnostics (ax, mdl, 'covratio');
+%! yd = get (h(1), 'YData');
+%! yv = get (h(2), 'YData');
+%! xv = get (h(2), 'XData');
+%! assert (numel (h), 2);
+%! assert (yd(1), 1.774933177, -1e-8);
+%! assert (yd(2), 1.397661919, -1e-8);
+%! assert (yd(3), 1.428481535, -1e-8);
+%! assert (numel (xv), 5);
+%! assert (sum (isnan (xv)), 1);
+%! assert (yv(1), 0.55, 1e-12);
+%! assert (yv(2), 0.55, 1e-12);
+%! assert (yv(4), 1.45, 1e-12);
+%! assert (yv(5), 1.45, 1e-12);
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Covariance ratio');
+%! assert (get (get (ax, 'title'), 'string'), 'Case order plot of covariance ratio');
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotDiagnostics (ax, mdl, 'dfbetas');
+%! p = mdl.NumCoefficients;
+%! yv = get (h(p+1), 'YData');
+%! xv = get (h(p+1), 'XData');
+%! assert (numel (h), p + 1);
+%! assert (numel (get (h(1), 'YData')), n);
+%! assert (numel (get (h(2), 'YData')), n);
+%! assert (numel (get (h(3), 'YData')), n);
+%! assert (numel (xv), 5);
+%! assert (sum (isnan (xv)), 1);
+%! assert (yv(1), -0.6708203932, -1e-8);
+%! assert (yv(end), 0.6708203932, -1e-8);
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Scaled change in coefficients');
+%! assert (get (get (ax, 'title'), 'string'), 'Case order plot of scaled change in coefficients');
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotDiagnostics (ax, mdl, 'dfbetas', 'Color', [1 0 0]);
+%! p = mdl.NumCoefficients;
+%! for k = 1:p
+%! assert (get (h(k), 'Color'), [1 0 0], 1e-10);
+%! endfor
+%! assert (get (h(p+1), 'Color'), [0.8510 0.8510 0.8660], 1e-4);
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotDiagnostics (ax, mdl, 'dffits');
+%! yd = get (h(1), 'YData');
+%! yv = get (h(2), 'YData');
+%! xv = get (h(2), 'XData');
+%! assert (numel (h), 2);
+%! assert (yd(1), 0.476480465355394, -1e-8);
+%! assert (yd(2), 0.477020506700835, -1e-8);
+%! assert (yd(3), -0.074329411030064, -1e-7);
+%! assert (sum (isnan (xv)), 1);
+%! assert (yv(1), -0.7745966692, -1e-8);
+%! assert (yv(end), 0.7745966692, -1e-8);
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Scaled change in fit');
+%! assert (get (get (ax, 'title'), 'string'), 'Case order plot of scaled change in fit');
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotDiagnostics (ax, mdl, 's2_i');
+%! yd = get (h(1), 'YData');
+%! assert (numel (h), 2);
+%! assert (yd(1), 0.02359100986, -1e-8);
+%! assert (yd(2), 0.02314622330, -1e-8);
+%! assert (yd(3), 0.02411685408, -1e-8);
+%! assert (get (h(2), 'YData'), [0.02273796067, 0.02273796067], -1e-8);
+%! assert (get (h(2), 'XData'), [0, n]);
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Leave-one-out variance');
+%! assert (get (get (ax, 'title'), 'string'), 'Case order plot of leave-one-out variance');
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotDiagnostics (ax, mdl, 'contour');
+%! yd = get (h(1), 'YData');
+%! xd = get (h(1), 'XData');
+%! assert (numel (h), 2);
+%! assert (xd(1), 0.3707792208, -1e-8);
+%! assert (xd(2), 0.2452836637, -1e-8);
+%! assert (yd(1), 0.07562471113, -1e-8);
+%! assert (yd(2), 0.11059272450, -1e-8);
+%! assert (get (h(1), 'LineStyle'), 'none');
+%! assert (get (h(1), 'Marker'), 'x');
+%! assert (isgraphics (h(2)));
+%! assert (get (get (ax, 'xlabel'), 'string'), 'Leverage');
+%! assert (get (get (ax, 'ylabel'), 'string'), 'Residual');
+%! assert (get (get (ax, 'title'), 'string'), 'Cook''s distance factorization');
+%! close (fig);
+
+%!test
+%! me = fitlm (X, y, 'Exclude', [2, 7]);
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h_ex = plotDiagnostics (ax, me, 'cookd');
+%! h_un = plotDiagnostics (ax, mdl, 'cookd');
+%! ref_ex = get (h_ex(2), 'YData');
+%! ref_un = get (h_un(2), 'YData');
+%! assert (! isequal (ref_ex, ref_un));
+%! assert (ref_ex(1), 3 * mean (me.Diagnostics.CooksDistance, 'omitnan'), 1e-12);
+%! close (fig);
+
+%!test
+%! mw = fitlm (X, y, 'Weights', (1:n)' / sum (1:n));
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! hw = plotDiagnostics (ax, mw, 'leverage');
+%! hu = plotDiagnostics (ax, mdl, 'leverage');
+%! ydw = get (hw(1), 'YData');
+%! ydu = get (hu(1), 'YData');
+%! assert (ydw(1) != ydu(1));
+%! assert (! isequal (ydw, ydu));
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! h = plotDiagnostics (mdl);
+%! assert (isequal (get (h(1), 'Parent'), gca ()));
+%! close (fig);
+
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
 %!error <Terms matrix must have 2 or 3 columns> fitlm (X, y, [1 2 3 4; 5 6 7 8])
@@ -4711,3 +5160,6 @@ endfunction
 %!error <Model update specification> removeTerms (mdl, {'x1'})
 %!error <Bad residuals plot type> plotResiduals (mdl, 'badtype')
 %!error <invalid ResidualType> plotResiduals (mdl, 'fitted', 'ResidualType', 'bad')
+%!error <Bad diagnostics plot type> plotDiagnostics (mdl, 'badtype')
+%!error <unrecognized property> plotDiagnostics (mdl, 'leverage', 'BadProp', 1)
+
