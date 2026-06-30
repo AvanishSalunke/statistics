@@ -782,15 +782,49 @@ classdef LinearModel
         has_intercept = any (strcmp (coef_names, '(Intercept)'));
         enc_names     = coef_names(! strcmp (coef_names, '(Intercept)'));
 
-        schema = parseWilkinsonFormula (modelspec, 'matrix');
-        if (isfield (schema, 'Terms'))
-          terms = schema.Terms;
-        else
-          terms = [];
-        endif
-
         cat_info.names  = {};
         cat_info.levels = {};
+        if (istable (data))
+          for j = 1:p_raw
+            if (cat_logical(j))
+              col = tbl_sub.(pred_names_raw{j});
+              if (iscell (col))
+                levels_j = unique (col);
+              elseif (isa (col, 'categorical'))
+                levels_j = categories (col);
+              else
+                levels_j = {};
+              endif
+              cat_info.names{end+1}  = pred_names_raw{j};
+              cat_info.levels{end+1} = levels_j;
+            endif
+          endfor
+        endif
+
+        atomic_names = {};
+        for t = 1:n_coef
+          if (strcmp (coef_names{t}, '(Intercept)'))
+            continue;
+          endif
+          factors_t = strsplit (coef_names{t}, ':');
+          for f = 1:numel (factors_t)
+            if (! any (strcmp (atomic_names, factors_t{f})))
+              atomic_names{end+1} = factors_t{f};
+            endif
+          endfor
+        endfor
+
+        terms = zeros (n_coef, numel (atomic_names) + 1);
+        for t = 1:n_coef
+          if (strcmp (coef_names{t}, '(Intercept)'))
+            continue;
+          endif
+          factors_t = strsplit (coef_names{t}, ':');
+          for f = 1:numel (factors_t)
+            col_t = find (strcmp (atomic_names, factors_t{f}));
+            terms(t, col_t) = 1;
+          endfor
+        endfor
 
       else
 
@@ -1165,7 +1199,7 @@ classdef LinearModel
       endif
 
       nan_rows     = any (isnan (X_raw), 2);
-      X_enc_new    = LinearModel.lm_predict (X_raw, pred_names, mdl.CatLevelInfo);
+      X_enc_new    = LinearModel.lm_predict (X_raw, pred_names, mdl.CatLevelInfo, mdl.EncPredictorNames);
       X_design_new = LinearModel.lm_build_design (mdl.TermsMatrix, X_enc_new);
 
       beta            = mdl.Coefficients.Estimate;
@@ -2565,6 +2599,173 @@ classdef LinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {} plotEffects (@var{mdl})
+    ## @deftypefnx {LinearModel} {} plotEffects (@var{ax}, @var{mdl})
+    ## @deftypefnx {LinearModel} {@var{h} =} plotEffects (@dots{})
+    ##
+    ## Plot the main effects of each predictor in a fitted linear regression model.
+    ##
+    ## @code{plotEffects (@var{mdl})} creates a horizontal dot-and-line plot
+    ## with one row per predictor.  Each dot shows the estimated main effect on
+    ## the response from changing that predictor from its minimum observed value
+    ## to its maximum observed value, while holding all other predictors fixed
+    ## at their observed means.  A horizontal line through each dot shows the
+    ## 95% confidence interval for that effect.
+    ##
+    ## The main effect for predictor @var{xs} is defined as
+    ## @math{g(x_{s,\max}) - g(x_{s,\min})}, where the adjusted response
+    ## function @math{g} evaluates the model at the specified value of
+    ## @var{xs} with all other predictors set to their observed means.
+    ## For numeric predictors the sign of the effect can be positive or
+    ## negative depending on the direction of the relationship.
+    ##
+    ## @code{plotEffects (@var{ax}, @var{mdl})} creates the plot in the axes
+    ## object @var{ax} instead of the current axes returned by @code{gca}.
+    ##
+    ## @code{@var{h} = plotEffects (@dots{})} returns a vector of
+    ## @math{p+1} graphics handles where @math{p} is the number of predictors.
+    ## @code{h(1)} is the line object containing the effect estimate markers
+    ## (one circle per predictor, plotted as a single line object with
+    ## @code{XData} of length @math{p} and @code{YData = 1:p}).
+    ## @code{h(j+1)} is the confidence interval line for predictor @math{j},
+    ## with @code{XData = [ci_lo, ci_hi]} and @code{YData = [j, j]}.
+    ##
+    ## The y-axis tick labels follow the format
+    ## @qcode{"varname: min to max"}, showing the predictor name and the
+    ## minimum and maximum observed values used to compute the effect.
+    ##
+    ## @seealso{fitlm, plotAdjustedResponse, plotInteraction, plotSlice, LinearModel}
+    ## @end deftypefn
+    function h = plotEffects (this, varargin)
+      [ax, mdl, args] = lm_plot_axes (this, varargin);
+
+      if (! isempty (args))
+        error ('plotEffects: Wrong number of arguments.');
+      endif
+
+      p = mdl.NumPredictors;
+      if (! any (any (mdl.TermsMatrix(:, 1:end-1) != 0)))
+        error ('plotEffects: Model has no predictors.');
+      endif
+
+      if (isempty (ax))
+        ax = gca ();
+      endif
+
+      DEF_COLOR = [0.1490, 0.5490, 0.8660];
+
+      act    = mdl.ObservationInfo.Subset;
+      pred   = mdl.PredictorNames;
+      V      = mdl.CoefficientCovariance;
+      beta   = mdl.Coefficients.Estimate;
+      t_crit = tinv (0.975, mdl.DFE);
+      n_act  = sum (act);
+      cinfo  = mdl.CatLevelInfo;
+      ename  = mdl.EncPredictorNames;
+
+      X_act    = zeros (n_act, p);
+      is_cat   = false (1, p);
+      cat_lvls = cell (1, p);
+
+      for j = 1:p
+        ci = [];
+        if (! isempty (cinfo) && isfield (cinfo, 'names') ...
+            && ! isempty (cinfo.names))
+          ci = find (strcmp (cinfo.names, pred{j}));
+        endif
+        col = mdl.Variables{act, pred{j}};
+        if (! isempty (ci))
+          is_cat(j)   = true;
+          levels_j    = cinfo.levels{ci};
+          cat_lvls{j} = levels_j;
+          if (iscell (col))
+            col_str = col;
+          elseif (isa (col, 'categorical'))
+            col_str = cellstr (col);
+          else
+            col_str = cellstr (num2str (col(:)));
+          endif
+          codes = zeros (n_act, 1);
+          for L = 1:numel (levels_j)
+            codes (strcmp (col_str, char (levels_j{L}))) = L;
+          endfor
+          X_act(:,j) = codes;
+        else
+          X_act(:,j) = double (col(:));
+        endif
+      endfor
+
+      effects = zeros (1, p);
+      ci_lo   = zeros (1, p);
+      ci_hi   = zeros (1, p);
+      x_lo_v  = zeros (1, p);
+      x_hi_v  = zeros (1, p);
+
+      for j = 1:p
+        if (is_cat(j))
+          x_lo_v(j) = 1;
+          x_hi_v(j) = numel (cat_lvls{j});
+        else
+          x_lo_v(j) = min (X_act(:,j));
+          x_hi_v(j) = max (X_act(:,j));
+        endif
+
+        X_hi_rows = X_act;  X_hi_rows(:,j) = x_hi_v(j);
+        X_lo_rows = X_act;  X_lo_rows(:,j) = x_lo_v(j);
+
+        X_hi_enc = LinearModel.lm_predict (X_hi_rows, pred, cinfo, ename);
+        X_lo_enc = LinearModel.lm_predict (X_lo_rows, pred, cinfo, ename);
+        D_hi     = LinearModel.lm_build_design (mdl.TermsMatrix, X_hi_enc);
+        D_lo     = LinearModel.lm_build_design (mdl.TermsMatrix, X_lo_enc);
+
+        c_bar      = mean (D_hi - D_lo, 1);
+        effects(j) = c_bar * beta;
+        SE         = sqrt (max (0, c_bar * V * c_bar'));
+
+        ci_lo(j) = effects(j) - t_crit * SE;
+        ci_hi(j) = effects(j) + t_crit * SE;
+      endfor
+
+      hold (ax, 'on');
+      h(1) = plot (ax, effects, 1:p, ...
+                   'LineStyle', 'none', ...
+                   'Marker', 'o', ...
+                   'MarkerSize', 6, ...
+                   'Color', DEF_COLOR);
+      for j = 1:p
+        h(j+1) = line ([ci_lo(j), ci_hi(j)], [j, j], ...
+                        'LineStyle', '-', ...
+                        'Marker', 'none', ...
+                        'Color', DEF_COLOR, ...
+                        'Parent', ax);
+      endfor
+      hold (ax, 'off');
+
+      ytl = cell (p, 1);
+      for j = 1:p
+        if (is_cat(j))
+          lo_str = char (cat_lvls{j}{x_lo_v(j)});
+          hi_str = char (cat_lvls{j}{x_hi_v(j)});
+        else
+          lo_str = num2str (x_lo_v(j), '%g');
+          hi_str = num2str (x_hi_v(j), '%g');
+        endif
+        ytl{j} = [pred{j}, ': ', lo_str, ' to ', hi_str];
+      endfor
+
+      set (ax, 'YTick', 1:p, 'YTickLabel', ytl);
+      ylim  (ax, [0.5, p + 0.5]);
+      xlabel (ax, 'Main Effect');
+      ylabel (ax, '');
+      title  (ax, 'Main Effects Plot');
+
+      if (nargout == 0)
+        clear h;
+      endif
+
+    endfunction
+
   endmethods
 
   methods (Access = private, Static)
@@ -2736,7 +2937,10 @@ classdef LinearModel
       crit.Fpval         = Fpval;
     endfunction
 
-    function X_enc = lm_predict (X_raw, pred_names, cat_info)
+    function X_enc = lm_predict (X_raw, pred_names, cat_info, enc_names)
+      if (nargin < 4)
+        enc_names = {};
+      endif
       n     = rows (X_raw);
       X_enc = zeros (n, 0);
       for j = 1:numel (pred_names)
@@ -2746,6 +2950,18 @@ classdef LinearModel
         endif
         if (isempty (cat_idx))
           X_enc = [X_enc, X_raw(:, j)];
+          if (! isempty (enc_names))
+            k = 2;
+            while (true)
+              pname = sprintf ('%s^%d', pred_names{j}, k);
+              if (any (strcmp (enc_names, pname)))
+                X_enc = [X_enc, X_raw(:, j) .^ k];
+                k = k + 1;
+              else
+                break;
+              endif
+            endwhile
+          endif
         else
           levels_j = cat_info.levels{cat_idx};
           for L = 2:numel (levels_j)
@@ -5091,6 +5307,185 @@ endfunction
 %! assert (isequal (get (h(1), 'Parent'), gca ()));
 %! close (fig);
 
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotEffects (ax, mdl);
+%! xd1 = get (h(1), 'XData');
+%! yd1 = get (h(1), 'YData');
+%! xd2 = get (h(2), 'XData');
+%! yd2 = get (h(2), 'YData');
+%! xd3 = get (h(3), 'XData');
+%! yd3 = get (h(3), 'YData');
+%! ytl = get (ax, 'YTickLabel');
+%! assert (numel (h), 3);
+%! assert (xd1(1), 2.38302891604232, -1e-10);
+%! assert (xd1(2), -19.5277648300125, -1e-10);
+%! assert (yd1, [1 2]);
+%! assert (xd2(1), 1.39673712385796, -1e-10);
+%! assert (xd2(2), 3.36932070822668, -1e-10);
+%! assert (yd2, [1 1]);
+%! assert (xd3(1), -20.4857975891918, -1e-10);
+%! assert (xd3(2), -18.5697320708331, -1e-10);
+%! assert (yd3, [2 2]);
+%! assert (get (h(1), 'Color'), [0.1490 0.5490 0.8660], 1e-4);
+%! assert (get (h(2), 'Color'), [0.1490 0.5490 0.8660], 1e-4);
+%! assert (get (h(3), 'Color'), [0.1490 0.5490 0.8660], 1e-4);
+%! assert (get (h(1), 'Marker'), 'o');
+%! assert (get (h(1), 'LineStyle'), 'none');
+%! assert (get (h(2), 'LineStyle'), '-');
+%! assert (get (h(2), 'Marker'), 'none');
+%! assert (get (h(3), 'LineStyle'), '-');
+%! assert (get (h(3), 'Marker'), 'none');
+%! assert (mean (xd2), xd1(1), 1e-10);
+%! assert (mean (xd3), xd1(2), 1e-10);
+%! assert (get (get (ax, 'xlabel'), 'string'), 'Main Effect');
+%! assert (get (get (ax, 'ylabel'), 'string'), '');
+%! assert (get (get (ax, 'title'), 'string'), 'Main Effects Plot');
+%! assert (get (ax, 'YTick'), [1 2]);
+%! assert (ytl{1}, 'x1: 0.05 to 1');
+%! assert (ytl{2}, 'x2: 0.05 to 20');
+%! close (fig);
+
+%!test
+%! ## 3-predictor model
+%! X3 = [X, sin((1:n)' * pi / n)];
+%! y3 = X3 * [3; -1; 2] + 0.1 * cos ((1:n)' * pi / 7);
+%! m3 = fitlm (X3, y3);
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotEffects (ax, m3);
+%! xd1 = get (h(1), 'XData');
+%! yd1 = get (h(1), 'YData');
+%! xd2 = get (h(2), 'XData');
+%! yd2 = get (h(2), 'YData');
+%! xd3 = get (h(3), 'XData');
+%! yd3 = get (h(3), 'YData');
+%! xd4 = get (h(4), 'XData');
+%! yd4 = get (h(4), 'YData');
+%! ytl = get (ax, 'YTickLabel');
+%! assert (numel (h), 4);
+%! assert (xd1(1), 8.10687671732127, -1e-10);
+%! assert (xd1(2), -25.4487243632125, -1e-10);
+%! assert (xd1(3), 0.661302203942261, -1e-10);
+%! assert (yd1, [1 2 3]);
+%! assert (xd2(1), 0.565266595687836, -1e-10);
+%! assert (xd2(2), 15.6484868389547, -1e-10);
+%! assert (yd2, [1 1]);
+%! assert (xd3(1), -33.3368582824351, -1e-10);
+%! assert (xd3(2), -17.5605904439899, -1e-10);
+%! assert (yd3, [2 2]);
+%! assert (xd4(1), -1.25582490831999, -1e-10);
+%! assert (xd4(2), 2.57842931620451, -1e-10);
+%! assert (yd4, [3 3]);
+%! assert (get (ax, 'YTick'), [1 2 3]);
+%! assert (ytl{1}, 'x1: 0.05 to 1');
+%! assert (ytl{2}, 'x2: 0.05 to 20');
+%! assert (ytl{3}, 'x3: 1.22465e-16 to 1');
+%! assert (mean (xd2), xd1(1), 1e-10);
+%! assert (mean (xd3), xd1(2), 1e-10);
+%! assert (mean (xd4), xd1(3), 1e-10);
+%! close (fig);
+
+%!test
+%! me = fitlm (X, y, 'Exclude', [2, 7]);
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotEffects (ax, me);
+%! xd1 = get (h(1), 'XData');
+%! yd1 = get (h(1), 'YData');
+%! xd2 = get (h(2), 'XData');
+%! yd2 = get (h(2), 'YData');
+%! xd3 = get (h(3), 'XData');
+%! yd3 = get (h(3), 'YData');
+%! ytl = get (ax, 'YTickLabel');
+%! assert (numel (h), 3);
+%! assert (xd1(1), 2.50035744908398, -1e-10);
+%! assert (xd1(2), -19.5912988214488, -1e-10);
+%! assert (yd1, [1 2]);
+%! assert (xd2(1), 1.40421088339552, -1e-10);
+%! assert (xd2(2), 3.59650401477245, -1e-10);
+%! assert (yd2, [1 1]);
+%! assert (xd3(1), -20.6333076647782, -1e-10);
+%! assert (xd3(2), -18.5492899781194, -1e-10);
+%! assert (yd3, [2 2]);
+%! assert (ytl{1}, 'x1: 0.05 to 1');
+%! assert (ytl{2}, 'x2: 0.05 to 20');
+%! assert (mean (xd2), xd1(1), 1e-10);
+%! assert (mean (xd3), xd1(2), 1e-10);
+%! close (fig);
+
+%!test
+%! mw = fitlm (X, y, 'Weights', (1:n)' / sum (1:n));
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotEffects (ax, mw);
+%! xd1 = get (h(1), 'XData');
+%! yd1 = get (h(1), 'YData');
+%! xd2 = get (h(2), 'XData');
+%! yd2 = get (h(2), 'YData');
+%! xd3 = get (h(3), 'XData');
+%! yd3 = get (h(3), 'YData');
+%! ytl = get (ax, 'YTickLabel');
+%! assert (numel (h), 3);
+%! assert (xd1(1), 2.51587141860715, -1e-10);
+%! assert (xd1(2), -19.6411669663483, -1e-10);
+%! assert (yd1, [1 2]);
+%! assert (xd2(1), 1.08491557053384, -1e-10);
+%! assert (xd2(2), 3.94682726668046, -1e-10);
+%! assert (yd2, [1 1]);
+%! assert (xd3(1), -20.8383905241664, -1e-10);
+%! assert (xd3(2), -18.4439434085302, -1e-10);
+%! assert (yd3, [2 2]);
+%! assert (ytl{1}, 'x1: 0.05 to 1');
+%! assert (ytl{2}, 'x2: 0.05 to 20');
+%! assert (mean (xd2), xd1(1), 1e-10);
+%! assert (mean (xd3), xd1(2), 1e-10);
+%! close (fig);
+
+%!test
+%! mni = fitlm (X, y, 'Intercept', false);
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotEffects (ax, mni);
+%! xd1 = get (h(1), 'XData');
+%! yd1 = get (h(1), 'YData');
+%! xd2 = get (h(2), 'XData');
+%! yd2 = get (h(2), 'YData');
+%! xd3 = get (h(3), 'XData');
+%! yd3 = get (h(3), 'YData');
+%! ytl = get (ax, 'YTickLabel');
+%! assert (numel (h), 3);
+%! assert (xd1(1), 2.81335053251731, -1e-10);
+%! assert (xd1(2), -19.8951125513936, -1e-10);
+%! assert (yd1, [1 2]);
+%! assert (xd2(1), 2.36234515544211, -1e-10);
+%! assert (xd2(2), 3.26435590959250, -1e-10);
+%! assert (yd2, [1 1]);
+%! assert (xd3(1), -20.4919734818287, -1e-10);
+%! assert (xd3(2), -19.2982516209584, -1e-10);
+%! assert (yd3, [2 2]);
+%! assert (ytl{1}, 'x1: 0.05 to 1');
+%! assert (ytl{2}, 'x2: 0.05 to 20');
+%! assert (mean (xd2), xd1(1), 1e-10);
+%! assert (mean (xd3), xd1(2), 1e-10);
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotEffects (ax, mdl);
+%! assert (isequal (get (h(1), 'Parent'), ax));
+%! assert (get (h(1), 'XData'), [2.38302891604232, -19.5277648300125], -1e-10);
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! h = plotEffects (mdl);
+%! assert (isequal (get (h(1), 'Parent'), gca ()));
+%! assert (get (h(1), 'XData'), [2.38302891604232, -19.5277648300125], -1e-10);
+%! close (fig);
+
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
 %!error <Terms matrix must have 2 or 3 columns> fitlm (X, y, [1 2 3 4; 5 6 7 8])
@@ -5162,4 +5557,7 @@ endfunction
 %!error <invalid ResidualType> plotResiduals (mdl, 'fitted', 'ResidualType', 'bad')
 %!error <Bad diagnostics plot type> plotDiagnostics (mdl, 'badtype')
 %!error <unrecognized property> plotDiagnostics (mdl, 'leverage', 'BadProp', 1)
+%!error <Wrong number of arguments> plotEffects (mdl, 'extra')
+%!error <Wrong number of arguments> plotEffects (mdl, 'a', 'b')
+%!error <Model has no predictors> plotEffects (fitlm (X(:,1), y, 'constant'))
 
