@@ -873,7 +873,7 @@ classdef LinearModel
       endif
 
       fit = LinearModel.lm_fit (X_design_sub, y_sub, w_sub);
-      D   = lm_diagnostics (X_design_sub, y_sub, fit);
+      D   = lm_diagnostics (X_design_sub, y_sub, fit, w_sub);
 
       p    = fit.rank_X;
       SSE  = fit.SSE;
@@ -3057,7 +3057,7 @@ function [terms, has_intercept, coef_names] = lm_parse_modelspec ( ...
         inter_part = [inter_part; row];
       endfor
     endfor
-    terms = [linear_part; quad_part; inter_part];
+    terms = [linear_part; inter_part; quad_part];
 
   elseif (ischar (modelspec) && strcmpi (modelspec, 'full'))
     terms = zeros (1, p+1);
@@ -3147,7 +3147,7 @@ function [X_enc, enc_names, cat_info] = lm_encode_categorical ( ...
 endfunction
 
 ## observation-level influence statistics; returns D struct
-function D = lm_diagnostics (X, y, fit)
+function D = lm_diagnostics (X, y, fit, w)
   n    = rows (X);
   p    = fit.rank_X;
   h    = fit.leverage;
@@ -3156,13 +3156,13 @@ function D = lm_diagnostics (X, y, fit)
   MSE  = fit.MSE;
   RMSE = fit.RMSE;
 
-  S2_i = (DFE * MSE - Raw.^2 ./ max (1 - h, eps)) / max (DFE - 1, 1);
+  S2_i = (DFE * MSE - w .* Raw.^2 ./ max (1 - h, eps)) / max (DFE - 1, 1);
 
   r_std = Raw ./ max (RMSE .* sqrt (max (1 - h, eps)), eps);
   r_stu = Raw ./ max (sqrt (max (S2_i, eps)) .* sqrt (max (1 - h, eps)), eps);
 
-  CooksDistance = (1 / max (p, 1)) .* r_std.^2 .* h ./ max (1 - h, eps);
-  Dffits        = r_stu .* sqrt (h ./ max (1 - h, eps));
+  CooksDistance = (w / max (p, 1)) .* r_std.^2 .* h ./ max (1 - h, eps);
+  Dffits        = r_stu .* sqrt (h ./ max (1 - h, eps)) .* sqrt (w);
   CovRatio      = (S2_i ./ max (MSE, eps)).^p ./ max (1 - h, eps);
 
   p_full   = columns (X);  
@@ -3178,7 +3178,7 @@ function D = lm_diagnostics (X, y, fit)
       denom_base = (1 - h(i)) * sqrt (max (S2_i(i), eps));
       for jj = 1:p
         se_jj = sqrt (max (XtXinv_d(jj), eps));
-        Dfbetas(i, jj) = infl(jj) * Raw(i) / max (denom_base * se_jj, eps);
+        Dfbetas(i, active(jj)) = infl(jj) * Raw(i) / max (denom_base * se_jj, eps);
       endfor
     endfor
   endif
@@ -3367,128 +3367,241 @@ endfunction
 %! assert (strcmp (mdl.Variables.Properties.VariableNames{end}, 'y'));
 
 %!test
-%! ## NaN in predictor
+%! ## NaN in predictor drops the row from the fit
 %! X2 = X;  X2(2,1) = NaN;
-%! m2 = fitlm (X2, y);
-%! assert (m2.NumObservations, 19);
-%! assert (m2.ObservationInfo.Missing(2), true);
-%! assert (m2.ObservationInfo.Subset(2),  false);
-%! assert (isnan (m2.Fitted(2)));
-%! assert (m2.SST, 547.6167961780454, 1e-8);
-%! yp2 = predict (m2, X2);
-%! assert (isnan (yp2(2)));
-%! assert (! isnan (yp2(1)));
+%! m = fitlm (X2, y);
+%! assert (m.NumObservations, 19);
+%! assert (m.ObservationInfo.Missing(2), true);
+%! assert (m.ObservationInfo.Subset(2),  false);
+%! assert (isnan (m.Fitted(2)));
+%! assert (m.SSE, 0.370339572851658, 1e-9);
+%! assert (m.SST, 547.616796178045,  1e-6);
+%! assert (m.Coefficients.Estimate, ...
+%!         [0.0641300185953764; 2.68263140079657; -0.985345792254554], 1e-7);
+%! yp = predict (m, X2);
+%! assert (isnan (yp(2)));
+%! assert (! isnan (yp(1)));
+%! assert (size (m.Diagnostics.HatMatrix), [20, 20]);
+%! assert (m.Diagnostics.Leverage(1), 0.488485648300892, 1e-8);
+%! assert (m.Diagnostics.CooksDistance(1), 0.38266162627176, 1e-6);
 
 %!test
-%! ## NaN in response
+%! ## NaN in response drops the row but predict still works normally since X has no NaN
 %! y3 = y;  y3(5) = NaN;
-%! m3 = fitlm (X, y3);
-%! assert (m3.NumObservations, 19);
-%! assert (m3.ObservationInfo.Missing(5), true);
-%! assert (isnan (m3.Fitted(5)));
+%! m = fitlm (X, y3);
+%! assert (m.NumObservations, 19);
+%! assert (m.ObservationInfo.Missing(5), true);
+%! assert (isnan (m.Fitted(5)));
+%! assert (m.SSE, 0.337042910721425, 1e-9);
+%! assert (m.SST, 558.654961265991,  1e-6);
+%! assert (m.Coefficients.Estimate, ...
+%!         [0.145131680993155; 2.4865383021829; -0.979635081226208], 1e-7);
+%! yp = predict (m, X);
+%! assert (yp(5), -0.45777759499388, 1e-8);
+%! assert (yp(1), 0.22047684204099, 1e-8);
+%! assert (size (m.Diagnostics.HatMatrix), [20, 20]);
+%! assert (m.Diagnostics.Leverage(1), 0.386399650026734, 1e-8);
 
 %!test
-%! ## multiple NaN rows
+%! ## multiple NaN rows drop all affected observations from the fit
 %! X4 = X;  X4([2,8,14],2) = NaN;
-%! m4 = fitlm (X4, y);
-%! assert (sum (m4.ObservationInfo.Missing), 3);
-%! assert (m4.NumObservations, 17);
-%! assert (m4.SSE + m4.SSR, m4.SST, 1e-8);
+%! m = fitlm (X4, y);
+%! assert (sum (m.ObservationInfo.Missing), 3);
+%! assert (m.NumObservations, 17);
+%! assert (m.SSE, 0.261285495635633, 1e-9);
+%! assert (m.SSR, 527.635694805749,  1e-6);
+%! assert (m.SST, 527.896980301385,  1e-6);
+%! assert (m.Coefficients.Estimate, ...
+%!         [0.0986395043600395; 2.3735792982821; -0.97106191310122], 1e-7);
+%! assert (size (m.Diagnostics.HatMatrix), [20, 20]);
+%! assert (sum (m.Diagnostics.Leverage), 3, 1e-8);
 
 %!test
-%! ## exclude by index
-%! me = fitlm (X, y, 'Exclude', [3, 7]);
-%! assert (me.NumObservations, 18);
-%! assert (sum (me.ObservationInfo.Excluded), 2);
-%! assert (isnan (me.Fitted(3)) && isnan (me.Fitted(7)));
-%! ype = predict (me);
+%! ## exclude by index and exclude by logical vector give identical results
+%! m  = fitlm (X, y, 'Exclude', [3, 7]);
+%! excl = false (n, 1);  excl([3, 7]) = true;
+%! m2 = fitlm (X, y, 'Exclude', excl);
+%! assert (m.NumObservations, 18);
+%! assert (sum (m.ObservationInfo.Excluded), 2);
+%! assert (isnan (m.Fitted(3)) && isnan (m.Fitted(7)));
+%! assert (m.Coefficients.Estimate, m2.Coefficients.Estimate, 1e-12);
+%! assert (m.Coefficients.Estimate, ...
+%!         [0.118938102486219; 2.43606890944554; -0.974833228191174], 1e-7);
+%! ype = predict (m);
 %! assert (size (ype), [20, 1]);
-%! assert (! isnan (ype(3)));
-%! assert (! isnan (ype(7)));
-%! [~, yci] = predict (me);
-%! assert (yci(1,1), -0.028312276245845, 1e-10);
-%! assert (yci(1,2),  0.412312049343719, 1e-10);
+%! assert (! isnan (ype(3)) && ! isnan (ype(7)));
+%! [~, yci] = predict (m);
+%! assert (yci(1,1), -0.0283122762458446, 1e-10);
+%! assert (yci(1,2),  0.412312049343719,  1e-10);
+%! assert (size (m.Diagnostics.HatMatrix), [20, 20]);
+%! assert (m.Diagnostics.Leverage(1), 0.437780279893411, 1e-8);
+%! assert (m.Diagnostics.CooksDistance(1), 0.110112457355807, 1e-7);
 
 %!test
-%! ## exclude by logical vector
-%! excl = false (n, 1);  excl([1, 4]) = true;
-%! me2 = fitlm (X, y, 'Exclude', excl);
-%! assert (me2.NumObservations, 18);
-%! assert (me2.ObservationInfo.Excluded(1) && me2.ObservationInfo.Excluded(4));
-
-%!test
-%! ## NaN and exclude
+%! ## NaN and exclude together remove both the missing and the excluded row
 %! X6 = X;  X6(1,1) = NaN;
-%! m6 = fitlm (X6, y, 'Exclude', [2]);
-%! assert (m6.NumObservations, 18);
-%! assert (m6.ObservationInfo.Missing(1),  true);
-%! assert (m6.ObservationInfo.Excluded(2), true);
+%! m = fitlm (X6, y, 'Exclude', [2]);
+%! assert (m.NumObservations, 18);
+%! assert (m.ObservationInfo.Missing(1),  true);
+%! assert (m.ObservationInfo.Excluded(2), true);
+%! assert (m.SSE, 0.342515396265007, 1e-9);
+%! assert (m.Coefficients.Estimate, ...
+%!         [-0.0735450184226009; 3.17679029176988; -1.0045827469016], 1e-7);
 
 %!test
-%! ## WLS SSE
-%! w  = abs (sin ((1:n)')) + 0.1;
-%! mw = fitlm (X, y, 'Weights', w);
-%! assert (mw.SSE,    0.363519720897775, 1e-10);
-%! assert (mw.ObservationInfo.Weights, w, 1e-15);
-%! assert (mw.SST, 4.419834786423099e+02, 1e-8);
-%! ypw = predict (mw, X);
-%! assert (size (ypw), [20, 1]);
-%! assert (class (ypw), 'double');
-%! [ypw2, yci] = predict (mw, [0.5 0.25; 1.0 1.0]);
-%! assert (ypw2(1),  1.106748776307639, 1e-10);
-%! assert (ypw2(2),  1.593185531572655, 1e-10);
+%! ## weighted least squares produces different SSE and stores the weights
+%! w = abs (sin ((1:n)')) + 0.1;
+%! m = fitlm (X, y, 'Weights', w);
+%! assert (m.SSE, 0.363519720897775, 1e-10);
+%! assert (m.ObservationInfo.Weights, w, 1e-15);
+%! assert (m.SST, 4.419834786423099e+02, 1e-8);
+%! [yp, yci] = predict (m, [0.5 0.25; 1.0 1.0]);
+%! assert (yp(1),  1.106748776307639, 1e-10);
+%! assert (yp(2),  1.593185531572655, 1e-10);
 %! assert (yci(1,1), 0.763985050242272, 1e-10);
 %! assert (yci(1,2), 1.449512502373006, 1e-10);
+%! assert (m.Diagnostics.Leverage(1), 0.421642939812731, 1e-8);
+%! assert (m.Diagnostics.Leverage(2), 0.301314342928707, 1e-8);
+%! assert (m.Diagnostics.HatMatrix(1,1), 0.421642939812731, 1e-8);
+%! assert (m.Diagnostics.CooksDistance(1), 0.0728569335883748, 1e-7);
+%! assert (m.Diagnostics.CovRatio(1), 1.96611264276187, 1e-6);
 
 %!test
-%! ## uniform weights
-%! mw2 = fitlm (X, y, 'Weights', 2 * ones (n, 1));
-%! assert (mw2.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-10);
+%! ## uniform weights scale internals but leave point estimates unchanged
+%! m = fitlm (X, y, 'Weights', 2 * ones (n, 1));
+%! assert (m.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-10);
 
 %!test
-%! ## constant and linear modelspecs
-%! mc = fitlm (X, y, 'constant');
-%! assert (mc.NumCoefficients, 1);
-%! assert (mc.CoefficientNames{1}, '(Intercept)');
-%! ml = fitlm (X, y, 'linear');
-%! m0 = fitlm (X, y, []);
-%! assert (ml.NumCoefficients, 3);
-%! assert (ml.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-12);
-%! assert (m0.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-12);
+%! ## constant linear and default modelspecs behave as expected
+%! m  = fitlm (X, y, 'constant');
+%! assert (m.NumCoefficients, 1);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! m2 = fitlm (X, y, 'linear');
+%! m3 = fitlm (X, y, []);
+%! assert (m2.NumCoefficients, 3);
+%! assert (m2.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-12);
+%! assert (m3.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-12);
 
 %!test
-%! ## modelspec term counts
-%! assert (fitlm (X, y, 'interactions').NumCoefficients,  4);
-%! assert (fitlm (X, y, 'purequadratic').NumCoefficients, 5);
-%! assert (fitlm (X, y, 'quadratic').NumCoefficients,     6);
+%! ## purequadratic modelspec produces the expected term count
+%! m = fitlm (X, y, 'purequadratic');
+%! assert (m.NumCoefficients, 5);
 
 %!test
-%! ## full model with p=2: 2^2=4 terms, identical to interactions
-%! mf = fitlm (X, y, 'full');
-%! mi = fitlm (X, y, 'interactions');
-%! assert (mf.NumCoefficients, 4);
-%! assert (mf.Coefficients.Estimate, mi.Coefficients.Estimate, 1e-12);
-%! assert (mf.MSE, mi.MSE, 1e-12);
+%! ## interactions modelspec term count and coefficients are verified
+%! m = fitlm (X, y, 'interactions');
+%! assert (m.NumCoefficients, 4);
+%! assert (m.SSE, 0.383859187927621, 1e-9);
+%! assert (m.Coefficients.Estimate, ...
+%!         [0.157640728038039; 2.08542680311791; -0.929682701072813; -0.031208018255475], 1e-7);
 
 %!test
-%! ## full model with p=3: 2^3=8 terms, includes 3-way interaction
-%! X3  = [X, cos((1:n)' * pi / n)];
-%! mf3 = fitlm (X3, y, 'full');
-%! assert (mf3.NumCoefficients, 8);
-%! assert (any (strcmp (mf3.CoefficientNames, 'x1:x2:x3')));
+%! ## quadratic modelspec is rank deficient for this design and drops one coefficient
+%! m = fitlm (X, y, 'quadratic');
+%! assert (m.NumCoefficients, 6);
+%! assert (m.SSE, 0.315784637443501, 1e-9);
+%! assert (m.Coefficients.Estimate, ...
+%!         [0.447436249544699; -2.44859403731902; -0.0121968798776254; ...
+%!          -1.36755100280532; 0; 0.0318176901083297], 1e-7);
+%! drop = find (m.Coefficients.SE == 0);
+%! assert (numel (drop), 1);
+%! assert (isnan (m.Coefficients.tStat(drop)));
 
 %!test
-%! ## full no-intercept with p=2: 2^2-1=3 terms
-%! mfni = fitlm (X, y, 'full', 'Intercept', false);
-%! assert (mfni.NumCoefficients, 3);
-%! assert (! any (strcmp (mfni.CoefficientNames, '(Intercept)')));
+%! ## full modelspec with two predictors matches interactions exactly
+%! m  = fitlm (X, y, 'full');
+%! m2 = fitlm (X, y, 'interactions');
+%! assert (m.NumCoefficients, 4);
+%! assert (m.Coefficients.Estimate, m2.Coefficients.Estimate, 1e-10);
+%! assert (m.Coefficients.Estimate, ...
+%!         [0.157640728038039; 2.08542680311791; -0.929682701072813; -0.031208018255475], 1e-7);
 
 %!test
-%! ## SS partition holds
-%! for s = {'constant','linear','interactions','purequadratic','quadratic'}
-%!   ms = fitlm (X, y, s{1});
-%!   assert (ms.SSE + ms.SSR, ms.SST, 1e-8);
-%! endfor
+%! ## full modelspec with three predictors includes the three way interaction term
+%! X3 = [X, cos((1:n)' * pi / n)];
+%! m  = fitlm (X3, y, 'full');
+%! assert (m.NumCoefficients, 8);
+%! assert (any (strcmp (m.CoefficientNames, 'x1:x2:x3')));
+%! assert (m.SSE, 0.231331066631196, 1e-8);
+%! idx3 = find (strcmp (m.CoefficientNames, 'x1:x2:x3'));
+%! assert (m.Coefficients.Estimate(idx3), 0.514890561912964, 1e-6);
+
+%!test
+%! ## full modelspec without an intercept drops the intercept coefficient
+%! m = fitlm (X, y, 'full', 'Intercept', false);
+%! assert (m.NumCoefficients, 3);
+%! assert (! any (strcmp (m.CoefficientNames, '(Intercept)')));
+%! assert (m.Coefficients.Estimate, ...
+%!         [3.232987312533958; -1.041484635851565; 0.0324190990982863], 1e-7);
+
+%!test
+%! ## a p column terms matrix produces a model with no intercept
+%! m = fitlm (X, y, [1 0; 0 1]);
+%! assert (m.NumCoefficients, 2);
+%! assert (! any (strcmp (m.CoefficientNames, '(Intercept)')));
+%! assert (m.Coefficients.Estimate, [2.96142161317611; -0.997248749443286], 1e-7);
+
+%!test
+%! ## a p plus one column terms matrix produces a model with an intercept
+%! m = fitlm (X, y, [0 0 0; 1 0 0; 0 1 0]);
+%! assert (m.NumCoefficients, 3);
+%! assert (m.CoefficientNames{1}, '(Intercept)');
+%! assert (m.Coefficients.Estimate, ...
+%!         [0.116188677790207; 2.50845149057086; -0.978835329825186], 1e-7);
+
+%!test
+%! ## a table with a Wilkinson formula fits the same model and predicts on a table
+%! T = table (X(:,1), X(:,2), y, 'VariableNames', {'a','b','resp'});
+%! m = fitlm (T, 'resp ~ a + b');
+%! assert (m.NumCoefficients, 3);
+%! assert (m.ResponseName, 'resp');
+%! assert (m.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-8);
+%! Xt = table ([0.5;1.0], [0.25;1.0], 'VariableNames', {'a','b'});
+%! yp = predict (m, Xt);
+%! assert (yp(1), 1.125705590619342, 1e-10);
+%! assert (yp(2), 1.645804838535884, 1e-10);
+
+%!test
+%! ## a matrix with a Wilkinson formula string fits the same model as the matrix alone
+%! m = fitlm (X, y, 'y ~ x1 + x2');
+%! assert (m.NumCoefficients, 3);
+%! assert (m.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-8);
+
+%!test
+%! ## a table input with the default formula fits the same model as the matrix
+%! T3 = table (X(:,1), X(:,2), y, 'VariableNames', {'x1','x2','y'});
+%! m = fitlm (T3);
+%! assert (m.ResponseName, 'y');
+%! assert (m.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-8);
+
+%!test
+%! ## VarNames sets custom names and ResponseVar overrides the response name
+%! m  = fitlm (X, y, 'VarNames', {'alpha','beta','resp'});
+%! assert (m.ResponseName, 'resp');
+%! assert (isequal (m.PredictorNames, {'alpha','beta'}));
+%! assert (any (strcmp (m.CoefficientNames, 'alpha')));
+%! assert (any (strcmp (m.CoefficientNames, 'beta')));
+%! m2 = fitlm (X, y, 'VarNames', {'a','b','r'}, 'ResponseVar', 'r');
+%! assert (m2.ResponseName, 'r');
+
+%!test
+%! ## a rank deficient design matrix leaves the dropped coefficients as NaN across the board
+%! X_rd = [ones(n,1), X, X(:,1)+X(:,2)];
+%! m = fitlm (X_rd, y);
+%! assert (m.NumCoefficients, 5);
+%! assert (m.NumEstimatedCoefficients, 3);
+%! drop = find (m.Coefficients.SE == 0);
+%! assert (numel (drop), 2);
+%! assert (all (isnan (m.Coefficients.tStat(drop))));
+%! assert (all (isnan (m.Coefficients.pValue(drop))));
+%! assert (m.SST, 5.839104200023459e+02, 1e-8);
+%! assert (all (all (m.CoefficientCovariance(drop,:) == 0)));
+%! yp = predict (m, X_rd);
+%! assert (size (yp), [n, 1]);
+%! assert (! any (isnan (yp)));
+%! assert (size (m.Diagnostics.Dfbetas), [20, 5]);
+%! assert (all (isnan (m.Diagnostics.Dfbetas(:, drop)(:))));
+%! assert (m.Diagnostics.Leverage(1), 0.370779220779221, 1e-8);
 
 %!test
 %! ## Intercept=false
