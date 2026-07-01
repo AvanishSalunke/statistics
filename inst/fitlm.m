@@ -43,6 +43,41 @@ function mdl = fitlm (varargin)
   arg1 = varargin{1};
   rest = varargin(2:end);
 
+  if (isa (arg1, 'categorical'))
+    if (! isvector (arg1))
+      error (["fitlm: Predictor variables must be numeric vectors, numeric " ...
+              "matrices, or categorical vectors."]);
+    endif
+    if (isempty (rest) || is_nv (rest{1}))
+      error ("fitlm: Y argument is required unless X is a dataset or table.");
+    endif
+    y_arg = rest{1};
+    if (numel (y_arg) != size (arg1, 1))
+      error ("fitlm: Predictor and response variables must have the same length.");
+    endif
+    if (! isvector (y_arg) || (! isnumeric (y_arg) && ! islogical (y_arg)))
+      error ("fitlm: Response variable must be a numeric vector.");
+    endif
+
+    pred_name = 'x1';
+    resp_name = 'y';
+    tail      = rest(2:end);
+    keep      = true (1, numel (tail));
+    for k = 1:2:numel (tail)-1
+      if (ischar (tail{k}) && strcmpi (tail{k}, 'VarNames') && iscell (tail{k+1}))
+        vn = tail{k+1};
+        if (numel (vn) >= 1); pred_name = vn{1}; endif
+        if (numel (vn) >= 2); resp_name = vn{2}; endif
+        keep(k:k+1) = false;
+      endif
+    endfor
+    tail = tail(keep);
+
+    tbl = table (arg1(:), double (y_arg(:)), 'VariableNames', {pred_name, resp_name});
+    mdl = fitlm (tbl, tail{:});
+    return;
+  endif
+
   if (istable (arg1))
 
     response  = [];

@@ -847,11 +847,13 @@ classdef LinearModel
               cat_str_levels{j} = {};
             endif
           else
-            X_num_full(:, j) = X_raw(:, j);
             if (cat_logical(j))
               uvals = sort (unique (X_raw(isfinite (X_raw(:,j)), j)));
               cat_str_levels{j} = cellstr (num2str (uvals(:)));
+              [~, ic] = ismember (X_raw(:,j), uvals);
+              X_num_full(:, j) = ic;
             else
+              X_num_full(:, j) = X_raw(:, j);
               cat_str_levels{j} = {};
             endif
           endif
@@ -954,11 +956,42 @@ classdef LinearModel
         'VariableNames', {'Leverage', 'CooksDistance', 'Dffits', 'S2_i', ...
                           'CovRatio', 'Dfbetas', 'HatMatrix'});
 
+      dummy_names = {};
+      dummy_bases = {};
+      for ci = 1:numel (cat_info.names)
+        base_nm  = cat_info.names{ci};
+        levels_c = cat_info.levels{ci};
+        for L = 2:numel (levels_c)
+          dummy_names{end+1} = [base_nm, '_', char(levels_c{L})];
+          dummy_bases{end+1} = base_nm;
+        endfor
+      endfor
+
       if (has_intercept)
         non_int = coef_names(! strcmp (coef_names, '(Intercept)'));
-        lp_str  = ifelse (isempty (non_int), '1', ['1 + ', strjoin(non_int, ' + ')]);
       else
-        lp_str = strjoin (coef_names, ' + ');
+        non_int = coef_names;
+      endif
+
+      disp_terms = {};
+      for t = 1:numel (non_int)
+        factors_t = strsplit (non_int{t}, ':');
+        for f = 1:numel (factors_t)
+          idx = find (strcmp (dummy_names, factors_t{f}), 1);
+          if (! isempty (idx))
+            factors_t{f} = dummy_bases{idx};
+          endif
+        endfor
+        nm = strjoin (factors_t, ':');
+        if (! any (strcmp (disp_terms, nm)))
+          disp_terms{end+1} = nm;
+        endif
+      endfor
+
+      if (has_intercept)
+        lp_str = ifelse (isempty (disp_terms), '1', ['1 + ', strjoin(disp_terms, ' + ')]);
+      else
+        lp_str = strjoin (disp_terms, ' + ');
       endif
 
       FormulaS.ResponseName    = resp_name;
@@ -5580,4 +5613,3 @@ endfunction
 %!error <Wrong number of arguments> plotEffects (mdl, 'extra')
 %!error <Wrong number of arguments> plotEffects (mdl, 'a', 'b')
 %!error <Model has no predictors> plotEffects (fitlm (X(:,1), y, 'constant'))
-
