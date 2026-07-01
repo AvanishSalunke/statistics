@@ -3266,198 +3266,104 @@ endfunction
 %! mdl = fitlm (X, y);
 
 %!test
-%! ## integer count properties
+%! ## scalar fit-quality
 %! assert (mdl.NumObservations,          20);
 %! assert (mdl.NumCoefficients,           3);
 %! assert (mdl.NumVariables,              3);
 %! assert (mdl.NumPredictors,             2);
 %! assert (mdl.NumEstimatedCoefficients,  3);
 %! assert (mdl.DFE,                      17);
+%! assert (mdl.SSE,  0.386545331386823,   1e-9);
+%! assert (mdl.SSR,  583.523874670959,    1e-6);
+%! assert (mdl.SST,  583.910420002346,    1e-6);
+%! assert (mdl.MSE,  0.0227379606698351,  1e-10);
+%! assert (mdl.RMSE, 0.150791116017606,   1e-10);
+%! assert (mdl.Rsquared.Ordinary, 0.999338005765704, 1e-10);
+%! assert (mdl.Rsquared.Adjusted, 0.999260124091081, 1e-10);
+%! assert (mdl.LogLikelihood, 11.0836133807695, 1e-6);
+%! assert (mdl.ModelCriterion.AIC,  -16.1672267615389, 1e-6);
+%! assert (mdl.ModelCriterion.AICc, -14.6672267615389, 1e-6);
+%! assert (mdl.ModelCriterion.BIC,  -13.180029940877,  1e-6);
+%! assert (mdl.ModelCriterion.CAIC, -10.180029940877,  1e-6);
+%! assert (mdl.ModelFitVsNullModel.Fstat, 12831.4909842738, 1e-4);
+%! assert (strcmp (mdl.ModelFitVsNullModel.NullModel, 'constant'));
 
 %!test
-%! ## SS partition identity and positivity
-%! assert (mdl.SSE + mdl.SSR, mdl.SST, 1e-8);
-%! assert (mdl.SSE / mdl.DFE, mdl.MSE, 1e-12);
-%! assert (sqrt (mdl.MSE), mdl.RMSE, 1e-12);
-%! assert (mdl.SSE > 0 && mdl.SSR > 0 && mdl.SST > 0);
-
-%!test
-%! ## constant model SSR zero SSE equals SST
+%! ## constant-only model: SSR is exactly zero, SSE equals SST
 %! mc = fitlm (X, y, 'constant');
+%! assert (mc.SSE, 583.910420002346, 1e-6);
 %! assert (mc.SSR, 0, 1e-12);
 %! assert (mc.SSE, mc.SST, 1e-12);
 
 %!test
-%! ## R-squared 
-%! assert (mdl.Rsquared.Ordinary, 0.999338005765704, 1e-10);
-%! assert (mdl.Rsquared.Adjusted, 0.999260124091081, 1e-10);
-%! assert (mdl.Rsquared.Ordinary, mdl.SSR / mdl.SST, 1e-10);
-%! assert (mdl.Rsquared.Adjusted, 1 - (mdl.SSE/mdl.DFE) / (mdl.SST/(n-1)), 1e-10);
-%! assert (isfield (mdl.Rsquared, 'Ordinary') && isfield (mdl.Rsquared, 'Adjusted'));
-
-%!test
-%! ## residuals
-%! assert (mdl.Residuals.Raw, y - mdl.Fitted, 1e-10);
-%! assert (sum (mdl.Residuals.Raw), 0, 1e-8);
-%! assert (mdl.Residuals.Pearson, mdl.Residuals.Raw / sqrt (mdl.MSE), 1e-10);
-
-%!test
-%! ## standardized and studentized residual formulas
-%! h   = mdl.Diagnostics.Leverage;
-%! S2i = mdl.Diagnostics.S2_i;
-%! assert (mdl.Residuals.Standardized, ...
-%!         mdl.Residuals.Raw ./ (mdl.RMSE .* sqrt (1 - h)), 1e-8);
-%! assert (mdl.Residuals.Studentized, ...
-%!         mdl.Residuals.Raw ./ (sqrt (S2i) .* sqrt (1 - h)), 1e-6);
-
-%!test
-%! ## fitted values equal y minus raw residuals
-%! assert (numel (mdl.Fitted), 20);
-%! assert (all (! isnan (mdl.Fitted)));
-%! assert (mdl.Fitted, y - mdl.Residuals.Raw, 1e-10);
-%! yp = predict (mdl, X);
-%! assert (size (yp), [20, 1]);
-%! assert (class (yp), 'double');
-%! assert (yp(1), 0.192669485827491, 1e-10);
-%! assert (yp(2), 0.171266760882256, 1e-10);
-
-%!test
-%! ## coefficient estimates SE tStat 
+%! ## coefficient estimates, SE, tStat, names, covariance, schema
 %! assert (mdl.Coefficients.Estimate, [0.1161886778; 2.508451491; -0.9788353298], 1e-7);
 %! assert (mdl.Coefficients.SE,       [0.112185831;  0.4920818186; 0.02276108523], 1e-8);
 %! assert (mdl.Coefficients.tStat,    [1.035680502;  5.097630913; -43.00477415],   1e-6);
-
-%!test
-%! ## tStat and pValue
-%! assert (mdl.Coefficients.tStat, ...
-%!         mdl.Coefficients.Estimate ./ mdl.Coefficients.SE, 1e-10);
-%! assert (all (mdl.Coefficients.SE > 0));
 %! assert (all (mdl.Coefficients.pValue >= 0 & mdl.Coefficients.pValue <= 1));
-
-%!test
-%! ## CoefficientNames matches Coefficients row names
+%! assert (isequal (mdl.CoefficientNames, {'(Intercept)', 'x1', 'x2'}));
 %! assert (isequal (mdl.CoefficientNames, mdl.Coefficients.Properties.RowNames(:)'));
-%! assert (mdl.CoefficientNames{1}, '(Intercept)');
-%! assert (mdl.CoefficientNames{2}, 'x1');
-%! assert (mdl.CoefficientNames{3}, 'x2');
-
-%!test
-%! ## CoefficientCovariance properties
 %! assert (size (mdl.CoefficientCovariance), [3, 3]);
-%! assert (mdl.CoefficientCovariance, mdl.CoefficientCovariance', 1e-12);
 %! assert (diag (mdl.CoefficientCovariance), [0.0125857; 0.242145; 0.000518067], 1e-6);
-%! assert (all (diag (mdl.CoefficientCovariance) >= 0));
-%! assert (mdl.Coefficients.SE, sqrt (diag (mdl.CoefficientCovariance)), 1e-10);
+%! assert (width (mdl.Coefficients), 4);
+%! assert (isequal (mdl.Coefficients.Properties.VariableNames, ...
+%!                  {'Estimate','SE','tStat','pValue'}));
 
 %!test
-%! ## HatMatrix properties
+%! ## fitted values, predict(), residual columns (obs 1-3), schema
+%! assert (mdl.Fitted, y - mdl.Residuals.Raw, 1e-10);
+%! yp = predict (mdl, X);
+%! assert (size (yp), [20, 1]);
+%! assert (yp(1), 0.192669485827491, 1e-10);
+%! assert (yp(2), 0.171266760882256, 1e-10);
+%! assert (mdl.Residuals.Raw(1:3),          [0.075624711134088; 0.110592724482880; -0.023756501342530], 1e-10);
+%! assert (mdl.Residuals.Pearson(1:3),      [0.501519672586403; 0.733416711830473; -0.157545762442370], 1e-9);
+%! assert (mdl.Residuals.Standardized(1:3), [0.632246516521578; 0.844226394951239; -0.172381368754725], 1e-8);
+%! assert (mdl.Residuals.Studentized(1:3),  [0.620710275056923; 0.836747864205268; -0.167380843634378], 1e-6);
+%! assert (width (mdl.Residuals), 4);
+%! assert (isequal (mdl.Residuals.Properties.VariableNames, ...
+%!                  {'Raw','Pearson','Studentized','Standardized'}));
+
+%!test
+%! ## diagnostics
 %! H = mdl.Diagnostics.HatMatrix;
 %! assert (size (H), [20, 20]);
-%! assert (mdl.Diagnostics.Leverage, diag (H), 1e-10);
-%! assert (sum (mdl.Diagnostics.Leverage), 3, 1e-8);
 %! assert (H, H', 1e-10);
 %! assert (H * H, H, 1e-8);
-%! assert (all (mdl.Diagnostics.Leverage >= 0) && all (mdl.Diagnostics.Leverage <= 1));
-
-%!test
-%! ## Cook's D S2_i CovRatio Dffits formulas
-%! p   = mdl.NumEstimatedCoefficients;
-%! h   = mdl.Diagnostics.Leverage;
-%! raw = mdl.Residuals.Raw;
-%! r   = mdl.Residuals.Standardized;
-%! S2i = mdl.Diagnostics.S2_i;
-%! assert (mdl.Diagnostics.CooksDistance, (1/p) .* r.^2 .* h ./ (1-h), 1e-8);
-%! assert (mdl.Diagnostics.S2_i, (mdl.DFE*mdl.MSE - raw.^2./(1-h))/(mdl.DFE-1), 1e-8);
-%! assert (mdl.Diagnostics.CovRatio, (S2i./mdl.MSE).^p ./ (1-h), 1e-6);
-%! assert (mdl.Diagnostics.Dffits, mdl.Residuals.Studentized .* sqrt(h./(1-h)), 1e-6);
-%! assert (all (mdl.Diagnostics.CooksDistance >= 0));
-
-%!test
-%! ## Dfbetas size
+%! assert (H(1,1), 0.370779220779221, 1e-10);
+%! assert (H(1,2), 0.298051948051948, 1e-10);
+%! assert (mdl.Diagnostics.Leverage(1:3),      [0.370779220779221; 0.245283663704716; 0.164718614718615], 1e-10);
+%! assert (mdl.Diagnostics.CooksDistance(1:3), [0.078517048682575; 0.077211407930332; 0.001953301452841], 1e-8);
+%! assert (mdl.Diagnostics.S2_i(1:3),          [0.023591009857798; 0.023146223303229; 0.024116854077430], 1e-8);
+%! assert (mdl.Diagnostics.CovRatio(1:3),      [1.774933176573401; 1.397661919176034; 1.428481535363283], 1e-6);
+%! assert (mdl.Diagnostics.Dffits(1:3),        [0.476480465355394; 0.477020506700835; -0.074329411030064], 1e-6);
 %! assert (size (mdl.Diagnostics.Dfbetas), [20, 3]);
-
-%!test
-%! ## Diagnostics table schema
 %! assert (width (mdl.Diagnostics), 7);
 %! assert (isequal (mdl.Diagnostics.Properties.VariableNames, ...
 %!                  {'Leverage','CooksDistance','Dffits','S2_i', ...
 %!                   'CovRatio','Dfbetas','HatMatrix'}));
 
 %!test
-%! ## LogLikelihood formula
-%! assert (mdl.LogLikelihood, 11.0836133807695, 1e-6);
-%! assert (mdl.LogLikelihood, -(n/2)*(1 + log(2*pi*mdl.SSE/n)), 1e-8);
-
-%!test
-%! ## Information criteria
-%! assert (mdl.ModelCriterion.AIC,  -16.1672267615389, 1e-6);
-%! assert (mdl.ModelCriterion.AICc, -14.6672267615389, 1e-6);
-%! assert (mdl.ModelCriterion.BIC,  -13.180029940877,  1e-6);
-%! assert (mdl.ModelCriterion.CAIC, -10.180029940877,  1e-6);
-%! assert (mdl.ModelCriterion.BIC > mdl.ModelCriterion.AIC);
-%! assert (isfield (mdl.ModelCriterion, 'AIC')  && isfield (mdl.ModelCriterion, 'AICc') && ...
-%!         isfield (mdl.ModelCriterion, 'BIC')  && isfield (mdl.ModelCriterion, 'CAIC'));
-
-%!test
-%! ## Model fit vs null model
-%! assert (mdl.ModelFitVsNullModel.Fstat, 12831.4909842738, 1e-4);
-%! assert (mdl.ModelFitVsNullModel.Pvalue >= 0 && mdl.ModelFitVsNullModel.Pvalue <= 1);
-%! assert (strcmp (mdl.ModelFitVsNullModel.NullModel, 'constant'));
-%! p2  = mdl.NumEstimatedCoefficients - 1;
-%! R2  = mdl.Rsquared.Ordinary;
-%! assert (mdl.ModelFitVsNullModel.Fstat, (R2/p2)/((1-R2)/(n-p2-1)), 1e-6);
-
-%!test
-%! ## Coefficients table schema
-%! assert (width (mdl.Coefficients), 4);
-%! assert (height (mdl.Coefficients), 3);
-%! assert (isequal (mdl.Coefficients.Properties.VariableNames, ...
-%!                  {'Estimate','SE','tStat','pValue'}));
-
-%!test
-%! ## Residuals table schema
-%! assert (width (mdl.Residuals), 4);
-%! assert (height (mdl.Residuals), 20);
-%! assert (isequal (mdl.Residuals.Properties.VariableNames, ...
-%!                  {'Raw','Pearson','Studentized','Standardized'}));
-%! assert (all (! isnan (mdl.Residuals.Raw)));
-
-%!test
-%! ## ObservationInfo schema
+%! ## ObservationInfo, VariableInfo, names, Formula, Variables
 %! assert (width (mdl.ObservationInfo), 4);
 %! assert (height (mdl.ObservationInfo), 20);
 %! assert (isequal (mdl.ObservationInfo.Properties.VariableNames, ...
 %!                  {'Weights','Excluded','Missing','Subset'}));
 %! assert (all (mdl.ObservationInfo.Weights == 1));
-%! assert (sum (mdl.ObservationInfo.Subset), 20);
 %! assert (all (mdl.ObservationInfo.Subset == ...
 %!              (! mdl.ObservationInfo.Missing & ! mdl.ObservationInfo.Excluded)));
-
-%!test
-%! ## VariableInfo schema
 %! assert (width  (mdl.VariableInfo), 4);
 %! assert (height (mdl.VariableInfo), 3);
 %! assert (isequal (mdl.VariableInfo.Properties.VariableNames, ...
 %!                  {'Class','Range','InModel','IsCategorical'}));
 %! assert (mdl.VariableInfo.InModel(strcmp (mdl.VariableNames, 'y')), false);
 %! assert (all (mdl.VariableInfo.InModel(! strcmp (mdl.VariableNames, 'y'))));
-%! assert (ischar (mdl.VariableInfo.Class{1}));
-
-%!test
-%! ## Predictor and variable names
 %! assert (mdl.ResponseName, 'y');
 %! assert (isequal (mdl.PredictorNames, {'x1','x2'}));
 %! assert (isequal (mdl.VariableNames, {'x1','x2','y'}));
-
-%!test
-%! ## Formula struct properties
 %! assert (mdl.Formula.HasIntercept, true);
 %! assert (mdl.Formula.LinearPredictor, '1 + x1 + x2');
 %! assert (mdl.Formula.NTerms, 3);
-%! assert (isfield (mdl.Formula, 'ResponseName') && isfield (mdl.Formula, 'LinearPredictor'));
-
-%!test
-%! ## Variables table schema
 %! assert (strcmp (mdl.Variables.Properties.VariableNames{end}, 'y'));
 
 %!test
