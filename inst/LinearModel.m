@@ -943,11 +943,11 @@ classdef LinearModel
       S2i_full(subset_mask) = D.S2_i;
       CR_full(subset_mask)  = D.CovRatio;
 
-      Dfb_full   = zeros (n_total, p);
+      Dfb_full   = NaN (n_total, n_coef);
       Dfb_full(subset_mask, :) = D.Dfbetas;
 
-      HatMat_pad = zeros (n_total, n_obs);
-      HatMat_pad(subset_mask, :) = D.HatMatrix;
+      HatMat_pad = zeros (n_total, n_total);
+      HatMat_pad(subset_mask, subset_mask) = D.HatMatrix;
 
       DiagTable = table (Lev_full, CD_full, Dff_full, S2i_full, CR_full, ...
         Dfb_full, HatMat_pad, ...
@@ -3165,10 +3165,11 @@ function D = lm_diagnostics (X, y, fit)
   Dffits        = r_stu .* sqrt (h ./ max (1 - h, eps));
   CovRatio      = (S2_i ./ max (MSE, eps)).^p ./ max (1 - h, eps);
 
+  p_full   = columns (X);  
   active   = fit.active_cols;
   CovB_act = fit.CovBeta(active, active);
   XtXinv_d = diag (CovB_act) / max (MSE, eps);
-  Dfbetas  = zeros (n, p);
+  Dfbetas  = NaN (n, p_full);
 
   if (p > 0)
     for i = 1:n
