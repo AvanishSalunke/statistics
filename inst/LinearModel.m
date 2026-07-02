@@ -2787,7 +2787,7 @@ classdef LinearModel
         ytl{j} = [pred{j}, ': ', lo_str, ' to ', hi_str];
       endfor
 
-      set (ax, 'YTick', 1:p, 'YTickLabel', ytl);
+      set (ax, 'YTick', 1:p, 'YTickLabel', ytl, 'YDir', 'reverse');
       ylim  (ax, [0.5, p + 0.5]);
       xlabel (ax, 'Main Effect');
       ylabel (ax, '');
