@@ -558,7 +558,11 @@ classdef LinearModel
 
     ## Custom display
     function disp (this)
-      fprintf ("\n  Linear regression model:\n");
+      if (isempty (this.Robust))
+        fprintf ("\n  Linear regression model:\n");
+      else
+        fprintf ("\n  Linear regression model (robust fit):\n");
+      endif
       if (! isempty (this.Formula) && isstruct (this.Formula) ...
           && isfield (this.Formula, 'LinearPredictor'))
         fprintf ("      %s ~ %s\n", this.ResponseName, ...
@@ -874,7 +878,17 @@ classdef LinearModel
 
       endif
 
-      fit = LinearModel.lm_fit (X_design_sub, y_sub, w_sub);
+      if (isempty (opts.RobustOpts))
+        fit     = LinearModel.lm_fit (X_design_sub, y_sub, w_sub);
+        RobustS = [];
+      else
+        fit     = lm_robust_fit (X_design_sub, y_sub, w_sub, ...
+                                  opts.RobustOpts.WgtFun, opts.RobustOpts.Tune);
+        RobustS.RobustWgtFun = opts.RobustOpts.WgtFun;
+        RobustS.Tune         = opts.RobustOpts.Tune;
+        RobustS.Weights      = fit.RobustWeights;
+      endif
+
       D   = lm_diagnostics (X_design_sub, y_sub, fit, w_sub);
 
       p    = fit.rank_X;
@@ -1081,7 +1095,7 @@ classdef LinearModel
       this.SSE                      = SSE;
       this.SSR                      = SSR;
       this.SST                      = SST;
-      this.Robust                   = [];
+      this.Robust                   = RobustS;
       this.Steps                    = [];
       this.Formula                  = FormulaS;
       this.NumObservations          = n_obs;
@@ -3022,9 +3036,74 @@ function opts = lm_parse_nv (nv_args)
 
   opts.Intercept       = logical (intercept);
   opts.Exclude         = exclude;
-  opts.RobustOpts      = robustopts;
   opts.CategoricalVars = catvars;
   opts.ResponseVar     = char (respvar);
+
+  if (isempty (robustopts) || (ischar (robustopts) && strcmpi (robustopts, 'off')) ...
+      || (islogical (robustopts) && ! robustopts))
+    opts.RobustOpts = [];
+  else
+    rname = 'bisquare';
+    rtune = [];
+    if (isstruct (robustopts))
+      if (isfield (robustopts, 'RobustWgtFun') && ! isempty (robustopts.RobustWgtFun))
+        rname = robustopts.RobustWgtFun;
+      endif
+      if (isfield (robustopts, 'Tune'))
+        rtune = robustopts.Tune;
+      endif
+    elseif (is_function_handle (robustopts))
+      rname = robustopts;
+    elseif (ischar (robustopts) && ! strcmpi (robustopts, 'on'))
+      rname = robustopts;
+    elseif (! (ischar (robustopts) && strcmpi (robustopts, 'on')))
+      error ("LinearModel: invalid RobustOpts value.");
+    endif
+
+    if (is_function_handle (rname))
+      wfun = rname;
+      if (isempty (rtune))
+        rtune = 1;
+      endif
+    else
+      switch (lower (char (rname)))
+        case 'andrews'
+          wfun = @(r) (abs (r) < pi) .* sin (max (sqrt (eps), abs (r))) ...
+                      ./ max (sqrt (eps), abs (r));
+          def_tune = 1.339;
+        case 'bisquare'
+          wfun = @(r) (abs (r) < 1) .* (1 - r.^2).^2;
+          def_tune = 4.685;
+        case 'cauchy'
+          wfun = @(r) 1 ./ (1 + r.^2);
+          def_tune = 2.385;
+        case 'fair'
+          wfun = @(r) 1 ./ (1 + abs (r));
+          def_tune = 1.400;
+        case 'huber'
+          wfun = @(r) 1 ./ max (1, abs (r));
+          def_tune = 1.345;
+        case 'logistic'
+          wfun = @(r) tanh (max (sqrt (eps), abs (r))) ./ max (sqrt (eps), abs (r));
+          def_tune = 1.205;
+        case 'ols'
+          wfun = @(r) ones (size (r));
+          def_tune = 1;
+        case 'talwar'
+          wfun = @(r) 1 * (abs (r) < 1);
+          def_tune = 2.795;
+        case 'welsch'
+          wfun = @(r) exp (-(r.^2));
+          def_tune = 2.985;
+        otherwise
+          error ("LinearModel: unrecognised RobustWgtFun '%s'.", char (rname));
+      endswitch
+      if (isempty (rtune))
+        rtune = def_tune;
+      endif
+    endif
+    opts.RobustOpts = struct ('WgtFun', wfun, 'Tune', rtune);
+  endif
 
   if (isempty (weights))
     opts.Weights = [];
@@ -3290,6 +3369,130 @@ function h = lm_plot_data (ax, xdata, ydata, props)
             'MarkerEdgeColor', props.MarkerEdgeColor, ...
             'MarkerFaceColor', props.MarkerFaceColor, ...
             'LineWidth',      props.LineWidth);
+endfunction
+
+function fit = lm_robust_fit (X, y, w, wgtfun, tune)
+
+  n  = rows (X);
+  p  = columns (X);
+  w  = w(:);
+  sw = sqrt (w);
+
+  Xw   = X .* sw;
+  yw   = y .* sw;
+  beta = Xw \ yw;
+
+  [~, R] = qr (Xw, 0);
+  E = Xw / R;
+  h = min (0.9999, sum (E.^2, 2));
+  adjfactor = 1 ./ sqrt (max (1 - h, eps));
+
+  DFE = n - p;
+  if (DFE <= 0)
+    fit.beta          = beta;
+    fit.H             = zeros (n, n);
+    fit.leverage      = zeros (n, 1);
+    fit.SSE           = NaN;
+    fit.SSR           = NaN;
+    fit.SST           = NaN;
+    fit.DFE           = DFE;
+    fit.MSE           = NaN;
+    fit.RMSE          = NaN;
+    fit.CovBeta       = NaN (p, p);
+    fit.rank_X        = p;
+    fit.active_cols   = 1:p;
+    fit.Fitted        = X * beta;
+    fit.Raw           = y - fit.Fitted;
+    fit.RobustWeights = ones (n, 1);
+    return;
+  endif
+  ols_s = norm (y - X * beta) / sqrt (DFE);
+
+  tiny_s  = 1e-6 * std (y);
+  tolD    = sqrt (eps);
+  iterlim = 50;
+  iter    = 0;
+  beta0   = zeros (size (beta));
+  wts     = ones (n, 1);
+
+  while (iter == 0 || any (abs (beta - beta0) > tolD * max (abs (beta), abs (beta0))))
+    iter = iter + 1;
+    if (iter > iterlim)
+      break;
+    endif
+    r    = (y - X * beta) ./ sw;
+    radj = r .* adjfactor;
+
+    rs = sort (abs (radj));
+    s  = median (rs(max (1, p):end)) / 0.6745;
+
+    wts   = wgtfun (radj / (max (s, tiny_s) * tune));
+    beta0 = beta;
+
+    ww   = sqrt (w .* wts);
+    beta = (X .* ww) \ (y .* ww);
+  endwhile
+
+  r    = (y - X * beta) ./ sw;
+  radj = r .* adjfactor;
+  rs    = sort (abs (radj));
+  mad_s = median (rs(max (1, p):end)) / 0.6745;
+
+  if (all (wts < tolD | wts > 1 - tolD))
+    included = wts > 1 - tolD;
+    robust_s = norm (r(included)) / sqrt (max (sum (included) - p, eps));
+  else
+    st  = max (mad_s, tiny_s) * tune;
+    u   = radj / st;
+    phi = u .* wgtfun (u);
+
+    delta = 0.0001;
+    u1   = u - delta;
+    phi0 = u1 .* wgtfun (u1);
+    u1   = u + delta;
+    phi1 = u1 .* wgtfun (u1);
+    dphi = (phi1 - phi0) / (2 * delta);
+
+    m1 = mean (dphi);
+    m2 = sum ((1 - h) .* phi.^2) / (n - p);
+    K  = 1 + (p / n) * (1 - m1) / m1;
+    robust_s = K * sqrt (m2) * st / m1;
+  endif
+
+  sigma = max (robust_s, sqrt ((ols_s^2 * p^2 + robust_s^2 * n) / (p^2 + n)));
+
+  RI      = R \ eye (p);
+  CovBeta = (RI * RI') * sigma^2;
+
+  ww  = sqrt (w .* wts);
+  Xwf = X .* ww;
+  [Qf, ~] = qr (Xwf, 0);
+  Q1t = Qf * Qf';
+  H   = (Q1t ./ ww) .* ww';
+
+  Fitted = X * beta;
+  Raw    = y - Fitted;
+  ybar   = mean (y);
+  SSR    = sum ((Fitted - ybar).^2);
+  SSE    = sigma^2 * DFE;
+  SST    = SSE + SSR;
+
+  fit.beta          = beta;
+  fit.H             = H;
+  fit.leverage      = h;
+  fit.SSE           = SSE;
+  fit.SSR           = SSR;
+  fit.SST           = SST;
+  fit.DFE           = DFE;
+  fit.MSE           = sigma^2;
+  fit.RMSE          = sigma;
+  fit.CovBeta       = CovBeta;
+  fit.rank_X        = p;
+  fit.active_cols   = 1:p;
+  fit.Fitted        = Fitted;
+  fit.Raw           = Raw;
+  fit.RobustWeights = wts;
+
 endfunction
 
 %!shared mdl, X, y, n
@@ -5539,6 +5742,36 @@ endfunction
 %! assert (get (h(1), 'XData'), [2.38302891604232, -19.5277648300125], -1e-10);
 %! close (fig);
 
+%!test
+%! ## robust fit on the hald dataset down weights the influential outlier and matches matlab
+%! Xr = [7 26 6 60; 1 29 15 52; 11 56 8 20; 11 31 8 47; 7 52 6 33; ...
+%!      11 55 9 22; 3 71 17 6; 1 31 22 44; 2 54 18 22; 21 47 4 26; ...
+%!      1 40 23 34; 11 66 9 12; 10 68 8 12];
+%! yr = [78.5;74.3;104.3;87.6;95.9;109.2;102.7;72.5;93.1;115.9;83.8;113.3;109.4];
+%! mr = fitlm (Xr, yr, 'RobustOpts', 'on');
+%! assert (class (mr), 'LinearModel');
+%! assert (! isempty (mr.Robust));
+%! assert (mr.Robust.Tune, 4.685, 1e-10);
+%! assert (numel (mr.Robust.Weights), 13);
+%! assert (mr.Coefficients.Estimate, ...
+%!         [60.0897358816096; 1.57529551556915; 0.532199192097796; ...
+%!          0.133455378556458; -0.120521170556001], 1e-7);
+%! assert (mr.Coefficients.SE, ...
+%!         [75.8175597390933; 0.805849306629754; 0.783146694256936; ...
+%!          0.816603608044244; 0.767202244491812], 1e-7);
+%! assert (mr.SSE, 56.0362670671825, 1e-6);
+%! assert (mr.SSR, 2650.68247260864, 1e-5);
+%! assert (mr.SST, 2706.71873967582, 1e-5);
+%! assert (mr.DFE, 8);
+%! assert (mr.RMSE, 2.64660790133291, 1e-8);
+%! assert (mr.Rsquared.Ordinary, 0.97929734395902, 1e-8);
+%! assert (mr.Rsquared.Adjusted, 0.96894601593853, 1e-8);
+%! assert (mr.ModelFitVsNullModel.Fstat, 94.6059618650438, 1e-5);
+%! assert (mr.ModelFitVsNullModel.Pvalue, 9.0327751881622e-07, 1e-12);
+%! assert (mr.Robust.Weights(1), 0.999991395159739, 1e-8);
+%! assert (mr.Robust.Weights(6), 0.877841934872095, 1e-8);
+%! assert (mr.Robust.Weights(8), 0.874854854809619, 1e-8);
+
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
 %!error <Terms matrix must have 2 or 3 columns> fitlm (X, y, [1 2 3 4; 5 6 7 8])
@@ -5613,3 +5846,5 @@ endfunction
 %!error <Wrong number of arguments> plotEffects (mdl, 'extra')
 %!error <Wrong number of arguments> plotEffects (mdl, 'a', 'b')
 %!error <Model has no predictors> plotEffects (fitlm (X(:,1), y, 'constant'))
+%!error <unrecognised RobustWgtFun> fitlm (X, y, 'RobustOpts', 'notarealfunction')
+%!error <invalid RobustOpts value> fitlm (X, y, 'RobustOpts', 42)

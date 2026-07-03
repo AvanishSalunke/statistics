@@ -387,6 +387,7 @@ endfunction
 %!test 
 %! assert (class (fitlm (X, y, 'CategoricalVars', [1])), 'LinearModel');
 %!test 
+%! warning ('off', 'Octave:singular-matrix');
 %! assert (class (fitlm (X, y, 'RobustOpts', 'on')), 'LinearModel');
 %!test 
 %! assert (class (fitlm (X, y, 'ResponseVar', 'y')), 'LinearModel');
