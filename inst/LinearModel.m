@@ -1719,11 +1719,14 @@ classdef LinearModel
     ##
     ## @var{terms} may be a character vector in Wilkinson notation.  Use
     ## @code{'x1'} for a main effect, @code{'x1:x2'} for a two-way
-    ## interaction, @code{'x1^2'} for a quadratic (polynomial) term,
-    ## @code{'x1*x2'} to add both main effects and their interaction in one
-    ## step, @code{'x1 + x2^2'} to add several terms at once, or @code{'1'}
-    ## to add an intercept to a no-intercept model.  All variable names must
-    ## match entries in @code{@var{mdl}.PredictorNames}.
+    ## interaction, @code{'x1*x2'} to add both main effects and their
+    ## interaction in one step, @code{'x1 + x2^2'} to add several terms at
+    ## once, or @code{'1'} to add an intercept to a no-intercept model.  A
+    ## bare power term @code{'x1^2'} adds @code{x1} together with
+    ## @code{x1^2} (and any intermediate powers), matching the Wilkinson
+    ## hierarchy convention; power notation used inside an interaction, e.g.
+    ## @code{'x1:x2^2'}, adds only that exact interaction term.  All
+    ## variable names must match entries in @code{@var{mdl}.PredictorNames}.
     ##
     ## @var{terms} may also be a numeric matrix of size @var{t}-by-@var{v},
     ## where @var{t} is the number of terms to add and @var{v} equals
@@ -1801,11 +1804,10 @@ classdef LinearModel
             if (strcmp (ctok, '1'))
               T = [T; zeros(1, nv)];
             else
-              row   = zeros (1, nv);
               parts = cellfun (@strtrim, strsplit (ctok, ':'), ...
                                'UniformOutput', false);
-              for pi = 1:numel (parts)
-                part = parts{pi};
+              if (numel (parts) == 1)
+                part = parts{1};
                 hat  = strfind (part, '^');
                 if (isempty (hat))
                   vname = part;
@@ -1818,9 +1820,31 @@ classdef LinearModel
                 if (isempty (idx))
                   error ('addTerms: Unrecognized variable: ''%s''.', vname);
                 endif
-                row(idx(1)) = row(idx(1)) + exp;
-              endfor
-              T = [T; row];
+                for k = 1:exp
+                  row         = zeros (1, nv);
+                  row(idx(1)) = k;
+                  T           = [T; row];
+                endfor
+              else
+                row = zeros (1, nv);
+                for pi = 1:numel (parts)
+                  part = parts{pi};
+                  hat  = strfind (part, '^');
+                  if (isempty (hat))
+                    vname = part;
+                    exp   = 1;
+                  else
+                    vname = strtrim (part(1:hat(1)-1));
+                    exp   = str2double (strtrim (part(hat(1)+1:end)));
+                  endif
+                  idx = find (strcmp (pred, vname));
+                  if (isempty (idx))
+                    error ('addTerms: Unrecognized variable: ''%s''.', vname);
+                  endif
+                  row(idx(1)) = row(idx(1)) + exp;
+                endfor
+                T = [T; row];
+              endif
             endif
           endfor
 
@@ -1846,10 +1870,20 @@ classdef LinearModel
 
       combined = [existing; new_rows];
       int_mask = all (combined(:, 1:end-1) == 0, 2);
-      if (any (int_mask) && ! int_mask(1))
-        combined = [combined(int_mask, :); combined(! int_mask, :)];
-      endif
-      NewMdl   = lm_refit (mdl, combined);
+      body     = combined(! int_mask, :);
+      n_nonzero = sum (body(:, 1:end-1) != 0, 2);
+      degree    = sum (body(:, 1:end-1), 2);
+      tier      = zeros (rows (body), 1);
+      tier(n_nonzero == 1 & degree == 1) = 1;
+      tier(n_nonzero == 2)               = 2;
+      tier(n_nonzero == 1 & degree > 1)  = 3;
+      bitmask = zeros (rows (body), 1);
+      for i = 1:rows (body)
+        bitmask(i) = sum (2 .^ (find (body(i, 1:end-1)) - 1));
+      endfor
+      [~, order] = sortrows ([tier, bitmask]);
+      combined   = [combined(int_mask, :); body(order, :)];
+      NewMdl     = lm_refit (mdl, combined);
 
     endfunction
 
@@ -1868,12 +1902,15 @@ classdef LinearModel
     ##
     ## @var{terms} may be a character vector in Wilkinson notation.  Use
     ## @code{'x2'} to remove a main effect, @code{'x1:x2'} to remove an
-    ## interaction, @code{'x1^2'} to remove a polynomial term, @code{'1'} to
-    ## remove the intercept, or @code{'x1 + x2^2'} to remove several terms at
-    ## once.  The star operator @code{'x1*x2'} removes the main effects
-    ## @code{x1} and @code{x2} together with their interaction @code{x1:x2}
-    ## in a single call, following the same expansion rule as @code{addTerms}.
-    ## All variable names must match entries in
+    ## interaction, @code{'1'} to remove the intercept, or @code{'x1 + x2^2'}
+    ## to remove several terms at once.  A bare power term @code{'x1^2'}
+    ## removes @code{x1} together with @code{x1^2} (and any intermediate
+    ## powers), matching the Wilkinson hierarchy convention; power notation
+    ## used inside an interaction, e.g. @code{'x1:x2^2'}, removes only that
+    ## exact interaction term.  The star operator @code{'x1*x2'} removes the
+    ## main effects @code{x1} and @code{x2} together with their interaction
+    ## @code{x1:x2} in a single call, following the same expansion rule as
+    ## @code{addTerms}.  All variable names must match entries in
     ## @code{@var{mdl}.PredictorNames}.
     ##
     ## @var{terms} may also be a numeric matrix of size @var{t}-by-@var{v},
@@ -1951,11 +1988,10 @@ classdef LinearModel
             if (strcmp (ctok, '1'))
               T = [T; zeros(1, nv)];
             else
-              row   = zeros (1, nv);
               parts = cellfun (@strtrim, strsplit (ctok, ':'), ...
                                'UniformOutput', false);
-              for pi = 1:numel (parts)
-                part = parts{pi};
+              if (numel (parts) == 1)
+                part = parts{1};
                 hat  = strfind (part, '^');
                 if (isempty (hat))
                   vname = part;
@@ -1968,9 +2004,31 @@ classdef LinearModel
                 if (isempty (idx))
                   error ('removeTerms: Unrecognized variable: ''%s''.', vname);
                 endif
-                row(idx(1)) = row(idx(1)) + exp;
-              endfor
-              T = [T; row];
+                for k = 1:exp
+                  row         = zeros (1, nv);
+                  row(idx(1)) = k;
+                  T           = [T; row];
+                endfor
+              else
+                row = zeros (1, nv);
+                for pi = 1:numel (parts)
+                  part = parts{pi};
+                  hat  = strfind (part, '^');
+                  if (isempty (hat))
+                    vname = part;
+                    exp   = 1;
+                  else
+                    vname = strtrim (part(1:hat(1)-1));
+                    exp   = str2double (strtrim (part(hat(1)+1:end)));
+                  endif
+                  idx = find (strcmp (pred, vname));
+                  if (isempty (idx))
+                    error ('removeTerms: Unrecognized variable: ''%s''.', vname);
+                  endif
+                  row(idx(1)) = row(idx(1)) + exp;
+                endfor
+                T = [T; row];
+              endif
             endif
           endfor
 
@@ -2063,7 +2121,21 @@ classdef LinearModel
       endfor
 
       remaining = existing(keep, :);
-      NewMdl    = lm_refit (mdl, remaining);
+      int_mask  = all (remaining(:, 1:end-1) == 0, 2);
+      body      = remaining(! int_mask, :);
+      n_nonzero = sum (body(:, 1:end-1) != 0, 2);
+      degree    = sum (body(:, 1:end-1), 2);
+      tier      = zeros (rows (body), 1);
+      tier(n_nonzero == 1 & degree == 1) = 1;
+      tier(n_nonzero == 2)               = 2;
+      tier(n_nonzero == 1 & degree > 1)  = 3;
+      bitmask = zeros (rows (body), 1);
+      for i = 1:rows (body)
+        bitmask(i) = sum (2 .^ (find (body(i, 1:end-1)) - 1));
+      endfor
+      [~, order] = sortrows ([tier, bitmask]);
+      remaining  = [remaining(int_mask, :); body(order, :)];
+      NewMdl     = lm_refit (mdl, remaining);
 
     endfunction
 
@@ -3915,6 +3987,9 @@ endfunction
 %! yp = predict (m_rd, X_rd);
 %! assert (size (yp), [n, 1]);
 %! assert (! any (isnan (yp)));
+%! assert (yp(1:5), [0.192669485827486; 0.171266760882252; ...
+%!                   0.0519805029545;  -0.165189287955771; ...
+%!                  -0.480242611848561], 1e-10);
 
 %!test
 %! ## predict: ypred and default CI at new points
@@ -3972,8 +4047,12 @@ endfunction
 %! assert (yp(1), 2.099999999999998, 1e-10);
 %! assert (yp(2), 4.066666666666667, 1e-10);
 %! assert (yp(3), 6.066666666666666, 1e-10);
-%! assert (yci(1,1), 1.809712563216691, 1e-10);
-%! assert (yci(1,2), 2.390287436783305, 1e-10);
+%! assert (yci(1,1), 1.80971256321669, 1e-10);
+%! assert (yci(1,2), 2.3902874367833,  1e-10);
+%! assert (yci(2,1), 3.77637922988336, 1e-10);
+%! assert (yci(2,2), 4.35695410344997, 1e-10);
+%! assert (yci(3,1), 5.77637922988336, 1e-10);
+%! assert (yci(3,2), 6.35695410344997, 1e-10);
 
 %!test
 %! ## predict: interaction model
@@ -3982,6 +4061,38 @@ endfunction
 %! assert (yp(2),    1.282176811827644, 1e-10);
 %! assert (yci(1,1), -0.110763003580605, 1e-10);
 %! assert (yci(1,2),  2.038827907674306, 1e-10);
+
+%!test
+%! ## predict: weighted model, ypred and CI
+%! w  = (1:n)' / sum (1:n);
+%! mw = fitlm (X, y, 'Weights', w);
+%! [yp, yci] = predict (mw, [0.5 0.25; 1.0 1.0]);
+%! assert (yp(1),    1.15833357370544, 1e-10);
+%! assert (yp(2),    1.74408669002694, 1e-10);
+%! assert (yci(1,1), 0.802165170771357, 1e-10);
+%! assert (yci(1,2), 1.51450197663953,  1e-10);
+%! assert (yci(2,1), 0.69968979253134,  1e-10);
+%! assert (yci(2,2), 2.78848358752254,  1e-10);
+
+%!test
+%! ## predict: no-intercept model, ypred and CI
+%! mni = fitlm (X, y, 'Intercept', false);
+%! [yp, yci] = predict (mni, [0.5 0.25; 1.0 1.0]);
+%! assert (yp(1),    1.23139861922723, 1e-10);
+%! assert (yp(2),    1.96417286373283, 1e-10);
+%! assert (yci(1,1), 1.00126247085704, 1e-10);
+%! assert (yci(1,2), 1.46153476759743, 1e-10);
+%! assert (yci(2,1), 1.51833851162232, 1e-10);
+%! assert (yci(2,2), 2.41000721584333, 1e-10);
+
+%!test
+%! ## predict: observation interval combined with simultaneous bound
+%! [~, yci] = predict (mdl, [0.5 0.25; 1.0 1.0], ...
+%!                      'Prediction', 'observation', 'Simultaneous', true);
+%! assert (yci(1,1), 0.46801507632267,  1e-10);
+%! assert (yci(1,2), 1.78339610491601,  1e-10);
+%! assert (yci(2,1), 0.399032373599106, 1e-10);
+%! assert (yci(2,2), 2.89257730347266,  1e-10);
 
 %!test
 %! ## output is 2x1 double column vector
@@ -4017,32 +4128,17 @@ endfunction
 %! assert (! isequal (ya, yb));
 
 %!test
-%! ## table input gives same size and finite output as matrix
-%! Xt   = table ([0.5;1.0], [0.25;1.0], 'VariableNames', {'x1','x2'});
-%! ysim = random (mdl, Xt);
-%! assert (size (ysim), [2, 1]);
-%! assert (all (isfinite (ysim)));
-
-%!test
-%! ## full training data gives 20 row output with no NaN
-%! ysim = random (mdl, X);
-%! assert (size (ysim), [20, 1]);
-%! assert (sum (isnan (ysim)), 0);
-
-%!test
-%! ## weighted model gives correct size output
-%! w    = (1:n)' / sum (1:n);
-%! mw   = fitlm (X, y, 'Weights', w);
-%! ysim = random (mw, [0.5, 0.25; 1.0, 1.0]);
-%! assert (size (ysim), [2, 1]);
-%! assert (all (isfinite (ysim)));
-
-%!test
-%! ## no intercept model gives correct size output
-%! mni  = fitlm (X, y, 'Intercept', false);
-%! ysim = random (mni, [0.5, 0.25; 1.0, 1.0]);
-%! assert (size (ysim), [2, 1]);
-%! assert (all (isfinite (ysim)));
+%! ## random: table input, full training data, weighted and no-intercept
+%! ## models all give finite output of the expected size
+%! Xt = table ([0.5;1.0], [0.25;1.0], 'VariableNames', {'x1','x2'});
+%! mw  = fitlm (X, y, 'Weights', (1:n)' / sum (1:n));
+%! mni = fitlm (X, y, 'Intercept', false);
+%! assert (size (random (mdl, Xt)), [2, 1]);
+%! assert (all (isfinite (random (mdl, Xt))));
+%! assert (size (random (mdl, X)), [20, 1]);
+%! assert (sum (isnan (random (mdl, X))), 0);
+%! assert (all (isfinite (random (mw,  [0.5, 0.25; 1.0, 1.0]))));
+%! assert (all (isfinite (random (mni, [0.5, 0.25; 1.0, 1.0]))));
 
 %!test
 %! yf = feval (mdl, [0.5 0.25; 1.0 1.0; 0.2 0.04]);
@@ -4162,19 +4258,15 @@ endfunction
 %!test
 %! ci   = coefCI (mdl);
 %! ci01 = coefCI (mdl, 0.01);
+%! t01  = tinv (0.995, mdl.DFE);
 %! assert (size (ci01), [3, 2]);
 %! assert (ci01(1,1), -0.208951721610638, 1e-10);
 %! assert (ci01(1,2),  0.441329077191052, 1e-10);
 %! assert (ci01(2,1),  1.08228494564489,  1e-10);
-%! assert (ci01(2,2),  3.934618035496833,  1e-10);
-%! assert (ci01(3,1), -1.044802201703589,  1e-10);
+%! assert (ci01(2,2),  3.934618035496833, 1e-10);
+%! assert (ci01(3,1), -1.044802201703589, 1e-10);
 %! assert (ci01(3,2), -0.912868457946783, 1e-10);
 %! assert (all ((ci01(:,2) - ci01(:,1)) > (ci(:,2) - ci(:,1))));
-
-%!test
-%! ## alpha=0.01 formula identity
-%! ci01 = coefCI (mdl, 0.01);
-%! t01  = tinv (0.995, mdl.DFE);
 %! assert (ci01(:,2) - ci01(:,1), 2 * t01 * mdl.Coefficients.SE, 1e-10);
 
 %!test
@@ -4256,7 +4348,6 @@ endfunction
 %! assert (class (p), 'double');
 %! assert (p >= 0 && p <= 1);
 %! assert (F >= 0);
-%! assert (r, 2);
 %! assert (p, 9.489880832170599e-28, -1e-8);
 %! assert (F, 1.283149098426142e+04, -1e-8);
 %! assert (r, 2);
@@ -5771,6 +5862,186 @@ endfunction
 %! assert (mr.Robust.Weights(1), 0.999991395159739, 1e-8);
 %! assert (mr.Robust.Weights(6), 0.877841934872095, 1e-8);
 %! assert (mr.Robust.Weights(8), 0.874854854809619, 1e-8);
+
+%!test
+%! load hald
+%! Xh = ingredients;
+%! yh = heat;
+%! mdlh = fitlm (Xh, yh);
+%! assert (mdlh.Coefficients.Estimate, ...
+%!   [62.405369299918; 1.55110264750845; 0.510167579684912; ...
+%!    0.101909403579662; -0.144061029071018], 1e-9);
+%! assert (mdlh.Coefficients.SE, ...
+%!   [70.0709592085362; 0.744769867130993; 0.72378800183518; ...
+%!    0.754709045051309; 0.70905206344651], 1e-9);
+%! assert (mdlh.Coefficients.tStat, ...
+%!   [0.890602469336764; 2.0826603169159; 0.704857746178952; ...
+%!    0.135031379639465; -0.203174120065001], 1e-8);
+%! assert (mdlh.Coefficients.pValue, ...
+%!   [0.399133563385561; 0.0708216874297252; 0.500901103474289; ...
+%!    0.895922690510107; 0.844071473291884], 1e-8);
+%! assert (mdlh.CoefficientNames, {'(Intercept)', 'x1', 'x2', 'x3', 'x4'});
+%! assert (mdlh.NumCoefficients,          5);
+%! assert (mdlh.NumEstimatedCoefficients, 5);
+%! assert (mdlh.DFE,                      8);
+%! assert (mdlh.SSE, 47.863639350499,   1e-8);
+%! assert (mdlh.SSR, 2667.89943757258,  1e-6);
+%! assert (mdlh.SST, 2715.76307692308,  1e-6);
+%! assert (mdlh.MSE,  5.98295491881254, 1e-9);
+%! assert (mdlh.RMSE, 2.44600795559061, 1e-9);
+%! assert (mdlh.Rsquared.Ordinary, 0.98237562040768, 1e-9);
+%! assert (mdlh.Rsquared.Adjusted, 0.97356343061152, 1e-9);
+%! assert (mdlh.LogLikelihood, -26.918344895826, 1e-8);
+%! assert (mdlh.ModelCriterion.AIC,  63.8366897916521, 1e-7);
+%! assert (mdlh.ModelCriterion.AICc, 72.4081183630806, 1e-7);
+%! assert (mdlh.ModelCriterion.BIC,  66.6614365789598, 1e-7);
+%! assert (mdlh.ModelCriterion.CAIC, 71.6614365789598, 1e-7);
+%! assert (mdlh.Fitted(1:5), ...
+%!   [78.4952395815018; 72.7887993002909; 105.970937532083; ...
+%!    89.3271002550427; 95.649244438227], 1e-8);
+%! assert (mdlh.Residuals.Raw(1:5), ...
+%!   [0.00476041849822195; 1.51120069970906; -1.67093753208295; ...
+%!    -1.72710025504266; 0.250755561773033], 1e-8);
+%! assert (mdlh.Residuals.Pearson(1:5), ...
+%!   [0.00194619910672879; 0.617823297040002; -0.683128412670876; ...
+%!    -0.706089385807266; 0.102516249466771], 1e-8);
+%! assert (mdlh.Residuals.Studentized(1:5), ...
+%!   [0.00271470565323249; 0.734526653667679; -1.05809320265782; ...
+%!    -0.824036396702643; 0.119767490249399], 1e-8);
+%! assert (mdlh.Residuals.Standardized(1:5), ...
+%!   [0.00290214088954622; 0.756624558354514; -1.05027405557414; ...
+%!    -0.841081414787206; 0.127905848829164], 1e-8);
+%! assert (mdlh.Diagnostics.Leverage(1:5), ...
+%!   [0.550284813713987; 0.333242829857405; 0.576942476415795; ...
+%!    0.29523667959374; 0.357601364034465], 1e-8);
+%! assert (mdlh.Diagnostics.CooksDistance(1:5), ...
+%!   [2.06118491039641e-06; 0.0572247602223712; 0.300862709270433; ...
+%!    0.0592697490074745; 0.00182140011900327], 1e-8);
+%! assert (mdlh.Diagnostics.Dffits(1:5), ...
+%!   [0.00300294746488125; 0.519283016757055; -1.23563576459509; ...
+%!    -0.533347058289184; 0.0893585735072963], 1e-7);
+%! assert (mdlh.Diagnostics.S2_i(1:5), ...
+%!   [6.83765556564705; 6.34835899957971; 5.89485540180634; ...
+%!    6.23302709557492; 6.82367982420565], 1e-7);
+%! assert (mdlh.Diagnostics.CovRatio(1:5), ...
+%!   [4.33530738335252; 2.01725612858557; 2.19476339013102; ...
+%!    1.74129811023362; 3.00406926806094], 1e-6);
+%! assert (coefCI (mdlh), ...
+%!   [-99.178552392689 223.989290992525; -0.166339745871082 3.26854504088797; ...
+%!    -1.15889054555817 2.179225704928; -1.63845277518465 1.84227158234397; ...
+%!    -1.77913801945372 1.49101596131168], 1e-7);
+%! assert (coefCI (mdlh, 0.1), ...
+%!   [-67.8949453842232 192.705683984059; 0.166167302672858 2.93603799234403; ...
+%!    -0.835750978716108 1.85608613808593; -1.30150832005232 1.50532712721164; ...
+%!    -1.46257740216021 1.17445534401817], 1e-7);
+%! [p, F, r] = coefTest (mdlh);
+%! assert (p, 4.75618174559791e-07, 1e-12);
+%! assert (F, 111.479171821258, 1e-6);
+%! assert (r, 4);
+%! [dw, pdw] = dwtest (mdlh);
+%! assert (dw,  0.842123108585363, 1e-9);
+%! assert (pdw, 2.05259693286049,  1e-8);
+
+%!test
+%! load hald
+%! Xq = ingredients;
+%! yq = heat;
+%! mdlq = fitlm (Xq, yq, 'purequadratic');
+%! assert (mdlq.Coefficients.Estimate, ...
+%!   [-210.864812527187; 4.01775196981369; 5.27927179495849; 4.98703005469684; ...
+%!    1.18967556414545; -0.00475259718542981; -0.0278555063988026; ...
+%!    -0.0885225308739459; 0.0125632231921875], 1e-8);
+%! assert (mdlq.Coefficients.SE, ...
+%!   [62.2492955088454; 0.709968572684776; 0.928573133899706; 1.15325562045609; ...
+%!    0.559753134550446; 0.0119258668009245; 0.00570193167405062; ...
+%!    0.0224063172978396; 0.0040139580330777], 1e-8);
+%! assert (mdlq.Coefficients.tStat, ...
+%!   [-3.38742488253901; 5.6590560827508; 5.68535918413584; 4.3243058748108; ...
+%!    2.12535757410437; -0.398511677579811; -4.88527537528597; ...
+%!    -3.95078449069724; 3.12988404180068], 1e-7);
+%! assert (mdlq.Coefficients.pValue, ...
+%!   [0.0275955163014823; 0.00480588842249351; 0.00472567672152044; ...
+%!    0.0124052274432915; 0.100732674864514; 0.710609610173011; ...
+%!    0.00812965117162355; 0.0168069450605605; 0.0351891921636521], 1e-7);
+%! assert (mdlq.CoefficientNames, ...
+%!   {'(Intercept)', 'x1', 'x2', 'x3', 'x4', 'x1^2', 'x2^2', 'x3^2', 'x4^2'});
+%! assert (mdlq.NumCoefficients, 9);
+%! assert (mdlq.DFE, 4);
+%! assert (mdlq.Rsquared.Ordinary, 0.998060528051984, 1e-9);
+%! assert (mdlq.Rsquared.Adjusted, 0.994181584155951, 1e-9);
+%! assert (mdlq.SSE, 5.26714630515049, 1e-7);
+%! assert (mdlq.SSR, 2710.49593061793, 1e-6);
+%! assert (mdlq.SST, 2715.76307692308, 1e-6);
+%! Xnewq = mean (Xq, 1);
+%! [ypredq, yciq] = predict (mdlq, Xnewq);
+%! assert (ypredq, 101.90428629036, 1e-7);
+%! assert (yciq, [97.996264336243, 105.812308244477], 1e-6);
+%! [ypredq2, yciq2] = predict (mdlq, Xnewq, 'Alpha', 0.01);
+%! assert (ypredq2, 101.90428629036, 1e-7);
+%! assert (yciq2, [95.4237317847484, 108.384840795971], 1e-6);
+%! yfeq = feval (mdlq, Xnewq(1), Xnewq(2), Xnewq(3), Xnewq(4));
+%! assert (yfeq, 101.90428629036, 1e-7);
+%! ysimq = random (mdlq, Xnewq);
+%! assert (isscalar (ysimq));
+%! assert (isnumeric (ysimq));
+%! mdlq2 = removeTerms (mdlq, 'x1^2');
+%! assert (mdlq2.Coefficients.Estimate, ...
+%!   [180.815670525319; 0.228012666917658; -2.0654020024496; -1.90840414992816; ...
+%!    -0.0108001957000414; 0.0257318558607856; 0.00699693273966028], 1e-8);
+%! assert (mdlq2.CoefficientNames, ...
+%!   {'(Intercept)', 'x2', 'x3', 'x4', 'x2^2', 'x3^2', 'x4^2'});
+%! assert (mdlq2.NumCoefficients, 7);
+%! mdlq3 = addTerms (mdlq2, 'x1^2');
+%! assert (mdlq3.Coefficients.Estimate, mdlq.Coefficients.Estimate, 1e-8);
+%! assert (mdlq3.CoefficientNames, mdlq.CoefficientNames);
+%! assert (mdlq3.SSE, 5.26714630515049, 1e-7);
+
+%!test
+%! load hald
+%! Xr = ingredients;
+%! yr = heat;
+%! mdlr = fitlm (Xr, yr, 'RobustOpts', 'bisquare');
+%! assert (mdlr.Coefficients.Estimate, ...
+%!   [60.0897358816096; 1.57529551556915; 0.532199192097796; ...
+%!    0.133455378556458; -0.120521170556001], 1e-8);
+%! assert (mdlr.Coefficients.SE, ...
+%!   [75.8175597390933; 0.805849306629754; 0.783146694256936; ...
+%!    0.816603608044244; 0.767202244491812], 1e-8);
+%! assert (mdlr.Coefficients.tStat, ...
+%!   [0.792556976093573; 1.95482642053437; 0.679565138945976; ...
+%!    0.163427368238162; -0.157091785668371], 1e-7);
+%! assert (mdlr.Coefficients.pValue, ...
+%!   [0.450897370203866; 0.0863457969332376; 0.515957116726031; ...
+%!    0.874235088124976; 0.879064839096153], 1e-7);
+%! assert (mdlr.CoefficientNames, {'(Intercept)', 'x1', 'x2', 'x3', 'x4'});
+%! assert (is_function_handle (mdlr.Robust.RobustWgtFun));
+%! assert (mdlr.Robust.Tune, 4.685, 1e-10);
+%! assert (size (mdlr.Robust.Weights), [13, 1]);
+%! assert (isnumeric (mdlr.Robust.Weights));
+%! assert (mdlr.SSE, 56.0362670671825, 1e-6);
+%! assert (mdlr.MSE, 7.00453338339782, 1e-8);
+%! assert (mdlr.RMSE, 2.64660790133291, 1e-8);
+%! assert (mdlr.Rsquared.Ordinary, 0.97929734395902, 1e-9);
+%! assert (mdlr.Rsquared.Adjusted, 0.96894601593853, 1e-9);
+%! assert (mdlr.DFE, 8);
+%! H = [0 1 -1 0 0];
+%! [p1, F1, r1] = coefTest (mdlr, H);
+%! assert (p1, 0.00308748318894346, 1e-11);
+%! assert (F1, 17.4568343157849, 1e-7);
+%! assert (r1, 1);
+%! [pd1, dw1] = dwtest (mdlr, 'exact', 'both');
+%! assert (pd1, 0.844119247360191, 1e-9);
+%! assert (dw1, 2.05387711905232, 1e-8);
+%! [pd2, dw2] = dwtest (mdlr, 'approximate', 'right');
+%! assert (pd2, 0.425180546504485, 1e-9);
+%! assert (dw2, 2.05387711905232, 1e-8);
+%! Xnewr = mean (Xr, 1);
+%! [ypredr, ycir] = predict (mdlr, Xnewr, 'Simultaneous', true);
+%! assert (ypredr, 95.4263340097424, 1e-7);
+%! assert (ycir, [92.2744598719279, 98.5782081475569], 1e-6);
+%! [ypredr2, ycir2] = predict (mdlr, Xnewr, 'Simultaneous', true, 'Alpha', 0.1);
+%! assert (ypredr2, 95.4263340097424, 1e-7);
+%! assert (ycir2, [92.7161333049321, 98.1365347145527], 1e-6);
 
 %!error <Unknown option 'NotAKey'> fitlm (X, y, 'NotAKey', 1)
 %!error <VarNames must have 3 elements> fitlm (X, y, 'VarNames', {'a','b','c','d'})
