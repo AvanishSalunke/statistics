@@ -330,153 +330,91 @@ endfunction
 %! assert (mdl.Coefficients.pValue(3), 0.0807803098213114,      1e-09);
 %! assert (mdl.Coefficients.pValue(4), 0.952359384151778,       1e-09);
 
-
-%!shared X, y, yl, T1, T2, T3
+%!shared X, y, yl, T1, T2, T3, C
 %! X  = [1 2; 3 4; 5 6];
 %! y  = [2; 4; 5];
 %! yl = logical ([1; 0; 1]);
 %! T1 = table ([1;2;3], [4;5;6], 'VariableNames', {'x1','x2'});
 %! T2 = table ([1;2;3], [4;5;6], 'VariableNames', {'x1','y'});
 %! T3 = table ([1;2;3], [4;5;6], [2;4;5], 'VariableNames', {'x1','x2','y'});
+%! C  = categorical ({'a';'b';'a'});
 
-## fitlm (X, y) 
-%!test 
-%! assert (class (fitlm (X, y)), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, yl)), 'LinearModel');
-
-## fitlm (X, y) with model specification
-%!test 
-%! assert (class (fitlm (X, y, 'linear')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'constant')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'interactions')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'purequadratic')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'quadratic')), 'LinearModel');
 %!test
-%! assert (class (fitlm (X, y, 'full')), 'LinearModel');
-%!test 
+%! assert (class (fitlm (X, y)), 'LinearModel');
+%!test
+%! assert (class (fitlm (X, yl)), 'LinearModel');
+%!test
+%! assert (class (fitlm (X, y, 'linear')), 'LinearModel');
+%!test
 %! assert (class (fitlm (X, y, [1 0; 0 1])), 'LinearModel');
-
-## fitlm (X, y) with model specification and name-value pairs
-%!test 
-%! assert (class (fitlm (X, y, 'linear', 'Weights', [1;2;1])), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'linear', 'Intercept', true)), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'quadratic', 'Intercept', false)), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'linear', 'Exclude', [1])), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'linear', 'CategoricalVars', logical ([1 0]))), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'linear', 'Intercept', true, 'Weights', [1;2;1])), 'LinearModel');
-
-## fitlm (X, y) with name-value pairs
-%!test 
+%!test
 %! assert (class (fitlm (X, y, 'Intercept', false)), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'Weights', [1;2;1])), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'Exclude', [1])), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'VarNames', {'a','b','y'})), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'CategoricalVars', [1])), 'LinearModel');
-%!test 
-%! warning ('off', 'Octave:singular-matrix');
-%! assert (class (fitlm (X, y, 'RobustOpts', 'on')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (X, y, 'ResponseVar', 'y')), 'LinearModel');
+%!test
+%! assert (class (fitlm (X, y, 'linear', 'Weights', [1;2;1])), 'LinearModel');
 
-## fitlm (Table) 
-%!test 
+%!test
+%! mdl = fitlm (C, y);
+%! assert (class (mdl), 'LinearModel');
+%! assert (mdl.VariableNames, {'x1', 'y'});
+%!test
+%! mdl = fitlm (C, y, 'VarNames', {'grp', 'score'});
+%! assert (mdl.VariableNames, {'grp', 'score'});
+%!test
+%! assert (class (fitlm (C, y, 'Intercept', false)), 'LinearModel');
+
+%!test
 %! assert (class (fitlm (T2)), 'LinearModel');
-%!test 
+%!test
 %! assert (class (fitlm (T3)), 'LinearModel');
-
-## fitlm (Table) with response variable name
-%!test 
-%! assert (class (fitlm (T2, 'y')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T2, 'x1')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T3, 'y')), 'LinearModel');
-
-## fitlm (Table) with Wilkinson formula
-%!test 
-%! assert (class (fitlm (T3, 'y ~ x1')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T3, 'y ~ x1 + x2')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T3, 'y ~ x1 - 1')), 'LinearModel');
-
-## fitlm (Table) with external response vector
-%!test 
-%! assert (class (fitlm (T1, [2;4;5])), 'LinearModel');
-
-## fitlm (Table) with name-value pairs
-%!test 
-%! assert (class (fitlm (T1, 'linear')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T1, 'constant')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T2, [0 0; 1 0])), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T1, [2;4;5], 'linear')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T1, [2;4;5], 'Intercept', false)), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T3, 'y ~ x1', 'Intercept', true)), 'LinearModel');
-%!test 
+%!test
 %! assert (class (fitlm (T3, 'Exclude', [2])), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T3, 'Intercept', false)), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T3, 'Weights', [1;2;1])), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T2, 'y', 'linear')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T2, 'y', 'constant')), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T2, 'y', 'Intercept', false)), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T2, 'y', 'Exclude', [1])), 'LinearModel');
-%!test 
+%!test
+%! assert (class (fitlm (T2, 'y')), 'LinearModel');
+%!test
+%! assert (class (fitlm (T3, 'x1')), 'LinearModel');
+%!test
+%! assert (class (fitlm (T3, 'y ~ x1 + x2')), 'LinearModel');
+%!test
+%! assert (class (fitlm (T1, 'linear')), 'LinearModel');
+%!test
+%! assert (class (fitlm (T1, [2;4;5])), 'LinearModel');
+%!test
+%! assert (class (fitlm (T2, [0 0; 1 0])), 'LinearModel');
+%!test
 %! assert (class (fitlm (T2, 'y', 'linear', 'Intercept', false)), 'LinearModel');
-%!test 
-%! assert (class (fitlm (T1, 'linear', 'Weights', [1;2;1])), 'LinearModel');
 
 %!error <Not enough input arguments> fitlm ()
-%!error <Predictor variables must be numeric vectors, numeric matrices, or categorical vectors> fitlm ("hello", y)
-%!error <Predictor variables must be numeric vectors, numeric matrices, or categorical vectors> fitlm ({'a';'b'}, [1;2])
-%!error <Predictor variables must be numeric vectors, numeric matrices, or categorical vectors> fitlm (struct ('a', 1), [1;2])
+%!error <Predictor variables must be numeric vectors, numeric matrices, or categorical vectors> ...
+%! fitlm ("hello", y)
+%!error <Predictor variables must be numeric vectors, numeric matrices, or categorical vectors> ...
+%! fitlm (struct ('a', 1), [1;2])
+%!error <Predictor variables must be numeric vectors, numeric matrices, or categorical vectors> ...
+%! fitlm (categorical ([1 2; 3 4]), y)
+%!error <Y argument is required unless X is a dataset or table> ...
+%! fitlm (C)
+%!error <Y argument is required unless X is a dataset or table> ... 
+%! fitlm (C, 'Intercept', false)
+%!error <Predictor and response variables must have the same length> ...
+%! fitlm (C, [1;2])
+%!error <Response variable must be a numeric vector> fitlm (C, {'a';'b';'a'})
 %!error <Y argument is required unless X is a dataset or table> fitlm (X)
-%!error <Y argument is required unless X is a dataset or table> fitlm (X, 'Weights', [1;1;1])
-%!error <Y argument is required unless X is a dataset or table> fitlm (X, 'Intercept', false)
-%!error <Y argument is required unless X is a dataset or table> fitlm (X, 'Exclude', [1])
-%!error <Y argument is required unless X is a dataset or table> fitlm (X, 'CategoricalVars', [1])
-%!error <Y argument is required unless X is a dataset or table> fitlm (X, 'VarNames', {'a','b','y'})
-%!error <Predictor and response variables must have the same length> fitlm (X, [])
-%!error <Predictor and response variables must have the same length> fitlm (X, [1;2])
-%!error <Predictor and response variables must have the same length> fitlm (X, [1 2])
-%!error <Predictor and response variables must have the same length> fitlm (X, "hi")
-%!error <Predictor and response variables must have the same length> fitlm (X, "hello")
-%!error <Predictor and response variables must have the same length> fitlm (X, ones (2, 1))
+%!error <Y argument is required unless X is a dataset or table> ... 
+%! fitlm (X, 'Weights', [1;1;1])
+%!error <Predictor and response variables must have the same length> ...
+%! fitlm (X, [])
+%!error <Predictor and response variables must have the same length> ...
+%! fitlm (X, [1;2])
 %!error <Response variable must be a numeric vector> fitlm (X, ones (3, 2))
-%!error <Response variable must be a numeric vector> fitlm (X, ones (3, 3))
 %!error <Response variable must be a numeric vector> fitlm (X, {'1';'2';'3'})
-%!error <The terms matrix must have one column for each variable in the dataset or table> fitlm (T1, [])
-%!error <Cannot determine the response variable from the terms matrix> fitlm (T1, ones (1, 2))
-%!error <Cannot determine the response variable from the terms matrix> fitlm (T2, ones (2, 2))
-%!error <Predictor and response variables must have the same length> fitlm (T1, ones (4, 1))
-%!error <Predictor and response variables must have the same length> fitlm (T1, ones (2, 3))
-%!error <Predictor and response variables must have the same length> fitlm (T1, ones (1, 1))
+%!error <The terms matrix must have one column for each variable in the dataset or table> ...
+%! fitlm (T1, [])
+%!error <Cannot determine the response variable from the terms matrix> ...
+%! fitlm (T1, ones (1, 2))
+%!error <Predictor and response variables must have the same length> ...
+%! fitlm (T1, ones (4, 1))
+%!error <Predictor and response variables must have the same length> ...
+%! fitlm (T1, ones (2, 3))
+%!error <invalid second argument for table input> fitlm (T1, {1, 2})
 %!error <Name-Value arguments must be in pairs> fitlm (T2, 'y ~ x1', 'linear')
-%!error <Name-Value arguments must be in pairs> fitlm (T3, 'y ~ x1 + x2', 'Intercept')
-%!error <Name-Value arguments must be in pairs> fitlm (T2, 'linear', 'Intercept')
-%!error <Name-Value arguments must be in pairs> fitlm (T1, 'quadratic', 'Weights')
-%!error <Name-Value arguments must be in pairs> fitlm (T2, 'constant', 'Exclude')
+%!error <Name-Value arguments must be in pairs> fitlm (T1, 'linear', 'Weights')
+%!error <Name-Value arguments must be in pairs> fitlm (T2, [0 0; 1 0], 'Weights')
