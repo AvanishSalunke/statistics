@@ -30,14 +30,16 @@ classdef LinearModel
   ##
   ## The properties of a @code{LinearModel} object fall into four groups:
   ##
-  ## @itemize
-  ## @item @strong{Coefficient estimates} @minus{} @code{Coefficients} (a
-  ## table of estimates, standard errors, t-statistics, and p-values for each
-  ## term), @code{CoefficientCovariance}, @code{CoefficientNames}, and the
+  ## @multitable @columnfractions 0.22 0.02 0.76
+  ## @headitem Group @tab @tab Properties
+  ##
+  ## @item Coefficient estimates @tab @tab @code{Coefficients} (a table of
+  ## estimates, standard errors, t-statistics, and p-values for each term),
+  ## @code{CoefficientCovariance}, @code{CoefficientNames}, and the
   ## coefficient counts @code{NumCoefficients} and
   ## @code{NumEstimatedCoefficients}.
   ##
-  ## @item @strong{Summary statistics of the fit} @minus{} @code{DFE},
+  ## @item Summary statistics of the fit @tab @tab @code{DFE},
   ## @code{Fitted}, @code{Residuals} (raw, Pearson, Studentized, and
   ## standardized), @code{Diagnostics} (leverage, Cook's distance, and other
   ## per-observation influence measures), @code{MSE}, @code{RMSE},
@@ -46,18 +48,17 @@ classdef LinearModel
   ## and @code{ModelFitVsNullModel} (the F-test of the fitted model against an
   ## intercept-only model).
   ##
-  ## @item @strong{Fitting method information} @minus{} @code{Robust}, which
-  ## records the weighting function and tuning constant used when the model
-  ## is fit by robust regression, and is empty for an ordinary least squares
-  ## fit.
+  ## @item Fitting method information @tab @tab @code{Robust}, which records
+  ## the weighting function and tuning constant used when the model is fit by
+  ## robust regression, and is empty for an ordinary least squares fit.
   ##
-  ## @item @strong{Input data properties} @minus{} @code{Formula},
+  ## @item Input data properties @tab @tab @code{Formula},
   ## @code{NumObservations}, @code{NumPredictors}, @code{NumVariables},
   ## @code{ObservationInfo} (which observations were used, excluded, missing,
   ## or weighted), @code{ObservationNames}, @code{PredictorNames},
   ## @code{ResponseName}, @code{VariableInfo}, @code{VariableNames}, and
   ## @code{Variables}.
-  ## @end itemize
+  ## @end multitable
   ##
   ## A @code{LinearModel} object supports categorical predictors, which are
   ## automatically encoded internally as indicator (dummy) variables,
@@ -66,48 +67,66 @@ classdef LinearModel
   ## reweighted least squares.  Once fitted, the following methods are
   ## available on a @code{LinearModel} object:
   ##
-  ## @itemize
-  ## @item @code{predict} and @code{feval} @minus{} predict responses at new
-  ## predictor values, or reproduce the training fitted values when called
-  ## with no new data.  @code{predict} can also return pointwise or
-  ## simultaneous confidence or prediction intervals; @code{feval} accepts
-  ## predictors as separate arguments and returns only the point predictions,
-  ## so a @code{LinearModel} object can be used wherever a plain function
-  ## handle is expected.
+  ## @multitable @columnfractions 0.2 0.02 0.78
+  ## @headitem Method @tab @tab Description
   ##
-  ## @item @code{random} @minus{} simulate new response values by adding
-  ## independent Gaussian noise, drawn from the estimated error variance
-  ## @code{MSE}, to the fitted response at new predictor locations.
+  ## @item @code{predict} @tab @tab Predict responses at new predictor values
+  ## given in a matrix or table, or reproduce the training fitted values when
+  ## called with no new data.  Can also return pointwise or simultaneous
+  ## confidence or prediction intervals alongside the point predictions.
   ##
-  ## @item @code{coefCI} and @code{coefTest} @minus{} @code{coefCI} returns
-  ## Wald confidence intervals for every coefficient at a chosen significance
-  ## level; @code{coefTest} tests a linear hypothesis on the coefficients
-  ## (by default the overall model F-test that all non-intercept coefficients
-  ## are zero, or a custom hypothesis given by a contrast matrix and, if
-  ## needed, right-hand-side values) and returns the p-value, F-statistic, and
-  ## numerator degrees of freedom.
+  ## @item @code{feval} @tab @tab Predict responses given predictors as
+  ## separate scalar or vector arguments (one per predictor variable) instead
+  ## of a single matrix, so a @code{LinearModel} object can be evaluated the
+  ## same way as a plain function handle.  Returns point predictions only.
   ##
-  ## @item @code{dwtest} @minus{} Durbin-Watson test for first-order
+  ## @item @code{random} @tab @tab Simulate new response values at new
+  ## predictor locations by adding independent Gaussian noise, drawn from the
+  ## estimated error variance @code{MSE}, to the fitted response.
+  ##
+  ## @item @code{coefCI} @tab @tab Return Wald confidence intervals for every
+  ## fitted coefficient at a chosen significance level (default @math{0.05}).
+  ##
+  ## @item @code{coefTest} @tab @tab Test a linear hypothesis on the fitted
+  ## coefficients.  With no arguments, tests the overall model F-test that
+  ## all non-intercept coefficients are zero; a custom hypothesis can be
+  ## given as a contrast matrix and, if needed, right-hand-side values.
+  ## Returns the p-value, and optionally the F-statistic and its numerator
+  ## degrees of freedom.
+  ##
+  ## @item @code{dwtest} @tab @tab Durbin-Watson test for first-order
   ## autocorrelation among the model residuals, with a choice of exact or
-  ## approximate p-value computation and one- or two-sided alternatives.
+  ## approximate p-value computation and a one- or two-sided alternative.
   ##
-  ## @item @code{addTerms} and @code{removeTerms} @minus{} return a new,
-  ## refitted @code{LinearModel} with terms added to, or removed from, the
-  ## current model specification, given either as a Wilkinson formula
-  ## fragment or a terms matrix.  Observation weights, excluded rows, and
-  ## categorical encodings carry over automatically, and the original model
-  ## is left unmodified.
+  ## @item @code{addTerms} @tab @tab Return a new, refitted @code{LinearModel}
+  ## with terms added to the current model specification, given as a
+  ## Wilkinson formula fragment or a terms matrix.  Weights, excluded rows,
+  ## and categorical encodings carry over automatically; the original model
+  ## object is left unmodified.
   ##
-  ## @item @code{plotResiduals}, @code{plotDiagnostics}, and
-  ## @code{plotEffects} @minus{} @code{plotResiduals} plots the model
-  ## residuals (histogram, probability, case-order, fitted-value, or
-  ## lagged-residual plots); @code{plotDiagnostics} plots per-observation
-  ## influence measures such as leverage and Cook's distance against
-  ## observation number or fitted value; @code{plotEffects} shows the
-  ## estimated main effect and 95% confidence interval of each predictor,
-  ## evaluated between its observed minimum and maximum with all other
-  ## predictors held at their means.
-  ## @end itemize
+  ## @item @code{removeTerms} @tab @tab Return a new, refitted
+  ## @code{LinearModel} with terms removed from the current model
+  ## specification, given as a Wilkinson formula fragment or a terms matrix.
+  ## Weights, excluded rows, and categorical encodings carry over
+  ## automatically; the original model object is left unmodified.
+  ##
+  ## @item @code{plotResiduals} @tab @tab Plot the model residuals.  Default
+  ## is a probability density histogram; other supported plot types are
+  ## @qcode{"fitted"}, @qcode{"caseorder"}, @qcode{"lagged"},
+  ## @qcode{"probability"}, and @qcode{"observed"}.
+  ##
+  ## @item @code{plotDiagnostics} @tab @tab Plot per-observation influence
+  ## diagnostics.  Default is leverage by observation row number; other
+  ## supported plot types are @qcode{"cookd"}, @qcode{"covratio"},
+  ## @qcode{"dfbetas"}, @qcode{"dffits"}, @qcode{"s2_i"}, and
+  ## @qcode{"contour"} (standardized residuals against leverage with Cook's
+  ## distance contours).
+  ##
+  ## @item @code{plotEffects} @tab @tab Plot the estimated main effect and
+  ## 95% confidence interval of each predictor, evaluated between its
+  ## observed minimum and maximum with all other predictors held at their
+  ## observed means.
+  ## @end multitable
   ##
   ## Create a @code{LinearModel} object by using the @code{fitlm} function or
   ## the class constructor directly.
