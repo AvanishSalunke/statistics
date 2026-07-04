@@ -3567,6 +3567,161 @@ function fit = lm_robust_fit (X, y, w, wgtfun, tune)
 
 endfunction
 
+%!demo
+%!
+%! ## Simple linear regression with a single predictor.
+%! ## Ten runners record their weekly training distance and their finish
+%! ## time in a 10k race. We fit a straight line through this data and
+%! ## look at the fitted coefficients, then use predict to estimate the
+%! ## finish time for a runner who trains a distance not in the sample.
+%! Distance = [10; 15; 20; 25; 30; 35; 40; 45; 50; 55];
+%! Time     = [58; 55; 52; 50; 47; 45; 43; 41; 40; 38];
+%! X = Distance;
+%! y = Time;
+%!
+%! ## Fit the model and inspect the estimated slope and intercept.
+%! mdl = fitlm (X, y)
+%!
+%! ## Predict the finish time for a runner training 32 km per week.
+%! ypred = predict (mdl, 32)
+
+%!demo
+%!
+%! ## Multiple linear regression with two predictors, followed by a
+%! ## confidence interval on the coefficients.
+%! ## Thirteen coffee shops report their weekly foot traffic and the
+%! ## number of items on their menu, along with weekly revenue. We fit a
+%! ## model with both predictors, then use coefCI to see how precisely
+%! ## each coefficient is estimated.
+%! Traffic = [120; 150; 90; 200; 175; 60; 220; 140; 100; 190; 80; 210; 130];
+%! MenuSize = [8; 12; 6; 15; 10; 5; 18; 9; 7; 14; 6; 16; 11];
+%! Revenue = [1450; 1820; 1010; 2400; 2050; 700; 2650; 1700; 1150; ...
+%!            2300; 900; 2500; 1600];
+%! X = [Traffic, MenuSize];
+%! y = Revenue;
+%!
+%! ## Fit the model with both predictors together.
+%! mdl = fitlm (X, y)
+%!
+%! ## Check how tight the 95% confidence interval is on each coefficient.
+%! ci = coefCI (mdl)
+
+%!demo
+%!
+%! ## Growing a model with addTerms and predicting with the richer model.
+%! ## We model fuel economy from the carsmall data set using weight and
+%! ## horsepower as main effects only. addTerms then brings in the
+%! ## weight-horsepower interaction without needing to refit by hand, and
+%! ## predict shows how the estimate for a new car changes once that
+%! ## interaction is included.
+%! load carsmall
+%! X = [Weight, Horsepower];
+%! y = MPG;
+%!
+%! ## Fit the additive model first.
+%! mdl = fitlm (X, y);
+%!
+%! ## Add the interaction between weight and horsepower.
+%! mdl2 = addTerms (mdl, 'x1:x2');
+%!
+%! ## Compare predictions from both models for the same new car.
+%! Xnew = [3200, 120];
+%! ypred1 = predict (mdl, Xnew)
+%! ypred2 = predict (mdl2, Xnew)
+
+%!demo
+%!
+%! ## Simplifying a model with removeTerms and comparing fit quality.
+%! ## We fit the full Hald cement model with all four ingredients, then
+%! ## use removeTerms to drop the weakest predictor and refit
+%! ## automatically. Comparing SSE before and after shows how little
+%! ## explanatory power that ingredient was actually contributing.
+%! load hald
+%! X = ingredients;
+%! y = heat;
+%!
+%! ## Fit the model with all four ingredients.
+%! mdl = fitlm (X, y);
+%!
+%! ## Drop the third ingredient and refit on the same data.
+%! mdl2 = removeTerms (mdl, 'x3');
+%!
+%! ## Compare how much the error sum of squares changed.
+%! sse_full    = mdl.SSE
+%! sse_reduced = mdl2.SSE
+
+%!demo
+%!
+%! ## Testing a linear hypothesis and checking residual autocorrelation.
+%! ## Twelve patients are given a drug at different doses over different
+%! ## treatment durations, and a recovery score is recorded. coefTest
+%! ## checks whether the dose and duration coefficients are actually
+%! ## equal, and dwtest separately checks whether the residuals still
+%! ## carry a leftover pattern the model failed to capture.
+%! Dose     = [10; 15; 20; 25; 30; 35; 12; 18; 22; 28; 32; 38];
+%! Duration = [5; 7; 9; 11; 13; 15; 6; 8; 10; 12; 14; 16];
+%! Recovery = [42; 48; 55; 60; 68; 74; 45; 52; 58; 65; 71; 78];
+%! X = [Dose, Duration];
+%! y = Recovery;
+%! mdl = fitlm (X, y);
+%!
+%! ## Test H0: the Dose and Duration coefficients are equal.
+%! H = [0 1 -1];
+%! [p, F, r] = coefTest (mdl, H)
+%!
+%! ## Check for autocorrelation left over in the residuals.
+%! [pdw, dw] = dwtest (mdl)
+
+%!demo
+%!
+%! ## Checking residuals against fitted values.
+%! ## We fit a mileage model on the carsmall data set using weight and
+%! ## horsepower, then plot the raw residuals against the fitted values.
+%! ## A pattern in this plot, rather than a random scatter, would suggest
+%! ## the linear model is missing some curvature in the relationship.
+%! load carsmall
+%! X = [Weight, Horsepower];
+%! y = MPG;
+%! mdl = fitlm (X, y);
+%! plotResiduals (mdl, 'fitted')
+
+%!demo
+%!
+%! ## Spotting influential observations with Cook's distance.
+%! ## Sixteen houses are matched by size and age to a sale price, but one
+%! ## house was sold far above what its size and age would predict. After
+%! ## fitting the model, plotDiagnostics with the cookd option highlights
+%! ## that single observation as having outsized influence on the fit.
+%! Size  = [80; 95; 110; 120; 65; 140; 100; 130; 90; 150; 75; 105; ...
+%!          115; 85; 135; 125];
+%! Age   = [5; 10; 3; 8; 20; 2; 15; 6; 12; 1; 18; 9; 4; 14; 7; 11];
+%! Price = [200; 230; 260; 280; 150; 320; 240; 300; 210; 340; 170; ...
+%!          250; 270; 190; 500; 290];
+%! X = [Size, Age];
+%! y = Price;
+%! mdl = fitlm (X, y);
+%! plotDiagnostics (mdl, 'cookd')
+
+%!demo
+%!
+%! ## Comparing the size of each predictor's effect, alongside a
+%! ## hypothesis test on the model as a whole.
+%! ## We fit a mileage model on the carsmall data set using weight and
+%! ## horsepower. plotEffects draws each coefficient's estimate with its
+%! ## confidence interval side by side, and coefTest checks whether
+%! ## weight's effect is significantly different from horsepower's.
+%! load carsmall
+%! X = [Weight, Horsepower];
+%! y = MPG;
+%! mdl = fitlm (X, y);
+%!
+%! ## Visualize the relative size of each predictor's effect.
+%! plotEffects (mdl)
+%!
+%! ## Test whether the two coefficients differ significantly.
+%! H = [0 1 -1];
+%! [p, F, r] = coefTest (mdl, H)
+
 %!shared mdl, X, y, n
 %! n = 20;
 %! X = [1:n; (1:n).^2]' / n;
