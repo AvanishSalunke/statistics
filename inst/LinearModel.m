@@ -16,6 +16,104 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 classdef LinearModel
+  ## -*- texinfo -*-
+  ## @deftp {statistics} LinearModel
+  ##
+  ## Linear regression model
+  ##
+  ## The @code{LinearModel} class represents a least-squares (or, optionally,
+  ## robust) linear regression fit of a response variable to one or more
+  ## predictor variables.  A @code{LinearModel} object is returned by the
+  ## @code{fitlm} function and holds everything about the fit in one place:
+  ## the fitted coefficients, the data and specification used to produce
+  ## them, and the diagnostics needed to assess the quality of the fit.
+  ##
+  ## The properties of a @code{LinearModel} object fall into four groups:
+  ##
+  ## @itemize
+  ## @item @strong{Coefficient estimates} @minus{} @code{Coefficients} (a
+  ## table of estimates, standard errors, t-statistics, and p-values for each
+  ## term), @code{CoefficientCovariance}, @code{CoefficientNames}, and the
+  ## coefficient counts @code{NumCoefficients} and
+  ## @code{NumEstimatedCoefficients}.
+  ##
+  ## @item @strong{Summary statistics of the fit} @minus{} @code{DFE},
+  ## @code{Fitted}, @code{Residuals} (raw, Pearson, Studentized, and
+  ## standardized), @code{Diagnostics} (leverage, Cook's distance, and other
+  ## per-observation influence measures), @code{MSE}, @code{RMSE},
+  ## @code{Rsquared} (ordinary and adjusted), @code{SSE}, @code{SSR},
+  ## @code{SST}, @code{LogLikelihood}, @code{ModelCriterion} (AIC, BIC, etc.),
+  ## and @code{ModelFitVsNullModel} (the F-test of the fitted model against an
+  ## intercept-only model).
+  ##
+  ## @item @strong{Fitting method information} @minus{} @code{Robust}, which
+  ## records the weighting function and tuning constant used when the model
+  ## is fit by robust regression, and is empty for an ordinary least squares
+  ## fit.
+  ##
+  ## @item @strong{Input data properties} @minus{} @code{Formula},
+  ## @code{NumObservations}, @code{NumPredictors}, @code{NumVariables},
+  ## @code{ObservationInfo} (which observations were used, excluded, missing,
+  ## or weighted), @code{ObservationNames}, @code{PredictorNames},
+  ## @code{ResponseName}, @code{VariableInfo}, @code{VariableNames}, and
+  ## @code{Variables}.
+  ## @end itemize
+  ##
+  ## A @code{LinearModel} object supports categorical predictors, which are
+  ## automatically encoded internally as indicator (dummy) variables,
+  ## observation weights for a weighted least squares fit, excluding specific
+  ## observations from the fit, and robust regression using iteratively
+  ## reweighted least squares.  Once fitted, the following methods are
+  ## available on a @code{LinearModel} object:
+  ##
+  ## @itemize
+  ## @item @code{predict} and @code{feval} @minus{} predict responses at new
+  ## predictor values, or reproduce the training fitted values when called
+  ## with no new data.  @code{predict} can also return pointwise or
+  ## simultaneous confidence or prediction intervals; @code{feval} accepts
+  ## predictors as separate arguments and returns only the point predictions,
+  ## so a @code{LinearModel} object can be used wherever a plain function
+  ## handle is expected.
+  ##
+  ## @item @code{random} @minus{} simulate new response values by adding
+  ## independent Gaussian noise, drawn from the estimated error variance
+  ## @code{MSE}, to the fitted response at new predictor locations.
+  ##
+  ## @item @code{coefCI} and @code{coefTest} @minus{} @code{coefCI} returns
+  ## Wald confidence intervals for every coefficient at a chosen significance
+  ## level; @code{coefTest} tests a linear hypothesis on the coefficients
+  ## (by default the overall model F-test that all non-intercept coefficients
+  ## are zero, or a custom hypothesis given by a contrast matrix and, if
+  ## needed, right-hand-side values) and returns the p-value, F-statistic, and
+  ## numerator degrees of freedom.
+  ##
+  ## @item @code{dwtest} @minus{} Durbin-Watson test for first-order
+  ## autocorrelation among the model residuals, with a choice of exact or
+  ## approximate p-value computation and one- or two-sided alternatives.
+  ##
+  ## @item @code{addTerms} and @code{removeTerms} @minus{} return a new,
+  ## refitted @code{LinearModel} with terms added to, or removed from, the
+  ## current model specification, given either as a Wilkinson formula
+  ## fragment or a terms matrix.  Observation weights, excluded rows, and
+  ## categorical encodings carry over automatically, and the original model
+  ## is left unmodified.
+  ##
+  ## @item @code{plotResiduals}, @code{plotDiagnostics}, and
+  ## @code{plotEffects} @minus{} @code{plotResiduals} plots the model
+  ## residuals (histogram, probability, case-order, fitted-value, or
+  ## lagged-residual plots); @code{plotDiagnostics} plots per-observation
+  ## influence measures such as leverage and Cook's distance against
+  ## observation number or fitted value; @code{plotEffects} shows the
+  ## estimated main effect and 95% confidence interval of each predictor,
+  ## evaluated between its observed minimum and maximum with all other
+  ## predictors held at their means.
+  ## @end itemize
+  ##
+  ## Create a @code{LinearModel} object by using the @code{fitlm} function or
+  ## the class constructor directly.
+  ##
+  ## @seealso{fitlm}
+  ## @end deftp
 
   properties (GetAccess = public, SetAccess = protected)
 
@@ -632,7 +730,149 @@ classdef LinearModel
 
   methods (Access = public)
 
-    ## Class Constructor
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {@var{mdl} =} LinearModel (@var{X}, @var{y})
+    ## @deftypefnx {LinearModel} {@var{mdl} =} LinearModel (@var{tbl}, @var{resp_input})
+    ## @deftypefnx {LinearModel} {@var{mdl} =} LinearModel (@dots{}, @var{modelspec})
+    ## @deftypefnx {LinearModel} {@var{mdl} =} LinearModel (@dots{}, @var{Name}, @var{Value}, @dots{})
+    ##
+    ## Create a @qcode{LinearModel} class object representing a linear
+    ## regression model.
+    ##
+    ## @code{@var{mdl} = LinearModel (@var{X}, @var{y})} returns a
+    ## @code{LinearModel} object fit to the response @var{y} and the
+    ## predictor data @var{X}.  Unless removed via the @qcode{"Intercept"}
+    ## option, the fitted model contains a constant (intercept) term and one
+    ## linear term for every column of @var{X}.
+    ##
+    ## @itemize
+    ## @item
+    ## @var{X} is an @math{NxP} numeric or logical matrix of predictor data,
+    ## where rows correspond to observations and columns correspond to
+    ## variables.  By default, the predictors are named @qcode{"x1"},
+    ## @qcode{"x2"}, @dots{}, @qcode{"xP"}.
+    ## @item
+    ## @var{y} is an @math{Nx1} numeric or logical vector of response values,
+    ## and must have the same number of observations (rows) as @var{X}.  By
+    ## default, the response is named @qcode{"y"}.
+    ## @end itemize
+    ##
+    ## @code{@var{mdl} = LinearModel (@var{tbl}, @var{resp_input})} fits a
+    ## model using the variables in the table (or dataset) @var{tbl} as
+    ## predictors.  @var{resp_input} selects the response and can be a
+    ## character vector naming a variable in @var{tbl}, or a numeric vector
+    ## the same height as @var{tbl} to use as an external response.  If
+    ## @var{resp_input} is left empty, the last variable in @var{tbl} is used
+    ## as the response.  Variables that are @code{categorical} arrays, cell
+    ## arrays of character vectors, or logical arrays are automatically
+    ## treated as categorical predictors.
+    ##
+    ## @code{@var{mdl} = LinearModel (@dots{}, @var{modelspec})} additionally
+    ## specifies the terms of the model to fit.  @var{modelspec} can be any of
+    ## the following.
+    ##
+    ## @multitable @columnfractions 0.18 0.02 0.8
+    ## @headitem @var{Value} @tab @tab @var{Description}
+    ##
+    ## @item @qcode{"constant"} @tab @tab Model contains only an intercept
+    ## term.
+    ##
+    ## @item @qcode{"linear"} @tab @tab Model contains an intercept and one
+    ## term for each predictor variable.  This is the default when
+    ## @var{modelspec} is not specified.
+    ##
+    ## @item @qcode{"interactions"} @tab @tab Model contains an intercept, all
+    ## linear terms, and all pairwise products of distinct predictor
+    ## variables (no squared terms).
+    ##
+    ## @item @qcode{"purequadratic"} @tab @tab Model contains an intercept,
+    ## all linear terms, and all squared terms.
+    ##
+    ## @item @qcode{"quadratic"} @tab @tab Model contains an intercept, all
+    ## linear terms, all pairwise products of distinct predictor variables,
+    ## and all squared terms.
+    ##
+    ## @item @qcode{"full"} @tab @tab Model contains an intercept and all
+    ## terms up to and including the full @math{P}-way interaction of the
+    ## predictor variables.
+    ##
+    ## @item terms matrix @tab @tab A @math{TxP} or @math{Tx(P+1)} numeric
+    ## matrix, where @math{T} is the number of terms and @math{P} is the
+    ## number of predictor variables.  Each row represents one term, and the
+    ## value in column @math{j} is the exponent to which predictor @math{j}
+    ## is raised in that term; a row of all zeros represents the intercept.
+    ## If a @math{Tx(P+1)} matrix is supplied, its last column (representing
+    ## the response variable) must be all zeros.
+    ##
+    ## @item Wilkinson formula @tab @tab A character vector of the form
+    ## @qcode{"y ~ terms"} describing the response and predictor terms using
+    ## Wilkinson notation.  For table input, the variable to the left of
+    ## @qcode{"~"} is used as the response, overriding @var{resp_input}.
+    ## @end multitable
+    ##
+    ## @code{@var{mdl} = LinearModel (@dots{}, @var{Name}, @var{Value},
+    ## @dots{})} specifies additional options using one or more
+    ## @qcode{Name-Value} pair arguments as described below.
+    ##
+    ## @multitable @columnfractions 0.18 0.02 0.8
+    ## @headitem @var{Name} @tab @tab @var{Value}
+    ##
+    ## @item @qcode{"Intercept"} @tab @tab A logical scalar indicating
+    ## whether to include a constant (intercept) term in the model.  Default
+    ## is @qcode{true}.  Ignored when @var{modelspec} is a Wilkinson formula.
+    ##
+    ## @item @qcode{"Weights"} @tab @tab A numeric vector of nonnegative
+    ## observation weights, with one element per observation, used to fit a
+    ## weighted least squares model.  Default is a vector of ones.
+    ##
+    ## @item @qcode{"Exclude"} @tab @tab A numeric or logical vector
+    ## specifying observations to exclude from the fit, given as row indices
+    ## or a logical mask.  Excluded observations, together with any
+    ## observation containing a missing value, are recorded in
+    ## @code{ObservationInfo} but do not contribute to the fit.
+    ##
+    ## @item @qcode{"CategoricalVars"} @tab @tab Specifies which predictor
+    ## variables are treated as categorical, given as a vector of column
+    ## indices, a logical vector, or a cell array of variable names.  Each
+    ## categorical predictor with @math{L} categories is expanded into
+    ## @math{L-1} indicator (dummy) variables, using the first category as
+    ## the reference level.
+    ##
+    ## @item @qcode{"VarNames"} @tab @tab A cell array of character vectors
+    ## naming the predictor and response variables, in order, with the
+    ## response variable name last.  Only applies to matrix input, since
+    ## table variables already carry their own names.
+    ##
+    ## @item @qcode{"ResponseVar"} @tab @tab A character vector naming the
+    ## response variable, used to override the response variable name that
+    ## would otherwise be used.
+    ##
+    ## @item @qcode{"PredictorVars"} @tab @tab A cell array of character
+    ## vectors naming which variables in @var{tbl} to use as predictors.  By
+    ## default, all variables other than the response variable are used.
+    ##
+    ## @item @qcode{"RobustOpts"} @tab @tab Selects ordinary least squares or
+    ## robust regression fitting.  This value can be @qcode{"off"} (default,
+    ## ordinary least squares), @qcode{"on"} (robust fitting using the
+    ## @qcode{"bisquare"} weighting function), the name of one of the
+    ## weighting functions below, a function handle for a custom weighting
+    ## function, or a scalar structure with fields @qcode{RobustWgtFun} and
+    ## @qcode{Tune} specifying the weighting function and its tuning
+    ## constant.  Robust fitting uses Iteratively Reweighted Least Squares
+    ## (IRLS), refitting the model with updated observation weights until the
+    ## coefficients converge.  Supported weighting function names:
+    ## @qcode{"andrews"}, @qcode{"bisquare"}, @qcode{"cauchy"},
+    ## @qcode{"fair"}, @qcode{"huber"}, @qcode{"logistic"}, @qcode{"ols"},
+    ## @qcode{"talwar"}, @qcode{"welsch"}, each with its own default tuning
+    ## constant.
+    ## @end multitable
+    ##
+    ## @var{mdl} is returned as a @code{LinearModel} object.  If
+    ## @qcode{"RobustOpts"} is anything other than @qcode{"off"}, the returned
+    ## model is a robust fit rather than an ordinary least squares fit.
+    ##
+    ## @seealso{fitlm, addTerms, removeTerms}
+    ## @end deftypefn
     function this = LinearModel (varargin)
       ##   LinearModel (X, y, modelspec, NV...)
       ##   LinearModel (tbl, resp_input, modelspec, NV...)
