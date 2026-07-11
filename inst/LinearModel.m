@@ -1054,7 +1054,6 @@ classdef LinearModel
         y_sub         = y_full(subset_mask);
         n_coef        = size (X_design_sub, 2);
         has_intercept = any (strcmp (coef_names, '(Intercept)'));
-        enc_names     = coef_names(! strcmp (coef_names, '(Intercept)'));
 
         cat_info.names  = {};
         cat_info.levels = {};
@@ -1088,7 +1087,8 @@ classdef LinearModel
           endfor
         endfor
 
-        terms = zeros (n_coef, numel (atomic_names) + 1);
+        enc_names = atomic_names;
+        terms     = zeros (n_coef, numel (atomic_names) + 1);
         for t = 1:n_coef
           if (strcmp (coef_names{t}, '(Intercept)'))
             continue;
@@ -3446,7 +3446,11 @@ classdef LinearModel
       if (isempty (args) || ! (ischar (args{1}) || isstring (args{1}) ...
           || isnumeric (args{1})))
         J = 2:ncoef;
-        label = 'Whole Model';
+        if (numel (J) == 1)
+          label = cnames{J};
+        else
+          label = 'Whole Model';
+        endif
       else
         coefarg = args{1};
         args    = args(2:end);
@@ -4756,6 +4760,23 @@ endfunction
 %! m = fitlm (X, y, 'y ~ x1 + x2');
 %! assert_equal (m.NumCoefficients, 3);
 %! assert_equal (m.Coefficients.Estimate, mdl.Coefficients.Estimate, 1e-8);
+
+%!test
+%! ## a pure interaction formula keeps EncPredictorNames aligned with TermsMatrix
+%! mi = fitlm (X, y, 'y ~ x1:x2');
+%! assert_equal (numel (mi.EncPredictorNames), columns (mi.TermsMatrix) - 1);
+%! assert_equal (mi.NumCoefficients, 2);
+%! assert_equal (mi.CoefficientNames, {'(Intercept)', 'x1:x2'});
+%! assert_equal (mi.Coefficients.Estimate, ...
+%!   [-0.755813941484483; -0.876953077491396], 1e-9);
+%! assert_equal (predict (mi), mi.Fitted, 1e-10);
+%! fig = figure ('visible', 'off');
+%! h = plot (mi);
+%! assert_equal (numel (h), 3);
+%! assert_equal (get (get (gca, 'Title'),  'String'), 'Added Variable Plot for x1:x2');
+%! assert_equal (get (get (gca, 'XLabel'), 'String'), 'Adjusted x1:x2');
+%! assert_equal (get (h(2), 'DisplayName'), 'Fit: y = -0.876953*x');
+%! close (fig);
 
 %!test
 %! ## a table input with the default formula fits the same model as the matrix
