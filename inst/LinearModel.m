@@ -134,6 +134,12 @@ classdef LinearModel
   ## @item @code{plotAdded} @tab Plot the incremental effect of one or
   ## more terms on the response, after removing the effects of all other
   ## terms, along with the fitted line and its 95% confidence bounds.
+  ##
+  ## @item @code{plot} @tab Plot a default view of the model.  Creates an
+  ## added variable plot for the whole model when more than one predictor
+  ## is included, a scatter plot of the data with a fitted curve and 95%
+  ## confidence bounds when exactly one predictor is included, or a
+  ## histogram of the residuals when no predictors are included.
   ## @end multitable
   ##
   ## Create a @code{LinearModel} object by using the @code{fitlm} function or
@@ -3618,6 +3624,164 @@ classdef LinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {} plot (@var{mdl})
+    ## @deftypefnx {LinearModel} {} plot (@var{ax}, @var{mdl})
+    ## @deftypefnx {LinearModel} {@var{h} =} plot (@dots{})
+    ##
+    ## Create a default diagnostic plot for a fitted linear regression model.
+    ##
+    ## @code{plot (@var{mdl})} creates a plot whose type depends on the
+    ## number of predictors in @var{mdl}.  If @var{mdl} has two or more
+    ## predictors, @code{plot} creates an added variable plot for the whole
+    ## model except the constant (intercept) term, equivalent to
+    ## @code{plotAdded (@var{mdl})}.  If @var{mdl} has exactly one
+    ## predictor, @code{plot} creates a scatter plot of the data together
+    ## with the fitted curve and its 95% confidence bounds.  If @var{mdl}
+    ## has no predictors, @code{plot} creates a histogram of the residuals,
+    ## equivalent to @code{plotResiduals (@var{mdl})}.
+    ##
+    ## For the single-predictor case, the fitted curve and confidence
+    ## bounds are computed with @code{predict}, evaluated at 100 equally
+    ## spaced points spanning the observed range of the predictor when the
+    ## predictor is numeric, or at each level of the predictor when it is
+    ## categorical.  Excluded or missing observations appear as @code{NaN}
+    ## in the data and produce gaps in the plotted points.
+    ##
+    ## @code{plot (@var{ax}, @var{mdl})} plots into the axes object
+    ## @var{ax} instead of the current axes returned by @code{gca}.
+    ##
+    ## @code{@var{h} = plot (@dots{})} returns a vector of graphics object
+    ## handles.  For the two-or-more-predictor and no-predictor cases, see
+    ## @code{plotAdded} and @code{plotResiduals}, respectively, for the
+    ## meaning of @var{h}.  For the single-predictor case, @var{h}(1),
+    ## @var{h}(2), and @var{h}(3) correspond to the data points, the fitted
+    ## curve, and the 95% confidence bounds of the fitted curve,
+    ## respectively.
+    ##
+    ## @end deftypefn
+    function h = plot (this, varargin)
+      [ax, mdl, args] = lm_plot_axes (this, varargin);
+
+      if (! isempty (args))
+        error ("plot: Too many input arguments.");
+      endif
+
+      pred      = mdl.PredictorNames;
+      cinfo     = mdl.CatLevelInfo;
+      enc_names = mdl.EncPredictorNames;
+      enc_active = any (mdl.TermsMatrix(:, 1:end-1) != 0, 1);
+
+      active_pred = false (1, numel (pred));
+      for c = find (enc_active)
+        j = find (strcmp (pred, enc_names{c}), 1);
+        if (isempty (j) && ! isempty (cinfo) && isfield (cinfo, 'names'))
+          for k = 1:numel (cinfo.names)
+            prefix = [cinfo.names{k}, '_'];
+            if (strncmp (enc_names{c}, prefix, numel (prefix)))
+              j = find (strcmp (pred, cinfo.names{k}), 1);
+              break;
+            endif
+          endfor
+        endif
+        if (! isempty (j))
+          active_pred(j) = true;
+        endif
+      endfor
+      n_active = sum (active_pred);
+
+      if (n_active == 0)
+        if (isempty (ax))
+          h = plotResiduals (mdl);
+        else
+          h = plotResiduals (ax, mdl);
+        endif
+      elseif (n_active >= 2)
+        if (isempty (ax))
+          h = plotAdded (mdl);
+        else
+          h = plotAdded (ax, mdl);
+        endif
+      else
+        j1    = find (active_pred, 1);
+        act   = mdl.ObservationInfo.Subset;
+        n_act = sum (act);
+
+        ci = [];
+        if (! isempty (cinfo) && isfield (cinfo, 'names') ...
+            && ! isempty (cinfo.names))
+          ci = find (strcmp (cinfo.names, pred{j1}));
+        endif
+
+        col = mdl.Variables{act, pred{j1}};
+        if (! isempty (ci))
+          levels_1 = cinfo.levels{ci};
+          if (iscell (col))
+            col_str = col;
+          elseif (isa (col, 'categorical'))
+            col_str = cellstr (col);
+          else
+            col_str = cellstr (num2str (col(:)));
+          endif
+          x_act = zeros (n_act, 1);
+          for L = 1:numel (levels_1)
+            x_act(strcmp (col_str, char (levels_1{L}))) = L;
+          endfor
+          x_grid = (1:numel (levels_1))';
+        else
+          x_act  = double (col(:));
+          x_grid = linspace (min (x_act), max (x_act), 100)';
+        endif
+
+        y_act = mdl.Variables{act, mdl.ResponseName};
+
+        [y_fit, yci] = mdl.predict (x_grid);
+
+        if (isempty (ax))
+          ax = gca ();
+        endif
+
+        FIT_COLOR = [0.9600, 0.4660, 0.1600];
+        n_total   = numel (act);
+
+        xdata = NaN (n_total, 1);
+        ydata = NaN (n_total, 1);
+        xdata(act) = x_act;
+        ydata(act) = y_act;
+
+        bound_x = [x_grid; NaN; x_grid];
+        bound_y = [yci(:,1); NaN; yci(:,2)];
+
+        props = lm_plot_props ({});
+
+        hold (ax, 'on');
+        h(1) = lm_plot_data (ax, xdata, ydata, props);
+        set (h(1), 'DisplayName', 'Data');
+        h(2) = line (x_grid, y_fit, 'Color', FIT_COLOR, 'LineStyle', '-', ...
+                     'Marker', 'none', 'Parent', ax, 'DisplayName', 'Fit');
+        h(3) = line (bound_x, bound_y, 'Color', FIT_COLOR, 'LineStyle', ':', ...
+                     'Marker', 'none', 'Parent', ax, ...
+                     'DisplayName', '95% conf. bounds');
+        hold (ax, 'off');
+
+        if (! isempty (ci))
+          set (ax, 'XTick', 1:numel (levels_1), 'XTickLabel', levels_1);
+        endif
+
+        xlabel (ax, pred{j1});
+        ylabel (ax, mdl.ResponseName);
+        title (ax, [mdl.ResponseName, ' vs. ', pred{j1}]);
+
+        hleg = legend (ax, 'show');
+        set (hleg, 'Location', lm_legend_corner (xdata, ydata));
+      endif
+
+      if (nargout == 0)
+        clear h;
+      endif
+
+    endfunction
+
   endmethods
 
   methods(Access = private, Static)
@@ -6858,6 +7022,133 @@ endfunction
 %! close (fig);
 
 %!test
+%! ## multiple predictors delegate to plotAdded
+%! fig = figure ('visible', 'off');
+%! ax  = axes (fig);
+%! h1  = plot (ax, mdl);
+%! h2  = plotAdded (ax, mdl);
+%! assert_equal (get (h1(1), 'XData'), get (h2(1), 'XData'));
+%! assert_equal (get (h1(1), 'YData'), get (h2(1), 'YData'));
+%! assert_equal (get (h1(2), 'YData'), get (h2(2), 'YData'));
+%! assert_equal (get (h1(3), 'YData'), get (h2(3), 'YData'));
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Added Variable Plot for Whole Model');
+%! close (fig);
+
+%!test
+%! ## no axes argument uses the current axes
+%! fig = figure ('visible', 'off');
+%! h = plot (mdl);
+%! assert_equal (isequal (get (h(1), 'Parent'), gca ()), true);
+%! close (fig);
+
+%!test
+%! ## no predictors delegate to plotResiduals
+%! mc  = fitlm (X, y, 'constant');
+%! fig = figure ('visible', 'off');
+%! ax  = axes (fig);
+%! h1  = plot (ax, mc);
+%! h2  = plotResiduals (ax, mc);
+%! assert_equal (get (h1(1), 'type'), 'patch');
+%! assert_equal (get (h1(1), 'YData'), get (h2(1), 'YData'));
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Histogram of residuals');
+%! close (fig);
+
+%!test
+%! ## single predictor: data, fit line, and confidence bounds
+%! m1  = fitlm (X(:,1), y);
+%! fig = figure ('visible', 'off');
+%! ax  = axes (fig);
+%! h   = plot (ax, m1);
+%! assert_equal (numel (h), 3);
+%! assert_equal (get (h(1), 'XData'), X(:,1)', 1e-15);
+%! assert_equal (get (h(1), 'YData'), y', 1e-15);
+%! xf = get (h(2), 'XData');
+%! yf = get (h(2), 'YData');
+%! assert_equal (numel (xf), 100);
+%! assert_equal (xf(1:3),       [0.05, 0.0595959595959596, 0.0691919191919192], 1e-12);
+%! assert_equal (xf(end-2:end), [0.980808080808081, 0.99040404040404, 1],         1e-12);
+%! assert_equal (yf(1:3),       [2.98235017582927, 2.80917102518311, 2.63599187453694],   1e-7);
+%! assert_equal (yf(end-2:end), [-13.8160274368485, -13.9892065874947, -14.1623857381409], 1e-7);
+%! yb = get (h(3), 'YData');
+%! assert_equal (numel (yb), 201);
+%! assert_equal (isnan (yb(101)), true);
+%! assert_equal (yb(1:3),       [1.59215527128182, 1.43944293975561, 1.28661387851973], 1e-7);
+%! assert_equal (yb(102:104),   [4.37254508037672, 4.1788991106106,  3.98536987055415], 1e-7);
+%! assert_equal (yb(end-2:end), [-12.4666494408313, -12.6194785020672, -12.7721908335934], 1e-7);
+%! assert_equal (yb(1:100) + yb(102:201), 2 * yf, 1e-10);
+%! [yp, ~] = predict (m1, xf');
+%! assert_equal (yf', yp, 1e-10);
+%! assert_equal (get (get (ax, 'Title'),  'String'), 'y vs. x1');
+%! assert_equal (get (get (ax, 'XLabel'), 'String'), 'x1');
+%! assert_equal (get (get (ax, 'YLabel'), 'String'), 'y');
+%! close (fig);
+
+%!test
+%! ## real dataset with missing rows leaves gaps in the data
+%! load carsmall
+%! tbl2 = table (MPG, Weight);
+%! mdl2 = fitlm (tbl2, 'MPG ~ Weight');
+%! fig  = figure ('visible', 'off');
+%! ax   = axes (fig);
+%! h    = plot (ax, mdl2);
+%! xd = get (h(1), 'XData');
+%! yd = get (h(1), 'YData');
+%! assert_equal (numel (xd), 100);
+%! assert_equal (any (isnan (xd)), true);
+%! assert_equal (any (isnan (yd)), true);
+%! assert_equal (xd(1:3),       [3504, 3693, 3436], 1e-10);
+%! assert_equal (xd(end-2:end), [2295, 2625, 2720], 1e-10);
+%! assert_equal (yd(1:3),       [18, 15, 18], 1e-10);
+%! assert_equal (yd(end-2:end), [32, 28, 31], 1e-10);
+%! xf = get (h(2), 'XData');
+%! yf = get (h(2), 'YData');
+%! assert_equal (numel (xf), 100);
+%! assert_equal (xf(1:3),       [1795, 1824.666667, 1854.333333], 1e-4);
+%! assert_equal (xf(end-2:end), [4672.666667, 4702.333333, 4732], 1e-4);
+%! assert_equal (yf(1:3),       [33.77920696, 33.52371956, 33.26823216],   1e-6);
+%! assert_equal (yf(end-2:end), [8.996929296, 8.741441898, 8.485954499],   1e-6);
+%! yb = get (h(3), 'YData');
+%! assert_equal (numel (yb), 201);
+%! assert_equal (yb(1:3),       [32.2768265, 32.0472587, 31.81746955],    1e-6);
+%! assert_equal (yb(end-2:end), [11.0004001, 10.77351303, 10.54671087],   1e-6);
+%! assert_equal (get (get (ax, 'Title'),  'String'), 'MPG vs. Weight');
+%! assert_equal (get (get (ax, 'XLabel'), 'String'), 'Weight');
+%! assert_equal (get (get (ax, 'YLabel'), 'String'), 'MPG');
+%! close (fig);
+
+%!test
+%! ## categorical predictor: group codes with per-level fit and bounds
+%! yv = [4.73087805313537; 7.43361607881479; 4.48799323173627; 5.16869512618961; ...
+%!       6.50195295169252; 3.73839298415678; 4.3512762614163;  7.45869429457297; ...
+%!       4.08830081430877; 5.37758996783874; 6.70425002011403; 4.92219481850025; ...
+%!       5.90846112458998; 6.93808332486038; 3.44469932246968; 4.65954705986638; ...
+%!       7.00708466319882; 3.97022469477047; 4.66949449276983; 7.15297545753449; ...
+%!       3.79547107710474; 4.35907258855759; 6.85754858526846; 3.96760657205439; ...
+%!       5.50019159441948; 6.59933535084439; 4.04590000762589; 5.13690239596885; ...
+%!       5.93326622029102; 4.20198864027471];
+%! grp  = categorical (repmat ({'A';'B';'C'}, 10, 1));
+%! tbl4 = table (yv, grp, 'VariableNames', {'Response','Group'});
+%! mdl4 = fitlm (tbl4, 'Response ~ Group');
+%! fig  = figure ('visible', 'off');
+%! ax   = axes (fig);
+%! h    = plot (ax, mdl4);
+%! assert_equal (numel (h), 3);
+%! assert_equal (get (h(1), 'XData'), repmat ([1 2 3], 1, 10));
+%! assert_equal (get (h(1), 'YData'), yv', 1e-14);
+%! assert_equal (get (h(2), 'XData'), [1 2 3]);
+%! assert_equal (get (h(2), 'YData'), [4.98621086647521, 6.85868069471919, 4.0662772163002], 1e-10);
+%! assert_equal (get (h(3), 'XData'), [1 2 3 NaN 1 2 3]);
+%! assert_equal (get (h(3), 'YData'), ...
+%!   [4.68577486025387, 6.55824468849784, 3.76584121007885, NaN, ...
+%!    5.28664687269656, 7.15911670094053, 4.36671322252154], 1e-10);
+%! assert_equal (get (ax, 'XTick'), [1 2 3]);
+%! assert_equal (get (ax, 'XTickLabel'), {'A'; 'B'; 'C'});
+%! assert_equal (get (get (ax, 'Title'),  'String'), 'Response vs. Group');
+%! assert_equal (get (get (ax, 'XLabel'), 'String'), 'Group');
+%! assert_equal (get (get (ax, 'YLabel'), 'String'), 'Response');
+%! close (fig);
+
+%!test
 %! load hald
 %! Xh = ingredients;
 %! yh = heat;
@@ -7129,3 +7420,5 @@ endfunction
 %!error <Bad coefficient name> plotAdded (mdl, 'NotACoef')
 %!error <unrecognized property> plotAdded (mdl, 2, 'BadOpt', 5)
 %!error <Bad coefficient number> mdl0 = fitlm (ones (n, 1), y, 'Intercept', false); plotAdded (mdl0)
+%!error <Too many input arguments> plot (mdl, 'extra')
+
