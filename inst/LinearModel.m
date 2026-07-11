@@ -1930,40 +1930,8 @@ classdef LinearModel
       subset = logical (mdl.ObservationInfo.Subset);
       r      = mdl.Residuals.Raw(subset);
       r      = r(:);
-      n      = numel (r);
-      DW     = sum (diff (r).^2) / sum (r.^2);
 
-      e      = ones (n-1, 1);
-      A      = spdiags ([-e, e], [0, 1], n-1, n);
-      M      = full (A' * A);
-      [Q, R] = qr (mdl.DesignMatrix);
-      dr     = abs (diag (R));
-      tol    = max (size (mdl.DesignMatrix)) * eps (max (dr));
-      rnk    = sum (dr > tol);
-      Q2     = Q(:, rnk+1:size (Q, 2));
-      lam    = real (eig (Q2' * M * Q2));
-      k      = n - rnk;
-
-      if (strcmp (method, 'exact'))
-        a_row = (lam(:) - DW)';
-        f     = @(u) sin (0.5 * sum (atan (u(:) * a_row), 2)) ./ ...
-                     (u(:) .* prod ((1 + (u(:) * a_row).^2).^0.25, 2));
-        p_r   = 0.5 - integral (f, 0, Inf, 'AbsTol', 1e-10, 'RelTol', 1e-8) / pi;
-        p_r   = min (max (p_r, 0), 1);
-      else
-        mu_dw  = sum (lam) / k;
-        var_dw = 2 * (sum (lam.^2) - sum (lam)^2 / k) / (k * (k + 2));
-        p_r    = normcdf ((DW - mu_dw) / sqrt (var_dw));
-        p_r    = min (max (p_r, 0), 1);
-      endif
-
-      if (strcmp (tail, 'right'))
-        p = p_r;
-      elseif (strcmp (tail, 'left'))
-        p = 1 - p_r;
-      else
-        p = 2 * min (p_r, 1 - p_r);
-      endif
+      [p, DW] = dwtest (r, mdl.DesignMatrix, 'Method', method, 'Tail', tail);
 
     endfunction
 
