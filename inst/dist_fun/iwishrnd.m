@@ -21,13 +21,13 @@
 ## Return a random matrix sampled from the inverse Wishart distribution with
 ## given parameters.
 ##
-## Inputs: the @math{p x p} positive definite matrix @var{Tau} and scalar
+## Inputs: the @math{p * p} positive definite matrix @var{Tau} and scalar
 ## degrees of freedom parameter @var{df} (and optionally the transposed Cholesky
 ## factor @var{DI} of @var{Sigma} = @code{inv(Tau)}).
 ##
 ## @var{df} can be non-integer as long as @math{@var{df} > d}
 ##
-## Output: a random @math{p x p}  matrix @var{W} from the inverse
+## Output: a random @math{p * p}  matrix @var{W} from the inverse
 ## Wishart(@var{Tau}, @var{df}) distribution. (@code{inv(W)} is from the
 ## Wishart(@code{inv(Tau)}, @var{df}) distribution.) If @var{n} > 1,
 ## then @var{W} is @var{p} x @var{p} x @var{n} and holds @var{n} such random
@@ -82,10 +82,10 @@ endfunction
 
 
 
-%!assert(size (iwishrnd (1,2,1)), [1, 1]);
-%!assert(size (iwishrnd ([],2,1)), [1, 1]);
-%!assert(size (iwishrnd ([3 1; 1 3], 2.00001, [], 1)), [2, 2]);
-%!assert(size (iwishrnd (eye(2), 2, [], 3)), [2, 2, 3]);
+%!assert_equal (size (iwishrnd (1,2,1)), [1, 1]);
+%!assert_equal (size (iwishrnd ([],2,1)), [1, 1]);
+%!assert_equal (size (iwishrnd ([3 1; 1 3], 2.00001, [], 1)), [2, 2]);
+%!assert_equal (size (iwishrnd (eye (2), 2, [], 3)), [2, 2, 3]);
 
 %% Test input validation
 %!error iwishrnd ()

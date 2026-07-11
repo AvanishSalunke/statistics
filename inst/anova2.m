@@ -27,7 +27,8 @@
 ## (ANOVA) for balanced designs. For unbalanced factorial designs, diagnostic
 ## plots and/or planned contrasts, use @qcode{anovan} instead.
 ##
-## @qcode{anova2} requires two input arguments with an optional third and fourth:
+## @qcode{anova2} requires two input arguments with an optional third and
+## fourth:
 ##
 ## @itemize
 ## @item
@@ -104,7 +105,7 @@ function [p, anovatab, stats] = anova2 (x, reps, displayopt, model)
     error ("anova2: invalid number of input arguments.");
   endif
   ## Check for NaN values in X
-  if (any (isnan( x(:))))
+  if (any (isnan ( x(:))))
     error ("anova2: NaN values in input are not allowed.  Use anovan instead.");
   endif
   ## Add defaults
@@ -112,13 +113,13 @@ function [p, anovatab, stats] = anova2 (x, reps, displayopt, model)
     reps = 1;
   endif
   if (nargin < 3)
-    displayopt = "on";
+    displayopt = 'on';
   endif
   if (nargin < 4)
-    model = "interaction";
+    model = 'interaction';
   endif
   epsilonhat = [];
-  plotdata = ! (strcmp (displayopt, "off"));
+  plotdata = ! (strcmp (displayopt, 'off'));
 
   ## Calculate group numbers
   FFGn = size (x, 1) / reps;            ## Number of groups in Row Factor
@@ -145,7 +146,7 @@ function [p, anovatab, stats] = anova2 (x, reps, displayopt, model)
   ## Calculate group means
   GTmu = sum (x(:)) / GTsz;                 ## Grand mean of groups
   for i = 1:FFGn                            ## Group means of Row Factor
-    FFGm(i) = mean (x(RIdx(i,:),:), "all");
+    FFGm(i) = mean (x(RIdx(i,:),:), 'all');
   endfor
   for i = 1:SFGn                            ## Group means of Column Factor
     SFGm(i) = mean (x(:,i));
@@ -188,19 +189,19 @@ function [p, anovatab, stats] = anova2 (x, reps, displayopt, model)
   ## freedom. The calculations are based on equalities for the partitioning of
   ## variance in fully balanced designs.
   switch (lower (model))
-    case {"interaction", "full"}
+    case {'interaction', 'full'}
       ## TWO-WAY ANOVA WITH INTERACTION (full factorial model)
       ## Sums--of-squares are already partitioned into main effects and
       ## interaction. Just calculate mean-squares and degrees of freedom
-      model = "interaction";
+      model = 'interaction';
       MSE = SSE / df_SSE;           ## Mean Square for Error (Within)
       MSR = SSR / df_SSR;           ## Mean Square for Row Factor
       MS_DENOM = MSE;
       df_DENOM = df_SSE;
-    case "linear"
+    case 'linear'
       ## TWO-WAY ANOVA WITHOUT INTERACTION (additive, linear model)
       ## Pool Error and Interaction term
-      model = "linear";
+      model = 'linear';
       SSE += SSI;
       df_SSE += df_SSI;
       SSI = 0;
@@ -223,11 +224,11 @@ function [p, anovatab, stats] = anova2 (x, reps, displayopt, model)
       MSR = SSR / df_SSR;       ## Mean Square for Row Factor
       MS_DENOM = MSE;
       df_DENOM = df_SSE;
-    case "nested"
+    case 'nested'
       ## NESTED ANOVA
       ## Row Factor is nested within Column Factor. Treat Row factor as random.
       ## Pool Row Factor and Interaction term
-      model = "nested";
+      model = 'nested';
       SSR += SSI;
       df_SSR += df_SSI;
       SSI = 0;
@@ -246,7 +247,7 @@ function [p, anovatab, stats] = anova2 (x, reps, displayopt, model)
   p_MSR = 1 - fcdf (F_MSR, df_SSR, df_SSE);
   MSC = SSC / df_SSC;           ## Mean Square for Column Factor
   F_MSC = MSC / MS_DENOM;       ## F statistic for Column Factor
-  if (isempty(epsilonhat))
+  if (isempty (epsilonhat))
     p_MSC = 1 - fcdf (F_MSC, df_SSC, df_DENOM);
   else
     ## Apply correction for sphericity to the p-value of the column factor
@@ -275,23 +276,23 @@ function [p, anovatab, stats] = anova2 (x, reps, displayopt, model)
 
   ## Create results table (if requested)
   if (nargout > 1 && reps > 1)
-    anovatab = {"Source", "SS", "df", "MS", "F", "Prob>F"; ...
-                "Columns", SSC, df_SSC, MSC, F_MSC, p_MSC; ...
-                "Rows", SSR, df_SSR, MSR, F_MSR, p_MSR; ...
-                "Interaction", SSI, df_SSI, MSI, F_MSI, p_MSI; ...
-                "Error", SSE, df_SSE, MSE, "", ""; ...
-                "Total", SST, df_tot, "", "", ""};
+    anovatab = {'Source', 'SS', 'df', 'MS', 'F', 'Prob>F'; ...
+                'Columns', SSC, df_SSC, MSC, F_MSC, p_MSC; ...
+                'Rows', SSR, df_SSR, MSR, F_MSR, p_MSR; ...
+                'Interaction', SSI, df_SSI, MSI, F_MSI, p_MSI; ...
+                'Error', SSE, df_SSE, MSE, '', ''; ...
+                'Total', SST, df_tot, '', '', ''};
   elseif (nargout > 1 && reps == 1)
-    anovatab = {"Source", "SS", "df", "MS", "F", "Prob>F"; ...
-                "Columns", SSC, df_SSC, MSC, F_MSC, p_MSC; ...
-                "Rows", SSR, df_SSR, MSR, F_MSR, p_MSR; ...
-                "Error", SSE, df_SSE, MSE, "", ""; ...
-                "Total", SST, df_tot, "", "", ""};
+    anovatab = {'Source', 'SS', 'df', 'MS', 'F', 'Prob>F'; ...
+                'Columns', SSC, df_SSC, MSC, F_MSC, p_MSC; ...
+                'Rows', SSR, df_SSR, MSR, F_MSR, p_MSR; ...
+                'Error', SSE, df_SSE, MSE, '', ''; ...
+                'Total', SST, df_tot, '', '', ''};
   endif
 
   ## Create stats structure (if requested) for MULTCOMPARE
   if (nargout > 2)
-    stats.source = "anova2";
+    stats.source = 'anova2';
     stats.sigmasq = MS_DENOM; ## MS used to calculate F relating to stats.pval
     stats.colmeans = SFGm(:)';
     stats.coln = SFGs;
@@ -302,32 +303,32 @@ function [p, anovatab, stats] = anova2 (x, reps, displayopt, model)
       stats.pval = p_MSI;     ## Interaction p-value if stats.inter is true
     else
       stats.pval = p_MSC;     ## Column Factor p-value if stats.inter is false
-    end
+    endif
     stats.df = df_DENOM;      ## Degrees of freedom used to calculate stats.pval
     stats.model = model;
   endif
 
   ## Print results table on screen if no output argument was requested
   if (nargout == 0 || plotdata)
-    printf("\n                      ANOVA Table\n\n");
-    printf("Source             SS      df        MS       F      Prob>F\n");
-    printf("-----------------------------------------------------------\n");
-    printf("Columns      %10.4f %5.0f %10.4f %8.2f %9.4f\n", ...
+    printf ("\n                      ANOVA Table\n\n");
+    printf ("Source             SS      df        MS       F      Prob>F\n");
+    printf ("-----------------------------------------------------------\n");
+    printf ("Columns      %10.4f %5.0f %10.4f %8.2f %9.4f\n", ...
             SSC, df_SSC, MSC, F_MSC, p_MSC);
-    printf("Rows         %10.4f %5.0f %10.4f %8.2f %9.4f\n", ...
+    printf ("Rows         %10.4f %5.0f %10.4f %8.2f %9.4f\n", ...
             SSR, df_SSR, MSR, F_MSR, p_MSR);
     if (reps > 1)
-      printf("Interaction  %10.4f %5.0f %10.4f %8.2f %9.4f\n", ...
+      printf ("Interaction  %10.4f %5.0f %10.4f %8.2f %9.4f\n", ...
               SSI, df_SSI, MSI, F_MSI, p_MSI);
     endif
-    printf("Error        %10.4f %5.0f %10.4f\n", SSE, df_SSE, MSE);
-    printf("Total        %10.4f %5.0f\n\n", SST, df_tot);
+    printf ("Error        %10.4f %5.0f %10.4f\n", SSE, df_SSE, MSE);
+    printf ("Total        %10.4f %5.0f\n\n", SST, df_tot);
     if (! isempty (epsilonhat))
       printf (strcat ("Note: Greenhouse-Geisser's correction was applied to the\n", ...
                       "degrees of freedom for the Column factor: F(%.2f,%.2f)\n\n"), ...
                       dfN_GG, dfD_GG);
     endif
-    if (strcmpi (model, "nested"))
+    if (strcmpi (model, 'nested'))
       printf (strcat ("Note: Rows are a random factor nested within the columns.\n", ...
                       "The Column F statistic uses the Row MS instead of the MSE.\n\n"));
     endif
@@ -342,7 +343,7 @@ endfunction
 %! popcorn = [5.5, 4.5, 3.5; 5.5, 4.5, 4.0; 6.0, 4.0, 3.0; ...
 %!            6.5, 5.0, 4.0; 7.0, 5.5, 5.0; 7.0, 5.0, 4.5];
 %!
-%! [p, atab, stats] = anova2(popcorn, 3, "on");
+%! [p, atab, stats] = anova2 (popcorn, 3, 'on');
 
 %!demo
 %!
@@ -354,7 +355,7 @@ endfunction
 %!         31, 33, 36, 35;
 %!         15, 25, 30, 26];
 %!
-%! [p, atab, stats] = anova2 (data, 1, "on", "linear");
+%! [p, atab, stats] = anova2 (data, 1, 'on', 'linear');
 
 %!demo
 %!
@@ -365,7 +366,7 @@ endfunction
 %!         5.1873 12.4188 16.5927; 3.3579 14.3951 10.2129; ...
 %!         6.3092 8.5986 9.8934; 3.2831 3.4945 10.0203];
 %!
-%! [p, atab, stats] = anova2 (data, 4, "on", "nested");
+%! [p, atab, stats] = anova2 (data, 4, 'on', 'nested');
 
 ## testing against popcorn data and results from Matlab
 %!test
@@ -373,21 +374,21 @@ endfunction
 %! ## comparison with results from Matlab for column effect
 %! popcorn = [5.5, 4.5, 3.5; 5.5, 4.5, 4.0; 6.0, 4.0, 3.0; ...
 %!            6.5, 5.0, 4.0; 7.0, 5.5, 5.0; 7.0, 5.0, 4.5];
-%! [p, atab, stats] = anova2 (popcorn, 3, "off");
-%! assert (p(1), 7.678957383294716e-07, 1e-14);
-%! assert (p(2), 0.0001003738963050171, 1e-14);
-%! assert (p(3), 0.7462153966366274, 1e-14);
-%! assert (atab{2,5}, 56.700, 1e-14);
-%! assert (atab{2,3}, 2, 0);
-%! assert (atab{4,2}, 0.08333333333333348, 1e-14);
-%! assert (atab{5,4}, 0.1388888888888889, 1e-14);
-%! assert (atab{5,2}, 1.666666666666667, 1e-14);
-%! assert (atab{6,2}, 22);
-%! assert (stats.source, "anova2");
-%! assert (stats.colmeans, [6.25, 4.75, 4]);
-%! assert (stats.inter, true);
-%! assert (stats.pval, 0.7462153966366274, 1e-14);
-%! assert (stats.df, 12);
+%! [p, atab, stats] = anova2 (popcorn, 3, 'off');
+%! assert_equal (p(1), 7.678957383294716e-07, 1e-14);
+%! assert_equal (p(2), 0.0001003738963050171, 1e-14);
+%! assert_equal (p(3), 0.7462153966366274, 1e-14);
+%! assert_equal (atab{2,5}, 56.700, 1e-14);
+%! assert_equal (atab{2,3}, 2, 0);
+%! assert_equal (atab{4,2}, 0.08333333333333348, 1e-14);
+%! assert_equal (atab{5,4}, 0.1388888888888889, 1e-14);
+%! assert_equal (atab{5,2}, 1.666666666666667, 1e-14);
+%! assert_equal (atab{6,2}, 22);
+%! assert_equal (stats.source, "anova2");
+%! assert_equal (stats.colmeans, [6.25, 4.75, 4]);
+%! assert_equal (stats.inter, true);
+%! assert_equal (stats.pval, 0.7462153966366274, 1e-14);
+%! assert_equal (stats.df, 12);
 
 %!test
 %! ## Test for anova2 ("linear") - comparison with results from GraphPad Prism 8
@@ -396,18 +397,18 @@ endfunction
 %!         45, 65, 99, 78;
 %!         31, 33, 36, 35;
 %!         15, 25, 30, 26];
-%! [p, atab, stats] = anova2 (data, 1, "off", "linear");
-%! assert (atab{2,2}, 2174.95, 1e-10);
-%! assert (atab{3,2}, 8371.7, 1e-10);
-%! assert (atab{4,2}, 2404.3, 1e-10);
-%! assert (atab{5,2}, 12950.95, 1e-10);
-%! assert (atab{2,4}, 724.983333333333, 1e-10);
-%! assert (atab{3,4}, 2092.925, 1e-10);
-%! assert (atab{4,4}, 200.358333333333, 1e-10);
-%! assert (atab{2,5}, 3.61843363972882, 1e-10);
-%! assert (atab{3,5}, 10.445909412303, 1e-10);
-%! assert (atab{2,6}, 0.087266112738617, 1e-10);
-%! assert (atab{3,6}, 0.000698397753556, 1e-10);
+%! [p, atab, stats] = anova2 (data, 1, 'off', 'linear');
+%! assert_equal (atab{2,2}, 2174.95, 1e-10);
+%! assert_equal (atab{3,2}, 8371.7, 1e-10);
+%! assert_equal (atab{4,2}, 2404.3, 1e-10);
+%! assert_equal (atab{5,2}, 12950.95, 1e-10);
+%! assert_equal (atab{2,4}, 724.983333333333, 1e-10);
+%! assert_equal (atab{3,4}, 2092.925, 1e-10);
+%! assert_equal (atab{4,4}, 200.358333333333, 1e-10);
+%! assert_equal (atab{2,5}, 3.61843363972882, 1e-10);
+%! assert_equal (atab{3,5}, 10.445909412303, 1e-10);
+%! assert_equal (atab{2,6}, 0.087266112738617, 1e-10);
+%! assert_equal (atab{3,6}, 0.000698397753556, 1e-10);
 
 %!test
 %! ## Test for anova2 ("nested") - comparison with results from GraphPad Prism 8
@@ -415,15 +416,15 @@ endfunction
 %!         6.1605 13.1147 22.66; 2.3374 15.2654 24.1283; ...
 %!         5.1873 12.4188 16.5927; 3.3579 14.3951 10.2129; ...
 %!         6.3092 8.5986 9.8934; 3.2831 3.4945 10.0203];
-%! [p, atab, stats] = anova2 (data, 4, "off", "nested");
-%! assert (atab{2,2}, 745.360306290833, 1e-10);
-%! assert (atab{3,2}, 278.01854140125, 1e-10);
-%! assert (atab{4,2}, 180.180377467501, 1e-10);
-%! assert (atab{5,2}, 1203.55922515958, 1e-10);
-%! assert (atab{2,4}, 372.680153145417, 1e-10);
-%! assert (atab{3,4}, 92.67284713375, 1e-10);
-%! assert (atab{4,4}, 10.0100209704167, 1e-10);
-%! assert (atab{2,5}, 4.02146005730833, 1e-10);
-%! assert (atab{3,5}, 9.25800729165627, 1e-10);
-%! assert (atab{2,6}, 0.141597630656771, 1e-10);
-%! assert (atab{3,6}, 0.000636643812875719, 1e-10);
+%! [p, atab, stats] = anova2 (data, 4, 'off', 'nested');
+%! assert_equal (atab{2,2}, 745.360306290833, 1e-10);
+%! assert_equal (atab{3,2}, 278.01854140125, 1e-10);
+%! assert_equal (atab{4,2}, 180.180377467501, 1e-10);
+%! assert_equal (atab{5,2}, 1203.55922515958, 1e-10);
+%! assert_equal (atab{2,4}, 372.680153145417, 1e-10);
+%! assert_equal (atab{3,4}, 92.67284713375, 1e-10);
+%! assert_equal (atab{4,4}, 10.0100209704167, 1e-10);
+%! assert_equal (atab{2,5}, 4.02146005730833, 1e-10);
+%! assert_equal (atab{3,5}, 9.25800729165627, 1e-10);
+%! assert_equal (atab{2,6}, 0.141597630656771, 1e-10);
+%! assert_equal (atab{3,6}, 0.000636643812875719, 1e-10);

@@ -75,14 +75,14 @@ endfunction
 %! y3 = raylpdf (x, 2);
 %! y4 = raylpdf (x, 3);
 %! y5 = raylpdf (x, 4);
-%! plot (x, y1, "-b", x, y2, "g", x, y3, "-r", x, y4, "-m", x, y5, "-k")
+%! plot (x, y1, '-b', x, y2, 'g', x, y3, '-r', x, y4, '-m', x, y5, '-k')
 %! grid on
 %! ylim ([0, 1.25])
-%! legend ({"σ = 0,5", "σ = 1", "σ = 2", ...
-%!          "σ = 3", "σ = 4"}, "location", "northeast")
-%! title ("Rayleigh PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'σ = 0,5', 'σ = 1', 'σ = 2', ...
+%!          'σ = 3', 'σ = 4'}, 'location', 'northeast')
+%! title ('Rayleigh PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!test
@@ -90,12 +90,12 @@ endfunction
 %! sigma = 1:6;
 %! y = raylpdf (x, sigma);
 %! expected_y = [0.0000, 0.1212, 0.1051, 0.0874, 0.0738, 0.0637];
-%! assert (y, expected_y, 0.001);
+%! assert_equal (y, expected_y, 0.001);
 %!test
 %! x = 0:0.5:2.5;
 %! y = raylpdf (x, 0.5);
 %! expected_y = [0.0000, 1.2131, 0.5413, 0.0667, 0.0027, 0.0000];
-%! assert (y, expected_y, 0.001);
+%! assert_equal (y, expected_y, 0.001);
 
 ## Test input validation
 %!error<raylpdf: function called with too few input arguments.> raylpdf ()

@@ -56,7 +56,7 @@
 ##
 ## Matlab incompatibility: Matlab's @code{expfit} produces unpredictable results
 ## for some cases with higher dimensions (specifically 1 x m x n x ... arrays).
-## Octave's implementation allows for @math{nxD} arrays, consistently performing
+## Octave's implementation allows for @math{n*D} arrays, consistently performing
 ## calculations on individual column vectors.  Additionally, @var{censor} and
 ## @var{freq} can be used with arrays of any size, whereas Matlab only allows
 ## their use when @var{x} is a vector.
@@ -138,9 +138,9 @@ function [muhat, muci] = expfit (x, alpha = 0.05, censor = [], freq = [])
 
     ## Check that size of censor and freq match x
     if (! (isequal (size (censor), sz_s)))
-      error("expfit: X and CENSOR vectors mismatch.");
+      error ("expfit: X and CENSOR vectors mismatch.");
     elseif (! isequal (size (freq), sz_s))
-      error("expfit: X and FREQ vectors mismatch.");
+      error ("expfit: X and FREQ vectors mismatch.");
     endif
 
     ## Trivial case where censor and freq have no effect
@@ -169,7 +169,7 @@ function [muhat, muci] = expfit (x, alpha = 0.05, censor = [], freq = [])
     ## Censoring, but no sample counts adjustment
     elseif (all (freq(:) == 1))
 
-      censor = logical(censor); # convert any numeric censor'x to 0s and 1s
+      censor = logical (censor); # convert any numeric censor'x to 0s and 1s
       X = sum (x, 1);
       r = sz_s(1) - sum (censor, 1);
       muhat = X ./ r;
@@ -207,20 +207,20 @@ endfunction
 
 %!demo
 %! ## Sample 3 populations from 3 different exponential distributions
-%! rande ("seed", 1);   # for reproducibility
+%! rande ('seed', 1);   # for reproducibility
 %! r1 = exprnd (2, 4000, 1);
-%! rande ("seed", 2);   # for reproducibility
+%! rande ('seed', 2);   # for reproducibility
 %! r2 = exprnd (5, 4000, 1);
-%! rande ("seed", 3);   # for reproducibility
+%! rande ('seed', 3);   # for reproducibility
 %! r3 = exprnd (12, 4000, 1);
 %! r = [r1, r2, r3];
 %!
 %! ## Plot them normalized and fix their colors
 %! hist (r, 48, 0.52);
-%! h = findobj (gca, "Type", "patch");
-%! set (h(1), "facecolor", "c");
-%! set (h(2), "facecolor", "g");
-%! set (h(3), "facecolor", "r");
+%! h = findobj (gca, 'Type', 'patch');
+%! set (h(1), 'facecolor', 'c');
+%! set (h(2), 'facecolor', 'g');
+%! set (h(3), 'facecolor', 'r');
 %! hold on
 %!
 %! ## Estimate their mu parameter
@@ -229,77 +229,77 @@ endfunction
 %! ## Plot their estimated PDFs
 %! x = [0:max(r(:))];
 %! y = exppdf (x, muhat(1));
-%! plot (x, y, "-pr");
+%! plot (x, y, '-pr');
 %! y = exppdf (x, muhat(2));
-%! plot (x, y, "-sg");
+%! plot (x, y, '-sg');
 %! y = exppdf (x, muhat(3));
-%! plot (x, y, "-^c");
+%! plot (x, y, '-^c');
 %! ylim ([0, 0.6])
 %! xlim ([0, 40])
-%! legend ({"Normalized HIST of sample 1 with μ=2", ...
-%!          "Normalized HIST of sample 2 with μ=5", ...
-%!          "Normalized HIST of sample 3 with μ=12", ...
+%! legend ({'Normalized HIST of sample 1 with μ=2', ...
+%!          'Normalized HIST of sample 2 with μ=5', ...
+%!          'Normalized HIST of sample 3 with μ=12', ...
 %!          sprintf("PDF for sample 1 with estimated μ=%0.2f", muhat(1)), ...
 %!          sprintf("PDF for sample 2 with estimated μ=%0.2f", muhat(2)), ...
 %!          sprintf("PDF for sample 3 with estimated μ=%0.2f", muhat(3))})
-%! title ("Three population samples from different exponential distributions")
+%! title ('Three population samples from different exponential distributions')
 %! hold off
 
 ## Tests for mean
-%!assert (expfit (1), 1)
-%!assert (expfit (1:3), 2)
-%!assert (expfit ([1:3]'), 2)
-%!assert (expfit (1:3, []), 2)
-%!assert (expfit (1:3, [], [], []), 2)
-%!assert (expfit (magic (3)), [5 5 5])
-%!assert (expfit (cat (3, magic (3), 2*magic (3))), cat (3,[5 5 5], [10 10 10]))
-%!assert (expfit (1:3, 0.1, [0 0 0], [1 1 1]), 2)
-%!assert (expfit ([1:3]', 0.1, [0 0 0]', [1 1 1]'), 2)
-%!assert (expfit (1:3, 0.1, [0 0 0]', [1 1 1]'), 2)
-%!assert (expfit (1:3, 0.1, [1 0 0], [1 1 1]), 3)
-%!assert (expfit (1:3, 0.1, [0 0 0], [4 1 1]), 1.5)
-%!assert (expfit (1:3, 0.1, [1 0 0], [4 1 1]), 4.5)
-%!assert (expfit (1:3, 0.1, [1 0 1], [4 1 1]), 9)
-%!assert (expfit (1:3, 0.1, [], [-1 1 1]), 4)
-%!assert (expfit (1:3, 0.1, [], [0.5 1 1]), 2.2)
-%!assert (expfit (1:3, 0.1, [1 1 1]), NaN)
-%!assert (expfit (1:3, 0.1, [], [0 0 0]), NaN)
-%!assert (expfit (reshape (1:9, [3 3])), [2 5 8])
-%!assert (expfit (reshape (1:9, [3 3]), [], eye(3)), [3 7.5 12])
-%!assert (expfit (reshape (1:9, [3 3]), [], 2*eye(3)), [3 7.5 12])
-%!assert (expfit (reshape (1:9, [3 3]), [], [], [2 2 2; 1 1 1; 1 1 1]), ...
+%!assert_equal (expfit (1), 1)
+%!assert_equal (expfit (1:3), 2)
+%!assert_equal (expfit ([1:3]'), 2)
+%!assert_equal (expfit (1:3, []), 2)
+%!assert_equal (expfit (1:3, [], [], []), 2)
+%!assert_equal (expfit (magic (3)), [5 5 5])
+%!assert_equal (expfit (cat (3, magic (3), 2*magic (3))), cat (3,[5 5 5], [10 10 10]))
+%!assert_equal (expfit (1:3, 0.1, [0 0 0], [1 1 1]), 2)
+%!assert_equal (expfit ([1:3]', 0.1, [0 0 0]', [1 1 1]'), 2)
+%!assert_equal (expfit (1:3, 0.1, [0 0 0]', [1 1 1]'), 2)
+%!assert_equal (expfit (1:3, 0.1, [1 0 0], [1 1 1]), 3)
+%!assert_equal (expfit (1:3, 0.1, [0 0 0], [4 1 1]), 1.5)
+%!assert_equal (expfit (1:3, 0.1, [1 0 0], [4 1 1]), 4.5)
+%!assert_equal (expfit (1:3, 0.1, [1 0 1], [4 1 1]), 9)
+%!assert_equal (expfit (1:3, 0.1, [], [-1 1 1]), 4)
+%!assert_equal (expfit (1:3, 0.1, [], [0.5 1 1]), 2.2)
+%!assert_equal (expfit (1:3, 0.1, [1 1 1]), NaN)
+%!assert_equal (expfit (1:3, 0.1, [], [0 0 0]), NaN)
+%!assert_equal (expfit (reshape (1:9, [3 3])), [2 5 8])
+%!assert_equal (expfit (reshape (1:9, [3 3]), [], eye (3)), [3 7.5 12])
+%!assert_equal (expfit (reshape (1:9, [3 3]), [], 2*eye (3)), [3 7.5 12])
+%!assert_equal (expfit (reshape (1:9, [3 3]), [], [], [2 2 2; 1 1 1; 1 1 1]), ...
 %! [1.75 4.75 7.75])
-%!assert (expfit (reshape (1:9, [3 3]), [], [], [2 2 2; 1 1 1; 1 1 1]), ...
+%!assert_equal (expfit (reshape (1:9, [3 3]), [], [], [2 2 2; 1 1 1; 1 1 1]), ...
 %! [1.75 4.75 7.75])
-%!assert (expfit (reshape (1:9, [3 3]), [], eye(3), [2 2 2; 1 1 1; 1 1 1]), ...
+%!assert_equal (expfit (reshape (1:9, [3 3]), [], eye (3), [2 2 2; 1 1 1; 1 1 1]), ...
 %! [3.5 19/3 31/3])
 
 ## Tests for confidence intervals
-%!assert ([~,muci] = expfit (1:3, 0), [0; Inf])
-%!assert ([~,muci] = expfit (1:3, 2), [Inf; 0])
-%!assert ([~,muci] = expfit (1:3, 0.1, [1 1 1]), [NaN; NaN])
-%!assert ([~,muci] = expfit (1:3, 0.1, [], [0 0 0]), [NaN; NaN])
-%!assert ([~,muci] = expfit (1:3, -1), [NaN; NaN])
-%!assert ([~,muci] = expfit (1:3, 5), [NaN; NaN])
-#!assert ([~,muci] = expfit ([1:3;1:3], -1), NaN(2, 3)]
-#!assert ([~,muci] = expfit ([1:3;1:3], 5), NaN(2, 3)]
-%!assert ([~,muci] = expfit (1:3), [0.830485728373393; 9.698190330474096], ...
+%!assert_equal ([~,muci] = expfit (1:3, 0), [0; Inf])
+%!assert_equal ([~,muci] = expfit (1:3, 2), [Inf; 0])
+%!assert_equal ([~,muci] = expfit (1:3, 0.1, [1 1 1]), [NaN; NaN])
+%!assert_equal ([~,muci] = expfit (1:3, 0.1, [], [0 0 0]), [NaN; NaN])
+%!assert_equal ([~,muci] = expfit (1:3, -1), [NaN; NaN])
+%!assert_equal ([~,muci] = expfit (1:3, 5), [NaN; NaN])
+#!assert_equal ([~,muci] = expfit ([1:3;1:3], -1), NaN (2, 3)]
+#!assert_equal ([~,muci] = expfit ([1:3;1:3], 5), NaN (2, 3)]
+%!assert_equal ([~,muci] = expfit (1:3), [0.830485728373393; 9.698190330474096], ...
 %!             1000*eps)
-%!assert ([~,muci] = expfit (1:3, 0.1), ...
+%!assert_equal ([~,muci] = expfit (1:3, 0.1), ...
 %!                          [0.953017262058213; 7.337731146400207], 1000*eps)
-%!assert ([~,muci] = expfit ([1:3;2:4]), ...
+%!assert_equal ([~,muci] = expfit ([1:3;2:4]), ...
 %!             [0.538440777613095, 0.897401296021825, 1.256361814430554; ...
 %!             12.385982973214016, 20.643304955356694, 28.900626937499371], ...
 %!             1000*eps)
-%!assert ([~,muci] = expfit ([1:3;2:4], [], [1 1 1; 0 0 0]), ...
+%!assert_equal ([~,muci] = expfit ([1:3;2:4], [], [1 1 1; 0 0 0]), ...
 %!             100*[0.008132550920455, 0.013554251534091, 0.018975952147727; ...
 %!             1.184936706156216, 1.974894510260360, 2.764852314364504], ...
 %!             1000*eps)
-%!assert ([~,muci] = expfit ([1:3;2:4], [], [], [3 3 3; 1 1 1]), ...
+%!assert_equal ([~,muci] = expfit ([1:3;2:4], [], [], [3 3 3; 1 1 1]), ...
 %!             [0.570302756652583, 1.026544961974649, 1.482787167296715; ...
 %!             4.587722594914109, 8.257900670845396, 11.928078746776684], ...
 %!             1000*eps)
-%!assert ([~,muci] = expfit ([1:3;2:4], [], [0 0 0; 1 1 1], [3 3 3; 1 1 1]), ...
+%!assert_equal ([~,muci] = expfit ([1:3;2:4], [], [0 0 0; 1 1 1], [3 3 3; 1 1 1]), ...
 %!             [0.692071440311161, 1.245728592560089, 1.799385744809018; ...
 %!             8.081825275395081, 14.547285495711145, 21.012745716027212], ...
 %!             1000*eps)
@@ -308,7 +308,7 @@ endfunction
 %! x = reshape (1:8, [4 2]);
 %! x(4) = NaN;
 %! [muhat,muci] = expfit (x);
-%! assert ({muhat, muci}, {[NaN, 6.5], ...
+%! assert_equal ({muhat, muci}, {[NaN, 6.5], ...
 %!         [NaN, 2.965574334593430;NaN, 23.856157493553368]}, 1000*eps);
 
 %!test
@@ -316,7 +316,7 @@ endfunction
 %! censor = [0 1 0; 0 1 0; 0 1 0];
 %! freq = [1 1 0; 1 1 0; 1 1 0];
 %! [muhat,muci] = expfit (x, [], censor, freq);
-%! assert ({muhat, muci}, {[5 NaN NaN], ...
+%! assert_equal ({muhat, muci}, {[5 NaN NaN], ...
 %!                 [[2.076214320933482; 24.245475826185242],NaN(2)]}, 1000*eps);
 
 ## Test input validation
@@ -325,7 +325,7 @@ endfunction
 %!error [a b censor] = expfit (1)
 %!error <ALPHA must be a scalar quantity> expfit (1, [1 2])
 %!error <X cannot be negative> expfit ([-1 2 3 4 5])
-%!error <CENSOR must be a numeric or logical array> expfit ([1:5], [], "test")
-%!error <FREQ must be a numeric or logical array> expfit ([1:5], [], [], "test")
+%!error <CENSOR must be a numeric or logical array> expfit ([1:5], [], 'test')
+%!error <FREQ must be a numeric or logical array> expfit ([1:5], [], [], 'test')
 %!error <X and CENSOR vectors mismatch.> expfit ([1:5], [], [0 0 0 0])
 %!error <X and FREQ vectors mismatch.> expfit ([1:5], [], [], [1 1 1 1])

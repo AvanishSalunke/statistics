@@ -35,7 +35,7 @@
 ## between a row and column vector of @var{y}.  Hence, when @var{y} is column
 ## vector, it is plotted as a single series of bars (same color), whereas when
 ## @var{y} is row vector, each bar is plotted as a different group (different
-## colors).  For an @math{MxN} matrix, the function plots the bars corresponding
+## colors).  For an @math{M*N} matrix, the function plots the bars corresponding
 ## to each row on the @qcode{z-axis} ranging from @math{1} to @math{M} and each
 ## column on the @qcode{x-axis} ranging from @math{1} to @math{N}.
 ##
@@ -61,7 +61,7 @@
 ## specified by color.  For example, use @qcode{'red'} or @qcode{'r'} to
 ## specify all red bars.  When you want to specify colors for several groups,
 ## @var{color} can be a cellstr vector with each element specifying the color of
-## each group.  @var{color} can also be specified as a numerical @math{Mx3}
+## each group.  @var{color} can also be specified as a numerical @math{M*3}
 ## matrix, where each row corresponds to a RGB value with its elements in the
 ## range @math{[0,1]}.  If only one color is specified, then it applies to all
 ## bars.  If the number of colors equals the number of groups, then each color
@@ -73,20 +73,20 @@
 ## @code{bar3h (@dots{}, @var{name}, @var{value})} specifies one or more of the
 ## following name/value pairs:
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @headitem @tab Name @tab Value
-## @item @tab @qcode{"width"} @tab A two-element vector specifying the width
+## @multitable @columnfractions 0.2 0.75
+## @headitem Name @tab Value
+## @item @qcode{'width'} @tab A two-element vector specifying the width
 ## of the bars along the @qcode{x-} and @qcode{z-axes}, respectively.  Each
 ## element must be in the range @math{(0,1]}.
 ##
-## @item @tab @qcode{"color"} @tab A character or a cellstr vector, or a
-## numerical @math{Mx3} matrix following the same conventions as the @var{color}
+## @item @qcode{'color'} @tab A character or a cellstr vector, or a
+## numerical @math{M*3} matrix following the same conventions as the @var{color}
 ## input argument.
 ##
-## @item @tab @qcode{"xlabel"} @tab A cellstr vector specifying the group names
+## @item @qcode{'xlabel'} @tab A cellstr vector specifying the group names
 ## along the @qcode{x-axis}.
 ##
-## @item @tab @qcode{"zlabel"} @tab A cellstr vector specifying the names of the
+## @item @qcode{'zlabel'} @tab A cellstr vector specifying the names of the
 ## bars in the same series along the @qcode{z-axis}.
 ## @end multitable
 ##
@@ -131,7 +131,7 @@ function [varargout] = bar3h (varargin)
   z = [];
   width = 0.8;
   depth = 0.8;
-  style = "detached";
+  style = 'detached';
   color = [];
   xlabel = [];
   zlabel = [];
@@ -177,19 +177,18 @@ function [varargout] = bar3h (varargin)
       if (size (tmp, 2) == 3 && all (tmp(:) >= 0) && all (tmp(:) <= 1))
         color = tmp;
       else
-        error (["bar3h: numeric COLOR must be a 1x3 vector of an Nx3 matrix", ...
-                " where each value is between 0 and 1 inclusive."]);
+        error (strcat ("bar3h: numeric COLOR must be a 1x3 vector of an Nx3 matrix", " where each value is between 0 and 1 inclusive."));
       endif
       color = tmp;
       varargin(1) = [];
     elseif (ischar (tmp))
-      if (any (strcmpi (tmp, {"detached", "grouped", "stacked"})))
+      if (any (strcmpi (tmp, {'detached', 'grouped', 'stacked'})))
         style = tmp;
         varargin(1) = [];
       elseif (any (strcmpi (tmp, vc)))
         color = tmp;
         varargin(1) = [];
-      elseif (strcmpi (tmp, "width"))
+      elseif (strcmpi (tmp, 'width'))
         if (numel (varargin) < 2)
           error ("bar3h: missing value for optional argument 'width'.");
         endif
@@ -205,14 +204,14 @@ function [varargout] = bar3h (varargin)
           error ("bar3h: invalid value for optional argument 'width'.");
         endif
         varargin([1:2]) = [];
-      elseif (strcmpi (tmp, "color"))
+      elseif (strcmpi (tmp, 'color'))
         if (numel (varargin) < 2)
           error ("bar3h: missing value for optional argument 'color'.");
         endif
         c = varargin{2};
         if (iscellstr (c))
           is_vc = all (cell2mat (cellfun (@(x) any (strcmpi (vc, x)), ...
-                                          c, "UniformOutput", false)));
+                                          c, 'UniformOutput', false)));
           if (is_vc)
             color = c;
           else
@@ -228,14 +227,13 @@ function [varargout] = bar3h (varargin)
           if (size (c, 2) == 3 && all (c(:) >= 0) && all (c(:) <= 1))
             color = c;
           else
-            error (["bar3h: numeric COLOR must be a 1x3 vector of an Nx3", ...
-                    " matrix where each value is between 0 and 1 inclusive."]);
+            error (strcat ("bar3h: numeric COLOR must be a 1x3 vector of an Nx3", " matrix where each value is between 0 and 1 inclusive."));
           endif
         else
           error ("bar3h: invalid value for optional argument 'color'.");
         endif
         varargin([1:2]) = [];
-      elseif (strcmpi (tmp, "xlabel"))
+      elseif (strcmpi (tmp, 'xlabel'))
         if (numel (varargin) < 2)
           error ("bar3h: missing value for optional argument 'xlabel'.");
         endif
@@ -244,7 +242,7 @@ function [varargout] = bar3h (varargin)
           error ("bar3h: invalid value for optional argument 'xlabel'.");
         endif
         varargin([1:2]) = [];
-      elseif (strcmpi (tmp, "zlabel"))
+      elseif (strcmpi (tmp, 'zlabel'))
         if (numel (varargin) < 2)
           error ("bar3h: missing value for optional argument 'zlabel'.");
         endif
@@ -258,7 +256,7 @@ function [varargout] = bar3h (varargin)
       endif
     elseif (iscellstr (tmp))
       is_vc = all (cell2mat (cellfun (@(x) any (strcmpi (vc, x)), ...
-                                      tmp, "UniformOutput", false)));
+                                      tmp, 'UniformOutput', false)));
       if (is_vc)
         color = tmp;
       else
@@ -318,7 +316,7 @@ function [varargout] = bar3h (varargin)
   hw = width / 2;
   hd = depth / 2;
   ## Scale the bar's base when grouping together
-  if (strcmpi (style, "grouped"))
+  if (strcmpi (style, 'grouped'))
     sc = nx + 1;
     hw = hw / sc;
     hd = hd / sc;
@@ -339,10 +337,10 @@ function [varargout] = bar3h (varargin)
   V = bsxfun (@plus, V, permute (offset, [3, 2, 1]));
   V = reshape (permute (V, [2, 1, 3]), 3, []).';
   A = NaN;
-  if (strcmpi (style, "detached"))
+  if (strcmpi (style, 'detached'))
     ## Adjust bar heights according to values in y input
     V(:,2) = V(:,2) .* kron (y(:), ones (8,1));
-  elseif (strcmpi (style, "grouped"))
+  elseif (strcmpi (style, 'grouped'))
     ## Adjust bar heights according to values in y input
     V(:,2) = V(:,2) .* kron (y(:), ones (8,1));
     ## Move groups along x axis
@@ -351,7 +349,7 @@ function [varargout] = bar3h (varargin)
     offset = [-nx+1:2:nx-1] * (hd / width);
     V(:,3) = V(:,3) + kron (kron (ones (1, nz), offset)(:), ones (8,1));
     nx = 1;
-  elseif (strcmpi (style, "stacked"))
+  elseif (strcmpi (style, 'stacked'))
     ## Move groups along x axis
     V(:,1) = V(:,1) - kron (kron ([0:nx-1], ones (nz, 1))(:), ones (8,1));
     ## Adjust bar heights according to values in y input
@@ -446,7 +444,7 @@ endfunction
 %! b = bar3h (y, 0.5, 'stacked');
 
 ## Test input validation
-%!error <bar3h: Z must be numeric.> bar3h ("A")
+%!error <bar3h: Z must be numeric.> bar3h ('A')
 %!error <bar3h: Z must be numeric.> bar3h ({2,3,4,5})
 %!error <bar3h: inconsistent size in Y and Z input arguments.> ...
 %! bar3h ([1,2,3]', ones (2))
@@ -467,9 +465,9 @@ endfunction
 %!error <bar3h: numeric COLOR must be a 1x3 vector of an Nx3 matrix> ...
 %! bar3h (ones (5), 'color', [0.8, 0.8])
 %!error <bar3h: invalid value for optional argument 'color'.> ...
-%! bar3h (ones (5), 'color', "brown")
+%! bar3h (ones (5), 'color', 'brown')
 %!error <bar3h: invalid value for optional argument 'color'.> ...
-%! bar3h (ones (5), 'color', {"r", "k", "c", "m", "brown"})
+%! bar3h (ones (5), 'color', {'r', 'k', 'c', 'm', 'brown'})
 %!error <bar3h: missing value for optional argument 'xlabel'.> ...
 %! bar3h (ones (5), 'xlabel')
 %!error <bar3h: invalid value for optional argument 'xlabel'.> ...
@@ -480,6 +478,6 @@ endfunction
 %! bar3h (ones (5), 'zlabel', 4)
 %!error <bar3h: invalid optional argument.> bar3h (ones (5), 'this', 4)
 %!error <bar3h: the elements in 'xlabel' must equal the columns in Z.> ...
-%! bar3h (ones (5), 'xlabel', {"A", "B", "C"})
+%! bar3h (ones (5), 'xlabel', {'A', 'B', 'C'})
 %!error <bar3h: the elements in 'zlabel' must equal the rows in Z.> ...
-%! bar3h (ones (5), 'zlabel', {"A", "B", "C"})
+%! bar3h (ones (5), 'zlabel', {'A', 'B', 'C'})

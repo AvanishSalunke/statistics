@@ -97,10 +97,10 @@ function r = unifrnd (a, b, varargin)
   endif
 
   ## Check for class type
-  if (isa (a, "single") || isa (b, "single"))
-    cls = "single";
+  if (isa (a, 'single') || isa (b, 'single'))
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   if (isscalar (a) && isscalar (b))
@@ -112,34 +112,34 @@ function r = unifrnd (a, b, varargin)
   else
     r = a + (b - a) .* rand (sz, cls);
 
-    k = !(-Inf < a) | !(a <= b) | !(b < Inf);
+    k = ! (-Inf < a) | ! (a <= b) | ! (b < Inf);
     r(k) = NaN;
   endif
 
 endfunction
 
 ## Test output
-%!assert (size (unifrnd (1, 1)), [1 1])
-%!assert (size (unifrnd (1, ones (2,1))), [2, 1])
-%!assert (size (unifrnd (1, ones (2,2))), [2, 2])
-%!assert (size (unifrnd (ones (2,1), 1)), [2, 1])
-%!assert (size (unifrnd (ones (2,2), 1)), [2, 2])
-%!assert (size (unifrnd (1, 1, 3)), [3, 3])
-%!assert (size (unifrnd (1, 1, [4, 1])), [4, 1])
-%!assert (size (unifrnd (1, 1, 4, 1)), [4, 1])
-%!assert (size (unifrnd (1, 1, 4, 1, 5)), [4, 1, 5])
-%!assert (size (unifrnd (1, 1, 0, 1)), [0, 1])
-%!assert (size (unifrnd (1, 1, 1, 0)), [1, 0])
-%!assert (size (unifrnd (1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
-%!assert (size (unifrnd (1, 1, [])), [0, 0])
-%!assert (size (unifrnd (1, 1, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (unifrnd (1, 1)), [1 1])
+%!assert_equal (size (unifrnd (1, ones (2,1))), [2, 1])
+%!assert_equal (size (unifrnd (1, ones (2,2))), [2, 2])
+%!assert_equal (size (unifrnd (ones (2,1), 1)), [2, 1])
+%!assert_equal (size (unifrnd (ones (2,2), 1)), [2, 2])
+%!assert_equal (size (unifrnd (1, 1, 3)), [3, 3])
+%!assert_equal (size (unifrnd (1, 1, [4, 1])), [4, 1])
+%!assert_equal (size (unifrnd (1, 1, 4, 1)), [4, 1])
+%!assert_equal (size (unifrnd (1, 1, 4, 1, 5)), [4, 1, 5])
+%!assert_equal (size (unifrnd (1, 1, 0, 1)), [0, 1])
+%!assert_equal (size (unifrnd (1, 1, 1, 0)), [1, 0])
+%!assert_equal (size (unifrnd (1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
+%!assert_equal (size (unifrnd (1, 1, [])), [0, 0])
+%!assert_equal (size (unifrnd (1, 1, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (unifrnd (1, 1)), "double")
-%!assert (class (unifrnd (1, single (1))), "single")
-%!assert (class (unifrnd (1, single ([1, 1]))), "single")
-%!assert (class (unifrnd (single (1), 1)), "single")
-%!assert (class (unifrnd (single ([1, 1]), 1)), "single")
+%!assert_equal (class (unifrnd (1, 1)), "double")
+%!assert_equal (class (unifrnd (1, single (1))), "single")
+%!assert_equal (class (unifrnd (1, single ([1, 1]))), "single")
+%!assert_equal (class (unifrnd (single (1), 1)), "single")
+%!assert_equal (class (unifrnd (single ([1, 1]), 1)), "single")
 
 ## Test input validation
 %!error<unifrnd: function called with too few input arguments.> unifrnd ()

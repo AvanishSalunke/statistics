@@ -36,13 +36,13 @@ classdef ExhaustiveSearcher
   ## @seealso{createns, KDTreeSearcher, hnswSearcher, knnsearch, rangesearch}
   ## @end deftp
 
-  properties (SetAccess = private)
+  properties(SetAccess = private)
     ## -*- texinfo -*-
     ## @deftp {ExhaustiveSearcher} {property} X
     ##
     ## Point data
     ##
-    ## Point data, specified as an @math{NxP} numeric matrix where each row
+    ## Point data, specified as an @math{N*P} numeric matrix where each row
     ## is an observation and each column is a feature. This property is private
     ## and cannot be modified after object creation.
     ##
@@ -57,8 +57,8 @@ classdef ExhaustiveSearcher
     ## Distance metric
     ##
     ## Distance metric used for searches, specified as a character vector (e.g.,
-    ## @qcode{"euclidean"}, @qcode{"minkowski"}) or a function handle to a
-    ## custom distance function. Default is @qcode{"euclidean"}.  Supported
+    ## @qcode{'euclidean'}, @qcode{'minkowski'}) or a function handle to a
+    ## custom distance function. Default is @qcode{'euclidean'}.  Supported
     ## metrics align with those in @code{pdist2}.
     ##
     ## @end deftp
@@ -73,11 +73,11 @@ classdef ExhaustiveSearcher
     ## @qcode{Distance} metric and can be any of the following:
     ##
     ## @itemize
-    ## @item For @qcode{"minkowski"}, a positive scalar exponent (default 2).
-    ## @item For @qcode{"seuclidean"}, a nonnegative vector of scaling factors
+    ## @item For @qcode{'minkowski'}, a positive scalar exponent (default 2).
+    ## @item For @qcode{'seuclidean'}, a nonnegative vector of scaling factors
     ## matching the number of columns in @qcode{X} (default is standard
     ## deviation of @qcode{X}).
-    ## @item For @qcode{"mahalanobis"}, a positive definite covariance matrix
+    ## @item For @qcode{'mahalanobis'}, a positive definite covariance matrix
     ## matching the dimensions of @qcode{X} (default is @code{cov (@var{X})}).
     ## @item Empty for other metrics or custom functions.
     ## @end itemize
@@ -176,9 +176,9 @@ classdef ExhaustiveSearcher
                                  " unsupported distance metric '%s'."), val);
                 endif
                 this.Distance = val;
-              elseif (isa (val, "function_handle"))
+              elseif (isa (val, 'function_handle'))
                 try
-                  D = val (this.X(1,:), this.X);
+                  D = val(this.X(1,:), this.X);
                 catch
                   error (strcat ("ExhaustiveSearcher.subsasgn:", ...
                                  " invalid distance function handle."));
@@ -193,14 +193,14 @@ classdef ExhaustiveSearcher
                                " must be a string or function handle."));
               endif
             case 'DistParameter'
-              if (strcmpi (this.Distance, "minkowski"))
+              if (strcmpi (this.Distance, 'minkowski'))
                 if (! (isscalar (val) && isnumeric (val)
                                       && val > 0 && isfinite (val)))
                   error (strcat ("ExhaustiveSearcher.subsasgn:", ...
                                  " DistParameter must be a positive", ...
                                  " finite scalar for minkowski."));
                 endif
-              elseif (strcmpi (this.Distance, "seuclidean"))
+              elseif (strcmpi (this.Distance, 'seuclidean'))
                 if (! (isvector (val) && isnumeric (val) && all (val >= 0)
                                       && all (isfinite (val))
                                       && length (val) == columns (this.X)))
@@ -208,7 +208,7 @@ classdef ExhaustiveSearcher
                                  " DistParameter must be a nonnegative", ...
                                  " vector matching X columns."));
                 endif
-              elseif (strcmpi (this.Distance, "mahalanobis"))
+              elseif (strcmpi (this.Distance, 'mahalanobis'))
                 if (! (ismatrix (val) && isnumeric (val)
                                       && all (isfinite (val(:)))
                                       && rows (val) == columns (val)
@@ -251,34 +251,34 @@ classdef ExhaustiveSearcher
     ##
     ## @code{@var{obj} = ExhaustiveSearcher (@var{X})} constructs an
     ## @qcode{ExhaustiveSearcher} object with training data @var{X} using the
-    ## default @qcode{"euclidean"} distance metric. @var{X} must be an
-    ## @math{NxP} numeric matrix, where rows represent observations and columns
+    ## default @qcode{'euclidean'} distance metric. @var{X} must be an
+    ## @math{N*P} numeric matrix, where rows represent observations and columns
     ## represent features.
     ##
     ## @code{@var{obj} = ExhaustiveSearcher (@var{X}, @var{name}, @var{value})}
     ## allows customization through name-value pairs:
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Distance"} @tab @tab Distance metric, specified as a
-    ## character vector (e.g., @qcode{"euclidean"}, @qcode{"minkowski"}) or a
-    ## function handle.  Default is @qcode{"euclidean"}.  See @code{pdist2} for
+    ## @item @qcode{'Distance'} @tab Distance metric, specified as a
+    ## character vector (e.g., @qcode{'euclidean'}, @qcode{'minkowski'}) or a
+    ## function handle.  Default is @qcode{'euclidean'}.  See @code{pdist2} for
     ## supported metrics.
     ##
-    ## @item @qcode{"P"} @tab @tab a positive scalar specifying the exponent for
-    ## the Minkowski distance.  Valid only when @qcode{"Distance"} is
-    ## @qcode{"minkowski"}.  Default is 2.
+    ## @item @qcode{'P'} @tab a positive scalar specifying the exponent for
+    ## the Minkowski distance.  Valid only when @qcode{'Distance'} is
+    ## @qcode{'minkowski'}.  Default is 2.
     ##
-    ## @item @qcode{"Scale"} @tab @tab a nonnegative vector with the same number
+    ## @item @qcode{'Scale'} @tab a nonnegative vector with the same number
     ## of elements as the columns in @var{X} specifying the scale parameter for
     ## the standardized Euclidean distance.  Valid only when
-    ## @qcode{"Distance"} is @qcode{"seuclidean"}.  Default is @code{std (X)}.
+    ## @qcode{'Distance'} is @qcode{'seuclidean'}.  Default is @code{std (X)}.
     ##
-    ## @item @qcode{"Cov"} @tab @tab a positive definite matrix matching the
+    ## @item @qcode{'Cov'} @tab a positive definite matrix matching the
     ## number of columns in @var{X} specifying the covariance matrix for the
-    ## Mahalanobis distance.  Valid only when @qcode{"Distance"} is
-    ## @qcode{"mahalanobis"}.  Default is @code{cov (X)}.
+    ## Mahalanobis distance.  Valid only when @qcode{'Distance'} is
+    ## @qcode{'mahalanobis'}.  Default is @code{cov (X)}.
     ## @end multitable
     ##
     ## @seealso{ExhaustiveSearcher, knnsearch, rangesearch, pdist2}
@@ -299,7 +299,7 @@ classdef ExhaustiveSearcher
       obj.X = X;
 
       ## Default values for optional parameters
-      Distance = "euclidean";
+      Distance = 'euclidean';
       P = [];
       S = [];
       C = [];
@@ -307,19 +307,19 @@ classdef ExhaustiveSearcher
       ## Parse optional parameters
       while (numel (varargin) > 0)
         switch (lower (varargin{1}))
-          case "distance"
+          case 'distance'
             Distance = varargin{2};
-          case "p"
+          case 'p'
             P = varargin{2};
-          case "scale"
+          case 'scale'
             S = varargin{2};
-          case "cov"
+          case 'cov'
             C = varargin{2};
           otherwise
             error (strcat ("ExhaustiveSearcher: invalid parameter", ...
                            " name: '%s'."), varargin{1});
         endswitch
-        varargin (1:2) = [];
+        varargin(1:2) = [];
       endwhile
 
       ## Validate and set distance metric
@@ -333,9 +333,9 @@ classdef ExhaustiveSearcher
                  Distance);
         endif
         obj.Distance = Distance;
-      elseif (isa (Distance, "function_handle"))
+      elseif (isa (Distance, 'function_handle'))
         try
-          D = Distance (X(1,:), X);
+          D = Distance(X(1,:), X);
         catch
           error ("ExhaustiveSearcher: invalid distance function handle.");
         end_try_catch
@@ -350,7 +350,7 @@ classdef ExhaustiveSearcher
       endif
 
       ## Set DistParameter based on Distance
-      if (strcmpi (obj.Distance, "minkowski"))
+      if (strcmpi (obj.Distance, 'minkowski'))
         if (isempty (P))
           obj.DistParameter = 2;
         else
@@ -359,7 +359,7 @@ classdef ExhaustiveSearcher
           endif
           obj.DistParameter = P;
         endif
-      elseif (strcmpi (obj.Distance, "seuclidean"))
+      elseif (strcmpi (obj.Distance, 'seuclidean'))
         if (isempty (S))
           obj.DistParameter = std (X, [], 1);
         else
@@ -370,7 +370,7 @@ classdef ExhaustiveSearcher
           endif
           obj.DistParameter = S;
         endif
-      elseif (strcmpi (obj.Distance, "mahalanobis"))
+      elseif (strcmpi (obj.Distance, 'mahalanobis'))
         if (isempty (C))
           obj.DistParameter = cov (X);
         else
@@ -403,20 +403,21 @@ classdef ExhaustiveSearcher
     ##
     ## @itemize
     ## @item @var{obj} is an @qcode{ExhaustiveSearcher} object.
-    ## @item @var{Y} is an @math{MxP} numeric matrix of query points, where
+    ## @item @var{Y} is an @math{M*P} numeric matrix of query points, where
     ## @math{P} must match the number of columns in @var{obj.X}.
     ## @end itemize
     ##
-    ## @code{[@var{idx}, @var{D}] = knnsearch (@var{obj}, @var{Y}, @var{name}, @var{value})}
+    ## @code{[@var{idx}, @var{D}] = knnsearch (@var{obj}, @var{Y}, @var{name},
+    ## @var{value})}
     ## allows additional options via name-value pairs:
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"K"} @tab @tab A positive integer specifying the number of
+    ## @item @qcode{'K'} @tab A positive integer specifying the number of
     ## nearest neighbors to find. Default is 1.
     ##
-    ## @item @qcode{"IncludeTies"} @tab @tab Logical flag indicating whether to
+    ## @item @qcode{'IncludeTies'} @tab Logical flag indicating whether to
     ## include all neighbors tied with the @math{K}th smallest distance. Default
     ## is @qcode{false}. If @qcode{true}, @var{idx} and @var{D} are cell arrays.
     ## @end multitable
@@ -452,14 +453,14 @@ classdef ExhaustiveSearcher
       ## Parse options
       while (numel (varargin) > 0)
         switch (lower (varargin{1}))
-          case "k"
+          case 'k'
             K = varargin{2};
             if (! (isscalar (K) && isnumeric (K) && K >= 1
                                 && K == fix (K) && isfinite (K)))
               error (strcat ("ExhaustiveSearcher.knnsearch: K", ...
                              " must be a positive integer."));
             endif
-          case "includeties"
+          case 'includeties'
             IncludeTies = varargin{2};
             if (! (islogical (IncludeTies) && isscalar (IncludeTies)))
               error (strcat ("ExhaustiveSearcher.knnsearch:", ...
@@ -469,7 +470,7 @@ classdef ExhaustiveSearcher
             error (strcat ("ExhaustiveSearcher.knnsearch:", ...
                            " invalid parameter name: '%s'."), varargin{1});
         endswitch
-        varargin (1:2) = [];
+        varargin(1:2) = [];
       endwhile
 
       ## Determine block size based on memory target (128 MB)
@@ -541,7 +542,7 @@ classdef ExhaustiveSearcher
     ##
     ## @itemize
     ## @item @var{obj} is an @qcode{ExhaustiveSearcher} object.
-    ## @item @var{Y} is an @math{MxP} numeric matrix of query points, where
+    ## @item @var{Y} is an @math{M*P} numeric matrix of query points, where
     ## @math{P} must match the number of columns in @var{obj.X}.
     ## @item @var{r} is a nonnegative scalar specifying the search radius.
     ## @end itemize
@@ -549,10 +550,10 @@ classdef ExhaustiveSearcher
     ## @code{[@var{idx}, @var{D}] = rangesearch (@dots{}, @var{name},
     ## @var{value})} allows additional options via name-value pairs:
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"SortIndices"} @tab @tab Logical flag indicating whether to
+    ## @item @qcode{'SortIndices'} @tab Logical flag indicating whether to
     ## sort the indices by distance. Default is @qcode{true}.
     ## @end multitable
     ##
@@ -590,7 +591,7 @@ classdef ExhaustiveSearcher
       SortIndices = true;
       while (numel (varargin) > 0)
         switch (lower (varargin{1}))
-          case "sortindices"
+          case 'sortindices'
             SortIndices = varargin{2};
             if (! (islogical (SortIndices) && isscalar (SortIndices)))
               error (strcat ("ExhaustiveSearcher.rangesearch:", ...
@@ -600,7 +601,7 @@ classdef ExhaustiveSearcher
             error (strcat ("ExhaustiveSearcher.rangesearch: invalid", ...
                            " parameter name: '%s'."), varargin{1});
         endswitch
-        varargin (1:2) = [];
+        varargin(1:2) = [];
       endwhile
 
       ## Determine block size based on memory target (128 MB)
@@ -651,15 +652,15 @@ endclassdef
 %!demo
 %! ## Demo to verify implementation using fisheriris dataset
 %! load fisheriris
-%! rng('default');
+%! rng ('default');
 %! numSamples = size (meas, 1);
 %! queryIndices = [20, 95, 123, 136, 138];
-%! dataPoints = meas(~ismember (1:numSamples, queryIndices), :);
+%! dataPoints = meas(! ismember (1:numSamples, queryIndices), :);
 %! queryPoints = meas(queryIndices, :);
 %! searchModel = ExhaustiveSearcher (dataPoints, 'Distance', 'mahalanobis')
 %! mahalanobisParam = searchModel.DistParameter
 %! searchRadius = 3;
-%! nearestNeighbors = knnsearch (searchModel, queryPoints, "K", 2)
+%! nearestNeighbors = knnsearch (searchModel, queryPoints, 'K', 2)
 %! neighborsInRange = rangesearch (searchModel, queryPoints, searchRadius)
 
 %!demo
@@ -669,95 +670,95 @@ endclassdef
 %! ## Find the nearest neighbor to [2, 3]
 %! Y = [2, 3];
 %! [idx, D] = knnsearch (obj, Y);
-%! disp ("Nearest neighbor index:"); disp (idx);
-%! disp ("Distance:"); disp (D);
+%! disp ('Nearest neighbor index:'); disp (idx);
+%! disp ('Distance:'); disp (D);
 %! ## Find all points within radius 2
 %! [idx, D] = rangesearch (obj, Y, 2);
-%! disp ("Indices within radius:"); disp (idx);
-%! disp ("Distances:"); disp (D);
+%! disp ('Indices within radius:'); disp (idx);
+%! disp ('Distances:'); disp (D);
 
 %!demo
 %! ## Create an ExhaustiveSearcher with Minkowski distance (P=1)
 %! X = [0, 0; 1, 0; 0, 1];
-%! obj = ExhaustiveSearcher (X, "Distance", "minkowski", "P", 1);
+%! obj = ExhaustiveSearcher (X, 'Distance', 'minkowski', 'P', 1);
 %! ## Find the 2 nearest neighbors to [0.5, 0.5]
 %! Y = [0.5, 0.5];
-%! [idx, D] = knnsearch (obj, Y, "K", 2);
-%! disp ("Nearest neighbor indices:"); disp (idx);
-%! disp ("Distances:"); disp (D);
+%! [idx, D] = knnsearch (obj, Y, 'K', 2);
+%! disp ('Nearest neighbor indices:'); disp (idx);
+%! disp ('Distances:'); disp (D);
 
 %!demo
-%! rng(42);
-%! disp('Demonstrating ExhaustiveSearcher');
+%! rng (42);
+%! disp ('Demonstrating ExhaustiveSearcher');
 %!
 %! n = 100;
 %! mu1 = [0.3, 0.3];
 %! mu2 = [0.7, 0.7];
 %! sigma = 0.1;
-%! X1 = mu1 + sigma * randn(n/2, 2);
-%! X2 = mu2 + sigma * randn(n/2, 2);
+%! X1 = mu1 + sigma * randn (n/2, 2);
+%! X2 = mu2 + sigma * randn (n/2, 2);
 %! X = [X1; X2];
 %!
-%! obj = ExhaustiveSearcher(X);
+%! obj = ExhaustiveSearcher (X);
 %!
 %! Y = [0.3, 0.3; 0.7, 0.7; 0.5, 0.5];
 %!
 %! K = 5;
-%! [idx, D] = knnsearch(obj, Y, "K", K);
+%! [idx, D] = knnsearch (obj, Y, 'K', K);
 %!
-%! disp('For the first query point:');
-%! disp(['Query point: ', num2str(Y(1,:))]);
-%! disp('Indices of nearest neighbors:');
-%! disp(idx(1,:));
-%! disp('Distances:');
-%! disp(D(1,:));
+%! disp ('For the first query point:');
+%! disp (['Query point: ', num2str(Y(1,:))]);
+%! disp ('Indices of nearest neighbors:');
+%! disp (idx(1,:));
+%! disp ('Distances:');
+%! disp (D(1,:));
 %!
 %! figure;
-%! scatter(X(:,1), X(:,2), 36, 'b', 'filled'); % Training points
+%! scatter (X(:,1), X(:,2), 36, 'b', 'filled'); % Training points
 %! hold on;
-%! scatter(Y(:,1), Y(:,2), 36, 'r', 'filled'); % Query points
-%! for i = 1:size(Y,1)
+%! scatter (Y(:,1), Y(:,2), 36, 'r', 'filled'); % Query points
+%! for i = 1:size (Y,1)
 %!     query = Y(i,:);
 %!     neighbors = X(idx(i,:), :);
 %!     for j = 1:K
-%!         plot([query(1), neighbors(j,1)], [query(2), neighbors(j,2)], 'k-');
-%!     end
-%! end
+%!         plot ([query(1), neighbors(j,1)], [query(2), neighbors(j,2)], 'k-');
+%!     endfor
+%! endfor
 %! hold off;
-%! title('K Nearest Neighbors with ExhaustiveSearcher');
-%! xlabel('X1');
-%! ylabel('X2');
+%! title ('K Nearest Neighbors with ExhaustiveSearcher');
+%! xlabel ('X1');
+%! ylabel ('X2');
 %!
 %! r = 0.15;
-%! [idx, D] = rangesearch(obj, Y, r);
+%! [idx, D] = rangesearch (obj, Y, r);
 %!
-%! disp('For the first query point in rangesearch:');
-%! disp(['Query point: ', num2str(Y(1,:))]);
-%! disp('Indices of points within radius:');
-%! disp(idx{1});
-%! disp('Distances:');
-%! disp(D{1});
+%! disp ('For the first query point in rangesearch:');
+%! disp (['Query point: ', num2str(Y(1,:))]);
+%! disp ('Indices of points within radius:');
+%! disp (idx{1});
+%! disp ('Distances:');
+%! disp (D{1});
 %!
 %! figure;
-%! scatter(X(:,1), X(:,2), 36, 'b', 'filled');
+%! scatter (X(:,1), X(:,2), 36, 'b', 'filled');
 %! hold on;
-%! scatter(Y(:,1), Y(:,2), 36, 'r', 'filled');
-%! theta = linspace(0, 2*pi, 100);
-%! for i = 1:size(Y,1)
+%! scatter (Y(:,1), Y(:,2), 36, 'r', 'filled');
+%! theta = linspace (0, 2*pi, 100);
+%! for i = 1:size (Y,1)
 %!     center = Y(i,:);
-%!     x_circle = center(1) + r * cos(theta);
-%!     y_circle = center(2) + r * sin(theta);
-%!     plot(x_circle, y_circle, 'g-');
+%!     x_circle = center(1) + r * cos (theta);
+%!     y_circle = center(2) + r * sin (theta);
+%!     plot (x_circle, y_circle, 'g-');
 %!     % Highlight points within radius
-%!     if ~isempty(idx{i})
+%!     if ! isempty (idx{i})
 %!         in_radius = X(idx{i}, :);
-%!         scatter(in_radius(:,1), in_radius(:,2), 36, 'g', 'filled');
-%!     end
-%! end
+%!         scatter (in_radius(:,1), in_radius(:,2), 36, 'g', 'filled');
+%!     endif
+%! endfor
 %! hold off;
-%! title('Points within Radius with ExhaustiveSearcher');
-%! xlabel('X1');
-%! ylabel('X2');
+%! title ('Points within Radius with ExhaustiveSearcher');
+%! xlabel ('X1');
+%! ylabel ('X2');
 
 ## Test Cases
 
@@ -765,136 +766,136 @@ endclassdef
 %! ## Basic constructor with default Euclidean
 %! X = [1, 2; 3, 4; 5, 6];
 %! obj = ExhaustiveSearcher (X);
-%! assert (obj.X, X)
-%! assert (obj.Distance, "euclidean")
-%! assert (isempty (obj.DistParameter))
+%! assert_equal (obj.X, X)
+%! assert_equal (obj.Distance, "euclidean")
+%! assert_equal (isempty (obj.DistParameter), true)
 
 %!test
 %! ## Minkowski distance with custom P
 %! X = [1, 2; 3, 4];
-%! obj = ExhaustiveSearcher (X, "Distance", "minkowski", "P", 3);
-%! assert (obj.Distance, "minkowski")
-%! assert (obj.DistParameter, 3)
+%! obj = ExhaustiveSearcher (X, 'Distance', 'minkowski', 'P', 3);
+%! assert_equal (obj.Distance, "minkowski")
+%! assert_equal (obj.DistParameter, 3)
 
 %!test
 %! ## Seuclidean distance with custom Scale
 %! X = [1, 2; 3, 4; 5, 6];
 %! S = [1, 2];
-%! obj = ExhaustiveSearcher (X, "Distance", "seuclidean", "Scale", S);
-%! assert (obj.Distance, "seuclidean")
-%! assert (obj.DistParameter, S)
+%! obj = ExhaustiveSearcher (X, 'Distance', 'seuclidean', 'Scale', S);
+%! assert_equal (obj.Distance, "seuclidean")
+%! assert_equal (obj.DistParameter, S)
 
 %!test
 %! ## Mahalanobis distance with custom Cov
 %! X = [1, 2; 3, 4; 5, 6];
 %! C = [1, 0; 0, 1];
-%! obj = ExhaustiveSearcher (X, "Distance", "mahalanobis", "Cov", C);
-%! assert (obj.Distance, "mahalanobis")
-%! assert (obj.DistParameter, C)
+%! obj = ExhaustiveSearcher (X, 'Distance', 'mahalanobis', 'Cov', C);
+%! assert_equal (obj.Distance, "mahalanobis")
+%! assert_equal (obj.DistParameter, C)
 
 %!test
 %! ## knnsearch with Euclidean distance
 %! X = [1, 2; 3, 4; 5, 6];
 %! obj = ExhaustiveSearcher (X);
 %! Y = [2, 3];
-%! [idx, D] = knnsearch (obj, Y, "K", 1);
-%! assert (idx, 1)
-%! assert (D, sqrt(2), 1e-10)
+%! [idx, D] = knnsearch (obj, Y, 'K', 1);
+%! assert_equal (idx, 1)
+%! assert_equal (D, sqrt (2), 1e-10)
 
 %!test
 %! ## knnsearch with Cityblock distance
 %! X = [0, 0; 1, 1; 2, 2];
-%! obj = ExhaustiveSearcher (X, "Distance", "cityblock");
+%! obj = ExhaustiveSearcher (X, 'Distance', 'cityblock');
 %! Y = [1, 0];
-%! [idx, D] = knnsearch (obj, Y, "K", 1);
-%! assert (idx, 1)
-%! assert (D, 1, 1e-10)
+%! [idx, D] = knnsearch (obj, Y, 'K', 1);
+%! assert_equal (idx, 1)
+%! assert_equal (D, 1, 1e-10)
 
 %!test
 %! ## knnsearch with Chebychev distance
 %! X = [1, 1; 2, 3; 4, 2];
-%! obj = ExhaustiveSearcher (X, "Distance", "chebychev");
+%! obj = ExhaustiveSearcher (X, 'Distance', 'chebychev');
 %! Y = [2, 2];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 1)
-%! assert (D, 1, 1e-10)
+%! assert_equal (idx, 1)
+%! assert_equal (D, 1, 1e-10)
 
 %!test
 %! ## knnsearch with Cosine distance
 %! X = [1, 0; 0, 1; 1, 1];
-%! obj = ExhaustiveSearcher (X, "Distance", "cosine");
+%! obj = ExhaustiveSearcher (X, 'Distance', 'cosine');
 %! Y = [1, 0.5];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 3)
-%! assert (D < 0.1, true)
+%! assert_equal (idx, 3)
+%! assert_equal (D < 0.1, true)
 
 %!test
 %! ## knnsearch with Minkowski P=1 (Manhattan)
 %! X = [0, 0; 1, 0; 0, 1];
-%! obj = ExhaustiveSearcher (X, "Distance", "minkowski", "P", 1);
+%! obj = ExhaustiveSearcher (X, 'Distance', 'minkowski', 'P', 1);
 %! Y = [0.5, 0.5];
-%! [idx, D] = knnsearch (obj, Y, "K", 2, "IncludeTies", true);
-%! assert (iscell (idx))
-%! assert (idx{1}, [1, 2, 3])
-%! assert (D{1}, [1, 1, 1], 1e-10)
+%! [idx, D] = knnsearch (obj, Y, 'K', 2, 'IncludeTies', true);
+%! assert_equal (iscell (idx), true)
+%! assert_equal (idx{1}, [1, 2, 3])
+%! assert_equal (D{1}, [1, 1, 1], 1e-10)
 
 %!test
 %! ## rangesearch with Seuclidean
 %! X = [1, 1; 2, 2; 3, 3];
 %! S = [1, 1];
-%! obj = ExhaustiveSearcher (X, "Distance", "seuclidean", "Scale", S);
+%! obj = ExhaustiveSearcher (X, 'Distance', 'seuclidean', 'Scale', S);
 %! Y = [0, 0];
 %! [idx, D] = rangesearch (obj, Y, 2);
-%! assert (idx{1}, [1])
-%! assert (D{1}, [sqrt(2)], 1e-10)
+%! assert_equal (idx{1}, [1])
+%! assert_equal (D{1}, [sqrt(2)], 1e-10)
 
 %!test
 %! ## rangesearch with Mahalanobis
 %! X = [1, 1; 2, 2; 3, 3];
 %! C = [1, 0; 0, 1];
-%! obj = ExhaustiveSearcher (X, "Distance", "mahalanobis", "Cov", C);
+%! obj = ExhaustiveSearcher (X, 'Distance', 'mahalanobis', 'Cov', C);
 %! Y = [0, 0];
-%! [idx, D] = rangesearch (obj, Y, 3, "SortIndices", false);
-%! assert (idx{1}, [1, 2])
-%! assert (D{1}, [sqrt(2), sqrt(8)], 1e-10)
+%! [idx, D] = rangesearch (obj, Y, 3, 'SortIndices', false);
+%! assert_equal (idx{1}, [1, 2])
+%! assert_equal (D{1}, [sqrt(2), sqrt(8)], 1e-10)
 
 %!test
 %! ## rangesearch with Hamming distance
 %! X = [0, 1; 1, 0; 1, 1];
-%! obj = ExhaustiveSearcher (X, "Distance", "hamming");
+%! obj = ExhaustiveSearcher (X, 'Distance', 'hamming');
 %! Y = [0, 0];
 %! [idx, D] = rangesearch (obj, Y, 0.5);
-%! assert (idx{1}, [1, 2])
-%! assert (D{1}, [0.5, 0.5], 1e-10)
+%! assert_equal (idx{1}, [1, 2])
+%! assert_equal (D{1}, [0.5, 0.5], 1e-10)
 
 %!test
 %! ## Custom distance function
 %! X = [1, 2; 3, 4];
-%! custom_dist = @(x, y) sum(abs(x - y));
-%! obj = ExhaustiveSearcher (X, "Distance", custom_dist);
+%! custom_dist = @(x, y) sum (abs (x - y));
+%! obj = ExhaustiveSearcher (X, 'Distance', custom_dist);
 %! Y = [2, 3];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 1)
-%! assert (D, 2, 1e-10)
+%! assert_equal (idx, 1)
+%! assert_equal (D, 2, 1e-10)
 
 %!test
 %! ## IncludeTies returns all tied neighbors
 %! X = [0; 1; 2];
 %! obj = ExhaustiveSearcher (X);
 %! Y = 1;
-%! [idx, D] = knnsearch (obj, Y, "K", 2, "IncludeTies", true);
-%! assert (idx{1}, [2, 1, 3])
-%! assert (D{1}, [0, 1, 1])
+%! [idx, D] = knnsearch (obj, Y, 'K', 2, 'IncludeTies', true);
+%! assert_equal (idx{1}, [2, 1, 3])
+%! assert_equal (D{1}, [0, 1, 1])
 
 %!test
 %! ## Custom distance function with vectorized output
 %! X = [1, 2; 3, 4];
-%! f = @(x, y) sum(abs(x - y), 2);
-%! obj = ExhaustiveSearcher (X, "Distance", f);
+%! f = @(x, y) sum (abs (x - y), 2);
+%! obj = ExhaustiveSearcher (X, 'Distance', f);
 %! Y = [2, 3];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 1)
-%! assert (D, 2)
+%! assert_equal (idx, 1)
+%! assert_equal (D, 2)
 
 %!test
 %! ## Euclidean with high-dimensional data
@@ -902,210 +903,210 @@ endclassdef
 %! obj = ExhaustiveSearcher (X);
 %! Y = [5, 6, 7];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 2)
-%! assert (D, sqrt(3), 1e-10)
+%! assert_equal (idx, 2)
+%! assert_equal (D, sqrt (3), 1e-10)
 
 %!test
 %! ## Minkowski P=3 with scaled data
 %! X = [0, 1; 2, 3; 4, 5] * 10;
-%! obj = ExhaustiveSearcher (X, "Distance", "minkowski", "P", 3);
+%! obj = ExhaustiveSearcher (X, 'Distance', 'minkowski', 'P', 3);
 %! Y = [20, 30];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 2)
-%! assert (D, 0, 1e-10)
+%! assert_equal (idx, 2)
+%! assert_equal (D, 0, 1e-10)
 
 %!test
 %! ## Seuclidean with custom scales on diverse data
 %! X = [1, 10; 2, 20; 3, 30];
 %! S = [1, 5];
-%! obj = ExhaustiveSearcher (X, "Distance", "seuclidean", "Scale", S);
+%! obj = ExhaustiveSearcher (X, 'Distance', 'seuclidean', 'Scale', S);
 %! Y = [1.5, 15];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 1)
-%! assert (D, sqrt((0.5/1)^2 + (5/5)^2), 1e-10)
+%! assert_equal (idx, 1)
+%! assert_equal (D, sqrt ((0.5/1)^2 + (5/5)^2), 1e-10)
 
 %!test
 %! ## Mahalanobis with correlated data
 %! X = [1, 1; 2, 1.5; 3, 2];
 %! C = [1, 0.5; 0.5, 1];
-%! obj = ExhaustiveSearcher (X, "Distance", "mahalanobis", "Cov", C);
+%! obj = ExhaustiveSearcher (X, 'Distance', 'mahalanobis', 'Cov', C);
 %! Y = [2, 1.5];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 2)
-%! assert (D, 0, 1e-10)
+%! assert_equal (idx, 2)
+%! assert_equal (D, 0, 1e-10)
 
 %!test
 %! ## Cityblock with sparse data
 %! X = [0, 0, 1; 1, 0, 0; 0, 1, 0];
-%! obj = ExhaustiveSearcher (X, "Distance", "cityblock");
+%! obj = ExhaustiveSearcher (X, 'Distance', 'cityblock');
 %! Y = [0, 0, 0];
 %! [idx, D] = rangesearch (obj, Y, 1);
-%! assert (idx{1}, [1, 2, 3])
-%! assert (D{1}, [1, 1, 1], 1e-10)
+%! assert_equal (idx{1}, [1, 2, 3])
+%! assert_equal (D{1}, [1, 1, 1], 1e-10)
 
 %!test
 %! ## Chebychev with extreme values
 %! X = [0, 100; 50, 50; 100, 0];
-%! obj = ExhaustiveSearcher (X, "Distance", "chebychev");
+%! obj = ExhaustiveSearcher (X, 'Distance', 'chebychev');
 %! Y = [60, 60];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 2)
-%! assert (D, 10, 1e-10)
+%! assert_equal (idx, 2)
+%! assert_equal (D, 10, 1e-10)
 
 %!test
 %! ## Cosine with normalized data
 %! X = [1, 0; 0, 1; 1/sqrt(2), 1/sqrt(2)];
-%! obj = ExhaustiveSearcher (X, "Distance", "cosine");
+%! obj = ExhaustiveSearcher (X, 'Distance', 'cosine');
 %! Y = [1, 1];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 3)
-%! assert (D < 0.1, true)
+%! assert_equal (idx, 3)
+%! assert_equal (D < 0.1, true)
 
 %!test
 %! ## Correlation with time-series-like data
 %! X = [1, 2, 3; 2, 4, 6; 1, 1, 1];
-%! obj = ExhaustiveSearcher (X, "Distance", "correlation");
+%! obj = ExhaustiveSearcher (X, 'Distance', 'correlation');
 %! Y = [1.5, 3, 4.5];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 1)
-%! assert (D < 0.1, true)
+%! assert_equal (idx, 1)
+%! assert_equal (D < 0.1, true)
 
 %!test
 %! ## Spearman with ranked data
 %! X = [1, 2, 3; 3, 2, 1; 2, 1, 3];
-%! obj = ExhaustiveSearcher (X, "Distance", "spearman");
+%! obj = ExhaustiveSearcher (X, 'Distance', 'spearman');
 %! Y = [1, 2, 3];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 1)
-%! assert (D, 0, 1e-10)
+%! assert_equal (idx, 1)
+%! assert_equal (D, 0, 1e-10)
 
 %!test
 %! ## Jaccard with binary sparse data
 %! X = [1, 0, 0; 0, 1, 0; 1, 1, 0];
-%! obj = ExhaustiveSearcher (X, "Distance", "jaccard");
+%! obj = ExhaustiveSearcher (X, 'Distance', 'jaccard');
 %! Y = [1, 0, 0];
 %! [idx, D] = knnsearch (obj, Y);
-%! assert (idx, 1)
-%! assert (D, 0, 1e-10)
+%! assert_equal (idx, 1)
+%! assert_equal (D, 0, 1e-10)
 
 %!test
-%! obj = ExhaustiveSearcher (ones(3,2));
-%! assert (obj.X, ones(3,2))
-%! assert (obj.Distance, "euclidean")
-%! assert (isempty (obj.DistParameter))
+%! obj = ExhaustiveSearcher (ones (3,2));
+%! assert_equal (obj.X, ones (3,2))
+%! assert_equal (obj.Distance, "euclidean")
+%! assert_equal (isempty (obj.DistParameter), true)
 
 %!test
-%! obj = ExhaustiveSearcher (ones(3,2));
-%! obj.Distance = "minkowski";
-%! assert (obj.Distance, "minkowski")
+%! obj = ExhaustiveSearcher (ones (3,2));
+%! obj.Distance = 'minkowski';
+%! assert_equal (obj.Distance, "minkowski")
 
 %!test
-%! obj = ExhaustiveSearcher (ones(3,2), "Distance", "minkowski");
+%! obj = ExhaustiveSearcher (ones (3,2), 'Distance', 'minkowski');
 %! obj.DistParameter = 3;
-%! assert (obj.DistParameter, 3)
+%! assert_equal (obj.DistParameter, 3)
 
 %!test
-%! obj = ExhaustiveSearcher (ones(3,2), "Distance", "seuclidean");
+%! obj = ExhaustiveSearcher (ones (3,2), 'Distance', 'seuclidean');
 %! obj.DistParameter = [1, 2];
-%! assert (obj.DistParameter, [1, 2])
+%! assert_equal (obj.DistParameter, [1, 2])
 
 %!test
-%! obj = ExhaustiveSearcher (ones(3,2), "Distance", "mahalanobis");
-%! obj.DistParameter = eye(2);
-%! assert (obj.DistParameter, eye(2))
+%! obj = ExhaustiveSearcher (ones (3,2), 'Distance', 'mahalanobis');
+%! obj.DistParameter = eye (2);
+%! assert_equal (obj.DistParameter, eye (2))
 
 ## Test Input Validation
 
 %!error<ExhaustiveSearcher: too few input arguments.> ...
 %! ExhaustiveSearcher ()
 %!error<ExhaustiveSearcher: Name-Value arguments must be in pairs.> ...
-%! ExhaustiveSearcher (ones(3,2), "Distance")
+%! ExhaustiveSearcher (ones (3,2), 'Distance')
 %!error<ExhaustiveSearcher: X must be a finite numeric matrix.> ...
-%! ExhaustiveSearcher ("abc")
+%! ExhaustiveSearcher ('abc')
 %!error<ExhaustiveSearcher: X must be a finite numeric matrix.> ...
 %! ExhaustiveSearcher ([1; Inf; 3])
 %!error<ExhaustiveSearcher: invalid parameter name: 'foo'.> ...
-%! ExhaustiveSearcher (ones(3,2), "foo", "bar")
+%! ExhaustiveSearcher (ones (3,2), 'foo', 'bar')
 %!error<ExhaustiveSearcher: unsupported distance metric 'invalid'.> ...
-%! ExhaustiveSearcher (ones(3,2), "Distance", "invalid")
+%! ExhaustiveSearcher (ones (3,2), 'Distance', 'invalid')
 %!error<ExhaustiveSearcher: invalid distance function handle.> ...
-%! ExhaustiveSearcher (ones(3,2), "Distance", @(x) x)
+%! ExhaustiveSearcher (ones (3,2), 'Distance', @(x) x)
 %!error<ExhaustiveSearcher: Distance must be a string or function handle.> ...
-%! ExhaustiveSearcher (ones(3,2), "Distance", 1)
+%! ExhaustiveSearcher (ones (3,2), 'Distance', 1)
 %!error<ExhaustiveSearcher: P must be a positive finite scalar.> ...
-%! ExhaustiveSearcher (ones(3,2), "Distance", "minkowski", "P", -1)
+%! ExhaustiveSearcher (ones (3,2), 'Distance', 'minkowski', 'P', -1)
 %!error<ExhaustiveSearcher: Scale must be a nonnegative vector matching X columns.> ...
-%! ExhaustiveSearcher (ones(3,2), "Distance", "seuclidean", "Scale", [-1, 1])
+%! ExhaustiveSearcher (ones (3,2), 'Distance', 'seuclidean', 'Scale', [-1, 1])
 %!error<ExhaustiveSearcher: Cov must be a square matrix matching X columns.> ...
-%! ExhaustiveSearcher (ones(3,2), "Distance", "mahalanobis", "Cov", ones(3,3))
+%! ExhaustiveSearcher (ones (3,2), 'Distance', 'mahalanobis', 'Cov', ones (3,3))
 %!error<ExhaustiveSearcher: Cov must be positive definite.> ...
-%! ExhaustiveSearcher (ones(3,2), "Distance", "mahalanobis", "Cov", -eye(2))
+%! ExhaustiveSearcher (ones (3,2), 'Distance', 'mahalanobis', 'Cov', -eye (2))
 
 %!error<ExhaustiveSearcher.knnsearch: too few input arguments.> ...
-%! knnsearch (ExhaustiveSearcher (ones(3,2)))
+%! knnsearch (ExhaustiveSearcher (ones (3,2)))
 %!error<ExhaustiveSearcher.knnsearch: Name-Value arguments must be in pairs.> ...
-%! knnsearch (ExhaustiveSearcher (ones(3,2)), ones(3,2), "IncludeTies")
+%! knnsearch (ExhaustiveSearcher (ones (3,2)), ones (3,2), 'IncludeTies')
 %!error<ExhaustiveSearcher.knnsearch: Y must be a finite numeric matrix.> ...
-%! knnsearch (ExhaustiveSearcher (ones(3,2)), "abc")
+%! knnsearch (ExhaustiveSearcher (ones (3,2)), 'abc')
 %!error<ExhaustiveSearcher.knnsearch: number of columns in X and Y must match.> ...
-%! knnsearch (ExhaustiveSearcher (ones(3,2)), ones(3,3))
+%! knnsearch (ExhaustiveSearcher (ones (3,2)), ones (3,3))
 %!error<ExhaustiveSearcher.knnsearch: K must be a positive integer.> ...
-%! knnsearch (ExhaustiveSearcher (ones(3,2)), ones(3,2), "K", 0)
+%! knnsearch (ExhaustiveSearcher (ones (3,2)), ones (3,2), 'K', 0)
 %!error<ExhaustiveSearcher.knnsearch: invalid parameter name: 'foo'.> ...
-%! knnsearch (ExhaustiveSearcher (ones(3,2)), ones(3,2), "foo", "bar")
+%! knnsearch (ExhaustiveSearcher (ones (3,2)), ones (3,2), 'foo', 'bar')
 %!error<ExhaustiveSearcher.knnsearch: IncludeTies must be a logical scalar.> ...
-%! knnsearch (ExhaustiveSearcher (ones(3,2)), ones(3,2), "IncludeTies", 1)
+%! knnsearch (ExhaustiveSearcher (ones (3,2)), ones (3,2), 'IncludeTies', 1)
 
 %!error<ExhaustiveSearcher.rangesearch: too few input arguments.> ...
-%! rangesearch (ExhaustiveSearcher (ones(3,2)))
+%! rangesearch (ExhaustiveSearcher (ones (3,2)))
 %!error<ExhaustiveSearcher.rangesearch: Name-Value arguments must be in pairs.> ...
-%! rangesearch (ExhaustiveSearcher (ones(3,2)), ones(3,2), 1, "SortIndices")
+%! rangesearch (ExhaustiveSearcher (ones (3,2)), ones (3,2), 1, 'SortIndices')
 %!error<ExhaustiveSearcher.rangesearch: Y must be a finite numeric matrix.> ...
-%! rangesearch (ExhaustiveSearcher (ones(3,2)), "abc", 1)
+%! rangesearch (ExhaustiveSearcher (ones (3,2)), 'abc', 1)
 %!error<ExhaustiveSearcher.rangesearch: number of columns in X and Y must match.> ...
-%! rangesearch (ExhaustiveSearcher (ones(3,2)), ones(3,3), 1)
+%! rangesearch (ExhaustiveSearcher (ones (3,2)), ones (3,3), 1)
 %!error<ExhaustiveSearcher.rangesearch: R must be a nonnegative finite scalar.> ...
-%! rangesearch (ExhaustiveSearcher (ones(3,2)), ones(3,2), -1)
+%! rangesearch (ExhaustiveSearcher (ones (3,2)), ones (3,2), -1)
 %!error<ExhaustiveSearcher.rangesearch: invalid parameter name: 'foo'.> ...
-%! rangesearch (ExhaustiveSearcher (ones(3,2)), ones(3,2), 1, "foo", "bar")
+%! rangesearch (ExhaustiveSearcher (ones (3,2)), ones (3,2), 1, 'foo', 'bar')
 %!error<ExhaustiveSearcher.rangesearch: SortIndices must be a logical scalar.> ...
-%! rangesearch (ExhaustiveSearcher (ones(3,2)), ones(3,2), 1, "SortIndices", 1)
+%! rangesearch (ExhaustiveSearcher (ones (3,2)), ones (3,2), 1, 'SortIndices', 1)
 
 %!error<ExhaustiveSearcher.subsref: \(\) indexing not supported.> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj(1)
+%! obj = ExhaustiveSearcher (ones (3,2)); obj(1)
 %!error<ExhaustiveSearcher.subsref: {} indexing not supported.> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj{1}
+%! obj = ExhaustiveSearcher (ones (3,2)); obj{1}
 %!error<dynamic structure field names must be strings> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj.(1)
+%! obj = ExhaustiveSearcher (ones (3,2)); obj.(1)
 %!error<ExhaustiveSearcher.subsref: unrecognized property: 'invalid'> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj.invalid
+%! obj = ExhaustiveSearcher (ones (3,2)); obj.invalid
 %!error<ExhaustiveSearcher.subsasgn: \(\) indexing not supported.> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj(1) = 1
+%! obj = ExhaustiveSearcher (ones (3,2)); obj(1) = 1
 %!error<ExhaustiveSearcher.subsasgn: {} indexing not supported.> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj{1} = 1
+%! obj = ExhaustiveSearcher (ones (3,2)); obj{1} = 1
 %!error<ExhaustiveSearcher.subsasgn: chained subscripts not allowed.> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj.X.Y = 1
+%! obj = ExhaustiveSearcher (ones (3,2)); obj.X.Y = 1
 %!error<dynamic structure field names must be strings> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj.(1) = 1
+%! obj = ExhaustiveSearcher (ones (3,2)); obj.(1) = 1
 %!error<ExhaustiveSearcher.subsasgn: X is read-only and cannot be modified.> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj.X = 1
+%! obj = ExhaustiveSearcher (ones (3,2)); obj.X = 1
 %!error<ExhaustiveSearcher.subsasgn: unsupported distance metric 'invalid'.> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj.Distance = "invalid"
+%! obj = ExhaustiveSearcher (ones (3,2)); obj.Distance = 'invalid'
 %!error<ExhaustiveSearcher.subsasgn: invalid distance function handle.> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj.Distance = @(x) x
+%! obj = ExhaustiveSearcher (ones (3,2)); obj.Distance = @(x) x
 %!error<ExhaustiveSearcher.subsasgn: custom distance function output invalid.> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj.Distance = @(x, y) [1; 1]
+%! obj = ExhaustiveSearcher (ones (3,2)); obj.Distance = @(x, y) [1; 1]
 %!error<ExhaustiveSearcher.subsasgn: Distance must be a string or function handle.> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj.Distance = 1
+%! obj = ExhaustiveSearcher (ones (3,2)); obj.Distance = 1
 %!error<ExhaustiveSearcher.subsasgn: DistParameter must be a positive finite scalar for minkowski.> ...
-%! obj = ExhaustiveSearcher (ones(3,2), "Distance", "minkowski"); obj.DistParameter = -1
+%! obj = ExhaustiveSearcher (ones (3,2), 'Distance', 'minkowski'); obj.DistParameter = -1
 %!error<ExhaustiveSearcher.subsasgn: DistParameter must be a nonnegative vector matching X columns.> ...
-%! obj = ExhaustiveSearcher (ones(3,2), "Distance", "seuclidean"); obj.DistParameter = [-1, 1]
+%! obj = ExhaustiveSearcher (ones (3,2), 'Distance', 'seuclidean'); obj.DistParameter = [-1, 1]
 %!error<ExhaustiveSearcher.subsasgn: DistParameter must be a square matrix matching X columns.> ...
-%! obj = ExhaustiveSearcher (ones(3,2), "Distance", "mahalanobis"); obj.DistParameter = ones(3,3)
+%! obj = ExhaustiveSearcher (ones (3,2), 'Distance', 'mahalanobis'); obj.DistParameter = ones (3,3)
 %!error<ExhaustiveSearcher.subsasgn: DistParameter must be positive definite for mahalanobis.> ...
-%! obj = ExhaustiveSearcher (ones(3,2), "Distance", "mahalanobis"); obj.DistParameter = -eye(2)
+%! obj = ExhaustiveSearcher (ones (3,2), 'Distance', 'mahalanobis'); obj.DistParameter = -eye (2)
 %!error<ExhaustiveSearcher.subsasgn: DistParameter must be empty for this distance metric.> ...
-%! obj = ExhaustiveSearcher (ones(3,2), "Distance", "euclidean"); obj.DistParameter = 1
+%! obj = ExhaustiveSearcher (ones (3,2), 'Distance', 'euclidean'); obj.DistParameter = 1
 %!error<ExhaustiveSearcher.subsasgn: unrecognized property: 'invalid'> ...
-%! obj = ExhaustiveSearcher (ones(3,2)); obj.invalid = 1
+%! obj = ExhaustiveSearcher (ones (3,2)); obj.invalid = 1

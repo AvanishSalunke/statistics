@@ -54,8 +54,8 @@
 ##
 ## @itemize
 ## @item
-## "burnin" @var{burnin} the number of points to discard at the beginning, the default
-## is 0.
+## "burnin" @var{burnin} the number of points to discard at the beginning, the
+## default is 0.
 ##
 ## @item
 ## "thin" @var{thin} omits @var{m}-1 of every @var{m} points in the generated
@@ -107,41 +107,41 @@ function [smpl, neval] = slicesample (start, nsamples, varargin)
   for k = 1:2:length (varargin)
     if (ischar (varargin{k}))
       switch lower (varargin{k})
-        case "pdf"
-          if (isa (varargin{k+1}, "function_handle"))
+        case 'pdf'
+          if (isa (varargin{k+1}, 'function_handle'))
             pdf = varargin{k+1};
           else
             error ("slicesample: pdf must be a function handle.");
           endif
-        case "logpdf"
-          if (isa (varargin{k+1}, "function_handle"))
+        case 'logpdf'
+          if (isa (varargin{k+1}, 'function_handle'))
             pdf = varargin{k+1};
           else
             error ("slicesample: logpdf must be a function handle.");
           endif
-        case "width"
+        case 'width'
           if (numel (varargin{k+1}) == 1 || numel (varargin{k+1}) == sizestart(2))
             width = varargin{k+1}(:).';
           else
             error ("slicesample: width must be a scalar or 1 by dim vector.");
           endif
-        case "burnin"
+        case 'burnin'
           if (varargin{k+1}>=0)
             burnin = varargin{k+1};
           else
             error ("slicesample: burnin must be greater than or equal to 0.");
           endif
-        case "thin"
+        case 'thin'
           if (varargin{k+1}>=1)
             thin = varargin{k+1};
           else
             error ("slicesample: thin must be greater than or equal to 1.");
           endif
         otherwise
-          warning (["slicesample: Ignoring unknown option " varargin{k}]);
+          warning ("slicesample: Ignoring unknown option %s", varargin{k});
       endswitch
     else
-      error (["slicesample: " varargin{k} " is not a valid property."]);
+      error ("slicesample: %s is not a valid property.", varargin{k});
     endif
   endfor
 
@@ -162,7 +162,7 @@ function [smpl, neval] = slicesample (start, nsamples, varargin)
   maxit = 100;
   neval = 0;
 
-  fgreaterthan = @(x, fxc) logpdf (x) >= fxc;
+  fgreaterthan = @(x, fxc) logpdf(x) >= fxc;
 
   ti = burnin + nsamples * thin;
 
@@ -173,7 +173,7 @@ function [smpl, neval] = slicesample (start, nsamples, varargin)
   xc = smpl(1, :);
   for i = 1:ti
     neval++;
-    sliceheight = logpdf (xc) - rndexp(i);
+    sliceheight = logpdf(xc) - rndexp(i);
     c = width .* crand(i, :);
     lb = xc - c;
     ub = xc + width - c;
@@ -181,29 +181,29 @@ function [smpl, neval] = slicesample (start, nsamples, varargin)
     if (dim == 1)
       for k=1:maxit
         neval++;
-        if (! fgreaterthan (lb, sliceheight))
+        if (! fgreaterthan(lb, sliceheight))
           break
         endif
         lb -= width;
-      end
+      endfor
       if (k == maxit)
         warning ("slicesample: Step out exceeded maximum iterations");
       endif
       for k = 1:maxit
         neval++;
-        if (! fgreaterthan (ub, sliceheight))
+        if (! fgreaterthan(ub, sliceheight))
           break
         endif
         ub += width;
-      end
+      endfor
       if (k == maxit)
         warning ("slicesample: Step out exceeded maximum iterations");
       endif
-    end
+    endif
     xp = (ub - lb) .* prand(i, :) + lb;
     for k=1:maxit
       neval++;
-      isgt = fgreaterthan (xp,sliceheight);
+      isgt = fgreaterthan(xp,sliceheight);
       if (all (isgt))
         break
       endif
@@ -212,7 +212,7 @@ function [smpl, neval] = slicesample (start, nsamples, varargin)
       lb(lc) = xp(lc);
       ub(uc) = xp(uc);
       xp = (ub - lb) .* rand (1, dim) + lb;
-    end
+    endfor
     if (k == maxit)
       warning ("slicesample: Step in exceeded maximum iterations");
     endif
@@ -221,9 +221,9 @@ function [smpl, neval] = slicesample (start, nsamples, varargin)
       indx = (i - burnin) / thin;
       if rem (indx, 1) == 0
         smpl(indx, :) = xc;
-      end
-    end
-  end
+      endif
+    endif
+  endfor
   neval = neval / (nsamples * thin + burnin);
 endfunction
 
@@ -237,62 +237,62 @@ endfunction
 %! ## Define function to sample
 %! d = 2;
 %! mu = [-1; 2];
-%! rand ("seed", 5)  # for reproducibility
+%! rand ('seed', 5)  # for reproducibility
 %! Sigma = rand (d);
 %! Sigma = (Sigma + Sigma');
-%! Sigma += eye (d)*abs (eigs (Sigma, 1, "sa")) * 1.1;
-%! pdf = @(x)(2*pi)^(-d/2)*det(Sigma)^-.5*exp(-.5*sum((x.'-mu).*(Sigma\(x.'-mu)),1));
+%! Sigma += eye (d)*abs (eigs (Sigma, 1, 'sa')) * 1.1;
+%! pdf = @(x)(2*pi)^(-d/2)*det (Sigma)^-.5*exp (-.5*sum ((x.'-mu).*(Sigma\(x.'-mu)),1));
 %!
 %! ## Inputs
 %! start = ones (1,2);
 %! nsamples = 500;
 %! K = 500;
 %! m = 10;
-%! rande ("seed", 4);  rand ("seed", 5)  # for reproducibility
-%! [smpl, accept] = slicesample (start, nsamples, "pdf", pdf, "burnin", K, "thin", m, "width", [20, 30]);
+%! rande ('seed', 4);  rand ('seed', 5)  # for reproducibility
+%! [smpl, accept] = slicesample (start, nsamples, 'pdf', pdf, 'burnin', K, 'thin', m, 'width', [20, 30]);
 %! figure;
 %! hold on;
 %! plot (smpl(:,1), smpl(:,2), 'x');
-%! [x, y] = meshgrid (linspace (-6,4), linspace(-3,7));
-%! z = reshape (pdf ([x(:), y(:)]), size(x));
-%! mesh (x, y, z, "facecolor", "None");
+%! [x, y] = meshgrid (linspace (-6,4), linspace (-3,7));
+%! z = reshape (pdf ([x(:), y(:)]), size (x));
+%! mesh (x, y, z, 'facecolor', 'None');
 %!
 %! ## Using sample points to find the volume of half a sphere with radius of .5
 %! f = @(x) ((.25-(x(:,1)+1).^2-(x(:,2)-2).^2).^.5.*(((x(:,1)+1).^2+(x(:,2)-2).^2)<.25)).';
-%! int = mean (f (smpl) ./ pdf (smpl));
-%! errest = std (f (smpl) ./ pdf (smpl)) / nsamples^.5;
+%! int = mean (f(smpl) ./ pdf (smpl));
+%! errest = std (f(smpl) ./ pdf (smpl)) / nsamples^.5;
 %! trueerr = abs (2/3*pi*.25^(3/2)-int);
 %! fprintf ("Monte Carlo integral estimate int f(x) dx = %f\n", int);
 %! fprintf ("Monte Carlo integral error estimate %f\n", errest);
 %! fprintf ("The actual error %f\n", trueerr);
-%! mesh (x,y,reshape (f([x(:), y(:)]), size(x)), "facecolor", "None");
+%! mesh (x,y,reshape (f([x(:), y(:)]), size (x)), 'facecolor', 'None');
 
 %!demo
 %! ## Integrate truncated normal distribution to find normalization constant
 %! pdf = @(x) exp (-.5*x.^2)/(pi^.5*2^.5);
 %! nsamples = 1e3;
-%! rande ("seed", 4);  rand ("seed", 5)  # for reproducibility
-%! [smpl, accept] = slicesample (1, nsamples, "pdf", pdf, "thin", 4);
+%! rande ('seed', 4);  rand ('seed', 5)  # for reproducibility
+%! [smpl, accept] = slicesample (1, nsamples, 'pdf', pdf, 'thin', 4);
 %! f = @(x) exp (-.5 * x .^ 2) .* (x >= -2 & x <= 2);
 %! x = linspace (-3, 3, 1000);
 %! area (x, f(x));
-%! xlabel ("x");
-%! ylabel ("f(x)");
-%! int = mean (f (smpl) ./ pdf (smpl));
-%! errest = std (f (smpl) ./ pdf (smpl)) / nsamples ^ 0.5;
+%! xlabel ('x');
+%! ylabel ('f(x)');
+%! int = mean (f(smpl) ./ pdf (smpl));
+%! errest = std (f(smpl) ./ pdf (smpl)) / nsamples ^ 0.5;
 %! trueerr = abs (erf (2 ^ 0.5) * 2 ^ 0.5 * pi ^ 0.5 - int);
-%! fprintf("Monte Carlo integral estimate int f(x) dx = %f\n", int);
-%! fprintf("Monte Carlo integral error estimate %f\n", errest);
-%! fprintf("The actual error %f\n", trueerr);
+%! fprintf ("Monte Carlo integral estimate int f(x) dx = %f\n", int);
+%! fprintf ("Monte Carlo integral error estimate %f\n", errest);
+%! fprintf ("The actual error %f\n", trueerr);
 
 ## Test output
 %!test
 %! start = 0.5;
 %! nsamples = 1e3;
 %! pdf = @(x) exp (-.5*(x-1).^2)/(2*pi)^.5;
-%! [smpl, accept] = slicesample (start, nsamples, "pdf", pdf, "thin", 2, "burnin", 0, "width", 5);
-%! assert (mean (smpl, 1), 1, .15);
-%! assert (var (smpl, 1), 1, .25);
+%! [smpl, accept] = slicesample (start, nsamples, 'pdf', pdf, 'thin', 2, 'burnin', 0, 'width', 5);
+%! assert_equal (mean (smpl, 1), 1, .15);
+%! assert_equal (var (smpl, 1), 1, .25);
 
 ## Test input validation
 %!error slicesample ();

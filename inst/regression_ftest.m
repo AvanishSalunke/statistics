@@ -46,7 +46,7 @@
 ## a vector or a scalar if only a constant term is passed into the function.
 ##
 ## Name-Value pair arguments can be used to set statistical significance.
-## @qcode{"alpha"} can be used to specify the significance level of the test
+## @qcode{'alpha'} can be used to specify the significance level of the test
 ## (the default value is 0.05).  If you want to pass optional Name-Value pair
 ## without a reduced model, make sure that the latter is passed as an empty
 ## variable.
@@ -88,7 +88,7 @@ function [h, pval, stats] = regression_ftest (y, x, fm, rm, varargin)
   i = 1;
   while (i <= length (varargin))
     switch lower (varargin{i})
-      case "alpha"
+      case 'alpha'
         i = i + 1;
         alpha = varargin{i};
         ## Check for valid alpha
@@ -186,15 +186,15 @@ endfunction
 %!error<regression_ftest: X must contain finite real numbers.> ...
 %! regression_ftest ([1 2 3]', [2 3 4; 3 4 3+i]', [1 0.5]);
 %!error<regression_ftest: invalid value for alpha.> ...
-%! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], [], "alpha", 0);
+%! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], [], 'alpha', 0);
 %!error<regression_ftest: invalid value for alpha.> ...
-%! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], [], "alpha", 1.2);
+%! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], [], 'alpha', 1.2);
 %!error<regression_ftest: invalid value for alpha.> ...
-%! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], [], "alpha", [.02 .1]);
+%! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], [], 'alpha', [.02 .1]);
 %!error<regression_ftest: invalid value for alpha.> ...
-%! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], [], "alpha", "a");
+%! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], [], 'alpha', 'a');
 %!error<regression_ftest: invalid Name argument.> ...
-%! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], [], "some", 0.05);
+%! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], [], 'some', 0.05);
 %!error<regression_ftest: Y must be a vector of length> ...
 %! regression_ftest ([1 2 3]', [2 3; 3 4]', [1 0.5]);
 %!error<regression_ftest: Y must be a vector of length> ...
@@ -202,7 +202,7 @@ endfunction
 %!error<regression_ftest: reduced model, RM, must be a numeric vector or> ...
 %! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], ones (2));
 %!error<regression_ftest: reduced model, RM, must be a numeric vector or> ...
-%! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], "alpha");
+%! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], 'alpha');
 %!error<regression_ftest: reduced model, RM, must have smaller length than> ...
 %! regression_ftest ([1 2 3]', [2 3 4; 3 4 5]', [1 0.5], [1 2]);
 

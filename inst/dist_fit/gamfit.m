@@ -113,14 +113,14 @@ function [paramhat, paramci] = gamfit (x, alpha, censor, freq, options)
 
   ## Get options structure or add defaults
   if (nargin < 5)
-    options.Display = "off";
+    options.Display = 'off';
     options.MaxFunEvals = 400;
     options.MaxIter = 200;
     options.TolX = 1e-6;
   else
-    if (! isstruct (options) || ! isfield (options, "Display") ||
-        ! isfield (options, "MaxFunEvals") || ! isfield (options, "MaxIter")
-                                           || ! isfield (options, "TolX"))
+    if (! isstruct (options) || ! isfield (options, 'Display') ||
+        ! isfield (options, 'MaxFunEvals') || ! isfield (options, 'MaxIter')
+                                           || ! isfield (options, 'TolX'))
       error (strcat ("gamfit: 'options' 5th argument must be a", ...
                      " structure with 'Display', 'MaxFunEvals',", ...
                      " 'MaxIter', and 'TolX' fields present."));
@@ -247,8 +247,8 @@ function [paramhat, paramci] = gamfit (x, alpha, censor, freq, options)
       bounds = [lower upper];
 
       ## Find the root of the likelihood equation.
-      opts = optimset ("fzero");
-      opts = optimset (opts, "Display", "off");
+      opts = optimset ('fzero');
+      opts = optimset (opts, 'Display', 'off');
       f = @(a) lkeqn (a, bracket);
       [a, lkeqnval, err] = fzero (f, bounds, opts);
 
@@ -267,7 +267,7 @@ function [paramhat, paramci] = gamfit (x, alpha, censor, freq, options)
     ## Ensure that MLEs is possible and get initial estimates
     xuncbar = sum (freq_notc .* xunc) / nunc;
     s2unc = sum (freq_notc .* (xunc - xuncbar) .^ 2) / nunc;
-    if s2unc <= 100.*eps(xuncbar.^2)
+    if s2unc <= 100.*eps (xuncbar.^2)
 
       ## When all uncensored observations are equal and greater than all
       ## the censored observations, the likelihood surface becomes infinite
@@ -345,20 +345,20 @@ endfunction
 
 %!demo
 %! ## Sample 3 populations from different Gamma distributions
-%! randg ("seed", 5);    # for reproducibility
+%! randg ('seed', 5);    # for reproducibility
 %! r1 = gamrnd (1, 2, 2000, 1);
-%! randg ("seed", 2);    # for reproducibility
+%! randg ('seed', 2);    # for reproducibility
 %! r2 = gamrnd (2, 2, 2000, 1);
-%! randg ("seed", 7);    # for reproducibility
+%! randg ('seed', 7);    # for reproducibility
 %! r3 = gamrnd (7.5, 1, 2000, 1);
 %! r = [r1, r2, r3];
 %!
 %! ## Plot them normalized and fix their colors
 %! hist (r, 75, 4);
-%! h = findobj (gca, "Type", "patch");
-%! set (h(1), "facecolor", "c");
-%! set (h(2), "facecolor", "g");
-%! set (h(3), "facecolor", "r");
+%! h = findobj (gca, 'Type', 'patch');
+%! set (h(1), 'facecolor', 'c');
+%! set (h(2), 'facecolor', 'g');
+%! set (h(3), 'facecolor', 'r');
 %! ylim ([0, 0.62]);
 %! xlim ([0, 12]);
 %! hold on
@@ -371,22 +371,22 @@ endfunction
 %! ## Plot their estimated PDFs
 %! x = [0.01,0.1:0.2:18];
 %! y = gampdf (x, a_bA(1), a_bA(2));
-%! plot (x, y, "-pr");
+%! plot (x, y, '-pr');
 %! y = gampdf (x, a_bB(1), a_bB(2));
-%! plot (x, y, "-sg");
+%! plot (x, y, '-sg');
 %! y = gampdf (x, a_bC(1), a_bC(2));
-%! plot (x, y, "-^c");
+%! plot (x, y, '-^c');
 %! hold off
-%! legend ({"Normalized HIST of sample 1 with α=1 and β=2", ...
-%!          "Normalized HIST of sample 2 with α=2 and β=2", ...
-%!          "Normalized HIST of sample 3 with α=7.5 and β=1", ...
+%! legend ({'Normalized HIST of sample 1 with α=1 and β=2', ...
+%!          'Normalized HIST of sample 2 with α=2 and β=2', ...
+%!          'Normalized HIST of sample 3 with α=7.5 and β=1', ...
 %!          sprintf("PDF for sample 1 with estimated α=%0.2f and β=%0.2f", ...
 %!                  a_bA(1), a_bA(2)), ...
 %!          sprintf("PDF for sample 2 with estimated α=%0.2f and β=%0.2f", ...
 %!                  a_bB(1), a_bB(2)), ...
 %!          sprintf("PDF for sample 3 with estimated α=%0.2f and β=%0.2f", ...
 %!                  a_bC(1), a_bC(2))})
-%! title ("Three population samples from different Gamma distributions")
+%! title ('Three population samples from different Gamma distributions')
 %! hold off
 
 ## Test output
@@ -394,60 +394,60 @@ endfunction
 %! x = [1.2 1.6 1.7 1.8 1.9 2.0 2.2 2.6 3.0 3.5 4.0 4.8 5.6 6.6 7.6];
 %!test
 %! [paramhat, paramci] = gamfit (x);
-%! assert (paramhat, [3.4248, 0.9752], 1e-4);
-%! assert (paramci, [1.7287, 0.4670; 6.7852, 2.0366], 1e-4);
+%! assert_equal (paramhat, [3.4248, 0.9752], 1e-4);
+%! assert_equal (paramci, [1.7287, 0.4670; 6.7852, 2.0366], 1e-4);
 %!test
 %! [paramhat, paramci] = gamfit (x, 0.01);
-%! assert (paramhat, [3.4248, 0.9752], 1e-4);
-%! assert (paramci, [1.3945, 0.3705; 8.4113, 2.5668], 1e-4);
+%! assert_equal (paramhat, [3.4248, 0.9752], 1e-4);
+%! assert_equal (paramci, [1.3945, 0.3705; 8.4113, 2.5668], 1e-4);
 %!test
 %! freq = [1 1 1 1 2 1 1 1 1 2 1 1 1 1 2];
 %! [paramhat, paramci] = gamfit (x, [], [], freq);
-%! assert (paramhat, [3.3025, 1.0615], 1e-4);
-%! assert (paramci, [1.7710, 0.5415; 6.1584, 2.0806], 1e-4);
+%! assert_equal (paramhat, [3.3025, 1.0615], 1e-4);
+%! assert_equal (paramci, [1.7710, 0.5415; 6.1584, 2.0806], 1e-4);
 %!test
 %! [paramhat, paramci] = gamfit (x, [], [], [1:15]);
-%! assert (paramhat, [4.4484, 0.9689], 1e-4);
-%! assert (paramci, [3.4848, 0.7482; 5.6785, 1.2546], 1e-4);
+%! assert_equal (paramhat, [4.4484, 0.9689], 1e-4);
+%! assert_equal (paramci, [3.4848, 0.7482; 5.6785, 1.2546], 1e-4);
 %!test
 %! [paramhat, paramci] = gamfit (x, 0.01, [], [1:15]);
-%! assert (paramhat, [4.4484, 0.9689], 1e-4);
-%! assert (paramci, [3.2275, 0.6899; 6.1312, 1.3608], 1e-4);
+%! assert_equal (paramhat, [4.4484, 0.9689], 1e-4);
+%! assert_equal (paramci, [3.2275, 0.6899; 6.1312, 1.3608], 1e-4);
 %!test
 %! cens = [0 0 0 0 1 0 0 0 0 0 0 0 0 0 0];
 %! [paramhat, paramci] = gamfit (x, [], cens, [1:15]);
-%! assert (paramhat, [4.7537, 0.9308], 1e-4);
-%! assert (paramci, [3.7123, 0.7162; 6.0872, 1.2097], 1e-4);
+%! assert_equal (paramhat, [4.7537, 0.9308], 1e-4);
+%! assert_equal (paramci, [3.7123, 0.7162; 6.0872, 1.2097], 1e-4);
 %!test
 %! cens = [0 0 0 0 1 0 0 0 0 0 0 0 0 0 0];
 %! freq = [1 1 1 1 2 1 1 1 1 2 1 1 1 1 2];
 %! [paramhat, paramci] = gamfit (x, [], cens, freq);
-%! assert (paramhat, [3.4736, 1.0847], 1e-4);
-%! assert (paramci, [1.8286, 0.5359; 6.5982, 2.1956], 1e-4);
+%! assert_equal (paramhat, [3.4736, 1.0847], 1e-4);
+%! assert_equal (paramci, [1.8286, 0.5359; 6.5982, 2.1956], 1e-4);
 
 ## Test edge cases
 %!test
 %! [paramhat, paramci] = gamfit ([1 1 1 1 1 1]);
-%! assert (paramhat, [Inf, 0]);
-%! assert (paramci, [Inf, 0; Inf, 0]);
+%! assert_equal (paramhat, [Inf, 0]);
+%! assert_equal (paramci, [Inf, 0; Inf, 0]);
 %!test
 %! [paramhat, paramci] = gamfit ([1 1 1 1 1 1], [], [1 1 1 1 1 1]);
-%! assert (paramhat, [NaN, NaN]);
-%! assert (paramci, [NaN, NaN; NaN, NaN]);
+%! assert_equal (paramhat, [NaN, NaN]);
+%! assert_equal (paramci, [NaN, NaN; NaN, NaN]);
 %!test
 %! [paramhat, paramci] = gamfit ([1 1 1 1 1 1], [], [], [1 1 1 1 1 1]);
-%! assert (paramhat, [Inf, 0]);
-%! assert (paramci, [Inf, 0; Inf, 0]);
+%! assert_equal (paramhat, [Inf, 0]);
+%! assert_equal (paramci, [Inf, 0; Inf, 0]);
 
 ## Test class of input preserved
-%!assert (class (gamfit (single (x))), "single")
+%!assert_equal (class (gamfit (single (x))), "single")
 
 ## Test input validation
 %!error<gamfit: X must be a vector.> gamfit (ones (2))
 %!error<gamfit: wrong value for ALPHA.> gamfit (x, 1)
 %!error<gamfit: wrong value for ALPHA.> gamfit (x, -1)
 %!error<gamfit: wrong value for ALPHA.> gamfit (x, {0.05})
-%!error<gamfit: wrong value for ALPHA.> gamfit (x, "a")
+%!error<gamfit: wrong value for ALPHA.> gamfit (x, 'a')
 %!error<gamfit: wrong value for ALPHA.> gamfit (x, i)
 %!error<gamfit: wrong value for ALPHA.> gamfit (x, [0.01 0.02])
 %!error<gamfit: X and FREQ vectors mismatch.>

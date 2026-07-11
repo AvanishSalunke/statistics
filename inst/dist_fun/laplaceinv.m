@@ -45,7 +45,7 @@ function x = laplaceinv (p, mu, beta)
   endif
 
   ## Check for common size of P, MU, and BETA
-  if (! isscalar (p) || ! isscalar (mu) || ! isscalar(beta))
+  if (! isscalar (p) || ! isscalar (mu) || ! isscalar (beta))
     [retval, p, mu, beta] = common_size (p, mu, beta);
     if (retval > 0)
       error (strcat ("laplaceinv: P, MU, and BETA must be of", ...
@@ -59,8 +59,8 @@ function x = laplaceinv (p, mu, beta)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (mu, "single") || isa (beta, "single"));
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (mu, 'single') || isa (beta, 'single'));
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -79,27 +79,27 @@ endfunction
 %! x2 = cauchyinv (p, 0, 2);
 %! x3 = cauchyinv (p, 0, 4);
 %! x4 = cauchyinv (p, -5, 4);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-c")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-c')
 %! grid on
 %! ylim ([-10, 10])
-%! legend ({"μ = 0, β = 1", "μ = 0, β = 2", ...
-%!          "μ = 0, β = 4", "μ = -5, β = 4"}, "location", "northwest")
-%! title ("Laplace iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'μ = 0, β = 1', 'μ = 0, β = 2', ...
+%!          'μ = 0, β = 4', 'μ = -5, β = 4'}, 'location', 'northwest')
+%! title ('Laplace iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p, x
 %! p = [-1 0 0.5 1 2];
 %! x = [NaN, -Inf, 0, Inf, NaN];
-%!assert (laplaceinv (p, 0, 1), x)
-%!assert (laplaceinv (p, 0, [-2, -1, 0, 1, 2]), [nan(1, 3), Inf, NaN])
-%!assert (laplaceinv ([p, NaN], 0, 1), [x, NaN])
+%!assert_equal (laplaceinv (p, 0, 1), x)
+%!assert_equal (laplaceinv (p, 0, [-2, -1, 0, 1, 2]), [nan(1, 3), Inf, NaN])
+%!assert_equal (laplaceinv ([p, NaN], 0, 1), [x, NaN])
 
 ## Test class of input preserved
-%!assert (laplaceinv (single ([p, NaN]), 0, 1), single ([x, NaN]))
-%!assert (laplaceinv ([p, NaN], single (0), 1), single ([x, NaN]))
-%!assert (laplaceinv ([p, NaN], 0, single (1)), single ([x, NaN]))
+%!assert_equal (laplaceinv (single ([p, NaN]), 0, 1), single ([x, NaN]))
+%!assert_equal (laplaceinv ([p, NaN], single (0), 1), single ([x, NaN]))
+%!assert_equal (laplaceinv ([p, NaN], 0, single (1)), single ([x, NaN]))
 
 ## Test input validation
 %!error<laplaceinv: function called with too few input arguments.> laplaceinv ()

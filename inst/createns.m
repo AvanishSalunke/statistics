@@ -30,37 +30,38 @@
 ## name-value pairs. The following name-value pair is supported to specify
 ## the searcher type:
 ##
-## @multitable @columnfractions 0.18 0.02 0.8
-## @headitem @var{Name} @tab @tab @var{Value}
+## @multitable @columnfractions 0.18 0.8
+## @headitem @var{Name} @tab @var{Value}
 ##
-## @item @qcode{"NSMethod"} @tab @tab Specifies the nearest neighbor search
+## @item @qcode{'NSMethod'} @tab Specifies the nearest neighbor search
 ## method. Possible values are:
 ##   @itemize @bullet
-##   @item @qcode{"exhaustive"}: Creates an @code{ExhaustiveSearcher} object.
-##   @item @qcode{"kdtree"}: Creates a @code{KDTreeSearcher} object.
-##   @item @qcode{"hnsw"}: Creates an @code{hnswSearcher} object.
+##   @item @qcode{'exhaustive'}: Creates an @code{ExhaustiveSearcher} object.
+##   @item @qcode{'kdtree'}: Creates a @code{KDTreeSearcher} object.
+##   @item @qcode{'hnsw'}: Creates an @code{hnswSearcher} object.
 ##   @end itemize
-##   Default is @qcode{"exhaustive"}.
+##   Default is @qcode{'exhaustive'}.
 ##
 ## @end multitable
 ##
-## Additional name-value pairs depend on the selected @qcode{"NSMethod"} and
+## Additional name-value pairs depend on the selected @qcode{'NSMethod'} and
 ## are passed directly to the constructor of the corresponding class:
 ##
 ## @itemize @bullet
-## @item For @qcode{"exhaustive"}, see @code{ExhaustiveSearcher} documentation
-## for parameters like @qcode{"Distance"}, @qcode{"P"}, @qcode{"Scale"}, and
-## @qcode{"Cov"}.
-## @item For @qcode{"kdtree"}, see @code{KDTreeSearcher} documentation for
-## parameters like @qcode{"Distance"}, @qcode{"P"}, and @qcode{"BucketSize"}.
-## @item For @qcode{"hnsw"}, see @code{hnswSearcher} documentation for parameters
-## like @qcode{"Distance"}, @qcode{"P"}, @qcode{"Scale"}, @qcode{"Cov"},
-## @qcode{"MaxNumLinksPerNode"}, and @qcode{"TrainSetSize"}.
+## @item For @qcode{'exhaustive'}, see @code{ExhaustiveSearcher} documentation
+## for parameters like @qcode{'Distance'}, @qcode{'P'}, @qcode{'Scale'}, and
+## @qcode{'Cov'}.
+## @item For @qcode{'kdtree'}, see @code{KDTreeSearcher} documentation for
+## parameters like @qcode{'Distance'}, @qcode{'P'}, and @qcode{'BucketSize'}.
+## @item For @qcode{'hnsw'}, see @code{hnswSearcher} documentation for
+## parameters
+## like @qcode{'Distance'}, @qcode{'P'}, @qcode{'Scale'}, @qcode{'Cov'},
+## @qcode{'MaxNumLinksPerNode'}, and @qcode{'TrainSetSize'}.
 ## @end itemize
 ##
 ## @strong{Input Arguments:}
 ## @itemize @bullet
-## @item @var{X} - Training data, specified as an @math{NxP} numeric matrix
+## @item @var{X} - Training data, specified as an @math{N*P} numeric matrix
 ## where rows represent observations and columns represent features. Must be
 ## finite and numeric.
 ## @end itemize
@@ -69,7 +70,7 @@
 ## @itemize @bullet
 ## @item @var{obj} - A nearest neighbor searcher object of type
 ## @code{ExhaustiveSearcher}, @code{KDTreeSearcher}, or @code{hnswSearcher},
-## depending on the specified @qcode{"NSMethod"}.
+## depending on the specified @qcode{'NSMethod'}.
 ## @end itemize
 ##
 ## @strong{Examples:}
@@ -83,10 +84,12 @@
 ## obj = createns (X, "NSMethod", "kdtree", "Distance", "euclidean");
 ##
 ## ## Create an hnswSearcher with Minkowski distance and custom parameters
-## obj = createns (X, "NSMethod", "hnsw", "Distance", "minkowski", "P", 3, "MaxNumLinksPerNode", 2);
+## obj = createns (X, "NSMethod", "hnsw", "Distance", "minkowski", "P", 3, ...
+##                 "MaxNumLinksPerNode", 2);
 ## @end example
 ##
-## @seealso{ExhaustiveSearcher, KDTreeSearcher, hnswSearcher, knnsearch, rangesearch}
+## @seealso{ExhaustiveSearcher, KDTreeSearcher, hnswSearcher, knnsearch,
+## rangesearch}
 ## @end deftypefn
 
 function obj = createns (X, varargin)
@@ -104,11 +107,11 @@ function obj = createns (X, varargin)
   endif
 
   ## Set default NSMethod
-  NSMethod = "exhaustive";
+  NSMethod = 'exhaustive';
 
   ## Extract 'NSMethod' from varargin and remove it
   names = varargin(1:2:end);
-  idx = find (strcmpi (names, "nsmethod"));
+  idx = find (strcmpi (names, 'nsmethod'));
   if (! isempty (idx))
     if (length (idx) > 1)
       warning ("createns: multiple 'NSMethod' specified, using the last one.");
@@ -123,18 +126,18 @@ function obj = createns (X, varargin)
   endif
 
   ## Validate NSMethod value
-  allowed_methods = {"exhaustive", "kdtree", "hnsw"};
+  allowed_methods = {'exhaustive', 'kdtree', 'hnsw'};
   if (! any (strcmp (NSMethod, allowed_methods)))
     error ("createns: invalid 'NSMethod' value: '%s'.", NSMethod);
   endif
 
   ## Instantiate the appropriate searcher object
   switch (NSMethod)
-    case "exhaustive"
+    case 'exhaustive'
       obj = ExhaustiveSearcher (X, varargin{:});
-    case "kdtree"
+    case 'kdtree'
       obj = KDTreeSearcher (X, varargin{:});
-    case "hnsw"
+    case 'hnsw'
       obj = hnswSearcher (X, varargin{:});
   endswitch
 
@@ -146,41 +149,41 @@ endfunction
 %! ## Default ExhaustiveSearcher
 %! X = [1, 2; 3, 4; 5, 6];
 %! obj = createns (X);
-%! assert (isa (obj, "ExhaustiveSearcher"));
-%! assert (obj.X, X);
-%! assert (obj.Distance, "euclidean");
+%! assert_equal (isa (obj, 'ExhaustiveSearcher'), true);
+%! assert_equal (obj.X, X);
+%! assert_equal (obj.Distance, "euclidean");
 
 %!test
 %! ## KDTreeSearcher with default parameters
 %! X = [1, 2; 3, 4; 5, 6];
-%! obj = createns (X, "NSMethod", "kdtree");
-%! assert (isa (obj, "KDTreeSearcher"));
-%! assert (obj.X, X);
-%! assert (obj.Distance, "euclidean");
+%! obj = createns (X, 'NSMethod', 'kdtree');
+%! assert_equal (isa (obj, 'KDTreeSearcher'), true);
+%! assert_equal (obj.X, X);
+%! assert_equal (obj.Distance, "euclidean");
 
 %!test
 %! ## hnswSearcher with custom parameters
 %! X = [1, 2; 3, 4; 5, 6];
-%! obj = createns (X, "NSMethod", "hnsw", "MaxNumLinksPerNode", 2, "TrainSetSize", 3);
-%! assert (isa (obj, "hnswSearcher"));
-%! assert (obj.X, X);
-%! assert (obj.MaxNumLinksPerNode, 2);
-%! assert (obj.TrainSetSize, 3);
+%! obj = createns (X, 'NSMethod', 'hnsw', 'MaxNumLinksPerNode', 2, 'TrainSetSize', 3);
+%! assert_equal (isa (obj, 'hnswSearcher'), true);
+%! assert_equal (obj.X, X);
+%! assert_equal (obj.MaxNumLinksPerNode, 2);
+%! assert_equal (obj.TrainSetSize, 3);
 
 %!test
 %! ## ExhaustiveSearcher with custom distance
 %! X = [1, 2; 3, 4];
-%! obj = createns (X, "NSMethod", "exhaustive", "Distance", "cityblock");
-%! assert (isa (obj, "ExhaustiveSearcher"));
-%! assert (obj.Distance, "cityblock");
+%! obj = createns (X, 'NSMethod', 'exhaustive', 'Distance', 'cityblock');
+%! assert_equal (isa (obj, 'ExhaustiveSearcher'), true);
+%! assert_equal (obj.Distance, "cityblock");
 
 %!error<createns: too few input arguments.>
 %! createns ()
 %!error<createns: Name-Value arguments must be in pairs.>
-%! X = [1, 2; 3, 4]; createns (X, "NSMethod")
+%! X = [1, 2; 3, 4]; createns (X, 'NSMethod')
 %!error<createns: X must be a finite numeric matrix.>
 %! createns ([1; Inf; 3])
 %!error<createns: 'NSMethod' must be a string.>
-%! X = [1, 2; 3, 4]; createns (X, "NSMethod", 1)
+%! X = [1, 2; 3, 4]; createns (X, 'NSMethod', 1)
 %!error<createns: invalid 'NSMethod' value: 'invalid'.>
-%! X = [1, 2; 3, 4]; createns (X, "NSMethod", "invalid")
+%! X = [1, 2; 3, 4]; createns (X, 'NSMethod', 'invalid')

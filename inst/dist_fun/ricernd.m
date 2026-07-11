@@ -93,10 +93,10 @@ function r = ricernd (s, sigma, varargin)
   endif
 
   ## Check for class type
-  if (isa (s, "single") || isa (sigma, "single"))
-    cls = "single";
+  if (isa (s, 'single') || isa (sigma, 'single'))
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ## Return NaNs for out of range values of S and SIGMA
@@ -119,31 +119,31 @@ function r = ricernd (s, sigma, varargin)
 endfunction
 
 ## Test output
-%!assert (size (ricernd (2, 1/2)), [1, 1])
-%!assert (size (ricernd (2 * ones (2, 1), 1/2)), [2, 1])
-%!assert (size (ricernd (2 * ones (2, 2), 1/2)), [2, 2])
-%!assert (size (ricernd (2, 1/2 * ones (2, 1))), [2, 1])
-%!assert (size (ricernd (1, 1/2 * ones (2, 2))), [2, 2])
-%!assert (size (ricernd (ones (2, 1), 1)), [2, 1])
-%!assert (size (ricernd (ones (2, 2), 1)), [2, 2])
-%!assert (size (ricernd (2, 1/2, 3)), [3, 3])
-%!assert (size (ricernd (1, 1, [4, 1])), [4, 1])
-%!assert (size (ricernd (1, 1, 4, 1)), [4, 1])
-%!assert (size (ricernd (1, 1, 4, 1, 5)), [4, 1, 5])
-%!assert (size (ricernd (1, 1, 0, 1)), [0, 1])
-%!assert (size (ricernd (1, 1, 1, 0)), [1, 0])
-%!assert (size (ricernd (1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
-%!assert (size (ricernd (1, 1, [])), [0, 0])
-%!assert (size (ricernd (1, 1, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (ricernd (2, 1/2)), [1, 1])
+%!assert_equal (size (ricernd (2 * ones (2, 1), 1/2)), [2, 1])
+%!assert_equal (size (ricernd (2 * ones (2, 2), 1/2)), [2, 2])
+%!assert_equal (size (ricernd (2, 1/2 * ones (2, 1))), [2, 1])
+%!assert_equal (size (ricernd (1, 1/2 * ones (2, 2))), [2, 2])
+%!assert_equal (size (ricernd (ones (2, 1), 1)), [2, 1])
+%!assert_equal (size (ricernd (ones (2, 2), 1)), [2, 2])
+%!assert_equal (size (ricernd (2, 1/2, 3)), [3, 3])
+%!assert_equal (size (ricernd (1, 1, [4, 1])), [4, 1])
+%!assert_equal (size (ricernd (1, 1, 4, 1)), [4, 1])
+%!assert_equal (size (ricernd (1, 1, 4, 1, 5)), [4, 1, 5])
+%!assert_equal (size (ricernd (1, 1, 0, 1)), [0, 1])
+%!assert_equal (size (ricernd (1, 1, 1, 0)), [1, 0])
+%!assert_equal (size (ricernd (1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
+%!assert_equal (size (ricernd (1, 1, [])), [0, 0])
+%!assert_equal (size (ricernd (1, 1, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (ricernd (1, 1)), "double")
-%!assert (class (ricernd (1, single (0))), "single")
-%!assert (class (ricernd (1, single ([0, 0]))), "single")
-%!assert (class (ricernd (1, single (1), 2)), "single")
-%!assert (class (ricernd (1, single ([1, 1]), 1, 2)), "single")
-%!assert (class (ricernd (single (1), 1, 2)), "single")
-%!assert (class (ricernd (single ([1, 1]), 1, 1, 2)), "single")
+%!assert_equal (class (ricernd (1, 1)), "double")
+%!assert_equal (class (ricernd (1, single (0))), "single")
+%!assert_equal (class (ricernd (1, single ([0, 0]))), "single")
+%!assert_equal (class (ricernd (1, single (1), 2)), "single")
+%!assert_equal (class (ricernd (1, single ([1, 1]), 1, 2)), "single")
+%!assert_equal (class (ricernd (single (1), 1, 2)), "single")
+%!assert_equal (class (ricernd (single ([1, 1]), 1, 1, 2)), "single")
 
 ## Test input validation
 %!error<ricernd: function called with too few input arguments.> ricernd ()

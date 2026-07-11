@@ -66,7 +66,7 @@ endfunction
 ## Input validation tests
 %!error<raylstat: function called with too few input arguments.> raylstat ()
 %!error<raylstat: SIGMA must be numeric.> raylstat ({})
-%!error<raylstat: SIGMA must be numeric.> raylstat ("")
+%!error<raylstat: SIGMA must be numeric.> raylstat ('')
 %!error<raylstat: SIGMA must not be complex.> raylstat (i)
 
 ## Output validation tests
@@ -75,5 +75,5 @@ endfunction
 %! [m, v] = raylstat (sigma);
 %! expected_m = [1.2533, 2.5066, 3.7599, 5.0133, 6.2666, 7.5199];
 %! expected_v = [0.4292, 1.7168, 3.8628, 6.8673, 10.7301, 15.4513];
-%! assert (m, expected_m, 0.001);
-%! assert (v, expected_v, 0.001);
+%! assert_equal (m, expected_m, 0.001);
+%! assert_equal (v, expected_v, 0.001);

@@ -51,27 +51,27 @@
 ## @code{[@var{h}, @var{pval}, @var{ci}, @var{stats}] = vartest (@dots{})}
 ## returns a structure with the following fields:
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @item @tab @qcode{chisqstat} @tab the value of the test statistic
-## @item @tab @qcode{df} @tab the degrees of freedom of the test
+## @multitable @columnfractions 0.2 0.75
+## @item @qcode{chisqstat} @tab the value of the test statistic
+## @item @qcode{df} @tab the degrees of freedom of the test
 ## @end multitable
 ##
 ## @code{[@dots{}] = vartest (@dots{}, @var{name}, @var{value}), @dots{}}
 ## specifies one or more of the following name/value pairs:
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @headitem @tab Name @tab Value
-## @item @tab @qcode{"alpha"} @tab the significance level. Default is 0.05.
+## @multitable @columnfractions 0.2 0.75
+## @headitem Name @tab Value
+## @item @qcode{'alpha'} @tab the significance level. Default is 0.05.
 ##
-## @item @tab @qcode{"dim"} @tab dimension to work along a matrix or an N-D
+## @item @qcode{'dim'} @tab dimension to work along a matrix or an N-D
 ## array.
 ##
-## @item @tab @qcode{"tail"} @tab a string specifying the alternative hypothesis
+## @item @qcode{'tail'} @tab a string specifying the alternative hypothesis
 ## @end multitable
-## @multitable @columnfractions 0.1 0.15 0.75
-## @item @tab @qcode{"both"} @tab variance is not @var{v} (two-tailed, default)
-## @item @tab @qcode{"left"} @tab variance is less than @var{v} (left-tailed)
-## @item @tab @qcode{"right"} @tab variance is greater than @var{v}
+## @multitable @columnfractions 0.15 0.75
+## @item @qcode{'both'} @tab variance is not @var{v} (two-tailed, default)
+## @item @qcode{'left'} @tab variance is less than @var{v} (left-tailed)
+## @item @qcode{'right'} @tab variance is greater than @var{v}
 ## (right-tailed)
 ## @end multitable
 ##
@@ -84,30 +84,30 @@ function [h, pval, ci, stats] = vartest (x, v, varargin)
   if (nargin < 2)
     error ("vartest: too few input arguments.");
   endif
-  if (! isscalar (v) || ! isnumeric(v) || ! isreal(v) || v < 0)
+  if (! isscalar (v) || ! isnumeric (v) || ! isreal (v) || v < 0)
     error ("vartest: invalid value for variance.");
   endif
   ## Add defaults
   alpha = 0.05;
-  tail = "both";
+  tail = 'both';
   dim = [];
   if (nargin > 2 && mod (numel (varargin(:)), 2) == 0)
     for idx = 3:2:nargin
       name = varargin{idx-2};
       value = varargin{idx-1};
       switch (lower (name))
-        case "alpha"
+        case 'alpha'
           alpha = value;
           if (! isscalar (alpha) || ! isnumeric (alpha) || ...
                 alpha <= 0 || alpha >= 1)
             error ("vartest: invalid value for alpha.");
           endif
-        case "tail"
+        case 'tail'
           tail = value;
-          if (! any (strcmpi (tail, {"both", "left", "right"})))
+          if (! any (strcmpi (tail, {'both', 'left', 'right'})))
             error ("vartest: invalid value for tail.");
           endif
-        case "dim"
+        case 'dim'
           dim = value;
           if (! isscalar (dim) || ! ismember (dim, 1:ndims (x)))
             error ("vartest: invalid value for operating dimension.");
@@ -156,19 +156,19 @@ function [h, pval, ci, stats] = vartest (x, v, varargin)
     chisqstat(sumsq == 0) = NaN;
   endif
   ## Calculate p-value for the test and confidence intervals (if requested)
-  if (strcmpi (tail, "both"))
+  if (strcmpi (tail, 'both'))
     pval = chi2cdf (chisqstat, df);
     pval = 2 * min (pval, 1 - pval);
     if (nargout > 2)
       ci = cat (dim, sumsq ./ chi2inv (1 - alpha / 2, df), ...
                      sumsq ./ chi2inv (alpha / 2, df));
     endif
-  elseif (strcmpi (tail, "right"))
-    pval = gammainc (chisqstat / 2, df / 2, "upper");
+  elseif (strcmpi (tail, 'right'))
+    pval = gammainc (chisqstat / 2, df / 2, 'upper');
     if (nargout > 2)
       ci = cat (dim, sumsq ./ chi2inv (1 - alpha, df), Inf (size (pval)));
     endif
-  elseif (strcmpi (tail, "left"))
+  elseif (strcmpi (tail, 'left'))
     pval = chi2cdf (chisqstat, df);
     if (nargout > 2)
       ci = cat (dim, zeros (size (pval)), sumsq ./ chi2inv (alpha, df));
@@ -179,7 +179,7 @@ function [h, pval, ci, stats] = vartest (x, v, varargin)
   h(isnan (pval)) = NaN;
   ## Create stats output structure (if requested)
   if (nargout > 3)
-    stats = struct ("chisqstat", chisqstat, "df", df);
+    stats = struct ('chisqstat', chisqstat, 'df', df);
   endif
 
 endfunction
@@ -188,39 +188,39 @@ endfunction
 %!error<vartest: too few input arguments.> vartest ();
 %!error<vartest: invalid value for variance.> vartest ([1, 2, 3, 4], -0.5);
 %!error<vartest: invalid value for alpha.> ...
-%! vartest ([1, 2, 3, 4], 1, "alpha", 0);
+%! vartest ([1, 2, 3, 4], 1, 'alpha', 0);
 %!error<vartest: invalid value for alpha.> ...
-%! vartest ([1, 2, 3, 4], 1, "alpha", 1.2);
+%! vartest ([1, 2, 3, 4], 1, 'alpha', 1.2);
 %!error<vartest: invalid value for alpha.> ...
-%! vartest ([1, 2, 3, 4], 1, "alpha", "val");
+%! vartest ([1, 2, 3, 4], 1, 'alpha', 'val');
 %!error<vartest: invalid value for tail.>  ...
-%! vartest ([1, 2, 3, 4], 1, "tail", "val");
+%! vartest ([1, 2, 3, 4], 1, 'tail', 'val');
 %!error<vartest: invalid value for tail.>  ...
-%! vartest ([1, 2, 3, 4], 1, "alpha", 0.01, "tail", "val");
+%! vartest ([1, 2, 3, 4], 1, 'alpha', 0.01, 'tail', 'val');
 %!error<vartest: invalid value for operating dimension.> ...
-%! vartest ([1, 2, 3, 4], 1, "dim", 3);
+%! vartest ([1, 2, 3, 4], 1, 'dim', 3);
 %!error<vartest: invalid value for operating dimension.> ...
-%! vartest ([1, 2, 3, 4], 1, "alpha", 0.01, "tail", "both", "dim", 3);
+%! vartest ([1, 2, 3, 4], 1, 'alpha', 0.01, 'tail', 'both', 'dim', 3);
 %!error<vartest: invalid name for optional arguments.> ...
-%! vartest ([1, 2, 3, 4], 1, "alpha", 0.01, "tail", "both", "badoption", 3);
+%! vartest ([1, 2, 3, 4], 1, 'alpha', 0.01, 'tail', 'both', 'badoption', 3);
 %!error<vartest: optional arguments must be in name/value pairs.> ...
-%! vartest ([1, 2, 3, 4], 1, "alpha", 0.01, "tail");
+%! vartest ([1, 2, 3, 4], 1, 'alpha', 0.01, 'tail');
 ## Test results
 %!test
 %! load carsmall
 %! [h, pval, ci] = vartest (MPG, 7^2);
-%! assert (h, 1);
-%! assert (pval, 0.04335086742174443, 1e-14);
-%! assert (ci, [49.397; 88.039], 1e-3);
+%! assert_equal (h, 1);
+%! assert_equal (pval, 0.04335086742174443, 1e-14);
+%! assert_equal (ci, [49.397; 88.039], 1e-3);
 %!test
 %! load carsmall
-%! [h, pval, ci] = vartest (MPG, 7^2, "tail", "left");
-%! assert (h, 0);
-%! assert (pval, 0.978324566289128, 1e-14);
-%! assert (ci, [0; 83.685], 1e-3);
+%! [h, pval, ci] = vartest (MPG, 7^2, 'tail', 'left');
+%! assert_equal (h, 0);
+%! assert_equal (pval, 0.978324566289128, 1e-14);
+%! assert_equal (ci, [0; 83.685], 1e-3);
 %!test
 %! load carsmall
-%! [h, pval, ci] = vartest (MPG, 7^2, "tail", "right");
-%! assert (h, 1);
-%! assert (pval, 0.021675433710872, 1e-14);
-%! assert (ci, [51.543; Inf], 1e-3);
+%! [h, pval, ci] = vartest (MPG, 7^2, 'tail', 'right');
+%! assert_equal (h, 1);
+%! assert_equal (pval, 0.021675433710872, 1e-14);
+%! assert_equal (ci, [51.543; Inf], 1e-3);

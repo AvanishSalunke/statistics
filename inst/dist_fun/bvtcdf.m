@@ -23,7 +23,7 @@
 ##
 ## @code{@var{p} = bvtcdf (@var{x}, @var{rho}, @var{df})} will compute the
 ## bivariate student's t cumulative distribution function of @var{x}, which must
-## be an @math{Nx2} matrix, given a correlation coefficient @var{rho}, which
+## be an @math{N*2} matrix, given a correlation coefficient @var{rho}, which
 ## must be a scalar, and @var{df} degrees of freedom, which can be a scalar or a
 ## vector of positive numbers commensurate with @var{x}.
 ##
@@ -41,10 +41,10 @@ function p = bvtcdf (x, rho, df, TolFun)
     TolFun = 1e-8;
   endif
 
-  if (isa (x, "single") || isa (rho, "single") || isa (df, "single"))
-    is_type = "single";
+  if (isa (x, 'single') || isa (rho, 'single') || isa (df, 'single'))
+    is_type = 'single';
   else
-    is_type = "double";
+    is_type = 'double';
   endif
 
   if (abs (rho) < 1)
@@ -73,7 +73,7 @@ function p = bvtcdf (x, rho, df, TolFun)
 
   elseif (rho == 1)
     p = tcdf (min (x, [], 2), df);
-    p(any (isnan( x), 2)) = NaN;
+    p(any (isnan ( x), 2)) = NaN;
 
   else
     p = tcdf (x(:,1), df) - tcdf (-x(:,2), df);
@@ -182,7 +182,7 @@ function p = generalDF (x, rho, df, TolFun)
     b1 = x(i,1); b2 = x(i,2);
     v = df(i);
     if (isfinite (b1) && isfinite (b2))
-      p2(i) = quadgk (@bvtIntegrand, lo, hi, "AbsTol", TolFun, "RelTol", 0);
+      p2(i) = quadgk (@bvtIntegrand, lo, hi, 'AbsTol', TolFun, 'RelTol', 0);
     endif
   endfor
   p = p1 - p2 ./ (2 .* pi);
@@ -201,10 +201,10 @@ endfunction
 %! x = [1, 2];
 %! rho = [1, 0.5; 0.5, 1];
 %! df = 4;
-%! assert (bvtcdf(x, rho(2), df), mvtcdf(x, rho, df), 1e-14);
+%! assert_equal (bvtcdf (x, rho(2), df), mvtcdf (x, rho, df), 1e-14);
 %!test
 %! x = [3, 2;2, 4;1, 5];
 %! rho = [1, 0.5; 0.5, 1];
 %! df = 4;
-%! assert (bvtcdf(x, rho(2), df), mvtcdf(x, rho, df), 1e-14);
+%! assert_equal (bvtcdf (x, rho(2), df), mvtcdf (x, rho, df), 1e-14);
 

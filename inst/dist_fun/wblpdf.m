@@ -71,8 +71,8 @@ function y = wblpdf (x, varargin)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (lambda, "single") || isa (k, "single"))
-    y = NaN (size (x), "single");
+  if (isa (x, 'single') || isa (lambda, 'single') || isa (k, 'single'))
+    y = NaN (size (x), 'single');
   else
     y = NaN (size (x));
   endif
@@ -102,30 +102,30 @@ endfunction
 %! y2 = wblpdf (x, 1, 1);
 %! y3 = wblpdf (x, 1, 1.5);
 %! y4 = wblpdf (x, 1, 5);
-%! plot (x, y1, "-b", x, y2, "-r", x, y3, "-m", x, y4, "-g")
+%! plot (x, y1, '-b', x, y2, '-r', x, y3, '-m', x, y4, '-g')
 %! grid on
 %! ylim ([0, 2.5])
-%! legend ({"λ = 5, k = 0.5", "λ = 9, k = 1", ...
-%!          "λ = 6, k = 1.5", "λ = 2, k = 5"}, "location", "northeast")
-%! title ("Weibull PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'λ = 5, k = 0.5', 'λ = 9, k = 1', ...
+%!          'λ = 6, k = 1.5', 'λ = 2, k = 5'}, 'location', 'northeast')
+%! title ('Weibull PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x,y
 %! x = [-1 0 0.5 1 Inf];
 %! y = [0, exp(-x(2:4)), NaN];
-%!assert (wblpdf (x, ones (1,5), ones (1,5)), y)
-%!assert (wblpdf (x, 1, ones (1,5)), y)
-%!assert (wblpdf (x, ones (1,5), 1), y)
-%!assert (wblpdf (x, [0 NaN Inf 1 1], 1), [NaN NaN NaN y(4:5)])
-%!assert (wblpdf (x, 1, [0 NaN Inf 1 1]), [NaN NaN NaN y(4:5)])
-%!assert (wblpdf ([x, NaN], 1, 1), [y, NaN])
+%!assert_equal (wblpdf (x, ones (1,5), ones (1,5)), y)
+%!assert_equal (wblpdf (x, 1, ones (1,5)), y)
+%!assert_equal (wblpdf (x, ones (1,5), 1), y)
+%!assert_equal (wblpdf (x, [0 NaN Inf 1 1], 1), [NaN NaN NaN y(4:5)])
+%!assert_equal (wblpdf (x, 1, [0 NaN Inf 1 1]), [NaN NaN NaN y(4:5)])
+%!assert_equal (wblpdf ([x, NaN], 1, 1), [y, NaN])
 
 ## Test class of input preserved
-%!assert (wblpdf (single ([x, NaN]), 1, 1), single ([y, NaN]))
-%!assert (wblpdf ([x, NaN], single (1), 1), single ([y, NaN]))
-%!assert (wblpdf ([x, NaN], 1, single (1)), single ([y, NaN]))
+%!assert_equal (wblpdf (single ([x, NaN]), 1, 1), single ([y, NaN]))
+%!assert_equal (wblpdf ([x, NaN], single (1), 1), single ([y, NaN]))
+%!assert_equal (wblpdf ([x, NaN], 1, single (1)), single ([y, NaN]))
 
 ## Test input validation
 %!error wblpdf ()

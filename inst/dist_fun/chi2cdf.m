@@ -19,7 +19,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {statistics} {@var{p} =} chi2cdf (@var{x}, @var{df})
-## @deftypefnx {statistics} {@var{p} =} chi2cdf (@var{x}, @var{df}, @qcode{"upper"})
+## @deftypefnx {statistics} {@var{p} =} chi2cdf (@var{x}, @var{df}, @qcode{'upper'})
 ##
 ## Chi-squared cumulative distribution function (CDF).
 ##
@@ -50,9 +50,9 @@ function p = chi2cdf (x, df, uflag)
 
   ## Check for valid "upper" flag
   if (nargin > 2)
-    if (! strcmpi (uflag, "upper"))
+    if (! strcmpi (uflag, 'upper'))
       error ("chi2cdf: invalid argument for upper tail.");
-    end
+    endif
   else
     uflag = [];
   endif
@@ -84,38 +84,38 @@ endfunction
 %! p4 = chi2cdf (x, 4);
 %! p5 = chi2cdf (x, 6);
 %! p6 = chi2cdf (x, 9);
-%! plot (x, p1, "-b", x, p2, "-g", x, p3, "-r", ...
-%!       x, p4, "-c", x, p5, "-m", x, p6, "-y")
+%! plot (x, p1, '-b', x, p2, '-g', x, p3, '-r', ...
+%!       x, p4, '-c', x, p5, '-m', x, p6, '-y')
 %! grid on
 %! xlim ([0, 8])
-%! legend ({"df = 1", "df = 2", "df = 3", ...
-%!          "df = 4", "df = 6", "df = 9"}, "location", "southeast")
-%! title ("Chi-squared CDF")
-%! xlabel ("values in x")
-%! ylabel ("probability")
+%! legend ({'df = 1', 'df = 2', 'df = 3', ...
+%!          'df = 4', 'df = 6', 'df = 9'}, 'location', 'southeast')
+%! title ('Chi-squared CDF')
+%! xlabel ('values in x')
+%! ylabel ('probability')
 
 ## Test output
 %!shared x, p, u
 %! x = [-1, 0, 0.5, 1, 2];
 %! p = [0, (1 - exp (-x(2:end) / 2))];
 %! u = [1, 0, NaN, 0.606530659712633, 0.367879441171442];
-%!assert (chi2cdf (x, 2 * ones (1,5)), p, eps)
-%!assert (chi2cdf (x, 2), p, eps)
-%!assert (chi2cdf (x, 2 * [1, 0, NaN, 1, 1]), [0, 1, NaN, p(4:5)], eps)
-%!assert (chi2cdf (x, 2 * [1, 0, NaN, 1, 1], "upper"), u, 3 * eps)
-%!assert (chi2cdf ([x(1:2), NaN, x(4:5)], 2), [p(1:2), NaN, p(4:5)], eps)
+%!assert_equal (chi2cdf (x, 2 * ones (1,5)), p, eps)
+%!assert_equal (chi2cdf (x, 2), p, eps)
+%!assert_equal (chi2cdf (x, 2 * [1, 0, NaN, 1, 1]), [0, 1, NaN, p(4:5)], eps)
+%!assert_equal (chi2cdf (x, 2 * [1, 0, NaN, 1, 1], 'upper'), u, 3 * eps)
+%!assert_equal (chi2cdf ([x(1:2), NaN, x(4:5)], 2), [p(1:2), NaN, p(4:5)], eps)
 
 ## Test class of input preserved
-%!assert (chi2cdf ([x, NaN], 2), [p, NaN], eps)
-%!assert (chi2cdf (single ([x, NaN]), 2), single ([p, NaN]), eps ("single"))
-%!assert (chi2cdf ([x, NaN], single (2)), single ([p, NaN]), eps ("single"))
+%!assert_equal (chi2cdf ([x, NaN], 2), [p, NaN], eps)
+%!assert_equal (chi2cdf (single ([x, NaN]), 2), single ([p, NaN]), eps ('single'))
+%!assert_equal (chi2cdf ([x, NaN], single (2)), single ([p, NaN]), eps ('single'))
 
 ## Test input validation
 %!error<chi2cdf: function called with too few input arguments.> chi2cdf ()
 %!error<chi2cdf: function called with too few input arguments.> chi2cdf (1)
 %!error<chi2cdf: function called with too many inputs> chi2cdf (1, 2, 3, 4)
 %!error<chi2cdf: invalid argument for upper tail.> chi2cdf (1, 2, 3)
-%!error<chi2cdf: invalid argument for upper tail.> chi2cdf (1, 2, "uper")
+%!error<chi2cdf: invalid argument for upper tail.> chi2cdf (1, 2, 'uper')
 %!error<chi2cdf: X and DF must be of common size or scalars.> ...
 %! chi2cdf (ones (3), ones (2))
 %!error<chi2cdf: X and DF must be of common size or scalars.> ...

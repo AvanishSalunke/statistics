@@ -49,11 +49,12 @@
 ## the null hypothesis (that @var{x} is a random sample from a normal
 ## distribution) cannot be rejected at the 5% significance level, or @var{h} = 1
 ## if the null hypothesis can be rejected at the 5% level.  @code{chi2gof} uses
-## by default 10 bins (@qcode{"nbins"}), and compares the test statistic to a
+## by default 10 bins (@qcode{'nbins'}), and compares the test statistic to a
 ## chi-square distribution with @qcode{@var{nbins} - 3} degrees of freedom, to
 ## take into account that two parameters were estimated.
 ##
-## @code{[@var{h}, @var{p}] = chi2gof (@var{x})} also returns the p-value @var{p},
+## @code{[@var{h}, @var{p}] = chi2gof (@var{x})} also returns the p-value
+## @var{p},
 ## which is the probability of observing the given result, or one more extreme,
 ## by chance if the null hypothesis is true.  If there are not enough degrees of
 ## freedom to carry out the test, @var{p} is NaN.
@@ -61,49 +62,49 @@
 ## @code{[@var{h}, @var{p}, @var{stats}] = chi2gof (@var{x})} also returns a
 ## @var{stats} structure with the following fields:
 ##
-## @multitable @columnfractions 0.05 0.3 0.65
-## @item @tab "chi2stat" @tab Chi-square statistic
-## @item @tab "df" @tab Degrees of freedom
-## @item @tab "binedges" @tab Vector of bin binedges after pooling
-## @item @tab "O" @tab Observed count in each bin
-## @item @tab "E" @tab Expected count in each bin
+## @multitable @columnfractions 0.3 0.65
+## @item "chi2stat" @tab Chi-square statistic
+## @item "df" @tab Degrees of freedom
+## @item "binedges" @tab Vector of bin binedges after pooling
+## @item "O" @tab Observed count in each bin
+## @item "E" @tab Expected count in each bin
 ## @end multitable
 ##
 ## @code{[@dots{}] = chi2gof (@var{x}, @var{Name}, @var{Value}, @dots{})}
 ## specifies optional Name/Value pair arguments chosen from the following list.
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @headitem @tab Name @tab Value
-## @item @tab @qcode{"nbins"} @tab The number of bins to use.  Default is 10.
-## @item @tab @qcode{"binctrs"} @tab A vector of bin centers.
-## @item @tab @qcode{"binedges"} @tab A vector of bin binedges.
-## @item @tab @qcode{"cdf"} @tab A fully specified cumulative distribution
+## @multitable @columnfractions 0.2 0.75
+## @headitem Name @tab Value
+## @item @qcode{'nbins'} @tab The number of bins to use.  Default is 10.
+## @item @qcode{'binctrs'} @tab A vector of bin centers.
+## @item @qcode{'binedges'} @tab A vector of bin binedges.
+## @item @qcode{'cdf'} @tab A fully specified cumulative distribution
 ## function or a function handle provided in a cell array whose first element is
 ## a function handle, and all later elements are its parameter values.  The
 ## function must take @var{x} values as its first argument, and other parameters
 ## as later arguments.
-## @item @tab @qcode{"expected"} @tab A vector with one element per bin
+## @item @qcode{'expected'} @tab A vector with one element per bin
 ## specifying the expected counts for each bin.
-## @item @tab @qcode{"nparams"} @tab The number of estimated parameters; used to
+## @item @qcode{'nparams'} @tab The number of estimated parameters; used to
 ## adjust the degrees of freedom to be @qcode{@var{nbins} - 1 - @var{nparams}},
 ## where @var{nbins} is the number of bins.
-## @item @tab @qcode{"emin"} @tab The minimum allowed expected value for a bin;
+## @item @qcode{'emin'} @tab The minimum allowed expected value for a bin;
 ## any bin in either tail having an expected value less than this amount is
 ## pooled with a neighboring bin.  Use the value 0 to prevent pooling.  Default
 ## is 5.
-## @item @tab @qcode{"frequency"} @tab A vector of the same length as @var{x}
+## @item @qcode{'frequency'} @tab A vector of the same length as @var{x}
 ## containing the frequency of the corresponding @var{x} values.
-## @item @tab @qcode{"alpha"} @tab An @var{alpha} value such that the hypothesis
+## @item @qcode{'alpha'} @tab An @var{alpha} value such that the hypothesis
 ## is rejected if @qcode{@var{p} < @var{alpha}}.  Default is
 ## @qcode{@var{alpha} = 0.05}.
 ## @end multitable
 ##
-## You should specify either @qcode{"cdf"} or @qcode{"expected"} parameters, but
-## not both.  If your @qcode{"cdf"} input contains extra parameters, these are
-## accounted for automatically and there is no need to specify @qcode{"nparams"}.
-## If your @qcode{"expected"} input depends on estimated parameters, you should
-## use the @qcode{"nparams"} parameter to ensure that the degrees of freedom for
-## the test is correct.
+## You should specify either @qcode{'cdf'} or @qcode{'expected'} parameters, but
+## not both. If your @qcode{'cdf'} input contains extra parameters, these are
+## accounted for automatically and there is no need to specify
+## @qcode{'nparams'}. If your @qcode{'expected'} input depends on estimated
+## parameters, you should use the @qcode{'nparams'} parameter to ensure that the
+## degrees of freedom for the test is correct.
 ##
 ## @end deftypefn
 
@@ -113,7 +114,7 @@ function [h, p, stats] = chi2gof (x, varargin)
   if (nargin < 1)
     error ("chi2gof: At least one input argument is required.");
   endif
-  if (! isvector(x) || ! isreal(x))
+  if (! isvector (x) || ! isreal (x))
     error ("chi2gof: X must be a vector of real numbers.");
   endif
   ## Add initial parameters
@@ -132,23 +133,23 @@ function [h, p, stats] = chi2gof (x, varargin)
   while (numarg)
     argname = varargin{argpos};
     switch (lower (argname))
-      case "nbins"
+      case 'nbins'
         nbins = varargin{argpos + 1};
-      case "ctrs"
+      case 'ctrs'
         binctrs = varargin{argpos + 1};
-      case "edges"
+      case 'edges'
         binedges = varargin{argpos + 1};
-      case "cdf"
+      case 'cdf'
         cdf_spec = varargin{argpos + 1};
-      case "expected"
+      case 'expected'
         expected = varargin{argpos + 1};
-      case "nparams"
+      case 'nparams'
         nparams = varargin{argpos + 1};
-      case "emin"
+      case 'emin'
         emin = varargin{argpos + 1};
-      case "frequency"
+      case 'frequency'
         frequency = varargin{argpos + 1};
-      case "alpha"
+      case 'alpha'
         alpha = varargin{argpos + 1};
     endswitch
     numarg -= 2;
@@ -170,7 +171,7 @@ function [h, p, stats] = chi2gof (x, varargin)
    endif
   endif
   if (! isscalar (emin) || emin < 0 || emin != round (emin) || ! isreal (emin))
-    error("chi2gof: 'emin' must be a positive integer.");
+    error ("chi2gof: 'emin' must be a positive integer.");
   endif
   if (! isempty (nparams))
     if (! isscalar (nparams) || nparams < 0 || nparams != round (nparams) ...
@@ -197,9 +198,9 @@ function [h, p, stats] = chi2gof (x, varargin)
   endif
   ## Check for bin numbers, centers, or edges and calculate bins accordingly
   if (! isempty (binctrs))
-    [Observed, binedges] = calculatebins (x, frequency, "ctrs", binctrs);
+    [Observed, binedges] = calculatebins (x, frequency, 'ctrs', binctrs);
   elseif (! isempty (binedges))
-    [Observed, binedges] = calculatebins (x, frequency, "edges", binedges);
+    [Observed, binedges] = calculatebins (x, frequency, 'edges', binedges);
   else
     if (isempty (nbins))
       if (isempty (expected))
@@ -208,7 +209,7 @@ function [h, p, stats] = chi2gof (x, varargin)
         nbins = length (expected);    ## determined by Expected vector
       endif
     endif
-    [Observed, binedges] = calculatebins (x, frequency, "nbins", nbins);
+    [Observed, binedges] = calculatebins (x, frequency, 'nbins', nbins);
   endif
   Observed = Observed(:);
   nbins = length (Observed);
@@ -235,46 +236,46 @@ function [h, p, stats] = chi2gof (x, varargin)
       if (isempty (nparams))
         nparams = 2;
       endif
-    elseif (isa (cdf_spec, "function_handle"))
+    elseif (isa (cdf_spec, 'function_handle'))
       ## Split function handle to get function name and optional parameters
-      cstr = ostrsplit (func2str (cdf_spec), ",");
+      cstr = ostrsplit (func2str (cdf_spec), ',');
       ## Simple function handle, no parameters: e.g. @normcdf
-      if (isempty (strfind (cstr, "@")) && numel (cstr) == 1)
+      if (isempty (strfind (cstr, '@')) && numel (cstr) == 1)
         cdffunc = str2func (char (strcat ("@", cstr)));
         if (isempty (nparams))
           nparams = numel (cdfargs);
         endif
       ## Complex function handle, no parameters: e.g. @(x) normcdf(x)
-      elseif (! isempty (strfind (cstr, "@")) && numel (cstr) == 1)
+      elseif (! isempty (strfind (cstr, '@')) && numel (cstr) == 1)
         ## Remove white spaces
         cstr = char (cstr);
-        cstr(strfind (cstr, " ")) = [];
+        cstr(strfind (cstr, ' ')) = [];
         ## Remove input argument in parentheses
-        while (length (strfind (cstr,"(")))
-          cstr(index (cstr, "("):index (cstr, ")")) = [];
+        while (length (strfind (cstr,'(')))
+          cstr(index (cstr, '('):index (cstr, ')')) = [];
         endwhile
         cdffunc = str2func (cstr);
         if (isempty (nparams))
           nparams = numel (cdfargs);
         endif
-      elseif (! isempty (strfind (cstr, "@")) && numel (cstr) > 1)
+      elseif (! isempty (strfind (cstr, '@')) && numel (cstr) > 1)
         ## Evaluate function name in first cell
         cstr_f = char (cstr(1));
-        cstr_f(strfind (cstr_f, " ")) = [];
-        cstr_f(index (cstr_f, "("):index (cstr_f, ")")) = [];
-        cstr_f(index (cstr_f, "("):end) = [];
+        cstr_f(strfind (cstr_f, ' ')) = [];
+        cstr_f(index (cstr_f, '('):index (cstr_f, ')')) = [];
+        cstr_f(index (cstr_f, '('):end) = [];
         cdffunc = str2func (cstr_f);
         ## Evaluate optional parameters in remaining cells
         cstr_idx = 2;
         while (cstr_idx <= numel (cstr))
           cstr_p = char (cstr(cstr_idx));
-          cstr_p(strfind (cstr_p, " ")) = [];
+          cstr_p(strfind (cstr_p, ' ')) = [];
           ## Check for numerical value
           if (isscalar (str2num (cstr_p)))
             cdfargs{cstr_idx - 1} = cstr_p;
           else
             ## Get function handle: e.g. mean
-            cstr_p(index (cstr_p, "("):end) = [];
+            cstr_p(index (cstr_p, '('):end) = [];
             cdfargs{cstr_idx - 1} = feval (str2func (cstr_p), x .* frequency);
             cstr_idx += 1;
           endif
@@ -288,7 +289,7 @@ function [h, p, stats] = chi2gof (x, varargin)
       cdffunc = cdf_spec{1};
       cdfargs = cdf_spec(2:end);
       if (isempty (nparams))
-        nparams = numel(cdfargs);
+        nparams = numel (cdfargs);
       endif
     endif
     if (! is_function_handle (cdffunc))
@@ -301,20 +302,20 @@ function [h, p, stats] = chi2gof (x, varargin)
     interioredges = binedges(2:end-1);
     ## Compute the cumulative probabilities
     Fcdf = feval (cdffunc, interioredges, cdfargs{:});
-    if (! isvector(Fcdf) || numel (Fcdf) != (nbins - 1))
-      msg = sprintf("chi2gof: Wrong number of outputs from: %s\n", cdfname);
+    if (! isvector (Fcdf) || numel (Fcdf) != (nbins - 1))
+      msg = sprintf ("chi2gof: Wrong number of outputs from: %s\n", cdfname);
       error (msg);
     endif
     % Compute the expected values
-    Expected = sum(Observed) * diff([0;Fcdf(:);1]);
+    Expected = sum (Observed) * diff ([0;Fcdf(:);1]);
   endif
   ## Avoid too small expected values
   if (any (Expected < emin))
     [Expected, Observed, binedges] = poolbins (Expected, Observed, binedges, emin);
     nbins = length (Expected);
-  end
+  endif
   ## Compute test statistic
-  cstat = sum(((Observed - Expected) .^ 2) ./ Expected);
+  cstat = sum (((Observed - Expected) .^ 2) ./ Expected);
   ## Calculate degrees of freedom
   if (isempty (nparams))
     nparams = 0;
@@ -326,7 +327,7 @@ function [h, p, stats] = chi2gof (x, varargin)
     df = 0;
     p = NaN;
   endif
-  h = cast (p <= alpha, "double");
+  h = cast (p <= alpha, 'double');
   ## Create 3rd output argument if necessary
   if (nargout > 2)
     stats.chi2stat = cstat;
@@ -341,7 +342,7 @@ endfunction
 function [Expected, Observed, binedges] = poolbins (Expected, ...
                                                     Observed, binedges, emin)
   i = 1;
-  j = length(Expected);
+  j = length (Expected);
   while (i < j - 1 && (Expected(i) < emin || Expected(i + 1) < emin || ...
                        Expected(j) < emin || Expected(j - 1) < emin))
     if (Expected(i) < Expected(j))
@@ -366,7 +367,7 @@ function [Observed, binedges] = calculatebins (x, frequency, binspec, specval)
   hi = double (max (x(:)));
   ## Check binspec for bin count, bin centers, or bin edges.
   switch (binspec)
-    case "nbins"
+    case 'nbins'
       nbins = specval;
       if (isempty (x))
         lo = 0;
@@ -379,12 +380,12 @@ function [Observed, binedges] = calculatebins (x, frequency, binspec, specval)
       binwidth = (hi - lo) ./ nbins;
       binedges = lo + binwidth * (0:nbins);
       binedges(length (binedges)) = hi;
-    case "ctrs"
+    case 'ctrs'
       binctrs = specval(:)';
       binwidth = diff (binctrs);
       binwidth = [binwidth binwidth(end)];
       binedges = [binctrs(1)-binwidth(1)/2 binctrs+binwidth/2];
-    case "edges"
+    case 'edges'
       binedges = specval(:)';
   endswitch
   ## Update bins
@@ -392,18 +393,18 @@ function [Observed, binedges] = calculatebins (x, frequency, binspec, specval)
   ## Calculate bin numbers
   if (isempty (x))
     binnum = x;
-  elseif (! isequal (binspec, "edges"))
-    binedges = binedges + eps(binedges);
+  elseif (! isequal (binspec, 'edges'))
+    binedges = binedges + eps (binedges);
     [ignore, binnum] = histc (x, [-Inf binedges(2:end-1) Inf]);
   else
     [ignore, binnum] = histc (x, binedges);
     binnum(binnum == nbins + 1) = nbins;
-  end
+  endif
   ## Remove empty bins
   if (any (binnum == 0))
     frequency(binnum == 0) = [];
     binnum(binnum == 0) = [];
-  end
+  endif
   ## Compute Observed vector
   binnum = binnum(:);
   Observed = accumarray ([ones(size(binnum)), binnum], frequency, [1, nbins]);
@@ -412,41 +413,41 @@ endfunction
 %!demo
 %! x = normrnd (50, 5, 100, 1);
 %! [h, p, stats] = chi2gof (x)
-%! [h, p, stats] = chi2gof (x, "cdf", @(x)normcdf (x, mean(x), std(x)))
-%! [h, p, stats] = chi2gof (x, "cdf", {@normcdf, mean(x), std(x)})
+%! [h, p, stats] = chi2gof (x, 'cdf', @(x)normcdf (x, mean (x), std (x)))
+%! [h, p, stats] = chi2gof (x, 'cdf', {@normcdf, mean(x), std(x)})
 %!demo
 %! x = rand (100,1 );
 %! n = length (x);
 %! binedges = linspace (0, 1, 11);
 %! expectedCounts = n * diff (binedges);
-%! [h, p, stats] = chi2gof (x, "binedges", binedges, "expected", expectedCounts)
+%! [h, p, stats] = chi2gof (x, 'binedges', binedges, 'expected', expectedCounts)
 %!demo
 %! bins = 0:5;
 %! obsCounts = [6 16 10 12 4 2];
-%! n = sum(obsCounts);
-%! lambdaHat = sum(bins.*obsCounts) / n;
-%! expCounts = n * poisspdf(bins,lambdaHat);
-%! [h, p, stats] = chi2gof (bins, "binctrs", bins, "frequency", obsCounts, ...
-%!                          "expected", expCounts, "nparams",1)
+%! n = sum (obsCounts);
+%! lambdaHat = sum (bins.*obsCounts) / n;
+%! expCounts = n * poisspdf (bins,lambdaHat);
+%! [h, p, stats] = chi2gof (bins, 'binctrs', bins, 'frequency', obsCounts, ...
+%!                          'expected', expCounts, 'nparams',1)
 
 ## Test input validation
 %!error chi2gof ()
 %!error chi2gof ([2,3;3,4])
-%!error chi2gof ([1,2,3,4], "nbins", 3, "ctrs", [2,3,4])
-%!error chi2gof ([1,2,3,4], "frequency", [2,3,2])
-%!error chi2gof ([1,2,3,4], "frequency", [2,3,2,-2])
-%!error chi2gof ([1,2,3,4], "frequency", [2,3,2,2], "nparams", i)
-%!error chi2gof ([1,2,3,4], "frequency", [2,3,2,2], "alpha", 1.3)
-%!error chi2gof ([1,2,3,4], "expected", [-3,2,2])
-%!error chi2gof ([1,2,3,4], "expected", [3,2,2], "nbins", 5)
-%!error chi2gof ([1,2,3,4], "cdf", @normcdff)
+%!error chi2gof ([1,2,3,4], 'nbins', 3, 'ctrs', [2,3,4])
+%!error chi2gof ([1,2,3,4], 'frequency', [2,3,2])
+%!error chi2gof ([1,2,3,4], 'frequency', [2,3,2,-2])
+%!error chi2gof ([1,2,3,4], 'frequency', [2,3,2,2], 'nparams', i)
+%!error chi2gof ([1,2,3,4], 'frequency', [2,3,2,2], 'alpha', 1.3)
+%!error chi2gof ([1,2,3,4], 'expected', [-3,2,2])
+%!error chi2gof ([1,2,3,4], 'expected', [3,2,2], 'nbins', 5)
+%!error chi2gof ([1,2,3,4], 'cdf', @normcdff)
 %!test
 %! x = [1 2 1 3 2 4 3 2 4 3 2 2];
 %! [h, p, stats] = chi2gof (x);
-%! assert (h, 0);
-%! assert (p, NaN);
-%! assert (stats.chi2stat, 0.1205375022748029, 1e-14);
-%! assert (stats.df, 0);
-%! assert (stats.edges, [1, 2.5, 4], 1e-14);
-%! assert (stats.O, [7, 5], 1e-14);
-%! assert (stats.E, [6.399995519909668, 5.600004480090332], 1e-14);
+%! assert_equal (h, 0);
+%! assert_equal (p, NaN);
+%! assert_equal (stats.chi2stat, 0.1205375022748029, 1e-14);
+%! assert_equal (stats.df, 0);
+%! assert_equal (stats.edges, [1, 2.5, 4], 1e-14);
+%! assert_equal (stats.O, [7, 5], 1e-14);
+%! assert_equal (stats.E, [6.399995519909668, 5.600004480090332], 1e-14);

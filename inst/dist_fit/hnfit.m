@@ -20,7 +20,8 @@
 ## @deftypefnx {statistics} {[@var{paramhat}, @var{paramci}] =} hnfit (@var{x}, @var{mu}, @var{alpha})
 ## @deftypefnx {statistics} {[@var{paramhat}, @var{paramci}] =} hnfit (@var{x}, @var{mu}, @var{alpha}, @var{freq})
 ##
-## Estimate parameters and confidence intervals for the half-normal distribution.
+## Estimate parameters and confidence intervals for the half-normal
+## distribution.
 ##
 ## @code{@var{paramhat} = hnfit (@var{x}, @var{mu})} returns the maximum
 ## likelihood estimates of the parameters of the half-normal distribution given
@@ -124,17 +125,17 @@ endfunction
 
 %!demo
 %! ## Sample 2 populations from different half-normal distributions
-%! rand ("seed", 1);   # for reproducibility
+%! rand ('seed', 1);   # for reproducibility
 %! r1 = hnrnd (0, 5, 5000, 1);
-%! rand ("seed", 2);   # for reproducibility
+%! rand ('seed', 2);   # for reproducibility
 %! r2 = hnrnd (0, 2, 5000, 1);
 %! r = [r1, r2];
 %!
 %! ## Plot them normalized and fix their colors
 %! hist (r, [0.5:20], 1);
-%! h = findobj (gca, "Type", "patch");
-%! set (h(1), "facecolor", "c");
-%! set (h(2), "facecolor", "g");
+%! h = findobj (gca, 'Type', 'patch');
+%! set (h(1), 'facecolor', 'c');
+%! set (h(2), 'facecolor', 'g');
 %! hold on
 %!
 %! ## Estimate their shape parameters
@@ -144,30 +145,30 @@ endfunction
 %! ## Plot their estimated PDFs
 %! x = [0:0.2:10];
 %! y = hnpdf (x, mu_sigmaA(1), mu_sigmaA(2));
-%! plot (x, y, "-pr");
+%! plot (x, y, '-pr');
 %! y = hnpdf (x, mu_sigmaB(1), mu_sigmaB(2));
-%! plot (x, y, "-sg");
+%! plot (x, y, '-sg');
 %! xlim ([0, 10])
 %! ylim ([0, 0.5])
-%! legend ({"Normalized HIST of sample 1 with μ=0 and σ=5", ...
-%!          "Normalized HIST of sample 2 with μ=0 and σ=2", ...
+%! legend ({'Normalized HIST of sample 1 with μ=0 and σ=5', ...
+%!          'Normalized HIST of sample 2 with μ=0 and σ=2', ...
 %!          sprintf("PDF for sample 1 with estimated μ=%0.2f and σ=%0.2f", ...
 %!                  mu_sigmaA(1), mu_sigmaA(2)), ...
 %!          sprintf("PDF for sample 2 with estimated μ=%0.2f and σ=%0.2f", ...
 %!                  mu_sigmaB(1), mu_sigmaB(2))})
-%! title ("Two population samples from different half-normal distributions")
+%! title ('Two population samples from different half-normal distributions')
 %! hold off
 
 ## Test output
 %!test
 %! x = 1:20;
 %! [paramhat, paramci] = hnfit (x, 0);
-%! assert (paramhat, [0, 11.9791], 1e-4);
-%! assert (paramci, [0, 9.1648; 0, 17.2987], 1e-4);
+%! assert_equal (paramhat, [0, 11.9791], 1e-4);
+%! assert_equal (paramci, [0, 9.1648; 0, 17.2987], 1e-4);
 %!test
 %! x = 1:20;
 %! [paramhat, paramci] = hnfit (x, 0, 0.01);
-%! assert (paramci, [0, 8.4709; 0, 19.6487], 1e-4);
+%! assert_equal (paramci, [0, 8.4709; 0, 19.6487], 1e-4);
 
 ## Test input validation
 %!error<hnfit: function called with too few input arguments.> hnfit ()

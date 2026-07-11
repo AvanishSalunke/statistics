@@ -25,10 +25,10 @@
 ## Inverse of the normal cumulative distribution function (iCDF).
 ##
 ## For each element of @var{p}, compute the quantile (the inverse of the CDF) of
-## the normal distribution with mean @var{mu} and standard deviation @var{sigma}.
-## The size of @var{p} is the common size of @var{p}, @var{mu} and @var{sigma}.
-## A scalar input functions as a constant matrix of the same size as the other
-## inputs.
+## the normal distribution with mean @var{mu} and standard deviation
+## @var{sigma}. The size of @var{p} is the common size of @var{p}, @var{mu} and
+## @var{sigma}. A scalar input functions as a constant matrix of the same size
+## as the other inputs.
 ##
 ## Default values are @var{mu} = 0, @var{sigma} = 1.
 ##
@@ -71,8 +71,8 @@ function x = norminv (p, mu, sigma)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (mu, "single") || isa (sigma, "single"))
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (mu, 'single') || isa (sigma, 'single'))
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -96,32 +96,32 @@ endfunction
 %! x2 = norminv (p, 0, 1);
 %! x3 = norminv (p, 0, 2);
 %! x4 = norminv (p, -2, 0.8);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-c")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-c')
 %! grid on
 %! ylim ([-5, 5])
-%! legend ({"μ = 0, σ = 0.5", "μ = 0, σ = 1", ...
-%!          "μ = 0, σ = 2", "μ = -2, σ = 0.8"}, "location", "northwest")
-%! title ("Normal iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'μ = 0, σ = 0.5', 'μ = 0, σ = 1', ...
+%!          'μ = 0, σ = 2', 'μ = -2, σ = 0.8'}, 'location', 'northwest')
+%! title ('Normal iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.5 1 2];
-%!assert (norminv (p, ones (1,5), ones (1,5)), [NaN -Inf 1 Inf NaN])
-%!assert (norminv (p, 1, ones (1,5)), [NaN -Inf 1 Inf NaN])
-%!assert (norminv (p, ones (1,5), 1), [NaN -Inf 1 Inf NaN])
-%!assert (norminv (p, [1 -Inf NaN Inf 1], 1), [NaN NaN NaN NaN NaN])
-%!assert (norminv (p, 1, [1 0 NaN Inf 1]), [NaN NaN NaN NaN NaN])
-%!assert (norminv ([p(1:2) NaN p(4:5)], 1, 1), [NaN -Inf NaN Inf NaN])
-%!assert (norminv (p), probit (p))
-%!assert (norminv (0.31254), probit (0.31254))
+%!assert_equal (norminv (p, ones (1,5), ones (1,5)), [NaN -Inf 1 Inf NaN])
+%!assert_equal (norminv (p, 1, ones (1,5)), [NaN -Inf 1 Inf NaN])
+%!assert_equal (norminv (p, ones (1,5), 1), [NaN -Inf 1 Inf NaN])
+%!assert_equal (norminv (p, [1 -Inf NaN Inf 1], 1), [NaN NaN NaN NaN NaN])
+%!assert_equal (norminv (p, 1, [1 0 NaN Inf 1]), [NaN NaN NaN NaN NaN])
+%!assert_equal (norminv ([p(1:2) NaN p(4:5)], 1, 1), [NaN -Inf NaN Inf NaN])
+%!assert_equal (norminv (p), probit (p))
+%!assert_equal (norminv (0.31254), probit (0.31254))
 
 ## Test class of input preserved
-%!assert (norminv ([p, NaN], 1, 1), [NaN -Inf 1 Inf NaN NaN])
-%!assert (norminv (single ([p, NaN]), 1, 1), single ([NaN -Inf 1 Inf NaN NaN]))
-%!assert (norminv ([p, NaN], single (1), 1), single ([NaN -Inf 1 Inf NaN NaN]))
-%!assert (norminv ([p, NaN], 1, single (1)), single ([NaN -Inf 1 Inf NaN NaN]))
+%!assert_equal (norminv ([p, NaN], 1, 1), [NaN -Inf 1 Inf NaN NaN])
+%!assert_equal (norminv (single ([p, NaN]), 1, 1), single ([NaN -Inf 1 Inf NaN NaN]))
+%!assert_equal (norminv ([p, NaN], single (1), 1), single ([NaN -Inf 1 Inf NaN NaN]))
+%!assert_equal (norminv ([p, NaN], 1, single (1)), single ([NaN -Inf 1 Inf NaN NaN]))
 
 ## Test input validation
 %!error<norminv: function called with too few input arguments.> norminv ()

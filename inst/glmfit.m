@@ -31,48 +31,48 @@
 ## distribution defined in @var{distribution}.
 ##
 ## @itemize
-## @item @var{X} is an @math{nxp} numeric matrix of predictor variables with
+## @item @var{X} is an @math{n*p} numeric matrix of predictor variables with
 ## @math{n} observations and @math{p} predictors.
-## @item @var{y} is an @math{nx1} numeric vector of responses for all supported
+## @item @var{y} is an @math{n*1} numeric vector of responses for all supported
 ## distributions, except for the 'binomial' distribution in which case @var{y}
-## can be either a numeric or logical @math{nx1} vector or an @math{nx2}
+## can be either a numeric or logical @math{n*1} vector or an @math{n*2}
 ## matrix, where the first column contains the number of successes and the
 ## second column contains the number of trials.
 ## @item @var{distribution} is a character vector specifying the distribution of
-## the response variable. Supported distributions are @qcode{"normal"},
-## @qcode{"binomial"}, @qcode{"poisson"}, @qcode{"gamma"}, and @qcode{"inverse
-## gaussian"}.
+## the response variable. Supported distributions are @qcode{'normal'},
+## @qcode{'binomial'}, @qcode{'poisson'}, @qcode{'gamma'}, and @qcode{'inverse
+## gaussian'}.
 ## @end itemize
 ##
 ## @code{@var{b} = glmfit (@dots{}, @var{Name}, @var{Value})} specifies
 ## additional options using @qcode{Name-Value} pair arguments.
 ##
-## @multitable @columnfractions 0.18 0.02 0.8
-## @headitem @var{Name} @tab @tab @var{Value}
+## @multitable @columnfractions 0.18 0.8
+## @headitem @var{Name} @tab @var{Value}
 ##
-## @item @qcode{"B0"} @tab @tab A numeric vector specifying initial values for
+## @item @qcode{'B0'} @tab A numeric vector specifying initial values for
 ## the coefficient estimates.  By default, the initial values are fitted values
 ## fitted from the data.
 ##
-## @item @qcode{"Constant"} @tab @tab A character vector specifying whether to
+## @item @qcode{'Constant'} @tab A character vector specifying whether to
 ## include a constant term in the model.  Valid options are @var{"on"} (default)
 ## and @var{"off"}.
 ##
-## @item @qcode{"EstDisp"} @tab @tab A character vector specifying whether to
+## @item @qcode{'EstDisp'} @tab A character vector specifying whether to
 ## compute dispersion parameter. Valid options are @var{"on"} and @var{"off"}.
-## For @qcode{"binomial"} and @qcode{"poisson"} distributions the default is
-## @var{"off"}, whereas for the @qcode{"normal"}, @qcode{"gamma"}, and
-## @qcode{"inverse gaussian"} distributions the default is @var{"on"}.
+## For @qcode{'binomial'} and @qcode{'poisson'} distributions the default is
+## @var{"off"}, whereas for the @qcode{'normal'}, @qcode{'gamma'}, and
+## @qcode{'inverse gaussian'} distributions the default is @var{"on"}.
 ##
-## @item @qcode{"link"} @tab @tab A character vector specifying the name of a
-## canonical link function or a numeric scalar for specifying a @qcode{"power"}
-## link function.  Supported canonical link functions include @qcode{"identity"}
-## (default for @qcode{"normal"} distribution), @qcode{"log"} (default for
-## @qcode{"poisson"} distribution), @qcode{"logit"} (default for
-## @qcode{"binomial"} distribution), @qcode{"probit"}, @qcode{"loglog"},
-## @qcode{"comploglog"}, and @qcode{"reciprocal"} (default for the
-## @qcode{"gamma"} distribution).  The @qcode{"power"} link function is the
-## default for the @qcode{"inverse gaussian"} distribution with @math{p = -2}.
+## @item @qcode{'link'} @tab A character vector specifying the name of a
+## canonical link function or a numeric scalar for specifying a @qcode{'power'}
+## link function.  Supported canonical link functions include @qcode{'identity'}
+## (default for @qcode{'normal'} distribution), @qcode{'log'} (default for
+## @qcode{'poisson'} distribution), @qcode{'logit'} (default for
+## @qcode{'binomial'} distribution), @qcode{'probit'}, @qcode{'loglog'},
+## @qcode{'comploglog'}, and @qcode{'reciprocal'} (default for the
+## @qcode{'gamma'} distribution).  The @qcode{'power'} link function is the
+## default for the @qcode{'inverse gaussian'} distribution with @math{p = -2}.
 ## For custom link functions, the user can provide cell array with three
 ## function handles: the link function, its derivative, and its inverse, or
 ## alternatively a structure @var{S} with three fields: @qcode{S.Link},
@@ -81,17 +81,17 @@
 ## All custom link functions must accept a vector of inputs and return a vector
 ## of the same size.
 ##
-## @item @qcode{"Offset"} @tab @tab A numeric vector of the same length as the
+## @item @qcode{'Offset'} @tab A numeric vector of the same length as the
 ## response @var{y} specifying an offset variable in the fit. It is used as an
 ## additional predictor with a coefficient value fixed at 1.
 ##
-## @item @qcode{"Options"} @tab @tab A scalar structure containing the fields
+## @item @qcode{'Options'} @tab A scalar structure containing the fields
 ## @qcode{MaxIter} and @qcode{TolX}.  @qcode{MaxIter} must be a scalar positive
 ## integer specifying the maximum number of iteration allowed for fitting the
 ## model, and @qcode{TolX} must be a positive scalar value specifying the
 ## termination tolerance.
 ##
-## @item @qcode{"Weights"} @tab @tab An @math{nx1} numeric vector of nonnegative
+## @item @qcode{'Weights'} @tab An @math{n*1} numeric vector of nonnegative
 ## values, where @math{n} is the number of observations in @var{X}.  By default,
 ## it is @code{ones (n, 1)}.
 ## @end multitable
@@ -110,8 +110,8 @@
 ## @item @qcode{dfe} - Degrees of freedom for error
 ## @item @qcode{sfit} - Estimated dispersion parameter
 ## @item @qcode{s} - Theoretical or estimated dispersion parameter
-## @item @qcode{estdisp} - @code{false} when @qcode{"EstDisp"} is @qcode{"off"}
-## and @code{true} when @qcode{"EstDisp"} is @qcode{"on"}
+## @item @qcode{estdisp} - @code{false} when @qcode{'EstDisp'} is @qcode{'off'}
+## and @code{true} when @qcode{'EstDisp'} is @qcode{'on'}
 ## @item @qcode{covb} - Estimated covariance matrix for @var{b}
 ## @item @qcode{se} - Vector of standard errors of the coefficient estimates
 ## @var{b}
@@ -154,13 +154,11 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
   ## Check y dimensions based on distribution
   if (strcmpi (distribution, 'binomial'))
     if (cy > 2)
-      error (["glmfit: for a 'binomial' distribution,", ...
-              " Y must be an n-by-1 or n-by-2 matrix."]);
+      error (strcat ("glmfit: for a 'binomial' distribution,", " Y must be an n-by-1 or n-by-2 matrix."));
     ## Get y and N for binomial distribution
     elseif (cy == 2)
       if (! isnumeric (y))
-        error (["glmfit: n-by-2 matrix Y for 'binomial' distribution", ...
-                " must be numeric."]);
+        error (strcat ("glmfit: n-by-2 matrix Y for 'binomial' distribution", " must be numeric."));
       endif
       N = y(:, 2);
       y = y(:, 1) ./ N;
@@ -172,39 +170,38 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
     endif
   else
     if (cy != 1)
-      error (["glmfit: for distributions other than 'binomial',", ...
-              " Y must be an n-by-1 column vector."]);
+      error (strcat ("glmfit: for distributions other than 'binomial',", " Y must be an n-by-1 column vector."));
     endif
   endif
 
   ## Set default link, variance, and deviance functions
   ## Set defaults for estimating dispersion parameter and limiting mu
   switch (tolower (distribution))
-    case "normal"
-      [flink, dlink, ilink] = getlinkfunctions ("identity");
+    case 'normal'
+      [flink, dlink, ilink] = getlinkfunctions ('identity');
       varFun = @(mu) ones (size (mu));
       devFun = @(mu, y) (y - mu) .^ 2;
       estDisp = true;
-    case "binomial"
-      [flink, dlink, ilink] = getlinkfunctions ("logit");
+    case 'binomial'
+      [flink, dlink, ilink] = getlinkfunctions ('logit');
       varFun = @(mu, N) sqrt (mu) .* sqrt (1 - mu) ./ sqrt (N);
       devFun = @(mu, y, N) 2 * N .* (y .* log ((y + (y == 0)) ./ mu) + ...
                            (1 - y) .* log ((1 - y + (y == 1)) ./ (1 - mu)));
       estDisp = false;
       muLimits = [eps, 1-eps];
-    case "poisson"
-      [flink, dlink, ilink] = getlinkfunctions ("log");
+    case 'poisson'
+      [flink, dlink, ilink] = getlinkfunctions ('log');
       varFun = @(mu) sqrt (mu);
       devFun = @(mu, y) 2 * (y .* (log ((y + (y == 0)) ./ mu)) - (y - mu));
       estDisp = false;
       muLimits = realmin;
-    case "gamma"
-      [flink, dlink, ilink] = getlinkfunctions ("reciprocal");
+    case 'gamma'
+      [flink, dlink, ilink] = getlinkfunctions ('reciprocal');
       varFun = @(mu) mu;
       devFun = @(mu, y) 2 * (-log (y ./ mu) + (y - mu) ./ mu);
       estDisp = true;
       muLimits = realmin;
-    case "inverse gaussian"
+    case 'inverse gaussian'
       [flink, dlink, ilink] = getlinkfunctions (-2);
       varFun = @(mu) mu .^ (3 / 2);
       devFun = @(mu, y) (((y - mu) ./ mu) .^ 2) ./  y;
@@ -226,34 +223,34 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
   while (numel (varargin) > 0)
     switch (tolower (varargin {1}))
 
-      case "b0"
+      case 'b0'
         B0 = varargin {2};
         if (! (isnumeric (B0) && isequal (size (B0), size (xymissing))))
           error ("glmfit: 'B0' must be a numeric vector of the same size as Y.");
         endif
         B0(xymissing) = [];
 
-      case "constant"
+      case 'constant'
         constant = tolower (varargin {2});
-        if (strcmpi (constant, "on"))
+        if (strcmpi (constant, 'on'))
           constant = true;
-        elseif (strcmpi (constant, "off"))
+        elseif (strcmpi (constant, 'off'))
           constant = false;
         else
           error ("glmfit: 'Constant' should be either 'on' or 'off'.");
         endif
 
-      case "estdisp"
+      case 'estdisp'
         estDisp = tolower (varargin {2});
-        if (strcmpi (estDisp, "on"))
+        if (strcmpi (estDisp, 'on'))
           estDisp = true;
-        elseif (strcmpi (estDisp, "off"))
+        elseif (strcmpi (estDisp, 'off'))
           estDisp = false;
         else
           error ("glmfit: 'EstDisp' should be either 'on' or 'off'.");
         endif
 
-      case "link"
+      case 'link'
         linkArg = varargin {2};
         ## Input validation is performed in private function
         [flink, dlink, ilink, errmsg] = getlinkfunctions (linkArg);
@@ -261,44 +258,39 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
           error ("glmfit: %s", errmsg);
         endif
 
-      case "options"
+      case 'options'
         options = varargin {2};
-        rf = {"MaxIter", "TolX"};
+        rf = {'MaxIter', 'TolX'};
         if (! (isstruct (options) && all (ismember (rf, fieldnames (options)))))
-          error (["glmfit: 'Options' must be a structure containing", ...
-                  " the fields 'MaxIter', and 'TolX'."]);
+          error (strcat ("glmfit: 'Options' must be a structure containing", " the fields 'MaxIter', and 'TolX'."));
         endif
         MaxIter = options.MaxIter;
         TolX = options.TolX;
         if (! isscalar (MaxIter) || MaxIter <= 0 || fix (MaxIter) != MaxIter)
-          error (["glmfit: 'MaxIter' in 'Options' structure must", ...
-                  " be a positive integer."]);
+          error (strcat ("glmfit: 'MaxIter' in 'Options' structure must", " be a positive integer."));
         endif
         if (! isscalar (TolX) || TolX <= 0)
-          error (["glmfit: 'TolX' in 'Options' structure must", ...
-                  " be a positive scalar."]);
+          error (strcat ("glmfit: 'TolX' in 'Options' structure must", " be a positive scalar."));
         endif
 
-      case "offset"
+      case 'offset'
         offset = varargin {2};
         if (! (isnumeric (offset) && isequal (size (offset), size (xymissing))))
-          error (["glmfit: 'Offset' must be a numeric vector", ...
-                  " of the same size as Y."]);
+          error (strcat ("glmfit: 'Offset' must be a numeric vector", " of the same size as Y."));
         endif
         offset(xymissing) = [];
 
-      case "weights"
+      case 'weights'
         weight = varargin {2};
         if (! (isnumeric (weight) && isequal (size (weight), size (xymissing))))
-          error (["glmfit: 'Weights' must be a numeric vector", ...
-                  " of the same size as Y."]);
+          error (strcat ("glmfit: 'Weights' must be a numeric vector", " of the same size as Y."));
         endif
         weight(xymissing) = [];
 
       otherwise
         error ("glmfit: unknown parameter name.");
     endswitch
-    varargin (1:2) = [];
+    varargin(1:2) = [];
   endwhile
 
   ## Adjust X based on constant
@@ -316,7 +308,7 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
   endif
   if (rankX < cx)
     warning ("glmfit: X is ill-conditioned.");
-    P = P(1:rankx);
+    P = P(1:rankX);
     X = X(:,P);
   else
     P = [1:cx];
@@ -330,19 +322,19 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
   ## Initialize mu and eta
   if (isempty (B0))  # from y
     switch (distribution)
-      case "binomial"
+      case 'binomial'
         mu = (N .* y + 0.5) ./ (N + 1);
-      case "poisson"
+      case 'poisson'
         mu = y + 0.25;
-      case {"gamma", "inverse gaussian"}
+      case {'gamma', 'inverse gaussian'}
         mu = max (y, eps);
       otherwise
         mu = y;
     endswitch
-    eta = flink (mu);
+    eta = flink(mu);
   else               # from coefficient estimates
     eta = offset + X * B0(:);
-    mu = ilink (eta);
+    mu = ilink(eta);
   endif
 
   ## Initialize coefficient vector and iterations
@@ -355,11 +347,11 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
     Bold = Bnew;
 
     ## Compute iteratively reweighted least squares weights
-    d_eta = dlink (mu);
-    if (strcmpi (distribution, "binomial"))
-      IRLS = abs (d_eta) .* varFun (mu, N);
+    d_eta = dlink(mu);
+    if (strcmpi (distribution, 'binomial'))
+      IRLS = abs (d_eta) .* varFun(mu, N);
     else
-      IRLS = abs (d_eta) .* varFun (mu);
+      IRLS = abs (d_eta) .* varFun(mu);
     endif
     squaredWeight = sqrt (weight) ./ IRLS;
 
@@ -372,12 +364,12 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
 
     ## Compute predicted mean using current linear predictor
     eta = offset + X * Bnew;
-    mu = ilink (eta);
+    mu = ilink(eta);
 
     ## Force predicted mean within distribution support limits
-    if (strcmpi (distribution, "normal"))
+    if (strcmpi (distribution, 'normal'))
       mu = mu;
-    elseif (strcmpi (distribution, "binomial"))
+    elseif (strcmpi (distribution, 'binomial'))
       mu = max (min (mu, muLimits(2)), muLimits(1));
     else  # for "poisson", "gamma", and "inverse gaussian" distributions
       mu = max (mu, muLimits(1));
@@ -404,11 +396,11 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
 
   ## Compute deviance
   if (nargout > 1)
-    if (strcmpi (distribution, "binomial"))
-      devn = devFun (mu, y, N);
+    if (strcmpi (distribution, 'binomial'))
+      devn = devFun(mu, y, N);
       dev = sum (weight .* devn);
     else
-      devn = devFun (mu, y);
+      devn = devFun(mu, y);
       dev = sum (weight .* devn);
     endif
   endif
@@ -416,7 +408,7 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
   ## Compute stats
   if (nargout > 2)
     ## Store coefficient estimates
-    stats.beta = bb;
+    stats.beta = b;
 
     ## Compute degrees of freedom for error
     stats.dfe = max (nx - numc, 0);
@@ -424,16 +416,16 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
     ## Compute estimated dispersion parameter
     if (stats.dfe > 0)
       switch (tolower (distribution))
-        case "normal"
+        case 'normal'
           stats.sfit = sum (weight .* (y - mu) .^ 2) / stats.dfe;
-        case "binomial"
+        case 'binomial'
           stats.sfit = sum (weight .* (y - mu) .^ 2 ./ ...
                             (mu .* (1 - mu) ./ N)) / stats.dfe;
-        case "poisson"
+        case 'poisson'
           stats.sfit = sum (weight .* (y - mu) .^ 2 ./ mu) / stats.dfe;
-        case "gamma"
+        case 'gamma'
           stats.sfit = sum (weight .* ((y - mu) ./ mu) .^ 2) / stats.dfe;
-        case "inverse gaussian"
+        case 'inverse gaussian'
           stats.sfit = sum (weight .* ((y - mu) ./ mu .^ (3 / 2)) .^ 2) / ...
                        stats.dfe;
       endswitch
@@ -477,7 +469,7 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
       stats.coeffcorr(P,P) = C;
       stats.t(P) = b ./ se;
       if (estDisp)
-        stats.p = 2 * tcdf (-abs (stats.t), dfe);
+        stats.p = 2 * tcdf (-abs (stats.t), stats.dfe);
       else
         stats.p = 2 * normcdf (-abs (stats.t));
       endif
@@ -490,27 +482,27 @@ function [b, dev, stats] = glmfit (X, y, distribution, varargin)
     stats.resida = NaN (size (xymissing));  # Vector of Anscombe residuals
     if (isequal (distribution, 'binomial'))
       stats.resid(! xymissing) = (y - mu) .* N;
-      stats.residp(! xymissing) = (y - mu) ./ (varFun (mu, N) + (y == mu));
+      stats.residp(! xymissing) = (y - mu) ./ (varFun(mu, N) + (y == mu));
     else
       stats.resid(! xymissing)  = y - mu;
-      stats.residp(! xymissing) = (y - mu) ./ (varFun (mu) + (y == mu));
-    end
-    stats.residd(! xymissing) = sign (y - mu) .* sqrt (max (0, divn));
+      stats.residp(! xymissing) = (y - mu) ./ (varFun(mu) + (y == mu));
+    endif
+    stats.residd(! xymissing) = sign (y - mu) .* sqrt (max (0, devn));
     switch (tolower (distribution))
-      case "normal"
+      case 'normal'
         stats.resida(! xymissing) = y - mu;
-      case "binomial"
-        a = b = 2 / 3;
-        stats.resida(! xymissing) = beta(a, b) ...
-                                  * (betainc (y, a, b) - betainc (mu, a, b)) ...
+      case 'binomial'
+        ab = 2 / 3;
+        stats.resida(! xymissing) = beta (ab, ab) ...
+                                  * (betainc (y, ab, ab) - betainc (mu, ab, ab)) ...
                                   ./ ((mu .* (1 - mu)) .^ (1 / 6) ./ sqrt (N));
-      case "poisson"
+      case 'poisson'
         stats.resida(! xymissing) = 1.5 * ((y .^ (2 / 3) - mu .^ (2 / 3)) ...
                                            ./ mu .^ (1 / 6));
-      case "gamma"
+      case 'gamma'
         pwr = 1 / 3;
         stats.resida(! xymissing) = 3 * (y .^ pwr - mu .^ pwr) ./ mu .^ pwr;
-      case "inverse gaussian"
+      case 'inverse gaussian'
         stats.resida(! xymissing) = (log (y) - log (mu)) ./ mu;
     endswitch
   endif
@@ -521,42 +513,52 @@ endfunction
 %! x = [210, 230, 250, 270, 290, 310, 330, 350, 370, 390, 410, 430]';
 %! n = [48, 42, 31, 34, 31, 21, 23, 23, 21, 16, 17, 21]';
 %! y = [1, 2, 0, 3, 8, 8, 14, 17, 19, 15, 17, 21]';
-%! b = glmfit (x, [y n], "binomial", "Link", "probit");
-%! yfit = glmval (b, x, "probit", "Size", n);
+%! b = glmfit (x, [y n], 'binomial', 'Link', 'probit');
+%! yfit = glmval (b, x, 'probit', 'Size', n);
 %! plot (x, y./n, 'o', x, yfit ./ n, '-')
 
 %!demo
 %! load fisheriris
 %! X = meas (51:end, :);
-%! y = strcmp ("versicolor", species(51:end));
-%! b = glmfit (X, y, "binomial", "link", "logit")
+%! y = strcmp ('versicolor', species(51:end));
+%! b = glmfit (X, y, 'binomial', 'link', 'logit')
 
 ## Test output
 %!test
 %! load fisheriris;
 %! X = meas(51:end,:);
-%! y = strcmp ("versicolor", species(51:end));
-%! b = glmfit (X, y, "binomial", "link", "logit");
-%! assert (b, [42.6379; 2.4652; 6.6809; -9.4294; -18.2861], 1e-4);
+%! y = strcmp ('versicolor', species(51:end));
+%! b = glmfit (X, y, 'binomial', 'link', 'logit');
+%! assert_equal (b, [42.6379; 2.4652; 6.6809; -9.4294; -18.2861], 1e-4);
+
+## Requesting the stats output must not clobber the coefficient vector b; the
+## binomial Anscombe-residual computation previously reused the name "b".
+%!test
+%! load fisheriris;
+%! X = meas(51:end,:);
+%! y = strcmp ('versicolor', species(51:end));
+%! [b, dev, stats] = glmfit (X, y, 'binomial', 'link', 'logit');
+%! assert_equal (b, [42.6379; 2.4652; 6.6809; -9.4294; -18.2861], 1e-4);
+%! assert_equal (numel (stats.se), numel (b));
 
 %!test
 %! X = [1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.9, 9.0, 10.1]';
 %! y = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4]';
-%! [Bnew, dev] = glmfit (X, y, "gamma", "link", "log");
+%! [Bnew, dev] = glmfit (X, y, 'gamma', 'link', 'log');
 %! b_matlab = [-0.7631; 0.1113];
 %! dev_matlab = 0.0111;
-%! assert (Bnew, b_matlab, 0.001);
-%! assert (dev, dev_matlab, 0.001);
+%! assert_equal (Bnew, b_matlab, 0.001);
+%! assert_equal (dev, dev_matlab, 0.001);
 
 %!test
 %! X = [1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.9, 9.0, 10.1]';
 %! y = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4]';
 %! p_input = 1;
-%! [Bnew, dev] = glmfit (X, y, "inverse gaussian", "link", p_input);
+%! [Bnew, dev] = glmfit (X, y, 'inverse gaussian', 'link', p_input);
 %! b_matlab = [0.3813; 0.0950];
 %! dev_matlab = 0.0051;
-%! assert (Bnew, b_matlab, 0.001);
-%! assert (dev, dev_matlab, 0.001);
+%! assert_equal (Bnew, b_matlab, 0.001);
+%! assert_equal (dev, dev_matlab, 0.001);
 
 ## Test input validation
 %!error <glmfit: too few input arguments.> glmfit ()
@@ -601,87 +603,87 @@ endfunction
 %!error <glmfit: 'EstDisp' should be either 'on' or 'off'.> ...
 %! glmfit (rand (5, 2), rand (5, 1), 'normal', 'estdisp', true)
 %!error <glmfit: structure with custom link functions must be a scalar.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", {1, 2}))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', {1, 2}))
 %!error <glmfit: structure with custom link functions requires the fields 'Link', 'Derivative', and 'Inverse'.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", "norminv"))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', 'norminv'))
 %!error <glmfit: bad 'Link' function in custom link function structure.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", "some", "Derivative", @(x)x, "Inverse", "normcdf"))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', 'some', 'Derivative', @(x)x, 'Inverse', 'normcdf'))
 %!error <glmfit: bad 'Link' function in custom link function structure.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", 1, "Derivative", @(x)x, "Inverse", "normcdf"))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', 1, 'Derivative', @(x)x, 'Inverse', 'normcdf'))
 %!error <glmfit: custom 'Link' function must return an output of the same size as input.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", @(x) [x, x], "Derivative", @(x)x, "Inverse", "normcdf"))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', @(x) [x, x], 'Derivative', @(x)x, 'Inverse', 'normcdf'))
 %!error <glmfit: invalid custom 'Link' function.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", "what", "Derivative", @(x)x, "Inverse", "normcdf"))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', 'what', 'Derivative', @(x)x, 'Inverse', 'normcdf'))
 %!error <glmfit: bad 'Derivative' function in custom link function structure.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", @(x)x, "Derivative", "some", "Inverse", "normcdf"))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', @(x)x, 'Derivative', 'some', 'Inverse', 'normcdf'))
 %!error <glmfit: bad 'Derivative' function in custom link function structure.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", @(x)x, "Derivative", 1, "Inverse", "normcdf"))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', @(x)x, 'Derivative', 1, 'Inverse', 'normcdf'))
 %!error <glmfit: custom 'Derivative' function must return an output of the same size as input.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", @(x)x, "Derivative", @(x) [x, x], "Inverse", "normcdf"))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', @(x)x, 'Derivative', @(x) [x, x], 'Inverse', 'normcdf'))
 %!error <glmfit: invalid custom 'Derivative' function.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", @(x)x, "Derivative", "what", "Inverse", "normcdf"))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', @(x)x, 'Derivative', 'what', 'Inverse', 'normcdf'))
 %!error <glmfit: bad 'Inverse' function in custom link function structure.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", @(x)x, "Derivative", "normcdf", "Inverse", "some"))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', @(x)x, 'Derivative', 'normcdf', 'Inverse', 'some'))
 %!error <glmfit: bad 'Inverse' function in custom link function structure.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", @(x)x, "Derivative", "normcdf", "Inverse", 1))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', @(x)x, 'Derivative', 'normcdf', 'Inverse', 1))
 %!error <glmfit: custom 'Inverse' function must return an output of the same size as input.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", @(x)x, "Derivative", "normcdf", "Inverse", @(x) [x, x]))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', @(x)x, 'Derivative', 'normcdf', 'Inverse', @(x) [x, x]))
 %!error <glmfit: invalid custom 'Inverse' function.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', struct ("Link", @(x)x, "Derivative", "normcdf", "Inverse", "what"))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', struct ('Link', @(x)x, 'Derivative', 'normcdf', 'Inverse', 'what'))
 %!error <glmfit: cell array with custom link functions must have three elements.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', {'log'})
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', {'log'})
 %!error <glmfit: cell array with custom link functions must have three elements.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', {'log', 'hijy'})
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', {'log', 'hijy'})
 %!error <glmfit: cell array with custom link functions must have three elements.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', {1, 2, 3, 4})
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', {1, 2, 3, 4})
 %!error <glmfit: bad 'Link' function in custom link function cell array.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', {"log", "dfv", "dfgvd"})
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', {'log', 'dfv', 'dfgvd'})
 %!error <glmfit: custom 'Link' function must return an output of the same size as input.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', {@(x) [x, x], "dfv", "dfgvd"})
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', {@(x) [x, x], 'dfv', 'dfgvd'})
 %!error <glmfit: invalid custom 'Link' function.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', {@(x) what (x), "dfv", "dfgvd"})
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', {@(x) what (x), 'dfv', 'dfgvd'})
 %!error <glmfit: bad 'Derivative' function in custom link function cell array.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', {@(x) x, "dfv", "dfgvd"})
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', {@(x) x, 'dfv', 'dfgvd'})
 %!error <glmfit: custom 'Derivative' function must return an output of the same size as input.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', {@(x) x, @(x) [x, x], "dfgvd"})
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', {@(x) x, @(x) [x, x], 'dfgvd'})
 %!error <glmfit: invalid custom 'Derivative' function.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', {@(x) x, @(x) what (x), "dfgvd"})
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', {@(x) x, @(x) what (x), 'dfgvd'})
 %!error <glmfit: bad 'Inverse' function in custom link function cell array.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', {@(x) x, @(x) x, "dfgvd"})
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', {@(x) x, @(x) x, 'dfgvd'})
 %!error <glmfit: custom 'Inverse' function must return an output of the same size as input.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', {@(x) x, @(x) x, @(x) [x, x]})
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', {@(x) x, @(x) x, @(x) [x, x]})
 %!error <glmfit: invalid custom 'Inverse' function.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', {@(x) x, @(x) x, @(x) what (x)})
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', {@(x) x, @(x) x, @(x) what (x)})
 %!error <glmfit: numeric input for custom link function must be a finite real scalar value.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', NaN)
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', NaN)
 %!error <glmfit: numeric input for custom link function must be a finite real scalar value.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', [1, 2])
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', [1, 2])
 %!error <glmfit: numeric input for custom link function must be a finite real scalar value.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', [1i])
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', [1i])
 %!error <glmfit: canonical link function name must be a character vector.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', ["log"; "log1"])
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', ['log'; 'log1'])
 %!error <glmfit: canonical link function 'somelinkfunction' is not supported.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', 'somelinkfunction')
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', 'somelinkfunction')
 %!error <glmfit: invalid value for custom link function.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'link', true)
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'link', true)
 %!error <glmfit: 'Options' must be a structure containing the fields 'MaxIter', and 'TolX'.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'options', true)
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'options', true)
 %!error <glmfit: 'Options' must be a structure containing the fields 'MaxIter', and 'TolX'.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'options', struct ("MaxIter", 100))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'options', struct ('MaxIter', 100))
 %!error <glmfit: 'MaxIter' in 'Options' structure must be a positive integer.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'options', struct ("MaxIter", 4.5, "TolX", 1e-6))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'options', struct ('MaxIter', 4.5, 'TolX', 1e-6))
 %!error <glmfit: 'MaxIter' in 'Options' structure must be a positive integer.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'options', struct ("MaxIter", 0, "TolX", 1e-6))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'options', struct ('MaxIter', 0, 'TolX', 1e-6))
 %!error <glmfit: 'MaxIter' in 'Options' structure must be a positive integer.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'options', struct ("MaxIter", -100, "TolX", 1e-6))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'options', struct ('MaxIter', -100, 'TolX', 1e-6))
 %!error <glmfit: 'MaxIter' in 'Options' structure must be a positive integer.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'options', struct ("MaxIter", [50 ,50], "TolX", 1e-6))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'options', struct ('MaxIter', [50 ,50], 'TolX', 1e-6))
 %!error <glmfit: 'TolX' in 'Options' structure must be a positive scalar.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'options', struct ("MaxIter", 100, "TolX", 0))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'options', struct ('MaxIter', 100, 'TolX', 0))
 %!error <glmfit: 'TolX' in 'Options' structure must be a positive scalar.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'options', struct ("MaxIter", 100, "TolX", -1e-6))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'options', struct ('MaxIter', 100, 'TolX', -1e-6))
 %!error <glmfit: 'TolX' in 'Options' structure must be a positive scalar.> ...
-%! glmfit (rand(5,2), rand(5,1), 'poisson', 'options', struct ("MaxIter", 100, "TolX", [1e-6, 1e-6]))
+%! glmfit (rand (5,2), rand (5,1), 'poisson', 'options', struct ('MaxIter', 100, 'TolX', [1e-6, 1e-6]))
 %!error <glmfit: 'Offset' must be a numeric vector of the same size as Y.> ...
 %! glmfit (rand (5, 2), rand (5, 1), 'normal', 'offset', [1; 2; 3; 4])
 %!error <glmfit: 'Offset' must be a numeric vector of the same size as Y.> ...

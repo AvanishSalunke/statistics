@@ -77,9 +77,9 @@ function x = gevinv (p, k, sigma, mu)
 
   ## Use the Taylor series expansion of the exponential to
   ## avoid roundoff error or dividing by zero when k is small
-  ii = (abs(kllP) < 1E-4);
+  ii = (abs (kllP) < 1E-4);
   x(ii) = mu(ii) - sigma(ii) .* llP(ii) .* (1 - kllP(ii) .* (1 - kllP(ii)));
-  x(~ii) = mu(~ii) + (sigma(~ii) ./ k(~ii)) .* (exp(-kllP(~ii)) - 1);
+  x(! ii) = mu(! ii) + (sigma(! ii) ./ k(! ii)) .* (exp (-kllP(! ii)) - 1);
   x(is_neginf) = -Inf;
   x(is_posinf) = Inf;
   x(is_nan) = NaN;
@@ -94,17 +94,17 @@ endfunction
 %! x4 = gevinv (p, 1, 2, 5);
 %! x5 = gevinv (p, 1, 5, 5);
 %! x6 = gevinv (p, 1, 0.5, 5);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", ...
-%!       p, x4, "-c", p, x5, "-m", p, x6, "-k")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', ...
+%!       p, x4, '-c', p, x5, '-m', p, x6, '-k')
 %! grid on
 %! ylim ([-1, 10])
-%! legend ({"k = 1, σ = 1, μ = 1", "k = 0.5, σ = 1, μ = 1", ...
-%!          "k = 1, σ = 1, μ = 5", "k = 1, σ = 2, μ = 5", ...
-%!          "k = 1, σ = 5, μ = 5", "k = 1, σ = 0.5, μ = 5"}, ...
-%!         "location", "northwest")
-%! title ("Generalized extreme value iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'k = 1, σ = 1, μ = 1', 'k = 0.5, σ = 1, μ = 1', ...
+%!          'k = 1, σ = 1, μ = 5', 'k = 1, σ = 2, μ = 5', ...
+%!          'k = 1, σ = 5, μ = 5', 'k = 1, σ = 0.5, μ = 5'}, ...
+%!         'location', 'northwest')
+%! title ('Generalized extreme value iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!test
@@ -113,24 +113,24 @@ endfunction
 %! sigma = 1;
 %! mu = 0;
 %! x = gevinv (p, k, sigma, mu);
-%! c = gevcdf(x, k, sigma, mu);
-%! assert (c, p, 0.001);
+%! c = gevcdf (x, k, sigma, mu);
+%! assert_equal (c, p, 0.001);
 %!test
 %! p = 0.1:0.1:0.9;
 %! k = 1;
 %! sigma = 1;
 %! mu = 0;
 %! x = gevinv (p, k, sigma, mu);
-%! c = gevcdf(x, k, sigma, mu);
-%! assert (c, p, 0.001);
+%! c = gevcdf (x, k, sigma, mu);
+%! assert_equal (c, p, 0.001);
 %!test
 %! p = 0.1:0.1:0.9;
 %! k = 0.3;
 %! sigma = 1;
 %! mu = 0;
 %! x = gevinv (p, k, sigma, mu);
-%! c = gevcdf(x, k, sigma, mu);
-%! assert (c, p, 0.001);
+%! c = gevcdf (x, k, sigma, mu);
+%! assert_equal (c, p, 0.001);
 
 ## Test input validation
 %!error<gevinv: function called with too few input arguments.> gevinv ()
@@ -138,13 +138,13 @@ endfunction
 %!error<gevinv: function called with too few input arguments.> gevinv (1, 2)
 %!error<gevinv: function called with too few input arguments.> gevinv (1, 2, 3)
 %!error<gevinv: P, K, SIGMA, and MU must be of common size or scalars.> ...
-%! gevinv (ones (3), ones (2), ones(2), ones(2))
+%! gevinv (ones (3), ones (2), ones (2), ones (2))
 %!error<gevinv: P, K, SIGMA, and MU must be of common size or scalars.> ...
-%! gevinv (ones (2), ones (3), ones(2), ones(2))
+%! gevinv (ones (2), ones (3), ones (2), ones (2))
 %!error<gevinv: P, K, SIGMA, and MU must be of common size or scalars.> ...
-%! gevinv (ones (2), ones (2), ones(3), ones(2))
+%! gevinv (ones (2), ones (2), ones (3), ones (2))
 %!error<gevinv: P, K, SIGMA, and MU must be of common size or scalars.> ...
-%! gevinv (ones (2), ones (2), ones(2), ones(3))
+%! gevinv (ones (2), ones (2), ones (2), ones (3))
 %!error<gevinv: P, K, SIGMA, and MU must not be complex.> gevinv (i, 2, 3, 4)
 %!error<gevinv: P, K, SIGMA, and MU must not be complex.> gevinv (1, i, 3, 4)
 %!error<gevinv: P, K, SIGMA, and MU must not be complex.> gevinv (1, 2, i, 4)

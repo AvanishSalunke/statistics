@@ -27,10 +27,10 @@
 ##
 ## @itemize
 ## @item
-## @code{X} must be a @math{NxP} numeric matrix of predictor data where rows
+## @code{X} must be a @math{N*P} numeric matrix of predictor data where rows
 ## correspond to observations and columns correspond to features or variables.
 ## @item
-## @code{Y} is @math{Nx1} matrix or cell matrix containing the class labels of
+## @code{Y} is @math{N*1} matrix or cell matrix containing the class labels of
 ## corresponding predictor data in @var{X}. @var{Y} can be numerical, logical,
 ## char array or cell array of character vectors. @var{Y} must have same number
 ## of rows as @var{X}.
@@ -42,43 +42,43 @@
 ##
 ## @subheading Model Parameters
 ##
-## @multitable @columnfractions 0.18 0.02 0.8
-## @headitem @var{Name} @tab @tab @var{Value}
+## @multitable @columnfractions 0.18 0.8
+## @headitem @var{Name} @tab @var{Value}
 ##
-## @item @qcode{"PredictorNames"} @tab @tab A cell array of character vectors
+## @item @qcode{'PredictorNames'} @tab A cell array of character vectors
 ## specifying the names of the predictors. The length of this array must match
 ## the number of columns in @var{X}.
 ##
-## @item @qcode{"ResponseName"} @tab @tab A character vector specifying the
+## @item @qcode{'ResponseName'} @tab A character vector specifying the
 ## name of the response variable.
 ##
-## @item @qcode{"ClassNames"} @tab @tab Names of the classes in the class
+## @item @qcode{'ClassNames'} @tab Names of the classes in the class
 ## labels, @var{Y}, used for fitting the Discriminant model. @qcode{ClassNames}
 ## are of the same type as the class labels in @var{Y}.
 ##
-## @item @qcode{"Prior"} @tab @tab A numeric vector specifying the prior
+## @item @qcode{'Prior'} @tab A numeric vector specifying the prior
 ## probabilities for each class.  The order of the elements in @qcode{Prior}
 ## corresponds to the order of the classes in @qcode{ClassNames}.
-## Alternatively, you can specify @qcode{"empirical"} to use the empirical
-## class probabilities or @qcode{"uniform"} to assume equal class probabilities.
+## Alternatively, you can specify @qcode{'empirical'} to use the empirical
+## class probabilities or @qcode{'uniform'} to assume equal class probabilities.
 ##
-## @item @qcode{"Cost"} @tab @tab A @math{NxR} numeric matrix containing
+## @item @qcode{'Cost'} @tab A @math{N*R} numeric matrix containing
 ## misclassification cost for the corresponding instances in @var{X} where
 ## @math{R} is the number of unique categories in @var{Y}.  If an instance is
 ## correctly classified into its category the cost is calculated to be 1,
 ## otherwise 0. cost matrix can be altered use @code{@var{Mdl.cost} = somecost}.
 ## default value @qcode{@var{cost} = ones(rows(X),numel(unique(Y)))}.
 ##
-## @item @qcode{"DiscrimType"} @tab @tab A character vector or string scalar
+## @item @qcode{'DiscrimType'} @tab A character vector or string scalar
 ## specifying the type of discriminant analysis to perform. The only supported
-## value is @qcode{"linear"}.
+## value is @qcode{'linear'}.
 ##
-## @item @qcode{"FillCoeffs"} @tab @tab A character vector or string scalar
-## with values @qcode{"on"} or @qcode{"off"} specifying whether to fill the
-## coefficients after fitting. If set to @qcode{"on"}, the coefficients are
+## @item @qcode{'FillCoeffs'} @tab A character vector or string scalar
+## with values @qcode{'on'} or @qcode{'off'} specifying whether to fill the
+## coefficients after fitting. If set to @qcode{'on'}, the coefficients are
 ## computed during model fitting, which can be useful for prediction.
 ##
-## @item @qcode{"Gamma"} @tab @tab A numeric scalar specifying the
+## @item @qcode{'Gamma'} @tab A numeric scalar specifying the
 ## regularization parameter for the covariance matrix. It adjusts the linear
 ## discriminant analysis to make the model more stable in the presence of
 ## multicollinearity or small sample sizes. A value of 0 corresponds to no
@@ -115,10 +115,10 @@ endfunction
 %! ## and plot the decision boundaries.
 %!
 %! load fisheriris
-%! idx = ! strcmp (species, "setosa");
+%! idx = ! strcmp (species, 'setosa');
 %! X = meas(idx,3:4);
-%! Y = cast (strcmpi (species(idx), "virginica"), "double");
-%! obj = fitcdiscr (X, Y, "Gamma", 0.5)
+%! Y = cast (strcmpi (species(idx), 'virginica'), 'double');
+%! obj = fitcdiscr (X, Y, 'Gamma', 0.5)
 %! x1 = [min(X(:,1)):0.03:max(X(:,1))];
 %! x2 = [min(X(:,2)):0.02:max(X(:,2))];
 %! [x1G, x2G] = meshgrid (x1, x2);
@@ -127,53 +127,53 @@ endfunction
 %! gidx = logical (pred);
 %!
 %! figure
-%! scatter (XGrid(gidx,1), XGrid(gidx,2), "markerfacecolor", "magenta");
+%! scatter (XGrid(gidx,1), XGrid(gidx,2), 'markerfacecolor', 'magenta');
 %! hold on
-%! scatter (XGrid(!gidx,1), XGrid(!gidx,2), "markerfacecolor", "red");
-%! plot (X(Y == 0, 1), X(Y == 0, 2), "ko", X(Y == 1, 1), X(Y == 1, 2), "kx");
-%! xlabel ("Petal length (cm)");
-%! ylabel ("Petal width (cm)");
-%! title ("Linear Discriminant Analysis Decision Boundary");
-%! legend ({"Versicolor Region", "Virginica Region", ...
-%!         "Sampled Versicolor", "Sampled Virginica"}, ...
-%!         "location", "northwest")
+%! scatter (XGrid(! gidx,1), XGrid(! gidx,2), 'markerfacecolor', 'red');
+%! plot (X(Y == 0, 1), X(Y == 0, 2), 'ko', X(Y == 1, 1), X(Y == 1, 2), 'kx');
+%! xlabel ('Petal length (cm)');
+%! ylabel ('Petal width (cm)');
+%! title ('Linear Discriminant Analysis Decision Boundary');
+%! legend ({'Versicolor Region', 'Virginica Region', ...
+%!         'Sampled Versicolor', 'Sampled Virginica'}, ...
+%!         'location', 'northwest')
 %! axis tight
 %! hold off
 
 ## Tests
 %!test
 %! load fisheriris
-%! Mdl = fitcdiscr (meas, species, "Gamma", 0.5);
+%! Mdl = fitcdiscr (meas, species, 'Gamma', 0.5);
 %! [label, score, cost] = predict (Mdl, [2, 2, 2, 2]);
-%! assert (label, {'versicolor'})
-%! assert (score, [0, 0.9999, 0.0001], 1e-4)
-%! assert (cost, [1, 0.0001, 0.9999], 1e-4)
+%! assert_equal (label, {'versicolor'})
+%! assert_equal (score, [0, 0.9999, 0.0001], 1e-4)
+%! assert_equal (cost, [1, 0.0001, 0.9999], 1e-4)
 %! [label, score, cost] = predict (Mdl, [2.5, 2.5, 2.5, 2.5]);
-%! assert (label, {'versicolor'})
-%! assert (score, [0, 0.6368, 0.3632], 1e-4)
-%! assert (cost, [1, 0.3632, 0.6368], 1e-4)
-%! assert (class (Mdl), "ClassificationDiscriminant");
-%! assert ({Mdl.X, Mdl.Y, Mdl.NumObservations}, {meas, species, 150})
-%! assert ({Mdl.DiscrimType, Mdl.ResponseName}, {"linear", "Y"})
-%! assert ({Mdl.Gamma, Mdl.MinGamma}, {0.5, 0})
-%! assert (Mdl.ClassNames, unique (species))
+%! assert_equal (label, {'versicolor'})
+%! assert_equal (score, [0, 0.6368, 0.3632], 1e-4)
+%! assert_equal (cost, [1, 0.3632, 0.6368], 1e-4)
+%! assert_equal (class (Mdl), "ClassificationDiscriminant");
+%! assert_equal ({Mdl.X, Mdl.Y, Mdl.NumObservations}, {meas, species, 150})
+%! assert_equal ({Mdl.DiscrimType, Mdl.ResponseName}, {'linear', 'Y'})
+%! assert_equal ({Mdl.Gamma, Mdl.MinGamma}, {0.5, 0})
+%! assert_equal (Mdl.ClassNames, unique (species))
 %! sigma = [0.265008, 0.046361, 0.083757, 0.019201; ...
 %!          0.046361, 0.115388, 0.027622, 0.016355; ...
 %!          0.083757, 0.027622, 0.185188, 0.021333; ...
 %!          0.019201, 0.016355, 0.021333, 0.041882];
-%! assert (Mdl.Sigma, sigma, 1e-6)
+%! assert_equal (Mdl.Sigma, sigma, 1e-6)
 %! mu = [5.0060, 3.4280, 1.4620, 0.2460; ...
 %!       5.9360, 2.7700, 4.2600, 1.3260; ...
 %!       6.5880, 2.9740, 5.5520, 2.0260];
-%! assert (Mdl.Mu, mu, 1e-14)
-%! assert (Mdl.LogDetSigma, -8.6884, 1e-4)
+%! assert_equal (Mdl.Mu, mu, 1e-14)
+%! assert_equal (Mdl.LogDetSigma, -8.6884, 1e-4)
 
 ## Test input validation
 %!error<fitcdiscr: too few arguments.> fitcdiscr ()
 %!error<fitcdiscr: too few arguments.> fitcdiscr (ones (4,1))
 %!error<fitcdiscr: name-value arguments must be in pairs.>
-%! fitcdiscr (ones (4,2), ones (4, 1), "K")
+%! fitcdiscr (ones (4,2), ones (4, 1), 'K')
 %!error<fitcdiscr: number of rows in X and Y must be equal.>
 %! fitcdiscr (ones (4,2), ones (3, 1))
 %!error<fitcdiscr: number of rows in X and Y must be equal.>
-%! fitcdiscr (ones (4,2), ones (3, 1), "K", 2)
+%! fitcdiscr (ones (4,2), ones (3, 1), 'K', 2)

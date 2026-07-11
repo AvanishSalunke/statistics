@@ -60,8 +60,8 @@ function [m, v] = ricestat (s, sigma)
   endif
 
   ## Initialize mean and variance
-  if (isa (s, "single") || isa (sigma, "single"))
-    m = NaN (size (s), "single");
+  if (isa (s, 'single') || isa (sigma, 'single'))
+    m = NaN (size (s), 'single');
     v = m;
   else
     m = NaN (size (s));
@@ -80,7 +80,7 @@ function [m, v] = ricestat (s, sigma)
 
 endfunction
 
-function L = Laguerre_half(x)
+function L = Laguerre_half (x)
   L = exp (x ./ 2) .* ((1 - x) .* besseli (0, -x./2) - x .* besseli (1, -x./2));
 endfunction
 
@@ -88,7 +88,7 @@ endfunction
 %!error<ricestat: function called with too few input arguments.> ricestat ()
 %!error<ricestat: function called with too few input arguments.> ricestat (1)
 %!error<ricestat: S and SIGMA must be numeric.> ricestat ({}, 2)
-%!error<ricestat: S and SIGMA must be numeric.> ricestat (1, "")
+%!error<ricestat: S and SIGMA must be numeric.> ricestat (1, '')
 %!error<ricestat: S and SIGMA must not be complex.> ricestat (i, 2)
 %!error<ricestat: S and SIGMA must not be complex.> ricestat (1, i)
 %!error<ricestat: S and SIGMA must be of common size or scalars.> ...
@@ -100,11 +100,11 @@ endfunction
 %!shared s, sigma
 %! s = [2, 0, -1, 1, 4];
 %! sigma = [1, NaN, 3, -1, 2];
-%!assert (ricestat (s, sigma), [2.2724, NaN, NaN, NaN, 4.5448], 1e-4);
-%!assert (ricestat ([s(1:2), s(4:5)], 1), [2.2724, 1.2533, 1.5486, 4.1272], 1e-4);
-%!assert (ricestat ([s(1:2), s(4:5)], 3), [4.1665, 3.7599, 3.8637, 5.2695], 1e-4);
-%!assert (ricestat ([s(1:2), s(4:5)], 2), [3.0971, 2.5066, 2.6609, 4.5448], 1e-4);
-%!assert (ricestat (2, [sigma(1), sigma(3:5)]), [2.2724, 4.1665, NaN, 3.0971], 1e-4);
-%!assert (ricestat (0, [sigma(1), sigma(3:5)]), [1.2533, 3.7599, NaN, 2.5066], 1e-4);
-%!assert (ricestat (1, [sigma(1), sigma(3:5)]), [1.5486, 3.8637, NaN, 2.6609], 1e-4);
-%!assert (ricestat (4, [sigma(1), sigma(3:5)]), [4.1272, 5.2695, NaN, 4.5448], 1e-4);
+%!assert_equal (ricestat (s, sigma), [2.2724, NaN, NaN, NaN, 4.5448], 1e-4);
+%!assert_equal (ricestat ([s(1:2), s(4:5)], 1), [2.2724, 1.2533, 1.5486, 4.1272], 1e-4);
+%!assert_equal (ricestat ([s(1:2), s(4:5)], 3), [4.1665, 3.7599, 3.8637, 5.2695], 1e-4);
+%!assert_equal (ricestat ([s(1:2), s(4:5)], 2), [3.0971, 2.5066, 2.6609, 4.5448], 1e-4);
+%!assert_equal (ricestat (2, [sigma(1), sigma(3:5)]), [2.2724, 4.1665, NaN, 3.0971], 1e-4);
+%!assert_equal (ricestat (0, [sigma(1), sigma(3:5)]), [1.2533, 3.7599, NaN, 2.5066], 1e-4);
+%!assert_equal (ricestat (1, [sigma(1), sigma(3:5)]), [1.5486, 3.8637, NaN, 2.6609], 1e-4);
+%!assert_equal (ricestat (4, [sigma(1), sigma(3:5)]), [4.1272, 5.2695, NaN, 4.5448], 1e-4);

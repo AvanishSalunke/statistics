@@ -51,9 +51,9 @@ function y = ncfpdf (x, df1, df2, lambda)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (df1, "single") || ...
-      isa (df2, "single") || isa (lambda, "single"))
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (df1, 'single') || ...
+      isa (df2, 'single') || isa (lambda, 'single'))
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
@@ -76,7 +76,7 @@ function y = ncfpdf (x, df1, df2, lambda)
 
   ## Handle central distribution where lambda == 0
   k4 = lambda == 0 & ! k1 & x > 0;
-  if any(k4(:))
+  if any (k4(:))
     y(k4) = fpdf (x(k4), df1(k4), df2(k4));
   endif
 
@@ -163,10 +163,10 @@ function y = ncfpdf (x, df1, df2, lambda)
     term = ones (size (x));
     k = K;
     ok = df2int & k < df2;
-    while any(ok(:))
+    while any (ok(:))
       term(ok) = term(ok) .* xs(ok) .* ...
                  (df2(ok) - k(ok)) ./ (k(ok) + df1(ok)) ./ (k(ok) + 1);
-      ok = ok & term >= eps(rsum);
+      ok = ok & term >= eps (rsum);
       rsum(ok) = rsum(ok) + term(ok);
       k(ok) = k(ok) + 1;
     endwhile
@@ -241,7 +241,7 @@ function y = ncfpdf (x, df1, df2, lambda)
                  df1(K_df2) .* z1(K_df2);
   idx = ! Kzero & df2int & ! K_df2;
   y(td(idx)) = exp (y(td(idx))) .* (1 + rsum(idx)) .* df1(idx) .* z1(idx) .* ...
-               sqrt((df1(idx) + df2(idx) - 1) ./ (df2(idx) - K(idx)) ./ ...
+               sqrt ((df1(idx) + df2(idx) - 1) ./ (df2(idx) - K(idx)) ./ ...
                     (df1(idx) + K(idx) - 1) / pi2);
   idx = ! df2int & ! Kzero;
   y(td(idx)) = exp (y(td(idx))) .* (1 + rsum(idx)) .* df1(idx) .* z1(idx) .* ...
@@ -286,7 +286,7 @@ function lambda = StirlingError (n)
         lambda(k) = sfe(n2+1);
     else
         lnsr2pi = 0.9189385332046728;
-        lambda(k) = gammaln(n1+1)-(n1+0.5).*log(n1)+n1-lnsr2pi;
+        lambda(k) = gammaln (n1+1)-(n1+0.5).*log (n1)+n1-lnsr2pi;
     endif
   endif
   k = find (n > 15 & n <= 35);
@@ -298,11 +298,11 @@ function lambda = StirlingError (n)
   if (any (k))
     lambda(k) = (S0 - (S1 - (S2 - S3 ./ nn(k)) ./ nn(k)) ./ nn(k)) ./ n(k);
   endif
-  k = find(n > 80 & n <= 500);
+  k = find (n > 80 & n <= 500);
   if (any (k))
     lambda(k) = (S0 - (S1 - S2 ./ nn(k)) ./ nn(k)) ./ n(k);
   endif
-  k = find(n > 500);
+  k = find (n > 500);
   if (any (k))
     lambda(k) = (S0 - S1 ./ nn(k)) ./ n(k);
   endif
@@ -311,12 +311,12 @@ endfunction
 ## Deviance term for binomial and Poisson probability calculation.
 function BP = BinoPoisson (x, np)
   if (isa (x,'single') || isa (np,'single'))
-    BP = zeros (size (x), "single");
+    BP = zeros (size (x), 'single');
   else
     BP = zeros (size (x));
   endif
   k = abs (x - np) < 0.1 * (x + np);
-  if any(k(:))
+  if any (k(:))
     s = (x(k) - np(k)) .* (x(k) - np(k)) ./ (x(k) + np(k));
     v = (x(k) - np(k)) ./ (x(k) + np(k));
     ej = 2 .* x(k) .* v;
@@ -324,7 +324,7 @@ function BP = BinoPoisson (x, np)
     s1 = zeros (size (s), is_class);
     ok = true (size (s));
     j = 0;
-    while any(ok(:))
+    while any (ok(:))
       ej(ok) = ej(ok) .* v(ok) .* v(ok);
       j = j + 1;
       s1(ok) = s(ok) + ej(ok) ./ (2 * j + 1);
@@ -346,16 +346,16 @@ endfunction
 %! y2 = ncfpdf (x, 2, 5, 2);
 %! y3 = ncfpdf (x, 5, 10, 1);
 %! y4 = ncfpdf (x, 10, 20, 10);
-%! plot (x, y1, "-r", x, y2, "-g", x, y3, "-k", x, y4, "-m")
+%! plot (x, y1, '-r', x, y2, '-g', x, y3, '-k', x, y4, '-m')
 %! grid on
 %! xlim ([0, 5])
 %! ylim ([0, 0.8])
-%! legend ({"df1 = 2, df2 = 5, λ = 1", "df1 = 2, df2 = 5, λ = 2", ...
-%!          "df1 = 5, df2 = 10, λ = 1", "df1 = 10, df2 = 20, λ = 10"}, ...
-%!         "location", "northeast")
-%! title ("Noncentral F PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'df1 = 2, df2 = 5, λ = 1', 'df1 = 2, df2 = 5, λ = 2', ...
+%!          'df1 = 5, df2 = 10, λ = 1', 'df1 = 10, df2 = 20, λ = 10'}, ...
+%!         'location', 'northeast')
+%! title ('Noncentral F PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 %!demo
 %! ## Compare the noncentral F PDF with LAMBDA = 10 to the F PDF with the
@@ -364,14 +364,14 @@ endfunction
 %! x = 0.01:0.1:10.01;
 %! y1 = ncfpdf (x, 5, 20, 10);
 %! y2 = fpdf (x, 5, 20);
-%! plot (x, y1, "-", x, y2, "-");
+%! plot (x, y1, '-', x, y2, '-');
 %! grid on
 %! xlim ([0, 10])
 %! ylim ([0, 0.8])
-%! legend ({"Noncentral F(5,20,10)", "F(5,20)"}, "location", "northeast")
-%! title ("Noncentral F vs F PDFs")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'Noncentral F(5,20,10)', 'F(5,20)'}, 'location', 'northeast')
+%! title ('Noncentral F vs F PDFs')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x1, df1, df2, lambda
@@ -379,17 +379,17 @@ endfunction
 %! df1 = [2, 0, -1, 1, 4];
 %! df2 = [2, 4, 5, 6, 8];
 %! lambda = [1, NaN, 3, -1, 2];
-%!assert (ncfpdf (x1, df1, df2, lambda), [0, NaN, NaN, NaN, NaN]);
-%!assert (ncfpdf (x1, df1, df2, 1), [0, NaN, NaN, ...
+%!assert_equal (ncfpdf (x1, df1, df2, lambda), [0, NaN, NaN, NaN, NaN]);
+%!assert_equal (ncfpdf (x1, df1, df2, 1), [0, NaN, NaN, ...
 %!                                   0.05607937264237208, NaN], 1e-14);
-%!assert (ncfpdf (x1, df1, df2, 3), [0, NaN, NaN, ...
+%!assert_equal (ncfpdf (x1, df1, df2, 3), [0, NaN, NaN, ...
 %!                                   0.080125760971946518, NaN], 1e-14);
-%!assert (ncfpdf (x1, df1, df2, 2), [0, NaN, NaN, ...
+%!assert_equal (ncfpdf (x1, df1, df2, 2), [0, NaN, NaN, ...
 %!                                   0.0715902008258656, NaN], 1e-14);
-%!assert (ncfpdf (x1, 3, 5, lambda), [0, NaN, NaN, NaN, NaN]);
-%!assert (ncfpdf (2, df1, df2, lambda), [0.1254046999837947, NaN, NaN, ...
+%!assert_equal (ncfpdf (x1, 3, 5, lambda), [0, NaN, NaN, NaN, NaN]);
+%!assert_equal (ncfpdf (2, df1, df2, lambda), [0.1254046999837947, NaN, NaN, ...
 %!                                      NaN, 0.2152571783045893], 1e-14);
-%!assert (ncfpdf (4, df1, df2, lambda), [0.05067089541001374, NaN, NaN, ...
+%!assert_equal (ncfpdf (4, df1, df2, lambda), [0.05067089541001374, NaN, NaN, ...
 %!                                      NaN, 0.05560846335398539], 1e-14);
 
 ## Test input validation

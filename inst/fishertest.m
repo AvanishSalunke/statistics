@@ -25,14 +25,15 @@
 ## Fisher's exact test.
 ##
 ## @code{@var{h} = fishertest (@var{x})} performs Fisher's exact test on a
-## @math{2x2} contingency table given in matrix @var{x}. This is a test of the
+## @math{2*2} contingency table given in matrix @var{x}. This is a test of the
 ## hypothesis that there are no non-random associations between the two 2-level
 ## categorical variables in @var{x}.  @code{fishertest} returns the result of
 ## the tested hypothesis in @var{h}.  @var{h} = 0 indicates that the null
 ## hypothesis (of no association) cannot be rejected at the 5% significance
 ## level.  @var{h} = 1 indicates that the null hypothesis can be rejected at the
 ## 5% level.  @var{x} must contain only non-negative integers.  Use the
-## @code{crosstab} function to generate the contingency table from samples of two
+## @code{crosstab} function to generate the contingency table from samples of
+## two
 ## categorical variables.  Fisher's exact test is not suitable when all integers
 ## in @var{x} are very large.  User can use the Chi-square test in this case.
 ##
@@ -44,9 +45,9 @@
 ## @code{[@var{p}, @var{pval}, @var{stats}] = fishertest (@dots{})} returns the
 ## structure @var{stats} with the following fields:
 ##
-## @multitable @columnfractions 0.05 0.3 0.65
-## @item @tab @qcode{OddsRatio} @tab -- the odds ratio
-## @item @tab @qcode{ConfidenceInterval} @tab -- the asymptotic confidence
+## @multitable @columnfractions 0.3 0.65
+## @item @qcode{OddsRatio} @tab -- the odds ratio
+## @item @qcode{ConfidenceInterval} @tab -- the asymptotic confidence
 ## interval for the odds ratio.  If any of the four entries in the contingency
 ## table @var{x} is zero, the confidence interval will not be computed, and
 ## @qcode{[-Inf Inf]} will be displayed.
@@ -55,17 +56,17 @@
 ## @code{[@dots{}] = fishertest (@dots{}, @var{name}, @var{value}, @dots{})}
 ## specifies one or more of the following name/value pairs:
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @headitem @tab Name @tab Value
-## @item @tab @qcode{"alpha"} @tab the significance level. Default is 0.05.
+## @multitable @columnfractions 0.2 0.75
+## @headitem Name @tab Value
+## @item @qcode{'alpha'} @tab the significance level. Default is 0.05.
 ##
-## @item @tab @qcode{"tail"} @tab a string specifying the alternative hypothesis
+## @item @qcode{'tail'} @tab a string specifying the alternative hypothesis
 ## @end multitable
-## @multitable @columnfractions 0.1 0.25 0.65
-## @item @tab @qcode{"both"} @tab odds ratio not equal to 1, indicating
+## @multitable @columnfractions 0.25 0.65
+## @item @qcode{'both'} @tab odds ratio not equal to 1, indicating
 ## association between two variables (two-tailed test, default)
-## @item @tab @qcode{"left"} @tab odds ratio greater than 1 (right-tailed test)
-## @item @tab @qcode{"right"} @tab odds ratio is less than 1 (left-tailed test)
+## @item @qcode{'left'} @tab odds ratio greater than 1 (right-tailed test)
+## @item @qcode{'right'} @tab odds ratio is less than 1 (left-tailed test)
 ## @end multitable
 ##
 ## @seealso{crosstab, chi2test, mcnemar_test, ztest2}
@@ -95,7 +96,7 @@ function [h, p, stats] = fishertest (x, varargin)
 
   ## Add defaults and parse optional arguments
   alpha = 0.05;
-  tail = "both";
+  tail = 'both';
   if (nargin > 1)
     params = numel (varargin);
     if ((params / 2) != fix (params / 2))
@@ -105,15 +106,15 @@ function [h, p, stats] = fishertest (x, varargin)
       name = varargin{idx};
       value = varargin{idx+1};
       switch (lower (name))
-        case "alpha"
+        case 'alpha'
           alpha = value;
           if (! isscalar (alpha) || ! isnumeric (alpha) || ...
                 alpha <= 0 || alpha >= 1)
             error ("fishertest: invalid value for alpha.");
           endif
-        case "tail"
+        case 'tail'
           tail = value;
-          if (! any (strcmpi (tail, {"both", "left", "right"})))
+          if (! any (strcmpi (tail, {'both', 'left', 'right'})))
             error ("fishertest: invalid value for tail.");
           endif
         otherwise
@@ -136,7 +137,7 @@ function [h, p, stats] = fishertest (x, varargin)
 
     ## Use try_catch block to avoid memory overflow for large numbers
     try
-      if (strcmp (tail, "left"))
+      if (strcmp (tail, 'left'))
           p = hygecdf (x(1,1), sz, r1, c1);
       else
           if (min (r1, c1) <=  min (r2, c2))
@@ -147,13 +148,13 @@ function [h, p, stats] = fishertest (x, varargin)
               x11 = r1 - x12;
           endif
           switch tail
-            case "both"
+            case 'both'
               p1 = hygepdf (x11, sz, r1, c1);
               p2 = hygepdf (x(1,1), sz, r1, c1);
               p = sum (p1(p1 < p2 + 10 * eps (p2)));
-            case "right"
+            case 'right'
               xr = x11(x11 >= x(1,1));
-              p = sum(hygepdf(xr,sz,r1,c1));
+              p = sum (hygepdf (xr,sz,r1,c1));
           endswitch
       endif
     catch
@@ -174,7 +175,7 @@ function [h, p, stats] = fishertest (x, varargin)
           UB = OR * exp (norminv (1 - alpha / 2) * SE);
           CI = [LB, UB];
       endif
-      stats = struct ("OddsRatio", OR, "ConfidenceInterval", CI);
+      stats = struct ('OddsRatio', OR, 'ConfidenceInterval', CI);
     endif
 
   else
@@ -187,22 +188,22 @@ endfunction
 %! ## A Fisher's exact test example
 %!
 %! x = [3, 1; 1, 3]
-%! [h, p, stats] = fishertest(x)
+%! [h, p, stats] = fishertest (x)
 
 ## Test output against MATLAB R2018
-%!assert (fishertest ([3, 4; 5, 7]), false);
-%!assert (isa (fishertest ([3, 4; 5, 7]), "logical"), true);
+%!assert_equal (fishertest ([3, 4; 5, 7]), false);
+%!assert_equal (isa (fishertest ([3, 4; 5, 7]), 'logical'), true);
 %!test
 %! [h, pval, stats] = fishertest ([3, 4; 5, 7]);
-%! assert (pval, 1, 1e-14);
-%! assert (stats.OddsRatio, 1.05);
+%! assert_equal (pval, 1, 1e-14);
+%! assert_equal (stats.OddsRatio, 1.05);
 %! CI = [0.159222057151289, 6.92429189601808];
-%! assert (stats.ConfidenceInterval, CI, 1e-14)
+%! assert_equal (stats.ConfidenceInterval, CI, 1e-14)
 %!test
 %! [h, pval, stats] = fishertest ([3, 4; 5, 0]);
-%! assert (pval, 0.08080808080808080, 1e-14);
-%! assert (stats.OddsRatio, 0);
-%! assert (stats.ConfidenceInterval, [-Inf, Inf])
+%! assert_equal (pval, 0.08080808080808080, 1e-14);
+%! assert_equal (stats.OddsRatio, 0);
+%! assert_equal (stats.ConfidenceInterval, [-Inf, Inf])
 
 
 ## Test input validation
@@ -223,14 +224,14 @@ endfunction
 %!error<fishertest: cannot handle large entries.> ...
 %! fishertest (ones (2) * 1e8);
 %!error<fishertest: invalid value for alpha.> ...
-%! fishertest ([1, 2; 3, 4], "alpha", 0);
+%! fishertest ([1, 2; 3, 4], 'alpha', 0);
 %!error<fishertest: invalid value for alpha.> ...
-%! fishertest ([1, 2; 3, 4], "alpha", 1.2);
+%! fishertest ([1, 2; 3, 4], 'alpha', 1.2);
 %!error<fishertest: invalid value for alpha.> ...
-%! fishertest ([1, 2; 3, 4], "alpha", "val");
+%! fishertest ([1, 2; 3, 4], 'alpha', 'val');
 %!error<fishertest: invalid value for tail.>  ...
-%! fishertest ([1, 2; 3, 4], "tail", "val");
+%! fishertest ([1, 2; 3, 4], 'tail', 'val');
 %!error<fishertest: invalid value for tail.>  ...
-%! fishertest ([1, 2; 3, 4], "alpha", 0.01, "tail", "val");
+%! fishertest ([1, 2; 3, 4], 'alpha', 0.01, 'tail', 'val');
 %!error<fishertest: invalid name for optional arguments.> ...
-%! fishertest ([1, 2; 3, 4], "alpha", 0.01, "badoption", 3);
+%! fishertest ([1, 2; 3, 4], 'alpha', 0.01, 'badoption', 3);

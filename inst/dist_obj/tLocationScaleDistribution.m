@@ -28,10 +28,12 @@ classdef tLocationScaleDistribution
   ##
   ## The location-scale Student's T distribution is a continuous probability
   ## distribution that generalizes the standard Student's T distribution by
-  ## including location and scale parameters.  It is defined by location parameter
+  ## including location and scale parameters. It is defined by location
+  ## parameter
   ## @var{mu}, scale parameter @var{sigma}, and degrees of freedom @var{nu}.
   ##
-  ## There are several ways to create a @code{tLocationScaleDistribution} object.
+  ## There are several ways to create a @code{tLocationScaleDistribution}
+  ## object.
   ##
   ## @itemize
   ## @item Fit a distribution to data using the @code{fitdist} function.
@@ -49,15 +51,15 @@ classdef tLocationScaleDistribution
   ## functions to create probability distribution objects, instead of the class
   ## constructor or the aforementioned static method.
   ##
-  ## Further information about the location-scale Student's T distribution can be
-  ## found at
+  ## Further information about the location-scale Student's T distribution can
+  ## be found at
   ## @url{https://en.wikipedia.org/wiki/Student%27s_t-distribution#Location-scale_t_distribution}
   ##
   ## @seealso{fitdist, makedist, tlscdf, tlsinv, tlspdf, tlsrnd, tlsfit,
   ## tlslike, tlsstat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {tLocationScaleDistribution} {property} mu
     ##
@@ -75,9 +77,9 @@ classdef tLocationScaleDistribution
     ##
     ## Scale parameter
     ##
-    ## A positive scalar value characterizing the scale of the
-    ## location-scale Student's T distribution.  You can access the @qcode{sigma}
-    ## property using dot name assignment.
+    ## A positive scalar value characterizing the scale of the location-scale
+    ## Student's T distribution. You can access the @qcode{sigma} property using
+    ## dot name assignment.
     ##
     ## @end deftp
     sigma
@@ -95,7 +97,7 @@ classdef tLocationScaleDistribution
     nu
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {tLocationScaleDistribution} {property} DistributionName
     ##
@@ -105,7 +107,7 @@ classdef tLocationScaleDistribution
     ## object.  This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "tLocationScaleDistribution";
+    DistributionName = 'tLocationScaleDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {tLocationScaleDistribution} {property} NumParameters
@@ -123,39 +125,39 @@ classdef tLocationScaleDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{3x1} cell array of character vectors with each element containing
+    ## A @math{3*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter.  This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"mu", "sigma", "nu"};
+    ParameterNames = {'mu', 'sigma', 'nu'};
 
     ## -*- texinfo -*-
     ## @deftp {tLocationScaleDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{3x1} cell array of character vectors with each element containing
+    ## A @math{3*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter.  This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Location", "Scale", "Degrees of Freedom"};
+    ParameterDescription = {'Location', 'Scale', 'Degrees of Freedom'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = true;
-    DistributionCode = "tls";
+    DistributionCode = 'tls';
     ParameterRange = [-Inf, realmin, realmin; Inf, Inf, Inf];
     ParameterLogCI = [false, true, true];
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected)
+  properties(GetAccess = public, SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {tLocationScaleDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{3x1} numeric vector containing the values of the distribution
+    ## A @math{3*1} numeric vector containing the values of the distribution
     ## parameters.  This property is read-only. You can change the distribution
     ## parameters by assigning new values to the @qcode{mu}, @qcode{sigma}, and
     ## @qcode{nu} properties.
@@ -168,7 +170,7 @@ classdef tLocationScaleDistribution
     ##
     ## Covariance matrix of the parameter estimates
     ##
-    ## A @math{3x3} numeric matrix containing the variance-covariance of the
+    ## A @math{3*3} numeric matrix containing the variance-covariance of the
     ## parameter estimates.  Diagonal elements contain the variance of each
     ## estimated parameter, and non-diagonal elements contain the covariance
     ## between the parameter estimates.  The covariance matrix is only
@@ -185,7 +187,7 @@ classdef tLocationScaleDistribution
     ##
     ## Flag for fixed parameters
     ##
-    ## A @math{1x3} logical vector specifying which parameters are fixed and
+    ## A @math{1*3} logical vector specifying which parameters are fixed and
     ## which are estimated.  @qcode{true} values correspond to fixed parameters,
     ## @qcode{false} values correspond to parameter estimates.  This property is
     ## read-only.
@@ -198,7 +200,7 @@ classdef tLocationScaleDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution.  First element contains the lower boundary,
     ## second element contains the upper boundary.  This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -241,11 +243,11 @@ classdef tLocationScaleDistribution
     InputData
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected, Hidden)
+  properties(GetAccess = public, SetAccess = protected, Hidden)
     ParameterCI
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = tLocationScaleDistribution (mu, sigma, nu)
       if (nargin == 0)
@@ -262,12 +264,12 @@ classdef tLocationScaleDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "t Location-Scale distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 't Location-Scale distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "t Location-Scale distribution");
+      __disp__ (this, 't Location-Scale distribution');
     endfunction
 
     function this = set.mu (this, mu)
@@ -308,11 +310,11 @@ classdef tLocationScaleDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {tLocationScaleDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {tLocationScaleDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {tLocationScaleDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -320,7 +322,7 @@ classdef tLocationScaleDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -330,9 +332,9 @@ classdef tLocationScaleDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -479,14 +481,14 @@ classdef tLocationScaleDistribution
     ## the confidence intervals with additional options specified by
     ## @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Alpha"} @tab @tab A scalar value in the range @math{(0,1)}
+    ## @item @qcode{'Alpha'} @tab A scalar value in the range @math{(0,1)}
     ## specifying the significance level for the confidence interval.  The
     ## default value 0.05 corresponds to a 95% confidence interval.
     ##
-    ## @item @qcode{"Parameter"} @tab @tab A character vector or a cell array of
+    ## @item @qcode{'Parameter'} @tab A character vector or a cell array of
     ## character vectors specifying the parameter names for which to compute
     ## confidence intervals.  By default, @code{paramci} computes confidence
     ## intervals for all distribution parameters.
@@ -547,26 +549,26 @@ classdef tLocationScaleDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -587,9 +589,9 @@ classdef tLocationScaleDistribution
 
     ## -*- texinfo -*-
     ## @deftypefn  {tLocationScaleDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum})
-    ## @deftypefnx {tLocationScaleDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {tLocationScaleDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{'Display'}, @var{display})
     ## @deftypefnx {tLocationScaleDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam})
-    ## @deftypefnx {tLocationScaleDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {tLocationScaleDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{'Display'}, @var{display})
     ##
     ## Profile likelihood function for a probability distribution object.
     ##
@@ -602,14 +604,14 @@ classdef tLocationScaleDistribution
     ## fitted to data.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @qcode{"Display"}, @qcode{"on"})} also plots the profile likelihood
+    ## @qcode{'Display'}, @qcode{'on'})} also plots the profile likelihood
     ## against the default range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
     ## @var{setparam})} defines a user-defined range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @var{setparam}, @qcode{"Display"}, @qcode{"on"})} also plots the profile
+    ## @var{setparam}, @qcode{'Display'}, @qcode{'on'})} also plots the profile
     ## likelihood against the user-defined range of the selected parameter.
     ##
     ## For the location-scale Student's T distribution, @qcode{@var{pnum} = 1}
@@ -750,7 +752,7 @@ classdef tLocationScaleDistribution
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function pd = fit (x, varargin)
       ## Check input arguments
@@ -770,7 +772,7 @@ classdef tLocationScaleDistribution
         freq = varargin{3};
       endif
       if (nargin < 5)
-        options.Display = "off";
+        options.Display = 'off';
         options.MaxFunEvals = 400;
         options.MaxIter = 200;
         options.TolX = 1e-6;
@@ -793,7 +795,7 @@ classdef tLocationScaleDistribution
       pd.ParameterCI = pci;
       pd.ParameterIsFixed = [false, false, false];
       pd.ParameterCovariance = acov;
-      pd.InputData = struct ("data", x, "cens", censor, "freq", freq);
+      pd.InputData = struct ('data', x, 'cens', censor, 'freq', freq);
     endfunction
 
   endmethods
@@ -820,88 +822,88 @@ endfunction
 %! ## distribution to this data and plot a PDF of the fitted distribution
 %! ## superimposed on a histogram of the data.
 %!
-%! pd_fixed = makedist ("tLocationScale", "mu", 0, "sigma", 1, "nu", 5);
-%! rand ("seed", 2);
+%! pd_fixed = makedist ('tLocationScale', 'mu', 0, 'sigma', 1, 'nu', 5);
+%! rand ('seed', 2);
 %! data = random (pd_fixed, 5000, 1);
-%! pd_fitted = fitdist (data, "tLocationScale");
+%! pd_fitted = fitdist (data, 'tLocationScale');
 %! plot (pd_fitted);
-%! msg = "Fitted t Location-Scale distribution with mu = %0.2f, sigma = %0.2f, nu = %0.2f";
+%! msg = 'Fitted t Location-Scale distribution with mu = %0.2f, sigma = %0.2f, nu = %0.2f';
 %! title (sprintf (msg, pd_fitted.mu, pd_fitted.sigma, pd_fitted.nu));
 
 ## Test output
 %!shared pd, t
 %! pd = tLocationScaleDistribution;
 %! t = truncate (pd, 2, 4);
-%!assert (cdf (pd, [0:5]), [0.5, 0.8184, 0.9490, 0.9850, 0.9948, 0.9979], 1e-4);
-%!assert (cdf (t, [0:5]), [0, 0, 0, 0.7841, 1, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4, NaN]), [0.9030, 0.9490, 0.9850, 0.9948, NaN], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4, NaN]), [0, 0, 0.7841, 1, NaN], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [-Inf, -0.9195, -0.2672, 0.2672, 0.9195, Inf], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [2, 2.1559, 2.3533, 2.6223, 3.0432, 4], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, -0.2672, 0.2672, 0.9195, Inf, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.3533, 2.6223, 3.0432, 4, NaN], 1e-4);
-%!assert (iqr (pd), 1.4534, 1e-4);
-%!assert (iqr (t), 0.7139, 1e-4);
-%!assert (mean (pd), 0, eps);
-%!assert (mean (t), 2.6099, 1e-4);
-%!assert (median (pd), 0, eps);
-%!assert (median (t), 2.4758, 1e-4);
-%!assert (pdf (pd, [0:5]), [0.3796, 0.2197, 0.0651, 0.0173, 0.0051, 0.0018], 1e-4);
-%!assert (pdf (t, [0:5]), [0, 0, 1.4209, 0.3775, 0.1119, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1.5, NaN]), [0.2197, 0.1245, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 2), false);
-%!assert (any (random (t, 1000, 1) > 4), false);
-%!assert (std (pd), 1.2910, 1e-4);
-%!assert (std (t), 0.4989, 1e-4);
-%!assert (var (pd), 1.6667, 1e-4);
-%!assert (var (t), 0.2489, 1e-4);
+%!assert_equal (cdf (pd, [0:5]), [0.5, 0.8184, 0.9490, 0.9850, 0.9948, 0.9979], 1e-4);
+%!assert_equal (cdf (t, [0:5]), [0, 0, 0, 0.7841, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4, NaN]), [0.9030, 0.9490, 0.9850, 0.9948, NaN], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4, NaN]), [0, 0, 0.7841, 1, NaN], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [-Inf, -0.9195, -0.2672, 0.2672, 0.9195, Inf], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [2, 2.1559, 2.3533, 2.6223, 3.0432, 4], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, -0.2672, 0.2672, 0.9195, Inf, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.3533, 2.6223, 3.0432, 4, NaN], 1e-4);
+%!assert_equal (iqr (pd), 1.4534, 1e-4);
+%!assert_equal (iqr (t), 0.7139, 1e-4);
+%!assert_equal (mean (pd), 0, eps);
+%!assert_equal (mean (t), 2.6099, 1e-4);
+%!assert_equal (median (pd), 0, eps);
+%!assert_equal (median (t), 2.4758, 1e-4);
+%!assert_equal (pdf (pd, [0:5]), [0.3796, 0.2197, 0.0651, 0.0173, 0.0051, 0.0018], 1e-4);
+%!assert_equal (pdf (t, [0:5]), [0, 0, 1.4209, 0.3775, 0.1119, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1.5, NaN]), [0.2197, 0.1245, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 2), false);
+%!assert_equal (any (random (t, 1000, 1) > 4), false);
+%!assert_equal (std (pd), 1.2910, 1e-4);
+%!assert_equal (std (t), 0.4989, 1e-4);
+%!assert_equal (var (pd), 1.6667, 1e-4);
+%!assert_equal (var (t), 0.2489, 1e-4);
 
 ## Test input validation
 ## 'tLocationScaleDistribution' constructor
 %!error <tLocationScaleDistribution: MU must be a real scalar.> ...
-%! tLocationScaleDistribution(i, 1, 1)
+%! tLocationScaleDistribution (i, 1, 1)
 %!error <tLocationScaleDistribution: MU must be a real scalar.> ...
-%! tLocationScaleDistribution(Inf, 1, 1)
+%! tLocationScaleDistribution (Inf, 1, 1)
 %!error <tLocationScaleDistribution: MU must be a real scalar.> ...
-%! tLocationScaleDistribution([1, 2], 1, 1)
+%! tLocationScaleDistribution ([1, 2], 1, 1)
 %!error <tLocationScaleDistribution: MU must be a real scalar.> ...
-%! tLocationScaleDistribution("a", 1, 1)
+%! tLocationScaleDistribution ('a', 1, 1)
 %!error <tLocationScaleDistribution: MU must be a real scalar.> ...
-%! tLocationScaleDistribution(NaN, 1, 1)
+%! tLocationScaleDistribution (NaN, 1, 1)
 %!error <tLocationScaleDistribution: SIGMA must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, 0, 1)
+%! tLocationScaleDistribution (0, 0, 1)
 %!error <tLocationScaleDistribution: SIGMA must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, -1, 1)
+%! tLocationScaleDistribution (0, -1, 1)
 %!error <tLocationScaleDistribution: SIGMA must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, Inf, 1)
+%! tLocationScaleDistribution (0, Inf, 1)
 %!error <tLocationScaleDistribution: SIGMA must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, i, 1)
+%! tLocationScaleDistribution (0, i, 1)
 %!error <tLocationScaleDistribution: SIGMA must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, "a", 1)
+%! tLocationScaleDistribution (0, 'a', 1)
 %!error <tLocationScaleDistribution: SIGMA must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, [1, 2], 1)
+%! tLocationScaleDistribution (0, [1, 2], 1)
 %!error <tLocationScaleDistribution: SIGMA must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, NaN, 1)
+%! tLocationScaleDistribution (0, NaN, 1)
 %!error <tLocationScaleDistribution: NU must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, 1, 0)
+%! tLocationScaleDistribution (0, 1, 0)
 %!error <tLocationScaleDistribution: NU must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, 1, -1)
+%! tLocationScaleDistribution (0, 1, -1)
 %!error <tLocationScaleDistribution: NU must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, 1, Inf)
+%! tLocationScaleDistribution (0, 1, Inf)
 %!error <tLocationScaleDistribution: NU must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, 1, i)
+%! tLocationScaleDistribution (0, 1, i)
 %!error <tLocationScaleDistribution: NU must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, 1, "a")
+%! tLocationScaleDistribution (0, 1, 'a')
 %!error <tLocationScaleDistribution: NU must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, 1, [1, 2])
+%! tLocationScaleDistribution (0, 1, [1, 2])
 %!error <tLocationScaleDistribution: NU must be a positive real scalar.> ...
-%! tLocationScaleDistribution(0, 1, NaN)
+%! tLocationScaleDistribution (0, 1, NaN)
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (tLocationScaleDistribution, 2, "uper")
+%! cdf (tLocationScaleDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (tLocationScaleDistribution, 2, 3)
 
@@ -909,62 +911,62 @@ endfunction
 %!shared x
 %! x = tlsrnd (0, 1, 1, [1, 100]);
 %!error <paramci: optional arguments must be in NAME-VALUE pairs.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "alpha")
+%! paramci (tLocationScaleDistribution.fit (x), 'alpha')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "alpha", 0)
+%! paramci (tLocationScaleDistribution.fit (x), 'alpha', 0)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "alpha", 1)
+%! paramci (tLocationScaleDistribution.fit (x), 'alpha', 1)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "alpha", [0.5 2])
+%! paramci (tLocationScaleDistribution.fit (x), 'alpha', [0.5 2])
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "alpha", "")
+%! paramci (tLocationScaleDistribution.fit (x), 'alpha', '')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "alpha", {0.05})
+%! paramci (tLocationScaleDistribution.fit (x), 'alpha', {0.05})
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "parameter", "mu", ...
-%!          "alpha", {0.05})
+%! paramci (tLocationScaleDistribution.fit (x), 'parameter', 'mu', ...
+%!          'alpha', {0.05})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
 %! paramci (tLocationScaleDistribution.fit (x), ...
-%!          "parameter", {"mu", "sigma", "nu", "param"})
+%!          'parameter', {'mu', 'sigma', 'nu', 'param'})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", {"mu", "sigma", "nu", "param"})
+%! paramci (tLocationScaleDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', {'mu', 'sigma', 'nu', 'param'})
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "parameter", "param")
+%! paramci (tLocationScaleDistribution.fit (x), 'parameter', 'param')
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", "param")
+%! paramci (tLocationScaleDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', 'param')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "NAME", "value")
+%! paramci (tLocationScaleDistribution.fit (x), 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "alpha", 0.01, "NAME", "value")
+%! paramci (tLocationScaleDistribution.fit (x), 'alpha', 0.01, 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (tLocationScaleDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", "mu", "NAME", "value")
+%! paramci (tLocationScaleDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', 'mu', 'NAME', 'value')
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (tLocationScaleDistribution, "Parent")
+%! plot (tLocationScaleDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (tLocationScaleDistribution, "PlotType", 12)
+%! plot (tLocationScaleDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (tLocationScaleDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (tLocationScaleDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (tLocationScaleDistribution, "PlotType", "pdfcdf")
+%! plot (tLocationScaleDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (tLocationScaleDistribution, "Discrete", "pdfcdf")
+%! plot (tLocationScaleDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (tLocationScaleDistribution, "Discrete", [1, 0])
+%! plot (tLocationScaleDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (tLocationScaleDistribution, "Discrete", {true})
+%! plot (tLocationScaleDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (tLocationScaleDistribution, "Parent", 12)
+%! plot (tLocationScaleDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (tLocationScaleDistribution, "Parent", "hax")
+%! plot (tLocationScaleDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (tLocationScaleDistribution, "invalidNAME", "pdf")
+%! plot (tLocationScaleDistribution, 'invalidNAME', 'pdf')
 %!error <plot: no fitted DATA to plot a probability plot.> ...
-%! plot (tLocationScaleDistribution, "PlotType", "probability")
+%! plot (tLocationScaleDistribution, 'PlotType', 'probability')
 
 ## 'proflik' method
 %!error <proflik: no fitted data available.> ...
@@ -978,23 +980,23 @@ endfunction
 %!error <proflik: SETPARAM must be a numeric vector.> ...
 %! proflik (tLocationScaleDistribution.fit (x), 1, ones (2))
 %!error <proflik: missing VALUE for 'Display' argument.> ...
-%! proflik (tLocationScaleDistribution.fit (x), 1, "Display")
+%! proflik (tLocationScaleDistribution.fit (x), 1, 'Display')
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (tLocationScaleDistribution.fit (x), 1, "Display", 1)
+%! proflik (tLocationScaleDistribution.fit (x), 1, 'Display', 1)
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (tLocationScaleDistribution.fit (x), 1, "Display", {1})
+%! proflik (tLocationScaleDistribution.fit (x), 1, 'Display', {1})
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (tLocationScaleDistribution.fit (x), 1, "Display", {"on"})
+%! proflik (tLocationScaleDistribution.fit (x), 1, 'Display', {'on'})
 %!error <proflik: invalid VALUE size for 'Display' argument.> ...
-%! proflik (tLocationScaleDistribution.fit (x), 1, "Display", ["on"; "on"])
+%! proflik (tLocationScaleDistribution.fit (x), 1, 'Display', ['on'; 'on'])
 %!error <proflik: invalid VALUE for 'Display' argument.> ...
-%! proflik (tLocationScaleDistribution.fit (x), 1, "Display", "onnn")
+%! proflik (tLocationScaleDistribution.fit (x), 1, 'Display', 'onnn')
 %!error <proflik: invalid NAME for optional arguments.> ...
-%! proflik (tLocationScaleDistribution.fit (x), 1, "NAME", "on")
+%! proflik (tLocationScaleDistribution.fit (x), 1, 'NAME', 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (tLocationScaleDistribution.fit (x), 1, {"NAME"}, "on")
+%! proflik (tLocationScaleDistribution.fit (x), 1, {'NAME'}, 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (tLocationScaleDistribution.fit (x), 1, {[1 2 3 4]}, "Display", "on")
+%! proflik (tLocationScaleDistribution.fit (x), 1, {[1 2 3 4]}, 'Display', 'on')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...

@@ -40,7 +40,7 @@ classdef ClassificationGAM
   ## @seealso{fitcgam}
   ## @end deftp
 
-  properties (Access = public)
+  properties(Access = public)
     ## -*- texinfo -*-
     ## @deftp {ClassificationGAM} {property} X
     ##
@@ -198,20 +198,22 @@ classdef ClassificationGAM
     ## built-in functions.  Nevertheless, the @qcode{ScoreTransform} property
     ## always stores their function handle equivalent.
     ##
-    ## @multitable @columnfractions 0.2 0.05 0.75
-    ## @headitem @var{Value} @tab @tab @var{Description}
-    ## @item @qcode{"doublelogit"} @tab @tab @math{1 ./ (1 + exp (-2 * x))}
-    ## @item @qcode{"invlogit"} @tab @tab @math{1 ./ (1 + exp (-x))}
-    ## @item @qcode{"ismax"} @tab @tab Sets the score for the class with the
+    ## @multitable @columnfractions 0.2 0.75
+    ## @headitem @var{Value} @tab @var{Description}
+    ## @item @qcode{'doublelogit'} @tab @math{1 ./ (1 + exp (-2 * x))}
+    ## @item @qcode{'invlogit'} @tab @math{1 ./ (1 + exp (-x))}
+    ## @item @qcode{'ismax'} @tab Sets the score for the class with the
     ## largest score to 1, and for all other classes to 0
-    ## @item @qcode{"logit"} @tab @tab @math{log (x ./ (1 - x))}
-    ## @item @qcode{"none"} @tab @tab @math{x} (no transformation)
-    ## @item @qcode{"identity"} @tab @tab @math{x} (no transformation)
-    ## @item @qcode{"sign"} @tab @tab @math{-1 for x < 0, 0 for x = 0, 1 for x > 0}
-    ## @item @qcode{"symmetric"} @tab @tab @math{2 * x - 1}
-    ## @item @qcode{"symmetricismax"} @tab @tab Sets the score for the class
+    ## @item @qcode{'logit'} @tab @math{log (x ./ (1 - x))}
+    ## @item @qcode{'none'} @tab @math{x} (no transformation)
+    ## @item @qcode{'identity'} @tab @math{x} (no transformation)
+    ## @item @qcode{'sign'} @tab
+    ## @math{-1 for x < 0, 0 for x = 0, 1 for x >
+    ## 0}
+    ## @item @qcode{'symmetric'} @tab @math{2 * x - 1}
+    ## @item @qcode{'symmetricismax'} @tab Sets the score for the class
     ## with the largest score to 1, and for all other classes to -1
-    ## @item @qcode{"symmetriclogit"} @tab @tab @math{2 ./ (1 + exp (-x)) - 1}
+    ## @item @qcode{'symmetriclogit'} @tab @math{2 ./ (1 + exp (-x)) - 1}
     ## @end multitable
     ##
     ## @end deftp
@@ -223,7 +225,7 @@ classdef ClassificationGAM
     ## Model specification formula
     ##
     ## A character vector specifying the model formula in the form
-    ## @qcode{"Y ~ terms"} where @qcode{Y} represents the response variable and
+    ## @qcode{'Y ~ terms'} where @qcode{Y} represents the response variable and
     ## @qcode{terms} specifies the predictor variables and interaction terms.
     ## This property is read-only.
     ##
@@ -236,7 +238,7 @@ classdef ClassificationGAM
     ## Interaction terms specification
     ##
     ## A logical matrix, positive integer scalar, or character vector
-    ## @qcode{"all"} specifying the interaction terms between predictor
+    ## @qcode{'all'} specifying the interaction terms between predictor
     ## variables.  This property is read-only.
     ##
     ## @end deftp
@@ -334,11 +336,11 @@ classdef ClassificationGAM
     IntMatrix = [];
   endproperties
 
-  properties (Access = private, Hidden)
+  properties(Access = private, Hidden)
     STname = 'none';
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     ## Custom display
     function display (this)
@@ -355,15 +357,15 @@ classdef ClassificationGAM
       ## Print selected properties
       fprintf ("%+25s: '%s'\n", 'ResponseName', this.ResponseName);
       if (iscellstr (this.ClassNames))
-        str = repmat ({"'%s'"}, 1, numel (this.ClassNames));
+        str = repmat ({'''%s'''}, 1, numel (this.ClassNames));
         str = strcat ('{', strjoin (str, ' '), '}');
         str = sprintf (str, this.ClassNames{:});
       elseif (ischar (this.ClassNames))
-        str = repmat ({"'%s'"}, 1, rows (this.ClassNames));
+        str = repmat ({'''%s'''}, 1, rows (this.ClassNames));
         str = strcat ('[', strjoin (str, ' '), ']');
         str = sprintf (str, cellstr (this.ClassNames){:});
       else # single, double, logical
-        str = repmat ({"%d"}, 1, numel (this.ClassNames));
+        str = repmat ({'%d'}, 1, numel (this.ClassNames));
         str = strcat ('[', strjoin (str, ' '), ']');
         str = sprintf (str, this.ClassNames);
       endif
@@ -437,7 +439,7 @@ classdef ClassificationGAM
             case 'Cost'
               this = setCost (this, val);
             case 'ScoreTransform'
-              name = "ClassificationGAM";
+              name = 'ClassificationGAM';
               [this.ScoreTransform, this.STname] = parseScoreTransform ...
                                                    (varargin{2}, name);
             otherwise
@@ -450,7 +452,7 @@ classdef ClassificationGAM
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {statistics} {@var{obj} =} ClassificationGAM (@var{X}, @var{Y})
@@ -465,11 +467,11 @@ classdef ClassificationGAM
     ##
     ## @itemize
     ## @item
-    ## @code{X} must be a @math{NxP} numeric matrix of input data where rows
+    ## @code{X} must be a @math{N*P} numeric matrix of input data where rows
     ## correspond to observations and columns correspond to features or
     ## variables.  @var{X} will be used to train the GAM model.
     ## @item
-    ## @code{Y} is @math{Nx1} matrix or cell matrix containing the class labels
+    ## @code{Y} is @math{N*1} matrix or cell matrix containing the class labels
     ## of corresponding predictor data in @var{X}.  @var{Y} can contain any type
     ## of categorical data. @var{Y} must have the same number of rows as
     ## @var{X}.
@@ -480,21 +482,21 @@ classdef ClassificationGAM
     ## specified by the following @qcode{@var{name}, @var{value}} paired input
     ## arguments:
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{'PredictorNames'} @tab @tab A cell array of character
+    ## @item @qcode{'PredictorNames'} @tab A cell array of character
     ## vectors specifying the names of the predictors. The length of this array
     ## must match the number of columns in @var{X}.
     ##
-    ## @item @qcode{'ResponseName'} @tab @tab A character vector specifying the
+    ## @item @qcode{'ResponseName'} @tab A character vector specifying the
     ## name of the response variable.
     ##
-    ## @item @qcode{'ClassNames'} @tab @tab Names of the classes in the class
+    ## @item @qcode{'ClassNames'} @tab Names of the classes in the class
     ## labels, @var{Y}, used for fitting the GAM model.
     ## @qcode{ClassNames} are of the same type as the class labels in @var{Y}.
     ##
-    ## @item @qcode{'Cost'} @tab @tab An @math{NxR} numeric matrix containing
+    ## @item @qcode{'Cost'} @tab An @math{N*R} numeric matrix containing
     ## misclassification cost for the corresponding instances in @var{X}, where
     ## @math{R} is the number of unique categories in @var{Y}.  If an instance
     ## is correctly classified into its category the cost is calculated to be 1,
@@ -502,14 +504,14 @@ classdef ClassificationGAM
     ## @code{@var{Mdl}.cost = somecost}.  By default, its value is
     ## @qcode{@var{cost} = ones (rows (X), numel (unique (Y)))}.
     ##
-    ## @item @qcode{'Prior'} @tab @tab A numeric vector specifying the prior
+    ## @item @qcode{'Prior'} @tab A numeric vector specifying the prior
     ## probabilities for each class.  The order of the elements in @qcode{Prior}
     ## corresponds to the order of the classes in @qcode{ClassNames}.
-    ## Alternatively, you can specify @qcode{"empirical"} to use the empirical
-    ## class probabilities or @qcode{"uniform"} to assume equal class
+    ## Alternatively, you can specify @qcode{'empirical'} to use the empirical
+    ## class probabilities or @qcode{'uniform'} to assume equal class
     ## probabilities.
     ##
-    ## @item @qcode{'ScoreTransform'} @tab @tab A user-defined function handle
+    ## @item @qcode{'ScoreTransform'} @tab A user-defined function handle
     ## or a character vector specifying one of the following builtin functions
     ## specifying the transformation applied to predicted classification scores.
     ## Supported values include @qcode{'doublelogit'}, @qcode{'invlogit'},
@@ -517,28 +519,28 @@ classdef ClassificationGAM
     ## @qcode{'sign'}, @qcode{'symmetric'}, @qcode{'symmetricismax'}, and
     ## @qcode{'symmetriclogit'}.
     ##
-    ## @item @qcode{'Formula'} @tab @tab A character vector specifying the model
-    ## formula in the form @qcode{"Y ~ terms"} where @qcode{Y} represents the
+    ## @item @qcode{'Formula'} @tab A character vector specifying the model
+    ## formula in the form @qcode{'Y ~ terms'} where @qcode{Y} represents the
     ## response variable and @qcode{terms} specifies the predictor variables and
     ## interaction terms.
     ##
-    ## @item @qcode{'Interactions'} @tab @tab A logical matrix, a positive
-    ## integer scalar, or the string @qcode{"all"} for defining the interactions
+    ## @item @qcode{'Interactions'} @tab A logical matrix, a positive
+    ## integer scalar, or the string @qcode{'all'} for defining the interactions
     ## between predictor variables.
     ##
-    ## @item @qcode{'Knots'} @tab @tab A scalar or row vector specifying the
+    ## @item @qcode{'Knots'} @tab A scalar or row vector specifying the
     ## number of knots for each predictor variable in the spline fitting.
     ##
-    ## @item @qcode{'Order'} @tab @tab A scalar or row vector specifying the
+    ## @item @qcode{'Order'} @tab A scalar or row vector specifying the
     ## order of the spline for each predictor variable.
     ##
-    ## @item @qcode{'DoF'} @tab @tab A scalar or row vector specifying the
+    ## @item @qcode{'DoF'} @tab A scalar or row vector specifying the
     ## degrees of freedom for each predictor variable in the spline fitting.
     ##
-    ## @item @qcode{'LearningRate'} @tab @tab A scalar value between 0 and 1
+    ## @item @qcode{'LearningRate'} @tab A scalar value between 0 and 1
     ## specifying the learning rate used in the gradient boosting algorithm.
     ##
-    ## @item @qcode{'NumIterations'} @tab @tab A positive integer specifying
+    ## @item @qcode{'NumIterations'} @tab A positive integer specifying
     ## the maximum number of iterations for the gradient boosting algorithm.
     ## @end multitable
     ##
@@ -572,7 +574,7 @@ classdef ClassificationGAM
       Formula        = [];
       Interactions   = [];
       ClassNames     = [];
-      Prior          = "empirical";
+      Prior          = 'empirical';
       DoF            = ones (1, ndims_X) * 8;
       Order          = ones (1, ndims_X) * 3;
       Knots          = ones (1, ndims_X) * 5;
@@ -589,7 +591,7 @@ classdef ClassificationGAM
       while (numel (varargin) > 0)
         switch (tolower (varargin {1}))
 
-          case "predictornames"
+          case 'predictornames'
             PredictorNames = varargin{2};
             if (! iscellstr (PredictorNames))
               error (strcat ("ClassificationGAM: 'PredictorNames'", ...
@@ -599,14 +601,14 @@ classdef ClassificationGAM
                              " must equal the number of columns in X."));
             endif
 
-          case "responsename"
+          case 'responsename'
             ResponseName = varargin{2};
             if (! ischar (ResponseName))
               error (strcat ("ClassificationGAM: 'ResponseName'", ...
                              " must be a character vector."));
             endif
 
-          case "classnames"
+          case 'classnames'
             ClassNames = varargin{2};
             if (! (iscellstr (ClassNames) || isnumeric (ClassNames) ||
                    islogical (ClassNames) || ischar (ClassNames)))
@@ -618,25 +620,25 @@ classdef ClassificationGAM
             if (iscellstr (ClassNames) || ischar (ClassNames))
               ClassNames = cellstr (ClassNames);
               if (! all (cell2mat (cellfun (@(x) any (strcmp (x, gnY)),
-                                   ClassNames, "UniformOutput", false))))
+                                   ClassNames, 'UniformOutput', false))))
                 error (strcat ("ClassificationGAM: not all 'ClassNames'", ...
                                " are present in Y."));
               endif
             else
               if (! all (cell2mat (arrayfun (@(x) any (x == glY),
-                                   ClassNames, "UniformOutput", false))))
+                                   ClassNames, 'UniformOutput', false))))
                 error (strcat ("ClassificationGAM: not all 'ClassNames'", ...
                                " are present in Y."));
               endif
             endif
 
-          case "prior"
+          case 'prior'
             Prior = varargin{2};
             if (! (isnumeric (Prior) || ischar (Prior)))
               error (strcat ("ClassificationGAM: 'Prior' must be", ...
                              " a numeric vector or a string."));
             endif
-            if (ischar (Prior) && ! any (strcmpi (Prior, {"empirical", "uniform"})))
+            if (ischar (Prior) && ! any (strcmpi (Prior, {'empirical', 'uniform'})))
               error (strcat ("ClassificationGAM: 'Prior' must be", ...
                              " 'empirical', 'uniform', or a numeric vector."));
             endif
@@ -644,19 +646,19 @@ classdef ClassificationGAM
               error ("ClassificationGAM: 'Prior' must be a 2-element vector.");
             endif
 
-          case "cost"
+          case 'cost'
             Cost = varargin{2};
             if (! (isnumeric (Cost) && issquare (Cost)))
               error (strcat ("ClassificationGAM: 'Cost' must be", ...
                              " a numeric square matrix."));
             endif
 
-          case "scoretransform"
-            name = "ClassificationGAM";
+          case 'scoretransform'
+            name = 'ClassificationGAM';
             [this.ScoreTransform, this.STname] = parseScoreTransform ...
                                                  (varargin{2}, name);
 
-          case "formula"
+          case 'formula'
             if (F_I < 1)
               Formula = varargin{2};
               if (! ischar (Formula) && ! islogical (Formula))
@@ -668,7 +670,7 @@ classdef ClassificationGAM
                              " have already been defined."));
             endif
 
-          case "interactions"
+          case 'interactions'
             if (F_I < 1)
               tmp = varargin{2};
               if (isnumeric (tmp) && isscalar (tmp)
@@ -676,7 +678,7 @@ classdef ClassificationGAM
                 Interactions = tmp;
               elseif (islogical (tmp))
                 Interactions = tmp;
-              elseif (ischar (tmp) && strcmpi (tmp, "all"))
+              elseif (ischar (tmp) && strcmpi (tmp, 'all'))
                 Interactions = tmp;
               else
                 error ("ClassificationGAM: invalid 'Interactions' parameter.");
@@ -686,7 +688,7 @@ classdef ClassificationGAM
               error ("ClassificationGAM: 'Formula' has already been defined.");
             endif
 
-          case "knots"
+          case 'knots'
             if (KOD < 2)
               Knots = varargin{2};
               if (! isnumeric (Knots) || ! (isscalar (Knots) ||
@@ -701,7 +703,7 @@ classdef ClassificationGAM
                              " have been set already."));
             endif
 
-          case "order"
+          case 'order'
             if (KOD < 2)
               Order = varargin{2};
               if (! isnumeric (Order) || ! (isscalar (Order) ||
@@ -716,7 +718,7 @@ classdef ClassificationGAM
                              " have been set already."));
             endif
 
-          case "dof"
+          case 'dof'
             if (KOD < 2)
               DoF = varargin{2};
               if (! isnumeric (DoF) ||
@@ -731,14 +733,14 @@ classdef ClassificationGAM
                              " have been set already."));
             endif
 
-          case "learningrate"
+          case 'learningrate'
             LearningRate = varargin{2};
             if (LearningRate > 1 || LearningRate <= 0)
               error (strcat ("ClassificationGAM: 'LearningRate'", ...
                              " must be between 0 and 1."));
             endif
 
-          case "numiterations"
+          case 'numiterations'
             NumIterations = varargin{2};
             if (! isnumeric (NumIterations) || NumIterations <= 0)
               error (strcat ("ClassificationGAM: 'NumIterations'", ...
@@ -750,7 +752,7 @@ classdef ClassificationGAM
                            " name in optional pair arguments."));
 
         endswitch
-        varargin (1:2) = [];
+        varargin(1:2) = [];
       endwhile
 
       ## Generate default predictors and response variable names (if necessary)
@@ -760,7 +762,7 @@ classdef ClassificationGAM
         endfor
       endif
       if (isempty (ResponseName))
-        ResponseName = "Y";
+        ResponseName = 'Y';
       endif
 
       ## Assign predictors and response variable names
@@ -781,8 +783,8 @@ classdef ClassificationGAM
 
       ## Remove nans from X and Y
       RowsUsed  = ! logical (sum (isnan ([X, gY]), 2));
-      Y         = Y (RowsUsed);
-      X         = X (RowsUsed, :);
+      Y         = Y(RowsUsed);
+      X         = X(RowsUsed, :);
 
       ## Renew groups in Y
       [gY, gnY, glY] = grp2idx (Y);
@@ -799,7 +801,7 @@ classdef ClassificationGAM
       endif
 
       this.NumObservations = rows (X);
-      this.RowsUsed = cast (RowsUsed, "double");
+      this.RowsUsed = cast (RowsUsed, 'double');
 
       ## Assign the number of original predictors to the ClassificationGAM object
       this.NumPredictors = ndims_X;
@@ -807,9 +809,9 @@ classdef ClassificationGAM
       ## Assign Cost and compute Prior
       this = setCost (this, Cost, gnY);
       if (ischar (Prior))
-        if (strcmpi (Prior, "uniform"))
+        if (strcmpi (Prior, 'uniform'))
           this.Prior = [0.5, 0.5];
-        elseif (strcmpi (Prior, "empirical"))
+        elseif (strcmpi (Prior, 'empirical'))
           counts = histc (gY, 1:2);
           this.Prior = counts / sum (counts);
         endif
@@ -916,7 +918,7 @@ classdef ClassificationGAM
     ## @item
     ## @var{obj} must be a @qcode{ClassificationGAM} class object.
     ## @item
-    ## @var{XC} must be an @math{MxP} numeric matrix where each row is an
+    ## @var{XC} must be an @math{M*P} numeric matrix where each row is an
     ## observation and each column corresponds to a predictor variable.
     ## @item
     ## @var{includeInteractions} is a logical scalar indicating whether to
@@ -944,7 +946,7 @@ classdef ClassificationGAM
 
       ## Clean XC data
       notnansf  = ! logical (sum (isnan (XC), 2));
-      XC        = XC (notnansf, :);
+      XC        = XC(notnansf, :);
 
       ## Default values for Name-Value Pairs
       incInt = ! isempty (this.IntMatrix);
@@ -954,7 +956,7 @@ classdef ClassificationGAM
       while (numel (varargin) > 0)
         switch (tolower (varargin {1}))
 
-          case "includeinteractions"
+          case 'includeinteractions'
             tmpInt = varargin{2};
             if (! islogical (tmpInt) || (tmpInt != 0 && tmpInt != 1))
               error (strcat ("ClassificationGAM.predict:", ...
@@ -971,7 +973,7 @@ classdef ClassificationGAM
             error (strcat ("ClassificationGAM.predict: invalid NAME in", ...
                            " optional pairs of arguments."));
         endswitch
-        varargin (1:2) = [];
+        varargin(1:2) = [];
       endwhile
 
       ## Choose whether interactions must be included
@@ -1045,22 +1047,22 @@ classdef ClassificationGAM
     ## specifies additional name-value pair arguments to customize the
     ## cross-validation process.
     ##
-    ## @multitable @columnfractions 0.28 0.02 0.7
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.28 0.7
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"KFold"} @tab @tab Specify the number of folds to use in
+    ## @item @qcode{'KFold'} @tab Specify the number of folds to use in
     ## k-fold cross-validation.  @code{"KFold", @var{k}}, where @var{k} is an
     ## integer greater than 1.
     ##
-    ## @item @qcode{"Holdout"} @tab @tab Specify the fraction of the data to
+    ## @item @qcode{'Holdout'} @tab Specify the fraction of the data to
     ## hold out for testing.  @code{"Holdout", @var{p}}, where @var{p} is a
     ## scalar in the range @math{(0,1)}.
     ##
-    ## @item @qcode{"Leaveout"} @tab @tab Specify whether to perform
+    ## @item @qcode{'Leaveout'} @tab Specify whether to perform
     ## leave-one-out cross-validation.  @code{"Leaveout", @var{Value}}, where
     ## @var{Value} is 'on' or 'off'.
     ##
-    ## @item @qcode{"CVPartition"} @tab @tab Specify a @qcode{cvpartition}
+    ## @item @qcode{'CVPartition'} @tab Specify a @qcode{cvpartition}
     ## object used for cross-validation.  @code{"CVPartition", @var{cv}}, where
     ## @code{isa (@var{cv}, "cvpartition")} = 1.
     ##
@@ -1133,7 +1135,7 @@ classdef ClassificationGAM
             error (strcat ("ClassificationGAM.crossval: invalid",...
                            " parameter name in optional paired arguments."));
           endswitch
-        varargin (1:2) = [];
+        varargin(1:2) = [];
       endwhile
 
       ## Determine the cross-validation method to use
@@ -1182,7 +1184,7 @@ classdef ClassificationGAM
     ## @end deftypefn
     function savemodel (this, fname)
       ## Generate variable for class name
-      classdef_name = "ClassificationGAM";
+      classdef_name = 'ClassificationGAM';
 
       ## Create variables from model properties
       X = this.X;
@@ -1207,16 +1209,16 @@ classdef ClassificationGAM
       STname          = this.STname;
 
       ## Save classdef name and all model properties as individual variables
-      save ("-binary", fname, "classdef_name", "X", "Y", "NumObservations", ...
-            "RowsUsed", "NumPredictors", "PredictorNames", "ResponseName", ...
-            "ClassNames", "Prior", "Cost", "ScoreTransform", "Formula", ...
-            "Interactions", "Knots", "Order", "DoF", "BaseModel", ...
-            "ModelwInt", "IntMatrix", "STname");
+      save ('-binary', fname, 'classdef_name', 'X', 'Y', 'NumObservations', ...
+            'RowsUsed', 'NumPredictors', 'PredictorNames', 'ResponseName', ...
+            'ClassNames', 'Prior', 'Cost', 'ScoreTransform', 'Formula', ...
+            'Interactions', 'Knots', 'Order', 'DoF', 'BaseModel', ...
+            'ModelwInt', 'IntMatrix', 'STname');
     endfunction
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function mdl = load_model (filename, data)
       ## Create a ClassificationGAM object
@@ -1238,7 +1240,7 @@ classdef ClassificationGAM
   endmethods
 
   ## Helper functions
-  methods (Access = private)
+  methods(Access = private)
 
     ## Determine interactions from Interactions optional parameter
     function intMat = parseInteractions (this)
@@ -1260,14 +1262,14 @@ classdef ClassificationGAM
                          " combinations of predictors in X."));
         endif
         ## Get all combinations except all zeros
-        allMat = flip (fullfact(p)([2:end],:), 2);
+        allMat = flip (fullfact (p)([2:end],:), 2);
         ## Only keep interaction terms
         iterms = find (sum (allMat, 2) != 1);
         intMat = allMat(iterms);
-      elseif (strcmpi (this.Interactions, "all"))
+      elseif (strcmpi (this.Interactions, 'all'))
         p = this.NumPredictors;
         ## Calculate all p*(p-1)/2 interaction terms
-        allMat = flip (fullfact(p)([2:end],:), 2);
+        allMat = flip (fullfact (p)([2:end],:), 2);
         ## Only keep interaction terms
         iterms = find (sum (allMat, 2) != 1);
         intMat = allMat(iterms);
@@ -1348,7 +1350,7 @@ classdef ClassificationGAM
         for j = 1:n_features
           ## Fit a spline to the gradient for feature X_j
           spline_model = splinefit (X(:, j), gradient, Knots(j), ...
-                                             "order", Order(j));
+                                             'order', Order(j));
 
           ## Predict using the fitted spline
           spline_pred = ppval (spline_model, X(:, j));
@@ -1375,7 +1377,7 @@ classdef ClassificationGAM
         [~, gnY, gY] = unique (this.Y(this.RowsUsed));
       endif
       if (isempty (Cost))
-        this.Cost = cast (! eye (numel (gnY)), "double");
+        this.Cost = cast (! eye (numel (gnY)), 'double');
       else
         if (numel (gnY) != sqrt (numel (Cost)))
           error (strcat ("ClassificationGAM: the number", ...
@@ -1397,7 +1399,7 @@ function scores = predict_val (params, XC, intercept)
 
   ## Add the remaining terms
   for j = 1:ndims_X
-    ypred = ypred + ppval (params(j), XC (:,j));
+    ypred = ypred + ppval (params(j), XC(:,j));
   endfor
 
   ## Apply the sigmoid function to get probabilities
@@ -1418,7 +1420,7 @@ endfunction
 %!     1; 1; 1; 1; 1];
 %!
 %! ## Train the GAM model
-%! obj = fitcgam (X, Y, "Interactions", "all")
+%! obj = fitcgam (X, Y, 'Interactions', 'all')
 %!
 %! ## Create a grid of values for prediction
 %! x1 = [min(X(:,1)):0.1:max(X(:,1))];
@@ -1432,13 +1434,13 @@ endfunction
 %! x = [1, 2, 3; 4, 5, 6; 7, 8, 9; 3, 2, 1];
 %! y = [0; 0; 1; 1];
 %! PredictorNames = {'Feature1', 'Feature2', 'Feature3'};
-%! a = ClassificationGAM (x, y, "PredictorNames", PredictorNames);
-%! assert (class (a), "ClassificationGAM");
-%! assert ({a.X, a.Y, a.NumObservations}, {x, y, 4})
-%! assert ({a.NumPredictors, a.ResponseName}, {3, "Y"})
-%! assert (a.ClassNames, {'0'; '1'})
-%! assert (a.PredictorNames, PredictorNames)
-%! assert (a.BaseModel.Intercept, 0)
+%! a = ClassificationGAM (x, y, 'PredictorNames', PredictorNames);
+%! assert_equal (class (a), "ClassificationGAM");
+%! assert_equal ({a.X, a.Y, a.NumObservations}, {x, y, 4})
+%! assert_equal ({a.NumPredictors, a.ResponseName}, {3, 'Y'})
+%! assert_equal (a.ClassNames, {'0'; '1'})
+%! assert_equal (a.PredictorNames, PredictorNames)
+%! assert_equal (a.BaseModel.Intercept, 0)
 %!test
 %! load fisheriris
 %! inds = strcmp (species,'versicolor') | strcmp (species,'virginica');
@@ -1446,26 +1448,26 @@ endfunction
 %! Y = species(inds, :)';
 %! Y = strcmp (Y, 'virginica')';
 %! a = ClassificationGAM (X, Y, 'Formula', 'Y ~ x1 + x2 + x3 + x4 + x1:x2 + x2:x3');
-%! assert (class (a), "ClassificationGAM");
-%! assert ({a.X, a.Y, a.NumObservations}, {X, Y, 100})
-%! assert ({a.NumPredictors, a.ResponseName}, {4, "Y"})
-%! assert (a.ClassNames, {'0'; '1'})
-%! assert (a.Formula, 'Y ~ x1 + x2 + x3 + x4 + x1:x2 + x2:x3')
-%! assert (a.PredictorNames, {'x1', 'x2', 'x3', 'x4'})
-%! assert (a.ModelwInt.Intercept, 0)
+%! assert_equal (class (a), "ClassificationGAM");
+%! assert_equal ({a.X, a.Y, a.NumObservations}, {X, Y, 100})
+%! assert_equal ({a.NumPredictors, a.ResponseName}, {4, 'Y'})
+%! assert_equal (a.ClassNames, {'0'; '1'})
+%! assert_equal (a.Formula, 'Y ~ x1 + x2 + x3 + x4 + x1:x2 + x2:x3')
+%! assert_equal (a.PredictorNames, {'x1', 'x2', 'x3', 'x4'})
+%! assert_equal (a.ModelwInt.Intercept, 0)
 %!test
 %! X = [2, 3, 5; 4, 6, 8; 1, 2, 3; 7, 8, 9; 5, 4, 3];
 %! Y = [0; 1; 0; 1; 1];
 %! a = ClassificationGAM (X, Y, 'Knots', [4, 4, 4], 'Order', [3, 3, 3]);
-%! assert (class (a), "ClassificationGAM");
-%! assert ({a.X, a.Y, a.NumObservations}, {X, Y, 5})
-%! assert ({a.NumPredictors, a.ResponseName}, {3, "Y"})
-%! assert (a.ClassNames, {'0'; '1'})
-%! assert (a.PredictorNames, {'x1', 'x2', 'x3'})
-%! assert (a.Knots, [4, 4, 4])
-%! assert (a.Order, [3, 3, 3])
-%! assert (a.DoF, [7, 7, 7])
-%! assert (a.BaseModel.Intercept, 0.4055, 1e-1)
+%! assert_equal (class (a), "ClassificationGAM");
+%! assert_equal ({a.X, a.Y, a.NumObservations}, {X, Y, 5})
+%! assert_equal ({a.NumPredictors, a.ResponseName}, {3, 'Y'})
+%! assert_equal (a.ClassNames, {'0'; '1'})
+%! assert_equal (a.PredictorNames, {'x1', 'x2', 'x3'})
+%! assert_equal (a.Knots, [4, 4, 4])
+%! assert_equal (a.Order, [3, 3, 3])
+%! assert_equal (a.DoF, [7, 7, 7])
+%! assert_equal (a.BaseModel.Intercept, 0.4055, 1e-1)
 
 ## Test Prior calculation
 %!test
@@ -1473,110 +1475,110 @@ endfunction
 %! x = [1, 2; 3, 4; 5, 6; 7, 8];
 %! y = [0; 0; 1; 1];
 %! a = ClassificationGAM (x, y, 'Prior', 'uniform');
-%! assert (a.Prior, [0.5, 0.5], 1e-6);
+%! assert_equal (a.Prior, [0.5, 0.5], 1e-6);
 %!test
 %! ## Test empirical prior
 %! x = [1, 2; 3, 4; 5, 6; 7, 8; 9, 10];
 %! y = [0; 0; 0; 1; 1];
 %! a = ClassificationGAM (x, y, 'Prior', 'empirical');
-%! assert (a.Prior, [0.6; 0.4], 1e-6);
+%! assert_equal (a.Prior, [0.6; 0.4], 1e-6);
 %!test
 %! ## Test numeric prior
 %! x = [1, 2; 3, 4; 5, 6; 7, 8];
 %! y = [0; 0; 1; 1];
 %! a = ClassificationGAM (x, y, 'Prior', [0.7, 0.3]);
-%! assert (a.Prior, [0.7, 0.3], 1e-6);
+%! assert_equal (a.Prior, [0.7, 0.3], 1e-6);
 %!test
 %! ## Test default prior (empirical)
 %! x = [1, 2; 3, 4; 5, 6; 7, 8; 9, 10; 11, 12];
 %! y = [0; 0; 0; 1; 1; 1];
 %! a = ClassificationGAM (x, y);
-%! assert (a.Prior, [0.5; 0.5], 1e-6);
+%! assert_equal (a.Prior, [0.5; 0.5], 1e-6);
 %!test
 %! ## Test prior normalization
 %! x = [1, 2; 3, 4; 5, 6; 7, 8];
 %! y = [0; 0; 1; 1];
 %! a = ClassificationGAM (x, y, 'Prior', [2, 1]);
-%! assert (a.Prior, [2/3, 1/3], 1e-6);
+%! assert_equal (a.Prior, [2/3, 1/3], 1e-6);
 
 ## Test input validation for Prior
 %!error<ClassificationGAM: 'Prior' must be a 2-element vector.> ...
-%! ClassificationGAM (ones(4,2), ones(4,1), "Prior", [1])
+%! ClassificationGAM (ones (4,2), ones (4,1), 'Prior', [1])
 %!error<ClassificationGAM: 'Prior' must be a 2-element vector.> ...
-%! ClassificationGAM (ones(4,2), ones(4,1), "Prior", [1, 2, 3])
+%! ClassificationGAM (ones (4,2), ones (4,1), 'Prior', [1, 2, 3])
 %!error<ClassificationGAM: 'Prior' must be a numeric vector or a string.> ...
-%! ClassificationGAM (ones(4,2), ones(4,1), "Prior", {1, 2})
+%! ClassificationGAM (ones (4,2), ones (4,1), 'Prior', {1, 2})
 %!error<ClassificationGAM: 'Prior' must be> ...
-%! ClassificationGAM (ones(4,2), ones(4,1), "Prior", "invalid")
+%! ClassificationGAM (ones (4,2), ones (4,1), 'Prior', 'invalid')
 
 ## Test input validation for constructor
 %!error<ClassificationGAM: too few input arguments.> ClassificationGAM ()
 %!error<ClassificationGAM: too few input arguments.> ...
-%! ClassificationGAM (ones(4, 1))
+%! ClassificationGAM (ones (4, 1))
 %!error<ClassificationGAM: number of rows in X and Y must be equal.> ...
 %! ClassificationGAM (ones (4,2), ones (1,4))
 %!error<ClassificationGAM: 'PredictorNames' must be supplied as a cellstring array.> ...
-%! ClassificationGAM (ones (5,2), ones (5,1), "PredictorNames", ["A"])
+%! ClassificationGAM (ones (5,2), ones (5,1), 'PredictorNames', ['A'])
 %!error<ClassificationGAM: 'PredictorNames' must be supplied as a cellstring array.> ...
-%! ClassificationGAM (ones (5,2), ones (5,1), "PredictorNames", "A")
+%! ClassificationGAM (ones (5,2), ones (5,1), 'PredictorNames', 'A')
 %!error<ClassificationGAM: 'PredictorNames' must equal the number of columns in X.> ...
-%! ClassificationGAM (ones (5,2), ones (5,1), "PredictorNames", {"A", "B", "C"})
+%! ClassificationGAM (ones (5,2), ones (5,1), 'PredictorNames', {'A', 'B', 'C'})
 %!error<ClassificationGAM: 'ResponseName' must be a character vector.> ...
-%! ClassificationGAM (ones (5,2), ones (5,1), "ResponseName", {"Y"})
+%! ClassificationGAM (ones (5,2), ones (5,1), 'ResponseName', {'Y'})
 %!error<ClassificationGAM: 'ResponseName' must be a character vector.> ...
-%! ClassificationGAM (ones (5,2), ones (5,1), "ResponseName", 1)
+%! ClassificationGAM (ones (5,2), ones (5,1), 'ResponseName', 1)
 %!error<ClassificationGAM: 'ClassNames' must be a cell array of character vectors, a logical vector, a numeric vector, or a character array.> ...
-%! ClassificationGAM (ones(10,2), ones (10,1), "ClassNames", @(x)x)
+%! ClassificationGAM (ones (10,2), ones (10,1), 'ClassNames', @(x)x)
 %!error<ClassificationGAM: 'ClassNames' must be a cell array of character vectors, a logical vector, a numeric vector, or a character array.> ...
-%! ClassificationGAM (ones(10,2), ones (10,1), "ClassNames", {1})
+%! ClassificationGAM (ones (10,2), ones (10,1), 'ClassNames', {1})
 %!error<ClassificationGAM: not all 'ClassNames' are present in Y.> ...
-%! ClassificationGAM (ones(10,2), ones (10,1), "ClassNames", [1, 2])
+%! ClassificationGAM (ones (10,2), ones (10,1), 'ClassNames', [1, 2])
 %!error<ClassificationGAM: not all 'ClassNames' are present in Y.> ...
-%! ClassificationGAM (ones(5,2), ['a';'b';'a';'a';'b'], "ClassNames", ['a';'c'])
+%! ClassificationGAM (ones (5,2), ['a';'b';'a';'a';'b'], 'ClassNames', ['a';'c'])
 %!error<ClassificationGAM: not all 'ClassNames' are present in Y.> ...
-%! ClassificationGAM (ones(5,2), {'a';'b';'a';'a';'b'}, "ClassNames", {'a','c'})
+%! ClassificationGAM (ones (5,2), {'a';'b';'a';'a';'b'}, 'ClassNames', {'a','c'})
 %!error<ClassificationGAM: not all 'ClassNames' are present in Y.> ...
-%! ClassificationGAM (ones(10,2), logical (ones (10,1)), "ClassNames", [true, false])
+%! ClassificationGAM (ones (10,2), logical (ones (10,1)), 'ClassNames', [true, false])
 %!error<ClassificationGAM: 'Cost' must be a numeric square matrix.> ...
-%! ClassificationGAM (ones (5,2), ones (5,1), "Cost", [1, 2])
+%! ClassificationGAM (ones (5,2), ones (5,1), 'Cost', [1, 2])
 %!error<ClassificationGAM: 'Cost' must be a numeric square matrix.> ...
-%! ClassificationGAM (ones (5,2), ones (5,1), "Cost", "string")
+%! ClassificationGAM (ones (5,2), ones (5,1), 'Cost', 'string')
 %!error<ClassificationGAM: 'Cost' must be a numeric square matrix.> ...
-%! ClassificationGAM (ones (5,2), ones (5,1), "Cost", {eye(2)})
+%! ClassificationGAM (ones (5,2), ones (5,1), 'Cost', {eye(2)})
 
 ## Test predict method
 %!test
 %! x = [1, 2; 3, 4; 5, 6; 7, 8; 9, 10];
 %! y = [1; 0; 1; 0; 1];
-%! a = ClassificationGAM (x, y, "interactions", "all");
+%! a = ClassificationGAM (x, y, 'interactions', 'all');
 %! l = {'1'; '1'; '1'; '1'; '1'};
 %! s = [0.3760, 0.6240; 0.4259, 0.5741; 0.3760, 0.6240; ...
 %!      0.4259, 0.5741; 0.3760, 0.6240];
 %! [labels, scores] = predict (a, x);
-%! assert (class (a), "ClassificationGAM");
-%! assert ({a.X, a.Y, a.NumObservations}, {x, y, 5})
-%! assert ({a.NumPredictors, a.ResponseName}, {2, "Y"})
-%! assert (a.ClassNames, {'0'; '1'})
-%! assert (a.PredictorNames, {'x1', 'x2'})
-%! assert (a.ModelwInt.Intercept, 0.4055, 1e-1)
-%! assert (labels, l)
-%! assert (scores, s, 1e-1)
+%! assert_equal (class (a), "ClassificationGAM");
+%! assert_equal ({a.X, a.Y, a.NumObservations}, {x, y, 5})
+%! assert_equal ({a.NumPredictors, a.ResponseName}, {2, 'Y'})
+%! assert_equal (a.ClassNames, {'0'; '1'})
+%! assert_equal (a.PredictorNames, {'x1', 'x2'})
+%! assert_equal (a.ModelwInt.Intercept, 0.4055, 1e-1)
+%! assert_equal (labels, l)
+%! assert_equal (scores, s, 1e-1)
 %!test
 %! x = [1, 2, 3; 4, 5, 6; 7, 8, 9; 3, 2, 1];
 %! y = [0; 0; 1; 1];
 %! interactions = [false, true, false; true, false, true; false, true, false];
-%! a = fitcgam (x, y, "learningrate", 0.2, "interactions", interactions);
-%! [label, score] = predict (a, x, "includeinteractions", true);
+%! a = fitcgam (x, y, 'learningrate', 0.2, 'interactions', interactions);
+%! [label, score] = predict (a, x, 'includeinteractions', true);
 %! l = {'0'; '0'; '1'; '1'};
 %! s = [0.5106, 0.4894; 0.5135, 0.4865; 0.4864, 0.5136; 0.4847, 0.5153];
-%! assert (class (a), "ClassificationGAM");
-%! assert ({a.X, a.Y, a.NumObservations}, {x, y, 4})
-%! assert ({a.NumPredictors, a.ResponseName}, {3, "Y"})
-%! assert (a.ClassNames, {'0'; '1'})
-%! assert (a.PredictorNames, {'x1', 'x2', 'x3'})
-%! assert (a.ModelwInt.Intercept, 0)
-%! assert (label, l)
-%! assert (score, s, 1e-1)
+%! assert_equal (class (a), "ClassificationGAM");
+%! assert_equal ({a.X, a.Y, a.NumObservations}, {x, y, 4})
+%! assert_equal ({a.NumPredictors, a.ResponseName}, {3, 'Y'})
+%! assert_equal (a.ClassNames, {'0'; '1'})
+%! assert_equal (a.PredictorNames, {'x1', 'x2', 'x3'})
+%! assert_equal (a.ModelwInt.Intercept, 0)
+%! assert_equal (label, l)
+%! assert_equal (score, s, 1e-1)
 
 ## Test input validation for predict method
 %!error<ClassificationGAM.predict: too few input arguments.> ...
@@ -1594,57 +1596,57 @@ endfunction
 %!test
 %! status = warning;
 %! warning ('off');
-%! rand ("seed", 23);
+%! rand ('seed', 23);
 %! CVMdl = crossval (obj);
 %! warning (status);
-%! assert (class (CVMdl), "ClassificationPartitionedModel")
-%! assert ({CVMdl.X, CVMdl.Y}, {x, y})
-%! assert (CVMdl.KFold == 5)
-%! assert (class (CVMdl.Trained{1}), "CompactClassificationGAM")
-%! assert (CVMdl.CrossValidatedModel, "ClassificationGAM")
+%! assert_equal (class (CVMdl), "ClassificationPartitionedModel")
+%! assert_equal ({CVMdl.X, CVMdl.Y}, {x, y})
+%! assert_equal (CVMdl.KFold == 5, true)
+%! assert_equal (class (CVMdl.Trained{1}), "CompactClassificationGAM")
+%! assert_equal (CVMdl.CrossValidatedModel, "ClassificationGAM")
 %!test
 %! status = warning;
 %! warning ('off');
-%! rand ("seed", 23);
-%! CVMdl = crossval (obj, "KFold", 2);
+%! rand ('seed', 23);
+%! CVMdl = crossval (obj, 'KFold', 2);
 %! warning (status);
-%! assert (class (CVMdl), "ClassificationPartitionedModel")
-%! assert ({CVMdl.X, CVMdl.Y}, {x, y})
-%! assert (CVMdl.KFold == 2)
-%! assert (class (CVMdl.Trained{1}), "CompactClassificationGAM")
-%! assert (CVMdl.CrossValidatedModel, "ClassificationGAM")
+%! assert_equal (class (CVMdl), "ClassificationPartitionedModel")
+%! assert_equal ({CVMdl.X, CVMdl.Y}, {x, y})
+%! assert_equal (CVMdl.KFold == 2, true)
+%! assert_equal (class (CVMdl.Trained{1}), "CompactClassificationGAM")
+%! assert_equal (CVMdl.CrossValidatedModel, "ClassificationGAM")
 %!test
 %! status = warning;
 %! warning ('off');
-%! rand ("seed", 23);
-%! CVMdl = crossval (obj, "HoldOut", 0.2);
+%! rand ('seed', 23);
+%! CVMdl = crossval (obj, 'HoldOut', 0.2);
 %! warning (status);
-%! assert (class (CVMdl), "ClassificationPartitionedModel")
-%! assert ({CVMdl.X, CVMdl.Y}, {x, y})
-%! assert (class (CVMdl.Trained{1}), "CompactClassificationGAM")
-%! assert (CVMdl.CrossValidatedModel, "ClassificationGAM")
+%! assert_equal (class (CVMdl), "ClassificationPartitionedModel")
+%! assert_equal ({CVMdl.X, CVMdl.Y}, {x, y})
+%! assert_equal (class (CVMdl.Trained{1}), "CompactClassificationGAM")
+%! assert_equal (CVMdl.CrossValidatedModel, "ClassificationGAM")
 %!test
 %! status = warning;
 %! warning ('off');
-%! rand ("seed", 23);
+%! rand ('seed', 23);
 %! partition = cvpartition (y, 'KFold', 3);
 %! warning (status);
 %! CVMdl = crossval (obj, 'cvPartition', partition);
-%! assert (class (CVMdl), "ClassificationPartitionedModel")
-%! assert (CVMdl.KFold == 3)
-%! assert (class (CVMdl.Trained{1}), "CompactClassificationGAM")
-%! assert (CVMdl.CrossValidatedModel, "ClassificationGAM")
+%! assert_equal (class (CVMdl), "ClassificationPartitionedModel")
+%! assert_equal (CVMdl.KFold == 3, true)
+%! assert_equal (class (CVMdl.Trained{1}), "CompactClassificationGAM")
+%! assert_equal (CVMdl.CrossValidatedModel, "ClassificationGAM")
 
 ## Test input validation for crossval method
 %!error<ClassificationGAM.crossval: Name-Value arguments must be in pairs.> ...
-%! crossval (obj, "kfold")
+%! crossval (obj, 'kfold')
 %!error<ClassificationGAM.crossval: specify only one of the optional Name-Value paired arguments.>...
-%! crossval (obj, "kfold", 12, "holdout", 0.2)
+%! crossval (obj, 'kfold', 12, 'holdout', 0.2)
 %!error<ClassificationGAM.crossval: 'KFold' must be an integer value greater than 1.> ...
-%! crossval (obj, "kfold", 'a')
+%! crossval (obj, 'kfold', 'a')
 %!error<ClassificationGAM.crossval: 'Holdout' must be a numeric value between 0 and 1.> ...
-%! crossval (obj, "holdout", 2)
+%! crossval (obj, 'holdout', 2)
 %!error<ClassificationGAM.crossval: 'Leaveout' must be either 'on' or 'off'.> ...
-%! crossval (obj, "leaveout", 1)
+%! crossval (obj, 'leaveout', 1)
 %!error<ClassificationGAM.crossval: 'CVPartition' must be a 'cvpartition' object.> ...
-%! crossval (obj, "cvpartition", 1)
+%! crossval (obj, 'cvpartition', 1)

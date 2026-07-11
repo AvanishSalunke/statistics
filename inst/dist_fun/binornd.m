@@ -97,10 +97,10 @@ function r = binornd (n, ps, varargin)
   endif
 
   ## Check for class type
-  if (isa (n, "single") || isa (ps, "single"))
-    cls = "single";
+  if (isa (n, 'single') || isa (ps, 'single'))
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ## Generate random sample from binomial distribution
@@ -110,7 +110,7 @@ function r = binornd (n, ps, varargin)
       tmp = rand (n, nel);
       r = sum (tmp < ps, 1);
       r = reshape (r, sz);
-      if (strcmp (cls, "single"))
+      if (strcmp (cls, 'single'))
         r = single (r);
       endif
     elseif ((n == 0) && (ps >= 0) && (ps <= 1))
@@ -121,7 +121,7 @@ function r = binornd (n, ps, varargin)
   else
     r = zeros (sz, cls);
 
-    k = !(n >= 0) | !(n < Inf) | !(n == fix (n)) | !(ps >= 0) | !(ps <= 1);
+    k = ! (n >= 0) | ! (n < Inf) | ! (n == fix (n)) | ! (ps >= 0) | ! (ps <= 1);
     r(k) = NaN;
 
     k = (n > 0) & (n < Inf) & (n == fix (n)) & (ps >= 0) & (ps <= 1);
@@ -129,38 +129,38 @@ function r = binornd (n, ps, varargin)
       L = sum (k(:));
       ind = repelems ((1 : L), [(1 : L); n(k)(:)'])';
       p_ext = ps(k)(ind)(:);
-      r(k) = accumarray (ind, rand (sum(n(k)(:)), 1) < p_ext);
+      r(k) = accumarray (ind, rand (sum (n(k)(:)), 1) < p_ext);
     endif
   endif
 
 endfunction
 
 ## Test output
-%!assert (size (binornd (2, 1/2)), [1 1])
-%!assert (size (binornd (2 * ones (2, 1), 1/2)), [2, 1])
-%!assert (size (binornd (2 * ones (2, 2), 1/2)), [2, 2])
-%!assert (size (binornd (2, 1/2 * ones (2, 1))), [2, 1])
-%!assert (size (binornd (1, 1/2 * ones (2, 2))), [2, 2])
-%!assert (size (binornd (ones (2, 1), 1)), [2, 1])
-%!assert (size (binornd (ones (2, 2), 1)), [2, 2])
-%!assert (size (binornd (2, 1/2, 3)), [3, 3])
-%!assert (size (binornd (1, 1, [4, 1])), [4, 1])
-%!assert (size (binornd (1, 1, 4, 1)), [4, 1])
-%!assert (size (binornd (1, 1, 4, 1, 5)), [4, 1, 5])
-%!assert (size (binornd (1, 1, 0, 1)), [0, 1])
-%!assert (size (binornd (1, 1, 1, 0)), [1, 0])
-%!assert (size (binornd (1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
-%!assert (size (binornd (1, 1, [])), [0, 0])
-%!assert (size (binornd (1, 1, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (binornd (2, 1/2)), [1 1])
+%!assert_equal (size (binornd (2 * ones (2, 1), 1/2)), [2, 1])
+%!assert_equal (size (binornd (2 * ones (2, 2), 1/2)), [2, 2])
+%!assert_equal (size (binornd (2, 1/2 * ones (2, 1))), [2, 1])
+%!assert_equal (size (binornd (1, 1/2 * ones (2, 2))), [2, 2])
+%!assert_equal (size (binornd (ones (2, 1), 1)), [2, 1])
+%!assert_equal (size (binornd (ones (2, 2), 1)), [2, 2])
+%!assert_equal (size (binornd (2, 1/2, 3)), [3, 3])
+%!assert_equal (size (binornd (1, 1, [4, 1])), [4, 1])
+%!assert_equal (size (binornd (1, 1, 4, 1)), [4, 1])
+%!assert_equal (size (binornd (1, 1, 4, 1, 5)), [4, 1, 5])
+%!assert_equal (size (binornd (1, 1, 0, 1)), [0, 1])
+%!assert_equal (size (binornd (1, 1, 1, 0)), [1, 0])
+%!assert_equal (size (binornd (1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
+%!assert_equal (size (binornd (1, 1, [])), [0, 0])
+%!assert_equal (size (binornd (1, 1, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (binornd (1, 1)), "double")
-%!assert (class (binornd (1, single (0))), "single")
-%!assert (class (binornd (1, single ([0, 0]))), "single")
-%!assert (class (binornd (1, single (1), 2)), "single")
-%!assert (class (binornd (1, single ([1, 1]), 1, 2)), "single")
-%!assert (class (binornd (single (1), 1, 2)), "single")
-%!assert (class (binornd (single ([1, 1]), 1, 1, 2)), "single")
+%!assert_equal (class (binornd (1, 1)), "double")
+%!assert_equal (class (binornd (1, single (0))), "single")
+%!assert_equal (class (binornd (1, single ([0, 0]))), "single")
+%!assert_equal (class (binornd (1, single (1), 2)), "single")
+%!assert_equal (class (binornd (1, single ([1, 1]), 1, 2)), "single")
+%!assert_equal (class (binornd (single (1), 1, 2)), "single")
+%!assert_equal (class (binornd (single ([1, 1]), 1, 1, 2)), "single")
 
 ## Test input validation
 %!error<binornd: function called with too few input arguments.> binornd ()

@@ -75,7 +75,7 @@ endfunction
 %!error<nakastat: function called with too few input arguments.> nakastat ()
 %!error<nakastat: function called with too few input arguments.> nakastat (1)
 %!error<nakastat: MU and OMEGA must be numeric.> nakastat ({}, 2)
-%!error<nakastat: MU and OMEGA must be numeric.> nakastat (1, "")
+%!error<nakastat: MU and OMEGA must be numeric.> nakastat (1, '')
 %!error<nakastat: MU and OMEGA must not be complex.> nakastat (i, 2)
 %!error<nakastat: MU and OMEGA must not be complex.> nakastat (1, i)
 %!error<nakastat: MU and OMEGA must be of common size or scalars.> ...
@@ -86,13 +86,13 @@ endfunction
 ## Output validation tests
 %!test
 %! [m, v] = nakastat (1, 1);
-%! assert (m, 0.8862269254, 1e-10);
-%! assert (v, 0.2146018366, 1e-10);
+%! assert_equal (m, 0.8862269254, 1e-10);
+%! assert_equal (v, 0.2146018366, 1e-10);
 %!test
 %! [m, v] = nakastat (1, 2);
-%! assert (m, 1.25331413731, 1e-10);
-%! assert (v, 0.42920367321, 1e-10);
+%! assert_equal (m, 1.25331413731, 1e-10);
+%! assert_equal (v, 0.42920367321, 1e-10);
 %!test
 %! [m, v] = nakastat (2, 1);
-%! assert (m, 0.93998560299, 1e-10);
-%! assert (v, 0.11642706618, 1e-10);
+%! assert_equal (m, 0.93998560299, 1e-10);
+%! assert_equal (v, 0.11642706618, 1e-10);

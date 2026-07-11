@@ -76,13 +76,13 @@ function [m, v] = gevstat (k, sigma, mu)
   m(k >= 1) = Inf;
   m(k == 0) = mu(k == 0) + eg*sigma(k == 0);
   m(k < 1 & k != 0) = mu(k < 1 & k != 0) + sigma(k < 1 & k != 0) .* ...
-                        (gamma(1-k(k < 1 & k != 0)) - 1) ./ k(k < 1 & k != 0);
+                        (gamma (1-k(k < 1 & k != 0)) - 1) ./ k(k < 1 & k != 0);
 
   ## Find the variance
   v(k >= 0.5) = Inf;
   v(k == 0) = (pi^2 / 6) * sigma(k == 0) .^ 2;
-  v(k < 0.5 & k != 0) = (gamma(1-2*k(k < 0.5 & k != 0)) - ...
-                         gamma(1-k(k < 0.5 & k != 0)).^2) .* ...
+  v(k < 0.5 & k != 0) = (gamma (1-2*k(k < 0.5 & k != 0)) - ...
+                         gamma (1-k(k < 0.5 & k != 0)).^2) .* ...
                         (sigma(k < 0.5 & k != 0) ./ k(k < 0.5 & k != 0)) .^ 2;
 
 endfunction
@@ -92,8 +92,8 @@ endfunction
 %!error<gevstat: function called with too few input arguments.> gevstat (1)
 %!error<gevstat: function called with too few input arguments.> gevstat (1, 2)
 %!error<gevstat: K, SIGMA, and MU must be numeric.> gevstat ({}, 2, 3)
-%!error<gevstat: K, SIGMA, and MU must be numeric.> gevstat (1, "", 3)
-%!error<gevstat: K, SIGMA, and MU must be numeric.> gevstat (1, 2, "")
+%!error<gevstat: K, SIGMA, and MU must be numeric.> gevstat (1, '', 3)
+%!error<gevstat: K, SIGMA, and MU must be numeric.> gevstat (1, 2, '')
 %!error<gevstat: K, SIGMA, and MU must not be complex.> gevstat (i, 2, 3)
 %!error<gevstat: K, SIGMA, and MU must not be complex.> gevstat (1, i, 3)
 %!error<gevstat: K, SIGMA, and MU must not be complex.> gevstat (1, 2, i)
@@ -112,5 +112,5 @@ endfunction
 %! [m, v] = gevstat (k, sigma, mu);
 %! expected_m = [1, 1.4551, 2.1544, 2.6423, 3.4460, 4.0898, Inf];
 %! expected_v = [4, 3.4336, 6.5797, 13.3761, 59.3288, Inf, Inf];
-%! assert (m, expected_m, -0.001);
-%! assert (v, expected_v, -0.001);
+%! assert_equal (m, expected_m, -0.001);
+%! assert_equal (v, expected_v, -0.001);

@@ -42,7 +42,7 @@ function y = hnpdf (x, mu, sigma)
   endif
 
   ## Check for common size of X, MU, and SIGMA
-  if (! isscalar (x) || ! isscalar (mu) || ! isscalar(sigma))
+  if (! isscalar (x) || ! isscalar (mu) || ! isscalar (sigma))
     [retval, x, mu, sigma] = common_size (x, mu, sigma);
     if (retval > 0)
       error ("hnpdf: X, MU, and SIGMA must be of common size or scalars.");
@@ -55,8 +55,8 @@ function y = hnpdf (x, mu, sigma)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (mu, "single") || isa (sigma, "single"));
-    y = NaN (size (x), "single");
+  if (isa (x, 'single') || isa (mu, 'single') || isa (sigma, 'single'));
+    y = NaN (size (x), 'single');
   else
     y = NaN (size (x));
   endif
@@ -80,42 +80,42 @@ endfunction
 %! y2 = hnpdf (x, 0, 2);
 %! y3 = hnpdf (x, 0, 3);
 %! y4 = hnpdf (x, 0, 5);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-c")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-c')
 %! grid on
 %! xlim ([0, 10])
 %! ylim ([0, 0.9])
-%! legend ({"μ = 0, σ = 1", "μ = 0, σ = 2", ...
-%!          "μ = 0, σ = 3", "μ = 0, σ = 5"}, "location", "northeast")
-%! title ("Half-normal PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'μ = 0, σ = 1', 'μ = 0, σ = 2', ...
+%!          'μ = 0, σ = 3', 'μ = 0, σ = 5'}, 'location', 'northeast')
+%! title ('Half-normal PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 %!demo
 %! ## Plot half-normal against normal probability density function
 %! x = -5:0.001:5;
 %! y1 = hnpdf (x, 0, 1);
 %! y2 = normpdf (x);
-%! plot (x, y1, "-b", x, y2, "-g")
+%! plot (x, y1, '-b', x, y2, '-g')
 %! grid on
 %! xlim ([-5, 5])
 %! ylim ([0, 0.9])
-%! legend ({"half-normal with μ = 0, σ = 1", ...
-%!          "standard normal (μ = 0, σ = 1)"}, "location", "northeast")
-%! title ("Half-normal against standard normal PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'half-normal with μ = 0, σ = 1', ...
+%!          'standard normal (μ = 0, σ = 1)'}, 'location', 'northeast')
+%! title ('Half-normal against standard normal PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-Inf, -1, 0, 1/2, 1, Inf];
 %! y = [0, 0, 0.7979, 0.7041, 0.4839, 0];
-%!assert (hnpdf ([x, NaN], 0, 1), [y, NaN], 1e-4)
-%!assert (hnpdf (x, 0, [-2, -1, 0, 1, 1, 1]), [nan(1,3), y([4:6])], 1e-4)
+%!assert_equal (hnpdf ([x, NaN], 0, 1), [y, NaN], 1e-4)
+%!assert_equal (hnpdf (x, 0, [-2, -1, 0, 1, 1, 1]), [nan(1,3), y([4:6])], 1e-4)
 
 ## Test class of input preserved
-%!assert (class (hncdf (single ([x, NaN]), 0, 1)), "single")
-%!assert (class (hncdf ([x, NaN], 0, single (1))), "single")
-%!assert (class (hncdf ([x, NaN], single (0), 1)), "single")
+%!assert_equal (class (hncdf (single ([x, NaN]), 0, 1)), "single")
+%!assert_equal (class (hncdf ([x, NaN], 0, single (1))), "single")
+%!assert_equal (class (hncdf ([x, NaN], single (0), 1)), "single")
 
 ## Test input validation
 %!error<hnpdf: function called with too few input arguments.> hnpdf ()

@@ -27,7 +27,8 @@
 ## constant matrix of the same size as the other inputs.
 ##
 ## Further information about the noncentral chi-squared distribution can be
-## found at @url{https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution}
+## found at
+## @url{https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution}
 ##
 ## @seealso{ncx2cdf, ncx2inv, ncx2rnd, ncx2stat, chi2pdf}
 ## @end deftypefn
@@ -51,8 +52,8 @@ function y = ncx2pdf (x, df, lambda)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (df, "single") || isa (lambda, "single"))
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (df, 'single') || isa (lambda, 'single'))
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
@@ -78,7 +79,7 @@ function y = ncx2pdf (x, df, lambda)
   y(k3) = gampdf (x(k3), df(k3), 2);
 
   ## Handle normal cases
-  td = find(x>0 & x<Inf & lambda>0 & df>=0);
+  td = find (x>0 & x<Inf & lambda>0 & df>=0);
   ## Return if finished all normal cases
   if (isempty (td))
     return;
@@ -96,7 +97,7 @@ function y = ncx2pdf (x, df, lambda)
   large_DF = ! small_DF;
   ul = zeros (size (x));
   ul(small_DF) = -0.5 * (lambda(small_DF) + x(small_DF)) + ...
-                  0.5 * x_sqrt(small_DF) .* d_sqrt (small_DF) ./ ...
+                  0.5 * x_sqrt(small_DF) .* d_sqrt(small_DF) ./ ...
                   (df(small_DF) + 1) + df(small_DF) .* ...
                   (log (x(small_DF)) - log (2)) - log (2) - ...
                   gammaln (df(small_DF) + 1);
@@ -142,7 +143,7 @@ function y = ncx2pdf (x, df, lambda)
                 df(useB) .* log (x_sqrt(useB) ./ d_sqrt(useB))) .* Bess(useB);
   td(useB) = [];
   ## Return if finished all normal cases
-  if isempty(td)
+  if isempty (td)
     return;
   endif
   x(useB) = [];
@@ -157,9 +158,9 @@ function y = ncx2pdf (x, df, lambda)
   lnsr2pi = 0.9189385332046727; % log(sqrt(2*pi))
   dx = lambda .* x / 4;
   K = max (0, floor (0.5 * (sqrt (df .^ 2 + 4 * dx) - df)));
-  lntK = zeros(size(K));
+  lntK = zeros (size (K));
   K0 = K == 0;
-  lntK(K0) = -lnsr2pi -0.5 * (lambda(K0) + log(df(K0))) - ...
+  lntK(K0) = -lnsr2pi -0.5 * (lambda(K0) + log (df(K0))) - ...
               StirlingError (df(K0)) - BinoPoisson (df(K0), x(K0) / 2);
   K0 = ! K0;
   lntK(K0) = -2 * lnsr2pi - 0.5 * (log (K(K0)) + log (df(K0) + K(K0))) - ...
@@ -184,7 +185,7 @@ function y = ncx2pdf (x, df, lambda)
     sumK(keep) = sumK(keep) + term(keep);
     keep = keep & term > eps (sumK);
     k = k + 1;
-  end
+  endwhile
   y(td) = 0.5 * exp (lntK + log (sumK));
 
 endfunction
@@ -225,7 +226,7 @@ function lambda = StirlingError (n)
         lambda(k) = sfe(n2+1);
     else
         lnsr2pi = 0.9189385332046728;
-        lambda(k) = gammaln(n1+1)-(n1+0.5).*log(n1)+n1-lnsr2pi;
+        lambda(k) = gammaln (n1+1)-(n1+0.5).*log (n1)+n1-lnsr2pi;
     endif
   endif
   k = find (n > 15 & n <= 35);
@@ -237,11 +238,11 @@ function lambda = StirlingError (n)
   if (any (k))
     lambda(k) = (S0 - (S1 - (S2 - S3 ./ nn(k)) ./ nn(k)) ./ nn(k)) ./ n(k);
   endif
-  k = find(n > 80 & n <= 500);
+  k = find (n > 80 & n <= 500);
   if (any (k))
     lambda(k) = (S0 - (S1 - S2 ./ nn(k)) ./ nn(k)) ./ n(k);
   endif
-  k = find(n > 500);
+  k = find (n > 500);
   if (any (k))
     lambda(k) = (S0 - S1 ./ nn(k)) ./ n(k);
   endif
@@ -250,12 +251,12 @@ endfunction
 ## Deviance term for binomial and Poisson probability calculation.
 function BP = BinoPoisson (x, np)
   if (isa (x,'single') || isa (np,'single'))
-    BP = zeros (size (x), "single");
+    BP = zeros (size (x), 'single');
   else
     BP = zeros (size (x));
   endif
   k = abs (x - np) < 0.1 * (x + np);
-  if any(k(:))
+  if any (k(:))
     s = (x(k) - np(k)) .* (x(k) - np(k)) ./ (x(k) + np(k));
     v = (x(k) - np(k)) ./ (x(k) + np(k));
     ej = 2 .* x(k) .* v;
@@ -263,7 +264,7 @@ function BP = BinoPoisson (x, np)
     s1 = zeros (size (s), is_class);
     ok = true (size (s));
     j = 0;
-    while any(ok(:))
+    while any (ok(:))
       ej(ok) = ej(ok) .* v(ok) .* v(ok);
       j = j + 1;
       s1(ok) = s(ok) + ej(ok) ./ (2 * j + 1);
@@ -287,17 +288,17 @@ endfunction
 %! y4 = ncx2pdf (x, 4, 1);
 %! y5 = ncx2pdf (x, 4, 2);
 %! y6 = ncx2pdf (x, 4, 3);
-%! plot (x, y1, "-r", x, y2, "-g", x, y3, "-k", ...
-%!       x, y4, "-m", x, y5, "-c", x, y6, "-y")
+%! plot (x, y1, '-r', x, y2, '-g', x, y3, '-k', ...
+%!       x, y4, '-m', x, y5, '-c', x, y6, '-y')
 %! grid on
 %! xlim ([0, 10])
 %! ylim ([0, 0.32])
-%! legend ({"df = 2, λ = 1", "df = 2, λ = 2", ...
-%!          "df = 2, λ = 3", "df = 4, λ = 1", ...
-%!          "df = 4, λ = 2", "df = 4, λ = 3"}, "location", "northeast")
-%! title ("Noncentral chi-squared PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'df = 2, λ = 1', 'df = 2, λ = 2', ...
+%!          'df = 2, λ = 3', 'df = 4, λ = 1', ...
+%!          'df = 4, λ = 2', 'df = 4, λ = 3'}, 'location', 'northeast')
+%! title ('Noncentral chi-squared PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 %!demo
 %! ## Compare the noncentral chi-squared PDF with LAMBDA = 2 to the
@@ -306,31 +307,31 @@ endfunction
 %! x = 0:0.1:10;
 %! y1 = ncx2pdf (x, 4, 2);
 %! y2 = chi2pdf (x, 4);
-%! plot (x, y1, "-", x, y2, "-");
+%! plot (x, y1, '-', x, y2, '-');
 %! grid on
 %! xlim ([0, 10])
 %! ylim ([0, 0.32])
-%! legend ({"Noncentral T(10,1)", "T(10)"}, "location", "northwest")
-%! title ("Noncentral chi-squared vs chi-squared PDFs")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'Noncentral T(10,1)', 'T(10)'}, 'location', 'northwest')
+%! title ('Noncentral chi-squared vs chi-squared PDFs')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x1, df, d1
 %! x1 = [-Inf, 2, NaN, 4, Inf];
 %! df = [2, 0, -1, 1, 4];
 %! d1 = [1, NaN, 3, -1, 2];
-%!assert (ncx2pdf (x1, df, d1), [0, NaN, NaN, NaN, 0]);
-%!assert (ncx2pdf (x1, df, 1), [0, 0.07093996461786045, NaN, ...
+%!assert_equal (ncx2pdf (x1, df, d1), [0, NaN, NaN, NaN, 0]);
+%!assert_equal (ncx2pdf (x1, df, 1), [0, 0.07093996461786045, NaN, ...
 %!                              0.06160064323277038, 0], 1e-14);
-%!assert (ncx2pdf (x1, df, 3), [0, 0.1208364909271113, NaN, ...
+%!assert_equal (ncx2pdf (x1, df, 3), [0, 0.1208364909271113, NaN, ...
 %!                              0.09631299762429098, 0], 1e-14);
-%!assert (ncx2pdf (x1, df, 2), [0, 0.1076346446244688, NaN, ...
+%!assert_equal (ncx2pdf (x1, df, 2), [0, 0.1076346446244688, NaN, ...
 %!                              0.08430464047296625, 0], 1e-14);
-%!assert (ncx2pdf (x1, 2, d1), [0, NaN, NaN, NaN, 0]);
-%!assert (ncx2pdf (2, df, d1), [0.1747201674611283, NaN, NaN, ...
+%!assert_equal (ncx2pdf (x1, 2, d1), [0, NaN, NaN, NaN, 0]);
+%!assert_equal (ncx2pdf (2, df, d1), [0.1747201674611283, NaN, NaN, ...
 %!                              NaN, 0.1076346446244688], 1e-14);
-%!assert (ncx2pdf (4, df, d1), [0.09355987820265799, NaN, NaN, ...
+%!assert_equal (ncx2pdf (4, df, d1), [0.09355987820265799, NaN, NaN, ...
 %!                              NaN, 0.1192317192431485], 1e-14);
 
 ## Test input validation

@@ -63,9 +63,9 @@ function x = triinv (p, a, b, c)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (a, "single") || isa (b, "single") ...
-                        || isa (c, "single"))
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (a, 'single') || isa (b, 'single') ...
+                        || isa (c, 'single'))
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -97,35 +97,35 @@ endfunction
 %! x2 = triinv (p, 1, 5, 2);
 %! x3 = triinv (p, 2, 9, 3);
 %! x4 = triinv (p, 2, 9, 5);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-c")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-c')
 %! grid on
 %! ylim ([0, 10])
-%! legend ({"a = 3, b = 6, c = 4", "a = 1, b = 5, c = 2", ...
-%!          "a = 2, b = 9, c = 3", "a = 2, b = 9, c = 5"}, ...
-%!         "location", "northwest")
-%! title ("Triangular CDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'a = 3, b = 6, c = 4', 'a = 1, b = 5, c = 2', ...
+%!          'a = 2, b = 9, c = 3', 'a = 2, b = 9, c = 5'}, ...
+%!         'location', 'northwest')
+%! title ('Triangular CDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p, y
 %! p = [-1, 0, 0.02, 0.5, 0.98, 1, 2];
 %! y = [NaN, 0, 0.1, 0.5, 0.9, 1, NaN] + 1;
-%!assert (triinv (p, ones (1, 7), 1.5 * ones (1, 7), 2 * ones (1, 7)), y, eps)
-%!assert (triinv (p, 1 * ones (1, 7), 1.5, 2), y, eps)
-%!assert (triinv (p, 1, 1.5, 2 * ones (1, 7)), y, eps)
-%!assert (triinv (p, 1, 1.5*ones (1,7), 2), y, eps)
-%!assert (triinv (p, 1, 1.5, 2), y, eps)
-%!assert (triinv (p, [1, 1, NaN, 1, 1, 1, 1], 1.5, 2), [y(1:2), NaN, y(4:7)], eps)
-%!assert (triinv (p, 1, 1.5 * [1, 1, NaN, 1, 1, 1, 1], 2), [y(1:2), NaN, y(4:7)], eps)
-%!assert (triinv (p, 1, 1.5, 2 * [1, 1, NaN, 1, 1, 1, 1]), [y(1:2), NaN, y(4:7)], eps)
-%!assert (triinv ([p, NaN], 1, 1.5, 2), [y, NaN], eps)
+%!assert_equal (triinv (p, ones (1, 7), 1.5 * ones (1, 7), 2 * ones (1, 7)), y, eps)
+%!assert_equal (triinv (p, 1 * ones (1, 7), 1.5, 2), y, eps)
+%!assert_equal (triinv (p, 1, 1.5, 2 * ones (1, 7)), y, eps)
+%!assert_equal (triinv (p, 1, 1.5*ones (1,7), 2), y, eps)
+%!assert_equal (triinv (p, 1, 1.5, 2), y, eps)
+%!assert_equal (triinv (p, [1, 1, NaN, 1, 1, 1, 1], 1.5, 2), [y(1:2), NaN, y(4:7)], eps)
+%!assert_equal (triinv (p, 1, 1.5 * [1, 1, NaN, 1, 1, 1, 1], 2), [y(1:2), NaN, y(4:7)], eps)
+%!assert_equal (triinv (p, 1, 1.5, 2 * [1, 1, NaN, 1, 1, 1, 1]), [y(1:2), NaN, y(4:7)], eps)
+%!assert_equal (triinv ([p, NaN], 1, 1.5, 2), [y, NaN], eps)
 
 ## Test class of input preserved
-%!assert (triinv (single ([p, NaN]), 1, 1.5, 2), single ([y, NaN]), eps('single'))
-%!assert (triinv ([p, NaN], single (1), 1.5, 2), single ([y, NaN]), eps('single'))
-%!assert (triinv ([p, NaN], 1, single (1.5), 2), single ([y, NaN]), eps('single'))
-%!assert (triinv ([p, NaN], 1, 1.5, single (2)), single ([y, NaN]), eps('single'))
+%!assert_equal (triinv (single ([p, NaN]), 1, 1.5, 2), single ([y, NaN]), eps ('single'))
+%!assert_equal (triinv ([p, NaN], single (1), 1.5, 2), single ([y, NaN]), eps ('single'))
+%!assert_equal (triinv ([p, NaN], 1, single (1.5), 2), single ([y, NaN]), eps ('single'))
+%!assert_equal (triinv ([p, NaN], 1, 1.5, single (2)), single ([y, NaN]), eps ('single'))
 
 ## Test input validation
 %!error<triinv: function called with too few input arguments.> triinv ()
@@ -135,13 +135,13 @@ endfunction
 %!error<triinv: function called with too many inputs> ...
 %! triinv (1, 2, 3, 4, 5)
 %!error<triinv: P, A, B, and C must be of common size or scalars.> ...
-%! triinv (ones (3), ones (2), ones(2), ones(2))
+%! triinv (ones (3), ones (2), ones (2), ones (2))
 %!error<triinv: P, A, B, and C must be of common size or scalars.> ...
-%! triinv (ones (2), ones (3), ones(2), ones(2))
+%! triinv (ones (2), ones (3), ones (2), ones (2))
 %!error<triinv: P, A, B, and C must be of common size or scalars.> ...
-%! triinv (ones (2), ones (2), ones(3), ones(2))
+%! triinv (ones (2), ones (2), ones (3), ones (2))
 %!error<triinv: P, A, B, and C must be of common size or scalars.> ...
-%! triinv (ones (2), ones (2), ones(2), ones(3))
+%! triinv (ones (2), ones (2), ones (2), ones (3))
 %!error<triinv: P, A, B, and C must not be complex.> triinv (i, 2, 3, 4)
 %!error<triinv: P, A, B, and C must not be complex.> triinv (1, i, 3, 4)
 %!error<triinv: P, A, B, and C must not be complex.> triinv (1, 2, i, 4)

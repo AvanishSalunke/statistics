@@ -127,7 +127,7 @@ classdef ClassificationPartitionedModel
     ##
     ## A character vector specifying the class of the cross-validated model.
     ## This field contains the type of model that was used for the training,
-    ## e.g., @qcode{"ClassificationKNN"}.  This property is read-only.
+    ## e.g., @qcode{'ClassificationKNN'}.  This property is read-only.
     ##
     ## @end deftp
     CrossValidatedModel          = [];
@@ -251,21 +251,22 @@ classdef ClassificationPartitionedModel
     Trained                      = [];
   endproperties
 
-  properties (Access = private, Hidden)
+  properties(Access = private, Hidden)
     STname = 'none';
   endproperties
 
-  methods (Access = public)
+  methods(Access = public)
     ## -*- texinfo -*-
     ## @deftypefn  {ClassificationPartitionedModel} {@var{this} =} ClassificationPartitionedModel (@var{Mdl}, @var{Partition})
     ##
-    ## Create a @code{ClassificationPartitionedModel} class object for cross-validation
-    ## of classification models.
+    ## Create a @code{ClassificationPartitionedModel} class object for
+    ## cross-validation of classification models.
     ##
     ## @code{@var{this} = ClassificationPartitionedModel (@var{Mdl},
     ## @var{Partition})} returns a ClassificationPartitionedModel object, with
     ## @var{Mdl} as the trained classification model object and
-    ## @var{Partition} as the partitioning object obtained using @code{cvpartition}
+    ## @var{Partition} as the partitioning object obtained using
+    ## @code{cvpartition}
     ## function.
     ##
     ## @seealso{cvpartition}
@@ -286,7 +287,7 @@ classdef ClassificationPartitionedModel
       endif
 
       ## Check for valid cvpartition object
-      if (! strcmp (class (Partition), "cvpartition"))
+      if (! strcmp (class (Partition), 'cvpartition'))
         error ("ClassificationPartitionedModel: invalid 'cvpartition' object.");
       endif
 
@@ -314,7 +315,7 @@ classdef ClassificationPartitionedModel
       ## Switch Classification object types
       switch (this.CrossValidatedModel)
 
-        case "ClassificationDiscriminant"
+        case 'ClassificationDiscriminant'
           ## Arguments to pass in fitcdiscr
           args = {};
           ## List of acceptable parameters for fitcdiscr
@@ -341,7 +342,7 @@ classdef ClassificationPartitionedModel
           endfor
 
           ## Store ModelParameters to ClassificationPartitionedModel object
-          params = struct();
+          params = struct ();
           paramList = {'DiscrimType', 'FillCoeffs', 'Gamma'};
           for i = 1:numel (paramList)
             paramName = paramList{i};
@@ -351,7 +352,7 @@ classdef ClassificationPartitionedModel
           endfor
           this.ModelParameters = params;
 
-        case "ClassificationGAM"
+        case 'ClassificationGAM'
           ## Arguments to pass in fitcgam
           args = {};
           ## List of acceptable parameters for fitcdiscr
@@ -375,7 +376,7 @@ classdef ClassificationPartitionedModel
           endfor
 
           ## Store ModelParameters to ClassificationPartitionedModel object
-          params = struct();
+          params = struct ();
           paramList = {'Formula', 'Interactions', 'Knots', 'Order', 'DoF', ...
                        'LearningRate', 'NumIterations'};
           for i = 1:numel (paramList)
@@ -431,7 +432,7 @@ classdef ClassificationPartitionedModel
           endfor
 
           ## Store ModelParameters to ClassificationPartitionedModel object
-          params = struct();
+          params = struct ();
           paramList = {'NumNeighbors', 'Distance', 'DistParameter', ...
                        'NSMethod', 'DistanceWeight', 'Standardize'};
           for i = 1:numel (paramList)
@@ -467,7 +468,7 @@ classdef ClassificationPartitionedModel
           endfor
 
           ## Store ModelParameters to ClassificationPartitionedModel object
-          params = struct();
+          params = struct ();
           paramList = {'LayerSizes', 'Activations', 'OutputLayerActivation', ...
                        'LearningRate', 'IterationLimit', 'Solver'};
           for i = 1:numel (paramList)
@@ -526,22 +527,22 @@ classdef ClassificationPartitionedModel
     ## The function predicts the response for each observation that was
     ## held out during training in the cross-validation process.
     ##
-    ## @multitable @columnfractions 0.28 0.02 0.7
-    ## @headitem @var{Output} @tab @tab @var{Description}
+    ## @multitable @columnfractions 0.28 0.7
+    ## @headitem @var{Output} @tab @var{Description}
     ##
-    ## @item @qcode{label} @tab @tab Predicted class labels, returned as a
+    ## @item @qcode{label} @tab Predicted class labels, returned as a
     ## vector or cell array. The type of @var{label} matches the type of
     ## @var{Y} in the original training data. Each element of @var{label}
     ## corresponds to the predicted class
     ## label for the corresponding row in @var{X}.
     ##
-    ## @item @qcode{Score} @tab @tab Classification scores, returned as a
+    ## @item @qcode{Score} @tab Classification scores, returned as a
     ## numeric matrix. Each row of @var{Score} corresponds to an observation,
     ## and each column corresponds to a class. The value in row @var{i} and
     ## column @var{j} is the
     ## classification score for class @var{j} for observation @var{i}.
     ##
-    ## @item @qcode{Cost} @tab @tab Classification costs, returned as a
+    ## @item @qcode{Cost} @tab Classification costs, returned as a
     ## numeric matrix. Each row of @var{Cost} corresponds to an observation,
     ## and each column corresponds to a class. The value in row @var{i}
     ## and column @var{j} is the classification cost for class @var{j} for
@@ -636,10 +637,10 @@ endclassdef
 %! y = species;
 %!
 %! ## Create a KNN classifier model
-%! obj = fitcknn (x, y, "NumNeighbors", 5, "Standardize", 1);
+%! obj = fitcknn (x, y, 'NumNeighbors', 5, 'Standardize', 1);
 %!
 %! ## Create a partition for 5-fold cross-validation
-%! partition = cvpartition (y, "KFold", 5);
+%! partition = cvpartition (y, 'KFold', 5);
 %!
 %! ## Create the ClassificationPartitionedModel object
 %! cvModel = crossval (obj, 'cvPartition', partition)
@@ -651,7 +652,7 @@ endclassdef
 %! y = species;
 %!
 %! ## Create a KNN classifier model
-%! obj = fitcknn (x, y, "NumNeighbors", 5, "Standardize", 1);
+%! obj = fitcknn (x, y, 'NumNeighbors', 5, 'Standardize', 1);
 %!
 %! ## Create the ClassificationPartitionedModel object
 %! cvModel = crossval (obj);
@@ -665,144 +666,144 @@ endclassdef
 ## Tests
 %!test
 %! load fisheriris
-%! a = fitcdiscr (meas, species, "gamma", 0.3);
-%! cvModel = crossval (a, "KFold", 5);
-%! assert (class (cvModel), "ClassificationPartitionedModel");
-%! assert (cvModel.NumObservations, 150);
-%! assert (numel (cvModel.Trained), 5);
-%! assert (class (cvModel.Trained{1}), "CompactClassificationDiscriminant");
-%! assert (cvModel.CrossValidatedModel, "ClassificationDiscriminant");
-%! assert (cvModel.KFold, 5);
+%! a = fitcdiscr (meas, species, 'gamma', 0.3);
+%! cvModel = crossval (a, 'KFold', 5);
+%! assert_equal (class (cvModel), "ClassificationPartitionedModel");
+%! assert_equal (cvModel.NumObservations, 150);
+%! assert_equal (numel (cvModel.Trained), 5);
+%! assert_equal (class (cvModel.Trained{1}), "CompactClassificationDiscriminant");
+%! assert_equal (cvModel.CrossValidatedModel, "ClassificationDiscriminant");
+%! assert_equal (cvModel.KFold, 5);
 %!test
 %! load fisheriris
-%! a = fitcdiscr (meas, species, "gamma", 0.5, "fillcoeffs", "off");
-%! cvModel = crossval (a, "HoldOut", 0.3);
-%! assert (class (cvModel), "ClassificationPartitionedModel");
-%! assert ({cvModel.X, cvModel.Y}, {meas, species});
-%! assert (cvModel.NumObservations, 150);
-%! assert (numel (cvModel.Trained), 1);
-%! assert (class (cvModel.Trained{1}), "CompactClassificationDiscriminant");
-%! assert (cvModel.CrossValidatedModel, "ClassificationDiscriminant");
+%! a = fitcdiscr (meas, species, 'gamma', 0.5, 'fillcoeffs', 'off');
+%! cvModel = crossval (a, 'HoldOut', 0.3);
+%! assert_equal (class (cvModel), "ClassificationPartitionedModel");
+%! assert_equal ({cvModel.X, cvModel.Y}, {meas, species});
+%! assert_equal (cvModel.NumObservations, 150);
+%! assert_equal (numel (cvModel.Trained), 1);
+%! assert_equal (class (cvModel.Trained{1}), "CompactClassificationDiscriminant");
+%! assert_equal (cvModel.CrossValidatedModel, "ClassificationDiscriminant");
 %!test
 %! x = [1, 2, 3; 4, 5, 6; 7, 8, 9; 3, 2, 1];
-%! y = ["a"; "a"; "b"; "b"];
-%! a = fitcgam (x, y, "Interactions", "all");
-%! cvModel = crossval (a, "KFold", 2);
-%! assert (class (cvModel), "ClassificationPartitionedModel");
-%! assert (cvModel.NumObservations, 4);
-%! assert (numel (cvModel.Trained), 2);
-%! assert (class (cvModel.Trained{1}), "CompactClassificationGAM");
-%! assert (cvModel.CrossValidatedModel, "ClassificationGAM");
-%! assert (cvModel.KFold, 2);
+%! y = ['a'; 'a'; 'b'; 'b'];
+%! a = fitcgam (x, y, 'Interactions', 'all');
+%! cvModel = crossval (a, 'KFold', 2);
+%! assert_equal (class (cvModel), "ClassificationPartitionedModel");
+%! assert_equal (cvModel.NumObservations, 4);
+%! assert_equal (numel (cvModel.Trained), 2);
+%! assert_equal (class (cvModel.Trained{1}), "CompactClassificationGAM");
+%! assert_equal (cvModel.CrossValidatedModel, "ClassificationGAM");
+%! assert_equal (cvModel.KFold, 2);
 %!test
 %! x = [1, 2, 3; 4, 5, 6; 7, 8, 9; 3, 2, 1];
-%! y = ["a"; "a"; "b"; "b"];
+%! y = ['a'; 'a'; 'b'; 'b'];
 %! a = fitcgam (x, y);
-%! cvModel = crossval (a, "LeaveOut", "on");
-%! assert (class (cvModel), "ClassificationPartitionedModel");
-%! assert ({cvModel.X, cvModel.Y}, {x, y});
-%! assert (cvModel.NumObservations, 4);
-%! assert (numel (cvModel.Trained), 4);
-%! assert (class (cvModel.Trained{1}), "CompactClassificationGAM");
-%! assert (cvModel.CrossValidatedModel, "ClassificationGAM");
+%! cvModel = crossval (a, 'LeaveOut', 'on');
+%! assert_equal (class (cvModel), "ClassificationPartitionedModel");
+%! assert_equal ({cvModel.X, cvModel.Y}, {x, y});
+%! assert_equal (cvModel.NumObservations, 4);
+%! assert_equal (numel (cvModel.Trained), 4);
+%! assert_equal (class (cvModel.Trained{1}), "CompactClassificationGAM");
+%! assert_equal (cvModel.CrossValidatedModel, "ClassificationGAM");
 %!test
 %! x = [1, 2, 3; 4, 5, 6; 7, 8, 9; 3, 2, 1];
-%! y = ["a"; "a"; "b"; "b"];
+%! y = ['a'; 'a'; 'b'; 'b'];
 %! a = fitcknn (x, y);
-%! partition = cvpartition (y, "KFold", 2);
+%! partition = cvpartition (y, 'KFold', 2);
 %! cvModel = ClassificationPartitionedModel (a, partition);
-%! assert (class (cvModel), "ClassificationPartitionedModel");
-%! assert (class (cvModel.Trained{1}), "ClassificationKNN");
-%! assert (cvModel.NumObservations, 4);
-%! assert (cvModel.ModelParameters.NumNeighbors, 1);
-%! assert (cvModel.ModelParameters.NSMethod, "kdtree");
-%! assert (cvModel.ModelParameters.Distance, "euclidean");
-%! assert (! cvModel.ModelParameters.Standardize);
+%! assert_equal (class (cvModel), "ClassificationPartitionedModel");
+%! assert_equal (class (cvModel.Trained{1}), "ClassificationKNN");
+%! assert_equal (cvModel.NumObservations, 4);
+%! assert_equal (cvModel.ModelParameters.NumNeighbors, 1);
+%! assert_equal (cvModel.ModelParameters.NSMethod, "kdtree");
+%! assert_equal (cvModel.ModelParameters.Distance, "euclidean");
+%! assert_equal (! cvModel.ModelParameters.Standardize, true);
 %!test
 %! x = [1, 2, 3; 4, 5, 6; 7, 8, 9; 3, 2, 1];
-%! y = ["a"; "a"; "b"; "b"];
-%! a = fitcknn (x, y, "NSMethod", "exhaustive");
-%! partition = cvpartition (y, "HoldOut", 0.2);
+%! y = ['a'; 'a'; 'b'; 'b'];
+%! a = fitcknn (x, y, 'NSMethod', 'exhaustive');
+%! partition = cvpartition (y, 'HoldOut', 0.2);
 %! cvModel = ClassificationPartitionedModel (a, partition);
-%! assert (class (cvModel), "ClassificationPartitionedModel");
-%! assert (class (cvModel.Trained{1}), "ClassificationKNN");
-%! assert ({cvModel.X, cvModel.Y}, {x, y});
-%! assert (cvModel.NumObservations, 4);
-%! assert (cvModel.ModelParameters.NumNeighbors, 1);
-%! assert (cvModel.ModelParameters.NSMethod, "exhaustive");
-%! assert (cvModel.ModelParameters.Distance, "euclidean");
-%! assert (! cvModel.ModelParameters.Standardize);
+%! assert_equal (class (cvModel), "ClassificationPartitionedModel");
+%! assert_equal (class (cvModel.Trained{1}), "ClassificationKNN");
+%! assert_equal ({cvModel.X, cvModel.Y}, {x, y});
+%! assert_equal (cvModel.NumObservations, 4);
+%! assert_equal (cvModel.ModelParameters.NumNeighbors, 1);
+%! assert_equal (cvModel.ModelParameters.NSMethod, "exhaustive");
+%! assert_equal (cvModel.ModelParameters.Distance, "euclidean");
+%! assert_equal (! cvModel.ModelParameters.Standardize, true);
 %!test
 %! x = [1, 2, 3; 4, 5, 6; 7, 8, 9; 3, 2, 1];
-%! y = ["a"; "a"; "b"; "b"];
+%! y = ['a'; 'a'; 'b'; 'b'];
 %! k = 2;
-%! a = fitcknn (x, y, "NumNeighbors" ,k);
-%! partition = cvpartition (numel (y), "LeaveOut");
+%! a = fitcknn (x, y, 'NumNeighbors' ,k);
+%! partition = cvpartition (numel (y), 'LeaveOut');
 %! cvModel = ClassificationPartitionedModel (a, partition);
-%! assert (class (cvModel), "ClassificationPartitionedModel");
-%! assert (class (cvModel.Trained{1}), "ClassificationKNN");
-%! assert ({cvModel.X, cvModel.Y}, {x, y});
-%! assert (cvModel.NumObservations, 4);
-%! assert (cvModel.ModelParameters.NumNeighbors, k);
-%! assert (cvModel.ModelParameters.NSMethod, "kdtree");
-%! assert (cvModel.ModelParameters.Distance, "euclidean");
-%! assert (! cvModel.ModelParameters.Standardize);
+%! assert_equal (class (cvModel), "ClassificationPartitionedModel");
+%! assert_equal (class (cvModel.Trained{1}), "ClassificationKNN");
+%! assert_equal ({cvModel.X, cvModel.Y}, {x, y});
+%! assert_equal (cvModel.NumObservations, 4);
+%! assert_equal (cvModel.ModelParameters.NumNeighbors, k);
+%! assert_equal (cvModel.ModelParameters.NSMethod, "kdtree");
+%! assert_equal (cvModel.ModelParameters.Distance, "euclidean");
+%! assert_equal (! cvModel.ModelParameters.Standardize, true);
 %!test
 %! x = [1, 2, 3; 4, 5, 6; 7, 8, 9; 3, 2, 1];
-%! y = {"a"; "a"; "b"; "b"};
-%! a = fitcnet (x, y, "IterationLimit", 50);
-%! cvModel = crossval (a, "KFold", 2);
-%! assert (class (cvModel), "ClassificationPartitionedModel");
-%! assert (cvModel.NumObservations, 4);
-%! assert (numel (cvModel.Trained), 2);
-%! assert (class (cvModel.Trained{1}), "CompactClassificationNeuralNetwork");
-%! assert (cvModel.CrossValidatedModel, "ClassificationNeuralNetwork");
-%! assert (cvModel.KFold, 2);
+%! y = {'a'; 'a'; 'b'; 'b'};
+%! a = fitcnet (x, y, 'IterationLimit', 50);
+%! cvModel = crossval (a, 'KFold', 2);
+%! assert_equal (class (cvModel), "ClassificationPartitionedModel");
+%! assert_equal (cvModel.NumObservations, 4);
+%! assert_equal (numel (cvModel.Trained), 2);
+%! assert_equal (class (cvModel.Trained{1}), "CompactClassificationNeuralNetwork");
+%! assert_equal (cvModel.CrossValidatedModel, "ClassificationNeuralNetwork");
+%! assert_equal (cvModel.KFold, 2);
 %!test
 %! x = [1, 2, 3; 4, 5, 6; 7, 8, 9; 3, 2, 1];
-%! y = {"a"; "a"; "b"; "b"};
-%! a = fitcnet (x, y, "LayerSizes", [5, 3]);
-%! cvModel = crossval (a, "LeaveOut", "on");
-%! assert (class (cvModel), "ClassificationPartitionedModel");
-%! assert ({cvModel.X, cvModel.Y}, {x, y});
-%! assert (cvModel.NumObservations, 4);
-%! assert (numel (cvModel.Trained), 4);
-%! assert (class (cvModel.Trained{1}), "CompactClassificationNeuralNetwork");
-%! assert (cvModel.CrossValidatedModel, "ClassificationNeuralNetwork");
+%! y = {'a'; 'a'; 'b'; 'b'};
+%! a = fitcnet (x, y, 'LayerSizes', [5, 3]);
+%! cvModel = crossval (a, 'LeaveOut', 'on');
+%! assert_equal (class (cvModel), "ClassificationPartitionedModel");
+%! assert_equal ({cvModel.X, cvModel.Y}, {x, y});
+%! assert_equal (cvModel.NumObservations, 4);
+%! assert_equal (numel (cvModel.Trained), 4);
+%! assert_equal (class (cvModel.Trained{1}), "CompactClassificationNeuralNetwork");
+%! assert_equal (cvModel.CrossValidatedModel, "ClassificationNeuralNetwork");
 %!test
 %! load fisheriris
 %! inds = ! strcmp (species, 'setosa');
 %! x = meas(inds, 3:4);
 %! y = grp2idx (species(inds));
 %! SVMModel = fitcsvm (x,y);
-%! CVMdl = crossval (SVMModel, "KFold", 5);
-%! assert (class (CVMdl), "ClassificationPartitionedModel")
-%! assert ({CVMdl.X, CVMdl.Y}, {x, y})
-%! assert (CVMdl.KFold == 5)
-%! assert (class (CVMdl.Trained{1}), "CompactClassificationSVM")
-%! assert (CVMdl.CrossValidatedModel, "ClassificationSVM");
+%! CVMdl = crossval (SVMModel, 'KFold', 5);
+%! assert_equal (class (CVMdl), "ClassificationPartitionedModel")
+%! assert_equal ({CVMdl.X, CVMdl.Y}, {x, y})
+%! assert_equal (CVMdl.KFold == 5, true)
+%! assert_equal (class (CVMdl.Trained{1}), "CompactClassificationSVM")
+%! assert_equal (CVMdl.CrossValidatedModel, "ClassificationSVM");
 %!test
 %! load fisheriris
 %! inds = ! strcmp (species, 'setosa');
 %! x = meas(inds, 3:4);
 %! y = grp2idx (species(inds));
 %! obj = fitcsvm (x, y);
-%! CVMdl = crossval (obj, "HoldOut", 0.2);
-%! assert (class (CVMdl), "ClassificationPartitionedModel")
-%! assert ({CVMdl.X, CVMdl.Y}, {x, y})
-%! assert (class (CVMdl.Trained{1}), "CompactClassificationSVM")
-%! assert (CVMdl.CrossValidatedModel, "ClassificationSVM");
+%! CVMdl = crossval (obj, 'HoldOut', 0.2);
+%! assert_equal (class (CVMdl), "ClassificationPartitionedModel")
+%! assert_equal ({CVMdl.X, CVMdl.Y}, {x, y})
+%! assert_equal (class (CVMdl.Trained{1}), "CompactClassificationSVM")
+%! assert_equal (CVMdl.CrossValidatedModel, "ClassificationSVM");
 %!test
 %! load fisheriris
 %! inds = ! strcmp (species, 'setosa');
 %! x = meas(inds, 3:4);
 %! y = grp2idx (species(inds));
 %! obj = fitcsvm (x, y);
-%! CVMdl = crossval (obj, "LeaveOut", 'on');
-%! assert (class (CVMdl), "ClassificationPartitionedModel")
-%! assert ({CVMdl.X, CVMdl.Y}, {x, y})
-%! assert (class (CVMdl.Trained{1}), "CompactClassificationSVM")
-%! assert (CVMdl.CrossValidatedModel, "ClassificationSVM");
+%! CVMdl = crossval (obj, 'LeaveOut', 'on');
+%! assert_equal (class (CVMdl), "ClassificationPartitionedModel")
+%! assert_equal ({CVMdl.X, CVMdl.Y}, {x, y})
+%! assert_equal (class (CVMdl.Trained{1}), "CompactClassificationSVM")
+%! assert_equal (CVMdl.CrossValidatedModel, "ClassificationSVM");
 
 ## Test input validation for ClassificationPartitionedModel
 %!error<ClassificationPartitionedModel: too few input arguments.> ...
@@ -819,36 +820,36 @@ endclassdef
 ## Test for kfoldPredict
 %!test
 %! load fisheriris
-%! a = fitcdiscr (meas, species, "gamma", 0.5, "fillcoeffs", "off");
-%! cvModel = crossval (a, "Kfold", 4);
+%! a = fitcdiscr (meas, species, 'gamma', 0.5, 'fillcoeffs', 'off');
+%! cvModel = crossval (a, 'Kfold', 4);
 %! [label, score, cost] = kfoldPredict (cvModel);
-%! assert (class(cvModel), "ClassificationPartitionedModel");
-%! assert ({cvModel.X, cvModel.Y}, {meas, species});
-%! assert (cvModel.NumObservations, 150);
-%!# assert (label, {"b"; "b"; "a"; "a"});
-%!# assert (score, [4.5380e-01, 5.4620e-01; 2.4404e-01, 7.5596e-01; ...
+%! assert_equal (class (cvModel), "ClassificationPartitionedModel");
+%! assert_equal ({cvModel.X, cvModel.Y}, {meas, species});
+%! assert_equal (cvModel.NumObservations, 150);
+%!# assert_equal (label, {"b"; "b"; "a"; "a"});
+%!# assert_equal (score, [4.5380e-01, 5.4620e-01; 2.4404e-01, 7.5596e-01; ...
 %!#         9.9392e-01, 6.0844e-03; 9.9820e-01, 1.8000e-03], 1e-4);
-%!# assert (cost, [5.4620e-01, 4.5380e-01; 7.5596e-01, 2.4404e-01; ...
+%!# assert_equal (cost, [5.4620e-01, 4.5380e-01; 7.5596e-01, 2.4404e-01; ...
 %!#         6.0844e-03, 9.9392e-01; 1.8000e-03, 9.9820e-01], 1e-4);
 %!test
-%! x = ones(4, 11);
-%! y = {"a"; "a"; "b"; "b"};
+%! x = ones (4, 11);
+%! y = {'a'; 'a'; 'b'; 'b'};
 %! k = 3;
-%! a = fitcknn (x, y, "NumNeighbors", k);
-%! partition = cvpartition (numel (y), "LeaveOut");
+%! a = fitcknn (x, y, 'NumNeighbors', k);
+%! partition = cvpartition (numel (y), 'LeaveOut');
 %! cvModel = ClassificationPartitionedModel (a, partition);
 %! [label, score, cost] = kfoldPredict (cvModel);
-%! assert (class(cvModel), "ClassificationPartitionedModel");
-%! assert ({cvModel.X, cvModel.Y}, {x, y});
-%! assert (cvModel.NumObservations, 4);
-%! assert (cvModel.ModelParameters.NumNeighbors, k);
-%! assert (cvModel.ModelParameters.NSMethod, "exhaustive");
-%! assert (cvModel.ModelParameters.Distance, "euclidean");
-%! assert (! cvModel.ModelParameters.Standardize);
-%! assert (label, {"b"; "b"; "a"; "a"});
-%! assert (score, [0.3333, 0.6667; 0.3333, 0.6667; 0.6667, 0.3333; ...
+%! assert_equal (class (cvModel), "ClassificationPartitionedModel");
+%! assert_equal ({cvModel.X, cvModel.Y}, {x, y});
+%! assert_equal (cvModel.NumObservations, 4);
+%! assert_equal (cvModel.ModelParameters.NumNeighbors, k);
+%! assert_equal (cvModel.ModelParameters.NSMethod, "exhaustive");
+%! assert_equal (cvModel.ModelParameters.Distance, "euclidean");
+%! assert_equal (! cvModel.ModelParameters.Standardize, true);
+%! assert_equal (label, {'b'; 'b'; 'a'; 'a'});
+%! assert_equal (score, [0.3333, 0.6667; 0.3333, 0.6667; 0.6667, 0.3333; ...
 %!          0.6667, 0.3333], 1e-4);
-%! assert (cost, [0.6667, 0.3333; 0.6667, 0.3333; 0.3333, 0.6667; ...
+%! assert_equal (cost, [0.6667, 0.3333; 0.6667, 0.3333; 0.3333, 0.6667; ...
 %!          0.3333, 0.6667], 1e-4);
 
 ## Test input validation for kfoldPredict

@@ -109,7 +109,7 @@ function [nlogL, avar] = betalike (params, x, freq)
   else
     num0 = sum (x < x_lo);
     num1 = sum (x > x_hi);
-    x_ct = x (x > x_lo & x < x_hi);
+    x_ct = x(x > x_lo & x < x_hi);
     numx = length (x_ct);
   endif
 
@@ -122,12 +122,12 @@ function [nlogL, avar] = betalike (params, x, freq)
 
   ## Include log likelihood for zeros
   if (num0 > 0)
-    nlogL = nlogL - num0 * log (betainc (x_lo, a, b, "lower"));
+    nlogL = nlogL - num0 * log (betainc (x_lo, a, b, 'lower'));
   endif
 
   ## Include log likelihood for ones
   if (num1 > 0)
-    nlogL = nlogL - num1 * log (betainc (x_hi, a, b, "upper"));
+    nlogL = nlogL - num1 * log (betainc (x_hi, a, b, 'upper'));
   endif
 
   ## Compute the asymptotic covariance
@@ -150,13 +150,13 @@ function [nlogL, avar] = betalike (params, x, freq)
       ad = 2 * a *dd;
       bd = 2 * b *dd;
       if (num0 > 0)
-        da = diff (log (betainc (x_lo, aa, b, "lower"))) / ad;
-        db = diff (log (betainc (x_lo, a, bb, "lower"))) / bd;
+        da = diff (log (betainc (x_lo, aa, b, 'lower'))) / ad;
+        db = diff (log (betainc (x_lo, a, bb, 'lower'))) / bd;
         J = [J; repmat([da, db], num0, 1)];
       endif
       if num1 > 0
-        da = diff (log (betainc (x_hi, aa, b, "upper"))) / ad;
-        db = diff (log (betainc (x_hi, a, bb, "upper"))) / bd;
+        da = diff (log (betainc (x_hi, aa, b, 'upper'))) / ad;
+        db = diff (log (betainc (x_hi, a, bb, 'upper'))) / bd;
         J = [J; repmat([da, db], num1, 1)];
       endif
     endif
@@ -178,21 +178,21 @@ endfunction
 %! x = 0.01:0.02:0.99;
 %! [nlogL, avar] = betalike ([2.3, 1.2], x);
 %! avar_out = [0.03691678, 0.02803056; 0.02803056, 0.03965629];
-%! assert (nlogL, 17.873477715879040, 3e-14);
-%! assert (avar, avar_out, 1e-7);
+%! assert_equal (nlogL, 17.873477715879040, 3e-14);
+%! assert_equal (avar, avar_out, 1e-7);
 %!test
 %! x = 0.01:0.02:0.99;
 %! [nlogL, avar] = betalike ([1, 4], x);
 %! avar_out = [0.02793282, 0.02717274; 0.02717274, 0.03993361];
-%! assert (nlogL, 79.648061114839550, 1e-13);
-%! assert (avar, avar_out, 1e-7);
+%! assert_equal (nlogL, 79.648061114839550, 1e-13);
+%! assert_equal (avar, avar_out, 1e-7);
 %!test
 %! x = 0.00:0.02:1;
 %! [nlogL, avar] = betalike ([1, 4], x);
 %! avar_out = [0.00000801564765, 0.00000131397245; ...
 %!             0.00000131397245, 0.00070827639442];
-%! assert (nlogL, 573.2008434477486, 1e-10);
-%! assert (avar, avar_out, 1e-14);
+%! assert_equal (nlogL, 573.2008434477486, 1e-10);
+%! assert_equal (avar, avar_out, 1e-14);
 
 ## Test input validation
 %!error<betalike: function called with too few input arguments.> ...

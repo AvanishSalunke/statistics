@@ -104,44 +104,44 @@ function r = gevrnd (k, sigma, mu, varargin)
 
   ## Check that parameters match requested dimensions in size
   ## Use 'size (ones (sz))' to ignore any trailing singleton dimensions in SZ
-  if (!isscalar (k) && ! isequal (size (k), size (ones (sz))))
+  if (! isscalar (k) && ! isequal (size (k), size (ones (sz))))
     error ("gevrnd: K, SIGMA, and MU must be scalars or of size SZ.");
   endif
 
   ## Check for class type
-  if (isa (k, "single") || isa (sigma, "single") || isa (mu, "single"))
-    cls = "single";
+  if (isa (k, 'single') || isa (sigma, 'single') || isa (mu, 'single'))
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ## Generate random sample from Burr type XII distribution
-  r = gevinv (rand(sz), k, sigma, mu);
+  r = gevinv (rand (sz), k, sigma, mu);
 
   r = cast (r, cls);
 
 endfunction
 
 ## Test output
-%!assert (size (gevrnd (1, 2, 1)), [1, 1]);
-%!assert (size (gevrnd (ones (2, 1), 2, 1)), [2, 1]);
-%!assert (size (gevrnd (ones (2, 2), 2, 1)), [2, 2]);
-%!assert (size (gevrnd (1, 2 * ones (2, 1), 1)), [2, 1]);
-%!assert (size (gevrnd (1, 2 * ones (2, 2), 1)), [2, 2]);
-%!assert (size (gevrnd (1, 2, 1, 3)), [3, 3]);
-%!assert (size (gevrnd (1, 2, 1, [4, 1])), [4, 1]);
-%!assert (size (gevrnd (1, 2, 1, 4, 1)), [4, 1]);
-%!assert (size (gevrnd (1, 2, 1, [])), [0, 0])
-%!assert (size (gevrnd (1, 2, 1, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (gevrnd (1, 2, 1)), [1, 1]);
+%!assert_equal (size (gevrnd (ones (2, 1), 2, 1)), [2, 1]);
+%!assert_equal (size (gevrnd (ones (2, 2), 2, 1)), [2, 2]);
+%!assert_equal (size (gevrnd (1, 2 * ones (2, 1), 1)), [2, 1]);
+%!assert_equal (size (gevrnd (1, 2 * ones (2, 2), 1)), [2, 2]);
+%!assert_equal (size (gevrnd (1, 2, 1, 3)), [3, 3]);
+%!assert_equal (size (gevrnd (1, 2, 1, [4, 1])), [4, 1]);
+%!assert_equal (size (gevrnd (1, 2, 1, 4, 1)), [4, 1]);
+%!assert_equal (size (gevrnd (1, 2, 1, [])), [0, 0])
+%!assert_equal (size (gevrnd (1, 2, 1, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (gevrnd (1,1,1)), "double")
-%!assert (class (gevrnd (single (1),1,1)), "single")
-%!assert (class (gevrnd (single ([1 1]),1,1)), "single")
-%!assert (class (gevrnd (1,single (1),1)), "single")
-%!assert (class (gevrnd (1,single ([1 1]),1)), "single")
-%!assert (class (gevrnd (1,1,single (1))), "single")
-%!assert (class (gevrnd (1,1,single ([1 1]))), "single")
+%!assert_equal (class (gevrnd (1,1,1)), "double")
+%!assert_equal (class (gevrnd (single (1),1,1)), "single")
+%!assert_equal (class (gevrnd (single ([1 1]),1,1)), "single")
+%!assert_equal (class (gevrnd (1,single (1),1)), "single")
+%!assert_equal (class (gevrnd (1,single ([1 1]),1)), "single")
+%!assert_equal (class (gevrnd (1,1,single (1))), "single")
+%!assert_equal (class (gevrnd (1,1,single ([1 1]))), "single")
 
 ## Test input validation
 %!error<gevrnd: function called with too few input arguments.> gevrnd ()

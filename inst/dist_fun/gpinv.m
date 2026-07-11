@@ -65,9 +65,9 @@ function x = gpinv (p, k, sigma, theta)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (theta, "single") ...
-      || isa (sigma, "single") || isa (k, "single"))
-    x = zeros (size (p), "single");
+  if (isa (p, 'single') || isa (theta, 'single') ...
+      || isa (sigma, 'single') || isa (k, 'single'))
+    x = zeros (size (p), 'single');
   else
     x = zeros (size (p));
   endif
@@ -83,7 +83,7 @@ function x = gpinv (p, k, sigma, theta)
                 & (sigma > 0) & (sigma < Inf) & (-Inf < k) & (k < Inf);
   if (isscalar (theta) && isscalar (sigma) && isscalar (k))
     if (k == 0)
-      x(kx) = -log(1 - p(kx));
+      x(kx) = -log (1 - p(kx));
       x(kx) = sigma * x(kx) + theta;
     elseif (k > 0)
       x(kx) = (1 - p(kx)).^(-k) - 1;
@@ -91,7 +91,7 @@ function x = gpinv (p, k, sigma, theta)
     elseif (k < 0)
       x(kx) = (1 - p(kx)).^(-k) - 1;
       x(kx) = (sigma / k) * x(kx)  + theta;
-    end
+    endif
   else
     j = kx & (k == 0);
     if (any (j))
@@ -122,17 +122,17 @@ endfunction
 %! x4 = gpinv (p, 1, 2, 0);
 %! x5 = gpinv (p, 5, 2, 0);
 %! x6 = gpinv (p, 20, 2, 0);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", ...
-%!       p, x4, "-c", p, x5, "-m", p, x6, "-k")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', ...
+%!       p, x4, '-c', p, x5, '-m', p, x6, '-k')
 %! grid on
 %! ylim ([0, 5])
-%! legend ({"k = 1, σ = 1, θ = 0", "k = 5, σ = 1, θ = 0", ...
-%!          "k = 20, σ = 1, θ = 0", "k = 1, σ = 2, θ = 0", ...
-%!          "k = 5, σ = 2, θ = 0", "k = 20, σ = 2, θ = 0"}, ...
-%!         "location", "southeast")
-%! title ("Generalized Pareto iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'k = 1, σ = 1, θ = 0', 'k = 5, σ = 1, θ = 0', ...
+%!          'k = 20, σ = 1, θ = 0', 'k = 1, σ = 2, θ = 0', ...
+%!          'k = 5, σ = 2, θ = 0', 'k = 20, σ = 2, θ = 0'}, ...
+%!         'location', 'southeast')
+%! title ('Generalized Pareto iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p, y1, y2, y3
@@ -140,47 +140,47 @@ endfunction
 %! y1 = [NaN, 0, 0.6931471805599453, Inf, NaN];
 %! y2 = [NaN, 0, 1, Inf, NaN];
 %! y3 = [NaN, 0, 1/2, 1, NaN];
-%!assert (gpinv (p, zeros (1,5), ones (1,5), zeros (1,5)), y1)
-%!assert (gpinv (p, 0, 1, zeros (1,5)), y1)
-%!assert (gpinv (p, 0, ones (1,5), 0), y1)
-%!assert (gpinv (p, zeros (1,5), 1, 0), y1)
-%!assert (gpinv (p, 0, 1, 0), y1)
-%!assert (gpinv (p, 0, 1, [0, 0, NaN, 0, 0]), [y1(1:2), NaN, y1(4:5)])
-%!assert (gpinv (p, 0, [1, 1, NaN, 1, 1], 0), [y1(1:2), NaN, y1(4:5)])
-%!assert (gpinv (p, [0, 0, NaN, 0, 0], 1, 0), [y1(1:2), NaN, y1(4:5)])
-%!assert (gpinv ([p(1:2), NaN, p(4:5)], 0, 1, 0), [y1(1:2), NaN, y1(4:5)])
-%!assert (gpinv (p, ones (1,5), ones (1,5), zeros (1,5)), y2)
-%!assert (gpinv (p, 1, 1, zeros (1,5)), y2)
-%!assert (gpinv (p, 1, ones (1,5), 0), y2)
-%!assert (gpinv (p, ones (1,5), 1, 0), y2)
-%!assert (gpinv (p, 1, 1, 0), y2)
-%!assert (gpinv (p, 1, 1, [0, 0, NaN, 0, 0]), [y2(1:2), NaN, y2(4:5)])
-%!assert (gpinv (p, 1, [1, 1, NaN, 1, 1], 0), [y2(1:2), NaN, y2(4:5)])
-%!assert (gpinv (p, [1, 1, NaN, 1, 1], 1, 0), [y2(1:2), NaN, y2(4:5)])
-%!assert (gpinv ([p(1:2), NaN, p(4:5)], 1, 1, 0), [y2(1:2), NaN, y2(4:5)])
-%!assert (gpinv (p, -ones (1,5), ones (1,5), zeros (1,5)), y3)
-%!assert (gpinv (p, -1, 1, zeros (1,5)), y3)
-%!assert (gpinv (p, -1, ones (1,5), 0), y3)
-%!assert (gpinv (p, -ones (1,5), 1, 0), y3)
-%!assert (gpinv (p, -1, 1, 0), y3)
-%!assert (gpinv (p, -1, 1, [0, 0, NaN, 0, 0]), [y3(1:2), NaN, y3(4:5)])
-%!assert (gpinv (p, -1, [1, 1, NaN, 1, 1], 0), [y3(1:2), NaN, y3(4:5)])
-%!assert (gpinv (p, -[1, 1, NaN, 1, 1], 1, 0), [y3(1:2), NaN, y3(4:5)])
-%!assert (gpinv ([p(1:2), NaN, p(4:5)], -1, 1, 0), [y3(1:2), NaN, y3(4:5)])
+%!assert_equal (gpinv (p, zeros (1,5), ones (1,5), zeros (1,5)), y1)
+%!assert_equal (gpinv (p, 0, 1, zeros (1,5)), y1)
+%!assert_equal (gpinv (p, 0, ones (1,5), 0), y1)
+%!assert_equal (gpinv (p, zeros (1,5), 1, 0), y1)
+%!assert_equal (gpinv (p, 0, 1, 0), y1)
+%!assert_equal (gpinv (p, 0, 1, [0, 0, NaN, 0, 0]), [y1(1:2), NaN, y1(4:5)])
+%!assert_equal (gpinv (p, 0, [1, 1, NaN, 1, 1], 0), [y1(1:2), NaN, y1(4:5)])
+%!assert_equal (gpinv (p, [0, 0, NaN, 0, 0], 1, 0), [y1(1:2), NaN, y1(4:5)])
+%!assert_equal (gpinv ([p(1:2), NaN, p(4:5)], 0, 1, 0), [y1(1:2), NaN, y1(4:5)])
+%!assert_equal (gpinv (p, ones (1,5), ones (1,5), zeros (1,5)), y2)
+%!assert_equal (gpinv (p, 1, 1, zeros (1,5)), y2)
+%!assert_equal (gpinv (p, 1, ones (1,5), 0), y2)
+%!assert_equal (gpinv (p, ones (1,5), 1, 0), y2)
+%!assert_equal (gpinv (p, 1, 1, 0), y2)
+%!assert_equal (gpinv (p, 1, 1, [0, 0, NaN, 0, 0]), [y2(1:2), NaN, y2(4:5)])
+%!assert_equal (gpinv (p, 1, [1, 1, NaN, 1, 1], 0), [y2(1:2), NaN, y2(4:5)])
+%!assert_equal (gpinv (p, [1, 1, NaN, 1, 1], 1, 0), [y2(1:2), NaN, y2(4:5)])
+%!assert_equal (gpinv ([p(1:2), NaN, p(4:5)], 1, 1, 0), [y2(1:2), NaN, y2(4:5)])
+%!assert_equal (gpinv (p, -ones (1,5), ones (1,5), zeros (1,5)), y3)
+%!assert_equal (gpinv (p, -1, 1, zeros (1,5)), y3)
+%!assert_equal (gpinv (p, -1, ones (1,5), 0), y3)
+%!assert_equal (gpinv (p, -ones (1,5), 1, 0), y3)
+%!assert_equal (gpinv (p, -1, 1, 0), y3)
+%!assert_equal (gpinv (p, -1, 1, [0, 0, NaN, 0, 0]), [y3(1:2), NaN, y3(4:5)])
+%!assert_equal (gpinv (p, -1, [1, 1, NaN, 1, 1], 0), [y3(1:2), NaN, y3(4:5)])
+%!assert_equal (gpinv (p, -[1, 1, NaN, 1, 1], 1, 0), [y3(1:2), NaN, y3(4:5)])
+%!assert_equal (gpinv ([p(1:2), NaN, p(4:5)], -1, 1, 0), [y3(1:2), NaN, y3(4:5)])
 
 ## Test class of input preserved
-%!assert (gpinv (single ([p, NaN]), 0, 1, 0), single ([y1, NaN]))
-%!assert (gpinv ([p, NaN], 0, 1, single (0)), single ([y1, NaN]))
-%!assert (gpinv ([p, NaN], 0, single (1), 0), single ([y1, NaN]))
-%!assert (gpinv ([p, NaN], single (0), 1, 0), single ([y1, NaN]))
-%!assert (gpinv (single ([p, NaN]), 1, 1, 0), single ([y2, NaN]))
-%!assert (gpinv ([p, NaN], 1, 1, single (0)), single ([y2, NaN]))
-%!assert (gpinv ([p, NaN], 1, single (1), 0), single ([y2, NaN]))
-%!assert (gpinv ([p, NaN], single (1), 1, 0), single ([y2, NaN]))
-%!assert (gpinv (single ([p, NaN]), -1, 1, 0), single ([y3, NaN]))
-%!assert (gpinv ([p, NaN], -1, 1, single (0)), single ([y3, NaN]))
-%!assert (gpinv ([p, NaN], -1, single (1), 0), single ([y3, NaN]))
-%!assert (gpinv ([p, NaN], single (-1), 1, 0), single ([y3, NaN]))
+%!assert_equal (gpinv (single ([p, NaN]), 0, 1, 0), single ([y1, NaN]))
+%!assert_equal (gpinv ([p, NaN], 0, 1, single (0)), single ([y1, NaN]))
+%!assert_equal (gpinv ([p, NaN], 0, single (1), 0), single ([y1, NaN]))
+%!assert_equal (gpinv ([p, NaN], single (0), 1, 0), single ([y1, NaN]))
+%!assert_equal (gpinv (single ([p, NaN]), 1, 1, 0), single ([y2, NaN]))
+%!assert_equal (gpinv ([p, NaN], 1, 1, single (0)), single ([y2, NaN]))
+%!assert_equal (gpinv ([p, NaN], 1, single (1), 0), single ([y2, NaN]))
+%!assert_equal (gpinv ([p, NaN], single (1), 1, 0), single ([y2, NaN]))
+%!assert_equal (gpinv (single ([p, NaN]), -1, 1, 0), single ([y3, NaN]))
+%!assert_equal (gpinv ([p, NaN], -1, 1, single (0)), single ([y3, NaN]))
+%!assert_equal (gpinv ([p, NaN], -1, single (1), 0), single ([y3, NaN]))
+%!assert_equal (gpinv ([p, NaN], single (-1), 1, 0), single ([y3, NaN]))
 
 ## Test input validation
 %!error<gpinv: function called with too few input arguments.> gpinv ()
@@ -188,13 +188,13 @@ endfunction
 %!error<gpinv: function called with too few input arguments.> gpinv (1, 2)
 %!error<gpinv: function called with too few input arguments.> gpinv (1, 2, 3)
 %!error<gpinv: P, K, SIGMA, and THETA must be of common size or scalars.> ...
-%! gpinv (ones (3), ones (2), ones(2), ones(2))
+%! gpinv (ones (3), ones (2), ones (2), ones (2))
 %!error<gpinv: P, K, SIGMA, and THETA must be of common size or scalars.> ...
-%! gpinv (ones (2), ones (3), ones(2), ones(2))
+%! gpinv (ones (2), ones (3), ones (2), ones (2))
 %!error<gpinv: P, K, SIGMA, and THETA must be of common size or scalars.> ...
-%! gpinv (ones (2), ones (2), ones(3), ones(2))
+%! gpinv (ones (2), ones (2), ones (3), ones (2))
 %!error<gpinv: P, K, SIGMA, and THETA must be of common size or scalars.> ...
-%! gpinv (ones (2), ones (2), ones(2), ones(3))
+%! gpinv (ones (2), ones (2), ones (2), ones (3))
 %!error<gpinv: P, K, SIGMA, and THETA must not be complex.> gpinv (i, 2, 3, 4)
 %!error<gpinv: P, K, SIGMA, and THETA must not be complex.> gpinv (1, i, 3, 4)
 %!error<gpinv: P, K, SIGMA, and THETA must not be complex.> gpinv (1, 2, i, 4)

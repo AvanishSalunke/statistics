@@ -108,7 +108,7 @@ function [nlogL, acov] = gamlike (params, x, censor, freq)
   n_censored = sum (freq .* censor);
   if (n_censored > 0)
     z_censored = z(logical (censor));
-    Scen = gammainc (z_censored, a, "upper");
+    Scen = gammainc (z_censored, a, 'upper');
     L(logical (censor)) = log (Scen);
   endif
 
@@ -122,8 +122,8 @@ function [nlogL, acov] = gamlike (params, x, censor, freq)
   ## Invert to get the observed information matrix.
   if (nargout == 2)
     ## Calculate all data
-    dL11 = -psi (1, a) * ones (size (z), "like", z);
-    dL12 = -(1 ./ b) * ones (size (z), "like", z);
+    dL11 = -psi (1, a) * ones (size (z), 'like', z);
+    dL12 = -(1 ./ b) * ones (size (z), 'like', z);
     dL22 = -(2 .* z - a) ./ (b .^ 2);
     ## Calculate censored data
     if (n_censored > 0)
@@ -133,18 +133,18 @@ function [nlogL, acov] = gamlike (params, x, censor, freq)
       d2lnS = d2y ./ y - dlnS.*dlnS;
 
       #[dlnS,d2lnS] = dlngamsf(z_censored,a);
-      logzcen = log(z_censored);
-      tmp = exp(a .* logzcen - z_censored - gammaln(a) - log(b)) ./ Scen;
+      logzcen = log (z_censored);
+      tmp = exp (a .* logzcen - z_censored - gammaln (a) - log (b)) ./ Scen;
       dL11(logical (censor)) = d2lnS;
-      dL12(logical (censor)) = tmp .* (logzcen - dlnS - psi(0,a));
+      dL12(logical (censor)) = tmp .* (logzcen - dlnS - psi (0,a));
       dL22(logical (censor)) = tmp .* ((z_censored-1-a)./b - tmp);
     endif
-    nH11 = -sum(freq .* dL11);
-    nH12 = -sum(freq .* dL12);
-    nH22 = -sum(freq .* dL22);
+    nH11 = -sum (freq .* dL11);
+    nH12 = -sum (freq .* dL12);
+    nH22 = -sum (freq .* dL22);
     nH = [nH11 nH12; nH12 nH22];
     if (any (isnan (nH(:))))
-      acov = nan (2, "like", nH);
+      acov = nan (2, 'like', nH);
     else
       acov = inv (nH);
     endif
@@ -170,7 +170,7 @@ function [y, dy, d2y] = dgammainc (x, a)
   endif
 
   ## For x < a+1
-  is_lo = find(x < a + 1 & x != 0);
+  is_lo = find (x < a + 1 & x != 0);
   if (! isempty (is_lo))
     x_lo = x(is_lo);
     k_lo = a(is_lo);
@@ -181,7 +181,7 @@ function [y, dy, d2y] = dgammainc (x, a)
     stsum = step;
     d1sum = d1st;
     d2sum = d2st;
-    while norm (step, "inf") >= 100 * eps (norm (stsum, "inf"))
+    while norm (step, 'inf') >= 100 * eps (norm (stsum, 'inf'))
       k_1 += 1;
       step = step .* x_lo ./ k_1;
       d1st = (d1st .* x_lo - step) ./ k_1;
@@ -208,7 +208,7 @@ function [y, dy, d2y] = dgammainc (x, a)
   endif
 
   ## For x >= a+1
-  is_hi = find(x >= a+1);
+  is_hi = find (x >= a+1);
   if (! isempty (is_hi))
     x_hi = x(is_hi);
     k_hi = a(is_hi);
@@ -229,7 +229,7 @@ function [y, dy, d2y] = dgammainc (x, a)
     d1kx = 1 ./ x_hi;
     d2kx = 0;
     start = 1;
-    while norm (d2kx - start, "Inf") > 100 * eps (norm (d2kx, "Inf"))
+    while norm (d2kx - start, 'Inf') > 100 * eps (norm (d2kx, 'Inf'))
       rescale = 1 ./ x1;
       zc += 1;
       n_k = zc - k_hi;
@@ -288,17 +288,17 @@ endfunction
 
 ## Test output
 %!test
-%! [nlogL, acov] = gamlike([2, 3], [2, 3, 4, 5, 6, 7, 8, 9]);
-%! assert (nlogL, 19.4426, 1e-4);
-%! assert (acov, [2.7819, -5.0073; -5.0073, 9.6882], 1e-4);
+%! [nlogL, acov] = gamlike ([2, 3], [2, 3, 4, 5, 6, 7, 8, 9]);
+%! assert_equal (nlogL, 19.4426, 1e-4);
+%! assert_equal (acov, [2.7819, -5.0073; -5.0073, 9.6882], 1e-4);
 %!test
-%! [nlogL, acov] = gamlike([2, 3], [5:45]);
-%! assert (nlogL, 305.8070, 1e-4);
-%! assert (acov, [0.0423, -0.0087; -0.0087, 0.0167], 1e-4);
+%! [nlogL, acov] = gamlike ([2, 3], [5:45]);
+%! assert_equal (nlogL, 305.8070, 1e-4);
+%! assert_equal (acov, [0.0423, -0.0087; -0.0087, 0.0167], 1e-4);
 %!test
-%! [nlogL, acov] = gamlike([2, 13], [5:45]);
-%! assert (nlogL, 163.2261, 1e-4);
-%! assert (acov, [0.2362, -1.6631; -1.6631, 13.9440], 1e-4);
+%! [nlogL, acov] = gamlike ([2, 13], [5:45]);
+%! assert_equal (nlogL, 163.2261, 1e-4);
+%! assert_equal (acov, [0.2362, -1.6631; -1.6631, 13.9440], 1e-4);
 
 ## Test input validation
 %!error<gamlike: function called with too few input arguments.> ...

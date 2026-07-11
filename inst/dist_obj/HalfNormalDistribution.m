@@ -54,7 +54,7 @@ classdef HalfNormalDistribution
   ## hnlike, hnstat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {HalfNormalDistribution} {property} mu
     ##
@@ -80,7 +80,7 @@ classdef HalfNormalDistribution
     sigma
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {HalfNormalDistribution} {property} DistributionName
     ##
@@ -90,7 +90,7 @@ classdef HalfNormalDistribution
     ## object.  This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "HalfNormalDistribution";
+    DistributionName = 'HalfNormalDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {HalfNormalDistribution} {property} NumParameters
@@ -108,39 +108,39 @@ classdef HalfNormalDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter.  This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"mu", "sigma"};
+    ParameterNames = {'mu', 'sigma'};
 
     ## -*- texinfo -*-
     ## @deftp {HalfNormalDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter.  This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Location", "Scale"};
+    ParameterDescription = {'Location', 'Scale'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = false;
-    DistributionCode = "hn";
+    DistributionCode = 'hn';
     ParameterRange = [-Inf, realmin; Inf, Inf];
     ParameterLogCI = [true, true];
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected)
+  properties(GetAccess = public, SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {HalfNormalDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{2x1} numeric vector containing the values of the distribution
+    ## A @math{2*1} numeric vector containing the values of the distribution
     ## parameters.  This property is read-only. You can change the distribution
     ## parameters by assigning new values to the @qcode{mu} and @qcode{sigma}
     ## properties.
@@ -153,7 +153,7 @@ classdef HalfNormalDistribution
     ##
     ## Covariance matrix of the parameter estimates
     ##
-    ## A @math{2x2} numeric matrix containing the variance-covariance of the
+    ## A @math{2*2} numeric matrix containing the variance-covariance of the
     ## parameter estimates.  Diagonal elements contain the variance of each
     ## estimated parameter, and non-diagonal elements contain the covariance
     ## between the parameter estimates.  The covariance matrix is only
@@ -170,7 +170,7 @@ classdef HalfNormalDistribution
     ##
     ## Flag for fixed parameters
     ##
-    ## A @math{1x2} logical vector specifying which parameters are fixed and
+    ## A @math{1*2} logical vector specifying which parameters are fixed and
     ## which are estimated.  @qcode{true} values correspond to fixed parameters,
     ## @qcode{false} values correspond to parameter estimates.  This property is
     ## read-only.
@@ -183,7 +183,7 @@ classdef HalfNormalDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution.  First element contains the lower boundary,
     ## second element contains the upper boundary.  This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -226,11 +226,11 @@ classdef HalfNormalDistribution
     InputData
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected, Hidden)
+  properties(GetAccess = public, SetAccess = protected, Hidden)
     ParameterCI
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = HalfNormalDistribution (mu, sigma)
       if (nargin == 0)
@@ -246,12 +246,12 @@ classdef HalfNormalDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "Half-normal distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'Half-normal distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "Half-normal distribution");
+      __disp__ (this, 'Half-normal distribution');
     endfunction
 
     function this = set.mu (this, mu)
@@ -280,11 +280,11 @@ classdef HalfNormalDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {HalfNormalDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {HalfNormalDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {HalfNormalDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -292,7 +292,7 @@ classdef HalfNormalDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -302,9 +302,9 @@ classdef HalfNormalDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -451,14 +451,14 @@ classdef HalfNormalDistribution
     ## the confidence intervals with additional options specified by
     ## @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Alpha"} @tab @tab A scalar value in the range @math{(0,1)}
+    ## @item @qcode{'Alpha'} @tab A scalar value in the range @math{(0,1)}
     ## specifying the significance level for the confidence interval.  The
     ## default value 0.05 corresponds to a 95% confidence interval.
     ##
-    ## @item @qcode{"Parameter"} @tab @tab A character vector or a cell array of
+    ## @item @qcode{'Parameter'} @tab A character vector or a cell array of
     ## character vectors specifying the parameter names for which to compute
     ## confidence intervals.  By default, @code{paramci} computes confidence
     ## intervals for all distribution parameters.
@@ -519,26 +519,26 @@ classdef HalfNormalDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -559,9 +559,9 @@ classdef HalfNormalDistribution
 
     ## -*- texinfo -*-
     ## @deftypefn  {HalfNormalDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum})
-    ## @deftypefnx {HalfNormalDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {HalfNormalDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{'Display'}, @var{display})
     ## @deftypefnx {HalfNormalDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam})
-    ## @deftypefnx {HalfNormalDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {HalfNormalDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{'Display'}, @var{display})
     ##
     ## Profile likelihood function for a probability distribution object.
     ##
@@ -574,14 +574,14 @@ classdef HalfNormalDistribution
     ## fitted to data.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @qcode{"Display"}, @qcode{"on"})} also plots the profile likelihood
+    ## @qcode{'Display'}, @qcode{'on'})} also plots the profile likelihood
     ## against the default range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
     ## @var{setparam})} defines a user-defined range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @var{setparam}, @qcode{"Display"}, @qcode{"on"})} also plots the profile
+    ## @var{setparam}, @qcode{'Display'}, @qcode{'on'})} also plots the profile
     ## likelihood against the user-defined range of the selected parameter.
     ##
     ## For the Half-normal distribution, @qcode{@var{pnum} = 1} selects
@@ -721,7 +721,7 @@ classdef HalfNormalDistribution
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function pd = fit (x, mu, varargin)
       ## Check input arguments
@@ -749,7 +749,7 @@ classdef HalfNormalDistribution
       pd.ParameterCI = pci;
       pd.ParameterIsFixed = [true, false];
       pd.ParameterCovariance = acov;
-      pd.InputData = struct ("data", x, "cens", [], "freq", freq);
+      pd.InputData = struct ('data', x, 'cens', [], 'freq', freq);
     endfunction
 
   endmethods
@@ -770,62 +770,62 @@ endfunction
 %!shared pd, t
 %! pd = HalfNormalDistribution (0, 1);
 %! t = truncate (pd, 2, 4);
-%!assert (cdf (pd, [0:5]), [0, 0.6827, 0.9545, 0.9973, 0.9999, 1], 1e-4);
-%!assert (cdf (t, [0:5]), [0, 0, 0, 0.9420, 1, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4]), [0.8664, 0.9545, 0.9973, 0.9999], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4]), [0, 0, 0.9420, 1], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [0, 0.2533, 0.5244, 0.8416, 1.2816, Inf], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [2, 2.0923, 2.2068, 2.3607, 2.6064, 4], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 0.5244, 0.8416, 1.2816, Inf, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.2068, 2.3607, 2.6064, 4, NaN], 1e-4);
-%!assert (iqr (pd), 0.8317, 1e-4);
-%!assert (iqr (t), 0.4111, 1e-4);
-%!assert (mean (pd), 0.7979, 1e-4);
-%!assert (mean (t), 2.3706, 1e-4);
-%!assert (median (pd), 0.6745, 1e-4);
-%!assert (median (t), 2.2771, 1e-4);
-%!assert (pdf (pd, [0:5]), [0.7979, 0.4839, 0.1080, 0.0089, 0.0003, 0], 1e-4);
-%!assert (pdf (t, [0:5]), [0, 0, 2.3765, 0.1951, 0.0059, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1:4, NaN]), [0, 0.4839, 0.1080, 0.0089, 0.0003, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1:4, NaN]), [0, 0, 2.3765, 0.1951, 0.0059, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 2), false);
-%!assert (any (random (t, 1000, 1) > 4), false);
-%!assert (std (pd), 0.6028, 1e-4);
-%!assert (std (t), 0.3310, 1e-4);
-%!assert (var (pd), 0.3634, 1e-4);
-%!assert (var (t), 0.1096, 1e-4);
+%!assert_equal (cdf (pd, [0:5]), [0, 0.6827, 0.9545, 0.9973, 0.9999, 1], 1e-4);
+%!assert_equal (cdf (t, [0:5]), [0, 0, 0, 0.9420, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4]), [0.8664, 0.9545, 0.9973, 0.9999], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4]), [0, 0, 0.9420, 1], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [0, 0.2533, 0.5244, 0.8416, 1.2816, Inf], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [2, 2.0923, 2.2068, 2.3607, 2.6064, 4], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 0.5244, 0.8416, 1.2816, Inf, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.2068, 2.3607, 2.6064, 4, NaN], 1e-4);
+%!assert_equal (iqr (pd), 0.8317, 1e-4);
+%!assert_equal (iqr (t), 0.4111, 1e-4);
+%!assert_equal (mean (pd), 0.7979, 1e-4);
+%!assert_equal (mean (t), 2.3706, 1e-4);
+%!assert_equal (median (pd), 0.6745, 1e-4);
+%!assert_equal (median (t), 2.2771, 1e-4);
+%!assert_equal (pdf (pd, [0:5]), [0.7979, 0.4839, 0.1080, 0.0089, 0.0003, 0], 1e-4);
+%!assert_equal (pdf (t, [0:5]), [0, 0, 2.3765, 0.1951, 0.0059, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1:4, NaN]), [0, 0.4839, 0.1080, 0.0089, 0.0003, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1:4, NaN]), [0, 0, 2.3765, 0.1951, 0.0059, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 2), false);
+%!assert_equal (any (random (t, 1000, 1) > 4), false);
+%!assert_equal (std (pd), 0.6028, 1e-4);
+%!assert_equal (std (t), 0.3310, 1e-4);
+%!assert_equal (var (pd), 0.3634, 1e-4);
+%!assert_equal (var (t), 0.1096, 1e-4);
 
 ## Test input validation
 ## 'HalfNormalDistribution' constructor
 %!error <HalfNormalDistribution: MU must be a real scalar.> ...
-%! HalfNormalDistribution(Inf, 1)
+%! HalfNormalDistribution (Inf, 1)
 %!error <HalfNormalDistribution: MU must be a real scalar.> ...
-%! HalfNormalDistribution(i, 1)
+%! HalfNormalDistribution (i, 1)
 %!error <HalfNormalDistribution: MU must be a real scalar.> ...
-%! HalfNormalDistribution("a", 1)
+%! HalfNormalDistribution ('a', 1)
 %!error <HalfNormalDistribution: MU must be a real scalar.> ...
-%! HalfNormalDistribution([1, 2], 1)
+%! HalfNormalDistribution ([1, 2], 1)
 %!error <HalfNormalDistribution: MU must be a real scalar.> ...
-%! HalfNormalDistribution(NaN, 1)
+%! HalfNormalDistribution (NaN, 1)
 %!error <HalfNormalDistribution: SIGMA must be a positive real scalar.> ...
-%! HalfNormalDistribution(1, 0)
+%! HalfNormalDistribution (1, 0)
 %!error <HalfNormalDistribution: SIGMA must be a positive real scalar.> ...
-%! HalfNormalDistribution(1, -1)
+%! HalfNormalDistribution (1, -1)
 %!error <HalfNormalDistribution: SIGMA must be a positive real scalar.> ...
-%! HalfNormalDistribution(1, Inf)
+%! HalfNormalDistribution (1, Inf)
 %!error <HalfNormalDistribution: SIGMA must be a positive real scalar.> ...
-%! HalfNormalDistribution(1, i)
+%! HalfNormalDistribution (1, i)
 %!error <HalfNormalDistribution: SIGMA must be a positive real scalar.> ...
-%! HalfNormalDistribution(1, "a")
+%! HalfNormalDistribution (1, 'a')
 %!error <HalfNormalDistribution: SIGMA must be a positive real scalar.> ...
-%! HalfNormalDistribution(1, [1, 2])
+%! HalfNormalDistribution (1, [1, 2])
 %!error <HalfNormalDistribution: SIGMA must be a positive real scalar.> ...
-%! HalfNormalDistribution(1, NaN)
+%! HalfNormalDistribution (1, NaN)
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (HalfNormalDistribution, 2, "uper")
+%! cdf (HalfNormalDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (HalfNormalDistribution, 2, 3)
 
@@ -833,63 +833,63 @@ endfunction
 %!shared x
 %! x = hnrnd (1, 1, [1, 100]);
 %!error <paramci: optional arguments must be in NAME-VALUE pairs.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1), "alpha")
+%! paramci (HalfNormalDistribution.fit (x, 1), 'alpha')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1), "alpha", 0)
+%! paramci (HalfNormalDistribution.fit (x, 1), 'alpha', 0)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1), "alpha", 1)
+%! paramci (HalfNormalDistribution.fit (x, 1), 'alpha', 1)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1), "alpha", [0.5 2])
+%! paramci (HalfNormalDistribution.fit (x, 1), 'alpha', [0.5 2])
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1), "alpha", "")
+%! paramci (HalfNormalDistribution.fit (x, 1), 'alpha', '')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1), "alpha", {0.05})
+%! paramci (HalfNormalDistribution.fit (x, 1), 'alpha', {0.05})
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1), "parameter", "sigma", ...
-%!          "alpha", {0.05})
+%! paramci (HalfNormalDistribution.fit (x, 1), 'parameter', 'sigma', ...
+%!          'alpha', {0.05})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
 %! paramci (HalfNormalDistribution.fit (x, 1), ...
-%!          "parameter", {"mu", "sigma", "param"})
+%!          'parameter', {'mu', 'sigma', 'param'})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1), "alpha", 0.01, ...
-%!          "parameter", {"mu", "sigma", "param"})
+%! paramci (HalfNormalDistribution.fit (x, 1), 'alpha', 0.01, ...
+%!          'parameter', {'mu', 'sigma', 'param'})
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1), "parameter", "param")
+%! paramci (HalfNormalDistribution.fit (x, 1), 'parameter', 'param')
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1), "alpha", 0.01, ...
-%!          "parameter", "param")
+%! paramci (HalfNormalDistribution.fit (x, 1), 'alpha', 0.01, ...
+%!          'parameter', 'param')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1),"NAME", "value")
+%! paramci (HalfNormalDistribution.fit (x, 1),'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1), "alpha", 0.01, ...
-%!          "NAME", "value")
+%! paramci (HalfNormalDistribution.fit (x, 1), 'alpha', 0.01, ...
+%!          'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (HalfNormalDistribution.fit (x, 1), "alpha", 0.01, ...
-%!          "parameter", "sigma", "NAME", "value")
+%! paramci (HalfNormalDistribution.fit (x, 1), 'alpha', 0.01, ...
+%!          'parameter', 'sigma', 'NAME', 'value')
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (HalfNormalDistribution, "Parent")
+%! plot (HalfNormalDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (HalfNormalDistribution, "PlotType", 12)
+%! plot (HalfNormalDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (HalfNormalDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (HalfNormalDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (HalfNormalDistribution, "PlotType", "pdfcdf")
+%! plot (HalfNormalDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (HalfNormalDistribution, "Discrete", "pdfcdf")
+%! plot (HalfNormalDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (HalfNormalDistribution, "Discrete", [1, 0])
+%! plot (HalfNormalDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (HalfNormalDistribution, "Discrete", {true})
+%! plot (HalfNormalDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (HalfNormalDistribution, "Parent", 12)
+%! plot (HalfNormalDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (HalfNormalDistribution, "Parent", "hax")
+%! plot (HalfNormalDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (HalfNormalDistribution, "invalidNAME", "pdf")
+%! plot (HalfNormalDistribution, 'invalidNAME', 'pdf')
 %!error <plot: no fitted DATA to plot a probability plot.> ...
-%! plot (HalfNormalDistribution, "PlotType", "probability")
+%! plot (HalfNormalDistribution, 'PlotType', 'probability')
 
 ## 'proflik' method
 %!error <proflik: no fitted data available.> ...
@@ -905,24 +905,24 @@ endfunction
 %!error <proflik: SETPARAM must be a numeric vector.> ...
 %! proflik (HalfNormalDistribution.fit (x, 1), 2, ones (2))
 %!error <proflik: missing VALUE for 'Display' argument.> ...
-%! proflik (HalfNormalDistribution.fit (x, 1), 2, "Display")
+%! proflik (HalfNormalDistribution.fit (x, 1), 2, 'Display')
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (HalfNormalDistribution.fit (x, 1), 2, "Display", 1)
+%! proflik (HalfNormalDistribution.fit (x, 1), 2, 'Display', 1)
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (HalfNormalDistribution.fit (x, 1), 2, "Display", {1})
+%! proflik (HalfNormalDistribution.fit (x, 1), 2, 'Display', {1})
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (HalfNormalDistribution.fit (x, 1), 2, "Display", {"on"})
+%! proflik (HalfNormalDistribution.fit (x, 1), 2, 'Display', {'on'})
 %!error <proflik: invalid VALUE size for 'Display' argument.> ...
-%! proflik (HalfNormalDistribution.fit (x, 1), 2, "Display", ["on"; "on"])
+%! proflik (HalfNormalDistribution.fit (x, 1), 2, 'Display', ['on'; 'on'])
 %!error <proflik: invalid VALUE for 'Display' argument.> ...
-%! proflik (HalfNormalDistribution.fit (x, 1), 2, "Display", "onnn")
+%! proflik (HalfNormalDistribution.fit (x, 1), 2, 'Display', 'onnn')
 %!error <proflik: invalid NAME for optional arguments.> ...
-%! proflik (HalfNormalDistribution.fit (x, 1), 2, "NAME", "on")
+%! proflik (HalfNormalDistribution.fit (x, 1), 2, 'NAME', 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (HalfNormalDistribution.fit (x, 1), 2, {"NAME"}, "on")
+%! proflik (HalfNormalDistribution.fit (x, 1), 2, {'NAME'}, 'on')
 %!error <proflik: invalid optional argument.> ...
 %! proflik (HalfNormalDistribution.fit (x, 1), 2, {[1 2 3 4]}, ...
-%!          "Display", "on")
+%!          'Display', 'on')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...
@@ -934,8 +934,8 @@ endfunction
 
 ## Catch errors when using array of probability objects with available methods
 %!shared pd
-%! pd = HalfNormalDistribution(1, 1);
-%! pd(2) = HalfNormalDistribution(1, 3);
+%! pd = HalfNormalDistribution (1, 1);
+%! pd(2) = HalfNormalDistribution (1, 3);
 %!error <cdf: requires a scalar probability distribution.> cdf (pd, 1)
 %!error <icdf: requires a scalar probability distribution.> icdf (pd, 0.5)
 %!error <iqr: requires a scalar probability distribution.> iqr (pd)

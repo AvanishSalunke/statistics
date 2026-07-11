@@ -108,17 +108,17 @@ endfunction
 
 %!demo
 %! ## Sample 2 populations from different binomial distributions
-%! rand ("seed", 1);    # for reproducibility
+%! rand ('seed', 1);    # for reproducibility
 %! r1 = binornd (50, 0.15, 1000, 1);
-%! rand ("seed", 2);    # for reproducibility
+%! rand ('seed', 2);    # for reproducibility
 %! r2 = binornd (100, 0.5, 1000, 1);
 %! r = [r1, r2];
 %!
 %! ## Plot them normalized and fix their colors
 %! hist (r, 23, 0.35);
-%! h = findobj (gca, "Type", "patch");
-%! set (h(1), "facecolor", "c");
-%! set (h(2), "facecolor", "g");
+%! h = findobj (gca, 'Type', 'patch');
+%! set (h(1), 'facecolor', 'c');
+%! set (h(2), 'facecolor', 'g');
 %! hold on
 %!
 %! ## Estimate their probability of success
@@ -128,36 +128,36 @@ endfunction
 %! ## Plot their estimated PDFs
 %! x = [min(r(:,1)):max(r(:,1))];
 %! y = binopdf (x, 50, mean (pshatA));
-%! plot (x, y, "-pg");
+%! plot (x, y, '-pg');
 %! x = [min(r(:,2)):max(r(:,2))];
 %! y = binopdf (x, 100, mean (pshatB));
-%! plot (x, y, "-sc");
+%! plot (x, y, '-sc');
 %! ylim ([0, 0.2])
-%! legend ({"Normalized HIST of sample 1 with ps=0.15", ...
-%!          "Normalized HIST of sample 2 with ps=0.50", ...
+%! legend ({'Normalized HIST of sample 1 with ps=0.15', ...
+%!          'Normalized HIST of sample 2 with ps=0.50', ...
 %!          sprintf("PDF for sample 1 with estimated ps=%0.2f", ...
 %!                  mean (pshatA)), ...
 %!          sprintf("PDF for sample 2 with estimated ps=%0.2f", ...
 %!                  mean (pshatB))})
-%! title ("Two population samples from different binomial distributions")
+%! title ('Two population samples from different binomial distributions')
 %! hold off
 
 ## Test output
 %!test
 %! x = 0:3;
 %! [pshat, psci] = binofit (x, 3);
-%! assert (pshat, [0, 0.3333, 0.6667, 1], 1e-4);
-%! assert (psci(1,:), [0, 0.7076], 1e-4);
-%! assert (psci(2,:), [0.0084, 0.9057], 1e-4);
-%! assert (psci(3,:), [0.0943, 0.9916], 1e-4);
-%! assert (psci(4,:), [0.2924, 1.0000], 1e-4);
+%! assert_equal (pshat, [0, 0.3333, 0.6667, 1], 1e-4);
+%! assert_equal (psci(1,:), [0, 0.7076], 1e-4);
+%! assert_equal (psci(2,:), [0.0084, 0.9057], 1e-4);
+%! assert_equal (psci(3,:), [0.0943, 0.9916], 1e-4);
+%! assert_equal (psci(4,:), [0.2924, 1.0000], 1e-4);
 
 ## Test input validation
 %!error<binofit: function called with too few input arguments.> ...
 %! binofit ([1 2 3 4])
 %!error<binofit: X cannot have negative values.> ...
 %! binofit ([-1, 4, 3, 2], [1, 2, 3, 3])
-%!error<binofit: X must be a vector.> binofit (ones(2), [1, 2, 3, 3])
+%!error<binofit: X must be a vector.> binofit (ones (2), [1, 2, 3, 3])
 %!error<binofit: N must be a non-negative integer.> ...
 %! binofit ([1, 4, 3, 2], [1, 2, -1, 3])
 %!error<binofit: N must be a scalar or the same size as X.> ...
@@ -166,4 +166,4 @@ endfunction
 %! binofit ([1, 4, 3, 2], [5, 3, 5, 5])
 %!error<binofit: wrong value for ALPHA.> binofit ([1, 2, 1], 3, 1.2);
 %!error<binofit: wrong value for ALPHA.> binofit ([1, 2, 1], 3, 0);
-%!error<binofit: wrong value for ALPHA.> binofit ([1, 2, 1], 3, "alpha");
+%!error<binofit: wrong value for ALPHA.> binofit ([1, 2, 1], 3, 'alpha');

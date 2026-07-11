@@ -57,14 +57,14 @@ function y = geopdf (x, ps)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (ps, "single"))
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (ps, 'single'))
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
 
   ## Return NaN for out of range parameters
-  k = isnan (x) | (x == Inf) | !(ps >= 0) | !(ps <= 1);
+  k = isnan (x) | (x == Inf) | ! (ps >= 0) | ! (ps <= 1);
   y(k) = NaN;
 
   ## Get valid instances
@@ -85,26 +85,26 @@ endfunction
 %! y1 = geopdf (x, 0.2);
 %! y2 = geopdf (x, 0.5);
 %! y3 = geopdf (x, 0.7);
-%! plot (x, y1, "*b", x, y2, "*g", x, y3, "*r")
+%! plot (x, y1, '*b', x, y2, '*g', x, y3, '*r')
 %! grid on
 %! ylim ([0, 0.8])
-%! legend ({"ps = 0.2", "ps = 0.5", "ps = 0.7"}, "location", "northeast")
-%! title ("Geometric PDF")
-%! xlabel ("values in x (number of failures)")
-%! ylabel ("density")
+%! legend ({'ps = 0.2', 'ps = 0.5', 'ps = 0.7'}, 'location', 'northeast')
+%! title ('Geometric PDF')
+%! xlabel ('values in x (number of failures)')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-1 0 1 Inf];
 %! y = [0, 1/2, 1/4, NaN];
-%!assert (geopdf (x, 0.5*ones (1,4)), y)
-%!assert (geopdf (x, 0.5), y)
-%!assert (geopdf (x, 0.5*[-1 NaN 4 1]), [NaN NaN NaN y(4)])
-%!assert (geopdf ([x, NaN], 0.5), [y, NaN])
+%!assert_equal (geopdf (x, 0.5*ones (1,4)), y)
+%!assert_equal (geopdf (x, 0.5), y)
+%!assert_equal (geopdf (x, 0.5*[-1 NaN 4 1]), [NaN NaN NaN y(4)])
+%!assert_equal (geopdf ([x, NaN], 0.5), [y, NaN])
 
 ## Test class of input preserved
-%!assert (geopdf (single ([x, NaN]), 0.5), single ([y, NaN]), 5*eps ("single"))
-%!assert (geopdf ([x, NaN], single (0.5)), single ([y, NaN]), 5*eps ("single"))
+%!assert_equal (geopdf (single ([x, NaN]), 0.5), single ([y, NaN]), 5*eps ('single'))
+%!assert_equal (geopdf ([x, NaN], single (0.5)), single ([y, NaN]), 5*eps ('single'))
 
 ## Test input validation
 %!error geopdf ()

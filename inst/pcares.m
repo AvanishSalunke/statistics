@@ -22,7 +22,7 @@
 ## Calculate residuals from principal component analysis.
 ##
 ## @code{@var{residuals} = pcares (@var{x}, @var{ndim})} returns the residuals
-## obtained by retaining @var{ndim} principal components of the @math{NxD}
+## obtained by retaining @var{ndim} principal components of the @math{N*D}
 ## matrix @var{x}. Rows of @var{x} correspond to observations, columns of
 ## @var{x} correspond to variables.  @var{ndim} is a scalar and must be less
 ## than or equal to @math{D}.  @var{residuals} is a matrix of the same size as
@@ -110,9 +110,9 @@ endfunction
 %! r1 = pcares (ingredients,1);
 %! r2 = pcares (ingredients,2);
 %! r3 = pcares (ingredients,3);
-%! assert (r1(1,:), [2.0350,  2.8304, -6.8378, 3.0879], 1e-4);
-%! assert (r2(1,:), [-2.4037, 2.6930, -1.6482, 2.3425], 1e-4);
-%! assert (r3(1,:), [ 0.2008, 0.1957,  0.2045, 0.1921], 1e-4);
+%! assert_equal (r1(1,:), [2.0350,  2.8304, -6.8378, 3.0879], 1e-4);
+%! assert_equal (r2(1,:), [-2.4037, 2.6930, -1.6482, 2.3425], 1e-4);
+%! assert_equal (r3(1,:), [ 0.2008, 0.1957,  0.2045, 0.1921], 1e-4);
 
 ## Test input validation
 %!error<pcares: too few input arguments.> pcares (ones (20, 3))

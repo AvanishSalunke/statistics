@@ -57,34 +57,34 @@
 ## @subheading Name–Value Arguments
 ##
 ## @table @asis
-## @item @qcode{"InModel"}
+## @item @qcode{'InModel'}
 ## Logical row vector of length @var{p} specifying predictors that are initially
 ## included in the model.
 ##
-## @item @qcode{"Keep"}
+## @item @qcode{'Keep'}
 ## Logical row vector of length @var{p} specifying predictors that must remain
 ## in the model and are never removed during stepwise selection.
 ##
-## @item @qcode{"PEnter"}
+## @item @qcode{'PEnter'}
 ## Scalar significance level in the open interval (0,1) specifying the maximum
 ## p-value required for a predictor to enter the model.  Default is @code{0.05}.
 ##
-## @item @qcode{"PRemove"}
+## @item @qcode{'PRemove'}
 ## Scalar significance level in the open interval (0,1) specifying the minimum
 ## p-value required for a predictor to be removed from the model.  If not
-## specified, a default value greater than or equal to @qcode{"PEnter"} is used.
+## specified, a default value greater than or equal to @qcode{'PEnter'} is used.
 ##
-## @item @qcode{"MaxIter"}
+## @item @qcode{'MaxIter'}
 ## Positive integer specifying the maximum number of stepwise iterations.
 ## Default is @code{Inf}.
 ##
-## @item @qcode{"Scale"}
-## Either @qcode{"on"} or @qcode{"off"}.  When enabled, predictors are
+## @item @qcode{'Scale'}
+## Either @qcode{'on'} or @qcode{'off'}.  When enabled, predictors are
 ## standardized prior to stepwise selection only.  Final regression
 ## coefficients are always reported on the original data scale.
 ##
-## @item @qcode{"Display"}
-## Either @qcode{"on"} or @qcode{"off"}.  Accepted for compatibility but
+## @item @qcode{'Display'}
+## Either @qcode{'on'} or @qcode{'off'}.  Accepted for compatibility but
 ## currently does not affect output.
 ## @end table
 ##
@@ -152,18 +152,18 @@ endif
 
   ## Parse Name–Value pairs
   InModel  = [];
-  Display  = "on";
+  Display  = 'on';
   ## MATLAB-compatible defaults
   PEnter  = 0.05;
   PRemove = [];
-  Scale   = "off";
+  Scale   = 'off';
   MaxIter = Inf;
   Keep    = [];
 
   ## Parse Name-Value paired arguments using pairedArgs
-  optNames = {"InModel", "Display", "PEnter", "PRemove", ...
-              "Scale", "MaxIter", "Keep"};
-  dfValues = {[], "on", 0.05, [], "off", Inf, []};
+  optNames = {'InModel', 'Display', 'PEnter', 'PRemove', ...
+              'Scale', 'MaxIter', 'Keep'};
+  dfValues = {[], 'on', 0.05, [], 'off', Inf, []};
 
   [InModel, Display, PEnter, PRemove, Scale, MaxIter, Keep, args] = ...
     pairedArgs (optNames, dfValues, varargin(:));
@@ -171,13 +171,13 @@ endif
   ## Semantic validation for Name-Value options
 
   ## Validate Display
-  if (! any (strcmpi (Display, {"on", "off"})))
+  if (! any (strcmpi (Display, {'on', 'off'})))
     error ("stepwisefit: Display must be 'on' or 'off'");
   endif
   Display = lower (Display);
 
   ## Validate Scale
-  if (! any (strcmpi (Scale, {"on", "off"})))
+  if (! any (strcmpi (Scale, {'on', 'off'})))
     error ("stepwisefit: Scale must be 'on' or 'off'");
   endif
   Scale = lower (Scale);
@@ -204,8 +204,8 @@ endif
 
   ## Handle missing values
   wasnan = any (isnan ([X y]), 2);
-  Xc = X(!wasnan, :);
-  yc = y(!wasnan);
+  Xc = X(! wasnan, :);
+  yc = y(! wasnan);
 
   n = rows (Xc);
   p = columns (Xc);
@@ -231,7 +231,7 @@ endif
   endif
 
   if (isempty (Keep))
-    Keep = false(1, p);
+    Keep = false (1, p);
   endif
 
   ## Default PRemove if unset
@@ -243,7 +243,7 @@ endif
     error ("stepwisefit: PRemove must be greater than or equal to PEnter");
   endif
 
-  if (strcmp (Scale, "on"))
+  if (strcmp (Scale, 'on'))
     muX = mean (Xc, 1);
     sigX = std (Xc, 0, 1);
     sigX(sigX == 0) = 1;   ## prevent division by zero
@@ -270,7 +270,7 @@ endif
     iter = iter + 1;
 
     ## ADD phase: evaluate candidates by conditional p-value
-    candidates = find (~cur);
+    candidates = find (! cur);
     if (! isempty (candidates))
       best_p = Inf;
       best_j = -1;
@@ -419,7 +419,7 @@ endif
 
   ## Stats structure
   stats = struct ();
-  stats.source    = "stepwisefit";
+  stats.source    = 'stepwisefit';
   stats.df0       = numel (X_use);
   stats.dfe       = n - stats.df0 - 1;
   stats.SStotal   = sum ((yc - mean (yc)).^2);
@@ -433,7 +433,7 @@ endif
   stats.SE    = se;
   stats.TSTAT = b ./ se;
   stats.PVAL  = pval;
-  stats.TSTAT (!isfinite (stats.TSTAT)) = NaN;
+  stats.TSTAT (! isfinite (stats.TSTAT)) = NaN;
 
   excluded = setdiff (1:p, X_use);
 xr = zeros (n, numel (excluded));
@@ -505,16 +505,16 @@ endfunction
 %! y = [78.5; 74.3; 104.3; 87.6; 95.9; 109.2;
 %!      102.7; 72.5; 93.1; 115.9; 83.8; 113.3; 109.4];
 %! [b,se,pval,finalmodel,stats] = stepwisefit (X,y);
-%! assert (finalmodel, [true false false true]);
-%! assert (b, [1.4400; 0.4161; -0.4100; -0.6140], 1e-4);
-%! assert (se, [0.1384; 0.1856; 0.1992; 0.0486], 1e-4);
-%! assert (pval, [0; 0.0517; 0.0697; 0], 1e-4);
-%! assert (stats.rmse, 2.7343, 1e-4);
-%! assert (stats.SStotal, 2715.7631, 1e-3);
-%! assert (stats.SSresid, 74.7621, 1e-4);
-%! assert (stats.df0, 2);
-%! assert (stats.dfe, 10);
-%! assert (stats.intercept, 103.0974, 1e-4);
+%! assert_equal (finalmodel, [true false false true]);
+%! assert_equal (b, [1.4400; 0.4161; -0.4100; -0.6140], 1e-4);
+%! assert_equal (se, [0.1384; 0.1856; 0.1992; 0.0486], 1e-4);
+%! assert_equal (pval, [0; 0.0517; 0.0697; 0], 1e-4);
+%! assert_equal (stats.rmse, 2.7343, 1e-4);
+%! assert_equal (stats.SStotal, 2715.7631, 1e-3);
+%! assert_equal (stats.SSresid, 74.7621, 1e-4);
+%! assert_equal (stats.df0, 2);
+%! assert_equal (stats.dfe, 10);
+%! assert_equal (stats.intercept, 103.0974, 1e-4);
 %!test
 %! X = [
 %!   12.0 4 120 95 2600;
@@ -532,27 +532,27 @@ endfunction
 %!
 %! [b,se,pval,finalmodel,stats] = stepwisefit (X,y);
 %!
-%! assert (islogical (finalmodel));
-%! assert (numel (finalmodel) == 5);
-%! assert (sum (finalmodel) >= 1);
-%! assert (isnumeric (b));
-%! assert (isnumeric (se));
-%! assert (isnumeric (pval));
-%! assert (stats.rmse > 0);
-%! assert (isfinite (stats.intercept));
+%! assert_equal (islogical (finalmodel), true);
+%! assert_equal (numel (finalmodel) == 5, true);
+%! assert_equal (sum (finalmodel) >= 1, true);
+%! assert_equal (isnumeric (b), true);
+%! assert_equal (isnumeric (se), true);
+%! assert_equal (isnumeric (pval), true);
+%! assert_equal (stats.rmse > 0, true);
+%! assert_equal (isfinite (stats.intercept), true);
 %!test
 %! X = randn (30, 4);
 %! y = randn (30, 1);
 %! [~,~,~,~,stats] = stepwisefit (X, y);
 %!
 %! required_fields = {
-%!   "source", "df0", "dfe", "SStotal", "SSresid", "fstat", "pval", ...
-%!   "rmse", "xr", "yr", "B", "SE", "TSTAT", "PVAL", "covb", ...
-%!   "intercept", "wasnan"
+%!   'source', 'df0', 'dfe', 'SStotal', 'SSresid', 'fstat', 'pval', ...
+%!   'rmse', 'xr', 'yr', 'B', 'SE', 'TSTAT', 'PVAL', 'covb', ...
+%!   'intercept', 'wasnan'
 %! };
 %!
 %! for k = 1:numel (required_fields)
-%!   assert (isfield (stats, required_fields{k}));
+%!   assert_equal (isfield (stats, required_fields{k}), true);
 %! endfor
 %!test
 %! X = randn (40, 5);
@@ -560,24 +560,24 @@ endfunction
 %! [b,se,pval,finalmodel,stats] = stepwisefit (X, y);
 %!
 %! p = columns (X);
-%! n = rows (X(~stats.wasnan, :));
+%! n = rows (X(! stats.wasnan, :));
 %!
-%! assert (size (stats.yr), [n, 1]);
-%! assert (rows (stats.B) == p);
-%! assert (rows (stats.SE) == p);
-%! assert (rows (stats.TSTAT) == p);
-%! assert (rows (stats.PVAL) == p);
-%! assert (size (stats.covb), [p+1, p+1]);
+%! assert_equal (size (stats.yr), [n, 1]);
+%! assert_equal (rows (stats.B) == p, true);
+%! assert_equal (rows (stats.SE) == p, true);
+%! assert_equal (rows (stats.TSTAT) == p, true);
+%! assert_equal (rows (stats.PVAL) == p, true);
+%! assert_equal (size (stats.covb), [p+1, p+1]);
 %!test
 %! X = randn (25, 3);
 %! y = randn (25, 1);
 %! [~,~,~,~,stats] = stepwisefit (X, y);
 %!
 %! SSresid_calc = sum (stats.yr .^ 2);
-%! assert (SSresid_calc, stats.SSresid, 1e-10);
+%! assert_equal (SSresid_calc, stats.SSresid, 1e-10);
 %!
 %! rmse_calc = sqrt (stats.SSresid / stats.dfe);
-%! assert (rmse_calc, stats.rmse, 1e-10);
+%! assert_equal (rmse_calc, stats.rmse, 1e-10);
 %!test
 %! X = randn (50, 6);
 %! y = randn (50, 1);
@@ -587,11 +587,11 @@ endfunction
 %!   F_calc = ((stats.SStotal - stats.SSresid) / stats.df0) ...
 %!            / (stats.SSresid / stats.dfe);
 %!
-%!   assert (F_calc, stats.fstat, 1e-10);
-%!   assert (stats.pval >= 0 && stats.pval <= 1);
+%!   assert_equal (F_calc, stats.fstat, 1e-10);
+%!   assert_equal (stats.pval >= 0 && stats.pval <= 1, true);
 %! else
-%!   assert (isnan (stats.fstat));
-%!   assert (isnan (stats.pval));
+%!   assert_equal (isnan (stats.fstat), true);
+%!   assert_equal (isnan (stats.pval), true);
 %! endif
 %!test
 %! X = randn (35, 4);
@@ -599,35 +599,35 @@ endfunction
 %! [~,~,~,finalmodel,stats] = stepwisefit (X, y);
 %! p = columns (X);
 %! k = sum (finalmodel);
-%! assert (size (stats.xr, 2) == p - k);
-%! assert (all (isfinite (stats.xr(:))));
+%! assert_equal (size (stats.xr, 2) == p - k, true);
+%! assert_equal (all (isfinite (stats.xr(:))), true);
 %!test
 %! X = randn (35, 4);
 %! y = randn (35, 1);
 %! [~,~,~,finalmodel,stats] = stepwisefit (X, y);
 %!
-%! Xc = X(~stats.wasnan, :);
+%! Xc = X(! stats.wasnan, :);
 %! Xfinal = [ones(rows (Xc),1), Xc(:, finalmodel)];
 %!
 %! for j = 1:columns (stats.xr)
 %!   ortho = Xfinal' * stats.xr(:,j);
-%!   assert (max (abs (ortho(:))) < 1e-6);
+%!   assert_equal (max (abs (ortho(:))) < 1e-6, true);
 %! endfor
 %!test
 %! X = randn (40, 5);
 %! y = randn (40, 1);
 %! [~,~,~,finalmodel,stats,nextstep,history] = stepwisefit (X, y);
 %!
-%! assert (nextstep == 0);
-%! assert (isstruct (history));
-%! assert (isfield (history, "in"));
-%! assert (isfield (history, "df0"));
-%! assert (isfield (history, "rmse"));
-%! assert (isfield (history, "B"));
-%! assert (isequal (history.in, finalmodel));
-%! assert (history.df0 == stats.df0);
-%! assert (history.rmse == stats.rmse);
-%! assert (rows (history.B) == columns (X));
+%! assert_equal (nextstep == 0, true);
+%! assert_equal (isstruct (history), true);
+%! assert_equal (isfield (history, 'in'), true);
+%! assert_equal (isfield (history, 'df0'), true);
+%! assert_equal (isfield (history, 'rmse'), true);
+%! assert_equal (isfield (history, 'B'), true);
+%! assert_equal (isequal (history.in, finalmodel), true);
+%! assert_equal (history.df0 == stats.df0, true);
+%! assert_equal (history.rmse == stats.rmse, true);
+%! assert_equal (rows (history.B) == columns (X), true);
 %!test
 %! X = randn (20,4);
 %! y = randn (20,1);
@@ -636,23 +636,23 @@ endfunction
 %! X = randn (30, 4);
 %! y = randn (30, 1);
 %! keep = [true false false false];
-%! [~,~,~,finalmodel] = stepwisefit (X, y, "Keep", keep);
-%! assert (finalmodel(1) == true);
+%! [~,~,~,finalmodel] = stepwisefit (X, y, 'Keep', keep);
+%! assert_equal (finalmodel(1) == true, true);
 %!test
 %! X = randn (40, 6);
 %! y = randn (40, 1);
-%! [~,~,~,finalmodel] = stepwisefit (X, y, "MaxIter", 1);
-%! assert (islogical (finalmodel));
+%! [~,~,~,finalmodel] = stepwisefit (X, y, 'MaxIter', 1);
+%! assert_equal (islogical (finalmodel), true);
 %!test
 %! X = randn (50, 5);
 %! y = randn (50, 1);
 %! [b1] = stepwisefit (X, y);
-%! [b2] = stepwisefit (X, y, "Scale", "on");
-%! assert (rows (b1) == rows (b2));
+%! [b2] = stepwisefit (X, y, 'Scale', 'on');
+%! assert_equal (rows (b1) == rows (b2), true);
 %!test
 %! X = randn (20,4);
 %! y = randn (20,1);
-%! fail ("stepwisefit (X,y,'Keep',[true false])");
+%! fail ('stepwisefit (X,y,''Keep'',[true false])');
 
 ## Test input validation
 %!error <stepwisefit: at least two input arguments required> ...
@@ -662,27 +662,27 @@ endfunction
 %!error <stepwisefit: X must be a matrix and y a vector> ...
 %!       stepwisefit (ones (3,2), ones (2,1))
 %!error <stepwisefit: unrecognized input arguments> ...
-%!       stepwisefit (randn (10,2), randn (10,1), "UnknownOpt", 5)
+%!       stepwisefit (randn (10,2), randn (10,1), 'UnknownOpt', 5)
 %!error <stepwisefit: Display must be 'on' or 'off'> ...
-%!       stepwisefit (randn (10,2), randn (10,1), "Display", "maybe")
+%!       stepwisefit (randn (10,2), randn (10,1), 'Display', 'maybe')
 %!error <stepwisefit: Scale must be 'on' or 'off'> ...
-%!       stepwisefit (randn (10,2), randn (10,1), "Scale", 123)
+%!       stepwisefit (randn (10,2), randn (10,1), 'Scale', 123)
 %!error <stepwisefit: PEnter must be a scalar strictly between 0 and 1> ...
-%!       stepwisefit (randn (10,2), randn (10,1), "PEnter", -0.1)
+%!       stepwisefit (randn (10,2), randn (10,1), 'PEnter', -0.1)
 %!error <stepwisefit: PRemove must be a scalar strictly between 0 and 1> ...
-%!       stepwisefit (randn (10,2), randn (10,1), "PRemove", 1.5)
+%!       stepwisefit (randn (10,2), randn (10,1), 'PRemove', 1.5)
 %!error <stepwisefit: PRemove must be greater than or equal to PEnter> ...
 %!       stepwisefit (randn (10,2), randn (10,1), ...
-%!                     "PEnter", 0.05, "PRemove", 0.01)
+%!                     'PEnter', 0.05, 'PRemove', 0.01)
 %!error <stepwisefit: MaxIter must be a positive integer> ...
-%!       stepwisefit (randn (10,2), randn (10,1), "MaxIter", -2)
+%!       stepwisefit (randn (10,2), randn (10,1), 'MaxIter', -2)
 %!error <stepwisefit: MaxIter must be a positive integer> ...
-%!       stepwisefit (randn (10,2), randn (10,1), "MaxIter", 2.5)
+%!       stepwisefit (randn (10,2), randn (10,1), 'MaxIter', 2.5)
 %!error <stepwisefit: Keep must be a logical vector> ...
-%!       stepwisefit (randn (10,2), randn (10,1), "Keep", [1 0])
+%!       stepwisefit (randn (10,2), randn (10,1), 'Keep', [1 0])
 %!error <stepwisefit: InModel must be a logical vector> ...
-%!       stepwisefit (randn (10,2), randn (10,1), "InModel", [1 0])
+%!       stepwisefit (randn (10,2), randn (10,1), 'InModel', [1 0])
 %!error <stepwisefit: Keep length must match number of predictors> ...
-%!       stepwisefit (randn (10,4), randn (10,1), "Keep", [true false])
+%!       stepwisefit (randn (10,4), randn (10,1), 'Keep', [true false])
 %!error <stepwisefit: InModel length must match number of predictors> ...
-%!       stepwisefit (randn (10,4), randn (10,1), "InModel", true)
+%!       stepwisefit (randn (10,4), randn (10,1), 'InModel', true)

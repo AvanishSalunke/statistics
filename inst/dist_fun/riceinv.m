@@ -53,8 +53,8 @@ function x = riceinv (p, s, sigma)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (s, "single") || isa (sigma, "single"))
-    x = zeros (size (p), "single");
+  if (isa (p, 'single') || isa (s, 'single') || isa (sigma, 'single'))
+    x = zeros (size (p), 'single');
   else
     x = zeros (size (p));
   endif
@@ -76,31 +76,31 @@ endfunction
 %! x3 = riceinv (p, 1, 1);
 %! x4 = riceinv (p, 2, 1);
 %! x5 = riceinv (p, 4, 1);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-m", p, x5, "-k")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-m', p, x5, '-k')
 %! grid on
-%! legend ({"s = 0, σ = 1", "s = 0.5, σ = 1", "s = 1, σ = 1", ...
-%!          "s = 2, σ = 1", "s = 4, σ = 1"}, "location", "northwest")
-%! title ("Rician iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'s = 0, σ = 1', 's = 0.5, σ = 1', 's = 1, σ = 1', ...
+%!          's = 2, σ = 1', 's = 4, σ = 1'}, 'location', 'northwest')
+%! title ('Rician iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.75 1 2];
-%!assert (riceinv (p, ones (1,5), 2*ones (1,5)), [NaN 0 3.5354 Inf NaN], 1e-4)
-%!assert (riceinv (p, 1, 2*ones (1,5)), [NaN 0 3.5354 Inf NaN], 1e-4)
-%!assert (riceinv (p, ones (1,5), 2), [NaN 0 3.5354 Inf NaN], 1e-4)
-%!assert (riceinv (p, [1 0 NaN 1 1], 2), [NaN 0 NaN Inf NaN])
-%!assert (riceinv (p, 1, 2*[1 0 NaN 1 1]), [NaN NaN NaN Inf NaN])
-%!assert (riceinv ([p(1:2) NaN p(4:5)], 1, 2), [NaN 0 NaN Inf NaN])
+%!assert_equal (riceinv (p, ones (1,5), 2*ones (1,5)), [NaN 0 3.5354 Inf NaN], 1e-4)
+%!assert_equal (riceinv (p, 1, 2*ones (1,5)), [NaN 0 3.5354 Inf NaN], 1e-4)
+%!assert_equal (riceinv (p, ones (1,5), 2), [NaN 0 3.5354 Inf NaN], 1e-4)
+%!assert_equal (riceinv (p, [1 0 NaN 1 1], 2), [NaN 0 NaN Inf NaN])
+%!assert_equal (riceinv (p, 1, 2*[1 0 NaN 1 1]), [NaN NaN NaN Inf NaN])
+%!assert_equal (riceinv ([p(1:2) NaN p(4:5)], 1, 2), [NaN 0 NaN Inf NaN])
 
 ## Test class of input preserved
-%!assert (riceinv ([p, NaN], 1, 2), [NaN 0 3.5354 Inf NaN NaN], 1e-4)
-%!assert (riceinv (single ([p, NaN]), 1, 2), ...
+%!assert_equal (riceinv ([p, NaN], 1, 2), [NaN 0 3.5354 Inf NaN NaN], 1e-4)
+%!assert_equal (riceinv (single ([p, NaN]), 1, 2), ...
 %!        single ([NaN 0 3.5354 Inf NaN NaN]), 1e-4)
-%!assert (riceinv ([p, NaN], single (1), 2), ...
+%!assert_equal (riceinv ([p, NaN], single (1), 2), ...
 %!        single ([NaN 0 3.5354 Inf NaN NaN]), 1e-4)
-%!assert (riceinv ([p, NaN], 1, single (2)), ...
+%!assert_equal (riceinv ([p, NaN], 1, single (2)), ...
 %!        single ([NaN 0 3.5354 Inf NaN NaN]), 1e-4)
 
 ## Test input validation

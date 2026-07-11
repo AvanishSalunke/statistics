@@ -21,13 +21,13 @@
 ## Return a random matrix sampled from the Wishart distribution with given
 ## parameters
 ##
-## Inputs: the @math{p x p} positive definite matrix @var{Sigma} (or the
+## Inputs: the @math{p * p} positive definite matrix @var{Sigma} (or the
 ## lower-triangular Cholesky factor @var{D} of @var{Sigma}) and scalar degrees
 ## of freedom parameter @var{df}.
 ##
 ## @var{df} can be non-integer as long as @math{@var{df} > p - 1}
 ##
-## Output: a random @math{p x p}  matrix @var{W} from the
+## Output: a random @math{p * p}  matrix @var{W} from the
 ## Wishart(@var{Sigma}, @var{df}) distribution. If @var{n} > 1, then @var{W} is
 ## @var{p} x @var{p} x @var{n} and holds @var{n} such random matrices.
 ## (Optionally, the lower-triangular Cholesky factor @var{D} of @var{Sigma} is
@@ -55,7 +55,7 @@ function [W, D] = wishrnd (Sigma, df, D, n = 1)
     print_usage ();
   endif
 
-  if nargin < 3 || isempty(D)
+  if nargin < 3 || isempty (D)
     try
       D = chol (Sigma, 'lower');
     catch
@@ -91,7 +91,7 @@ function [W, D] = wishrnd (Sigma, df, D, n = 1)
     if (df_isint)
       Z = D * randn (p, df);
     else
-      Z = diag (sqrt(chi2rnd (df - (0:(p - 1))))); ##fill diagonal
+      Z = diag (sqrt (chi2rnd (df - (0:(p - 1))))); ##fill diagonal
       ## Note: chi2rnd(x) is equivalent to 2*randg(x/2), but the latter
       ## seems to offer no performance advantage
       Z(ii > jj) = randn (p * (p - 1) / 2, 1); #fill lower triangle
@@ -102,12 +102,12 @@ function [W, D] = wishrnd (Sigma, df, D, n = 1)
 endfunction
 
 
-%!assert (size (wishrnd (1,2)), [1, 1]);
-%!assert (size (wishrnd (1,2,[])), [1, 1]);
-%!assert (size (wishrnd (1,2,1)), [1, 1]);
-%!assert (size (wishrnd ([],2,1)), [1, 1]);
-%!assert (size (wishrnd ([3 1; 1 3], 2.00001, [], 1)), [2, 2]);
-%!assert (size (wishrnd (eye(2), 2, [], 3)), [2, 2, 3]);
+%!assert_equal (size (wishrnd (1,2)), [1, 1]);
+%!assert_equal (size (wishrnd (1,2,[])), [1, 1]);
+%!assert_equal (size (wishrnd (1,2,1)), [1, 1]);
+%!assert_equal (size (wishrnd ([],2,1)), [1, 1]);
+%!assert_equal (size (wishrnd ([3 1; 1 3], 2.00001, [], 1)), [2, 2]);
+%!assert_equal (size (wishrnd (eye (2), 2, [], 3)), [2, 2, 3]);
 
 %% Test input validation
 %!error wishrnd ()
@@ -117,7 +117,7 @@ endfunction
 %% Test for non-integer df where p-1 < df < p (should not warn or truncate)
 %!test
 %! W = wishrnd (eye (3), 2.5);
-%! assert (size (W), [3, 3]);
+%! assert_equal (size (W), [3, 3]);
 
 %% Test that invalid non-integer df < p-1 triggers a warning
 %!warning <Wishart distribution undefined> wishrnd (eye (3), 1.5);

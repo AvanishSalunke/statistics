@@ -57,8 +57,8 @@ function y = bisapdf (x, beta, gamma)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (beta, "single") || isa (gamma, "single"))
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (beta, 'single') || isa (gamma, 'single'))
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
@@ -93,14 +93,14 @@ endfunction
 %! y3 = bisapdf (x, 1, 2);
 %! y4 = bisapdf (x, 1, 5);
 %! y5 = bisapdf (x, 1, 10);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-c", x, y5, "-m")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-c', x, y5, '-m')
 %! grid on
 %! ylim ([0, 1.5])
-%! legend ({"β = 1 ,γ = 0.5", "β = 1, γ = 1", "β = 1, γ = 2", ...
-%!          "β = 1, γ = 5", "β = 1, γ = 10"}, "location", "northeast")
-%! title ("Birnbaum-Saunders PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'β = 1 ,γ = 0.5', 'β = 1, γ = 1', 'β = 1, γ = 2', ...
+%!          'β = 1, γ = 5', 'β = 1, γ = 10'}, 'location', 'northeast')
+%! title ('Birnbaum-Saunders PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 %!demo
 %! ## Plot various PDFs from the Birnbaum-Saunders distribution
@@ -110,31 +110,31 @@ endfunction
 %! y3 = bisapdf (x, 1, 0.5);
 %! y4 = bisapdf (x, 3, 0.5);
 %! y5 = bisapdf (x, 5, 0.5);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-c", x, y5, "-m")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-c', x, y5, '-m')
 %! grid on
 %! ylim ([0, 1.5])
-%! legend ({"β = 1, γ = 0.3", "β = 2, γ = 0.3", "β = 1, γ = 0.5", ...
-%!          "β = 3, γ = 0.5", "β = 5, γ = 0.5"}, "location", "northeast")
-%! title ("Birnbaum-Saunders CDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'β = 1, γ = 0.3', 'β = 2, γ = 0.3', 'β = 1, γ = 0.5', ...
+%!          'β = 3, γ = 0.5', 'β = 5, γ = 0.5'}, 'location', 'northeast')
+%! title ('Birnbaum-Saunders CDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-1, 0, 1, 2, Inf];
 %! y = [0, 0, 0.3989422804014327, 0.1647717335503959, 0];
-%!assert (bisapdf (x, ones (1,5), ones (1,5)), y, eps)
-%!assert (bisapdf (x, 1, 1), y, eps)
-%!assert (bisapdf (x, 1, ones (1,5)), y, eps)
-%!assert (bisapdf (x, ones (1,5), 1), y, eps)
-%!assert (bisapdf (x, 1, [1, 1, NaN, 1, 1]), [y(1:2), NaN, y(4:5)], eps)
-%!assert (bisapdf (x, [1, 1, NaN, 1, 1], 1), [y(1:2), NaN, y(4:5)], eps)
-%!assert (bisapdf ([x, NaN], 1, 1), [y, NaN], eps)
+%!assert_equal (bisapdf (x, ones (1,5), ones (1,5)), y, eps)
+%!assert_equal (bisapdf (x, 1, 1), y, eps)
+%!assert_equal (bisapdf (x, 1, ones (1,5)), y, eps)
+%!assert_equal (bisapdf (x, ones (1,5), 1), y, eps)
+%!assert_equal (bisapdf (x, 1, [1, 1, NaN, 1, 1]), [y(1:2), NaN, y(4:5)], eps)
+%!assert_equal (bisapdf (x, [1, 1, NaN, 1, 1], 1), [y(1:2), NaN, y(4:5)], eps)
+%!assert_equal (bisapdf ([x, NaN], 1, 1), [y, NaN], eps)
 
 ## Test class of input preserved
-%!assert (bisapdf (single ([x, NaN]), 1, 1), single ([y, NaN]), eps ("single"))
-%!assert (bisapdf ([x, NaN], 1, single (1)), single ([y, NaN]), eps ("single"))
-%!assert (bisapdf ([x, NaN], single (1), 1), single ([y, NaN]), eps ("single"))
+%!assert_equal (bisapdf (single ([x, NaN]), 1, 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (bisapdf ([x, NaN], 1, single (1)), single ([y, NaN]), eps ('single'))
+%!assert_equal (bisapdf ([x, NaN], single (1), 1), single ([y, NaN]), eps ('single'))
 
 ## Test input validation
 %!error<bisapdf: function called with too few input arguments.> bisapdf ()
@@ -142,11 +142,11 @@ endfunction
 %!error<bisapdf: function called with too few input arguments.> bisapdf (1, 2)
 %!error<bisapdf: function called with too many inputs> bisapdf (1, 2, 3, 4)
 %!error<bisapdf: X, BETA, and GAMMA must be of common size or scalars.> ...
-%! bisapdf (ones (3), ones (2), ones(2))
+%! bisapdf (ones (3), ones (2), ones (2))
 %!error<bisapdf: X, BETA, and GAMMA must be of common size or scalars.> ...
-%! bisapdf (ones (2), ones (3), ones(2))
+%! bisapdf (ones (2), ones (3), ones (2))
 %!error<bisapdf: X, BETA, and GAMMA must be of common size or scalars.> ...
-%! bisapdf (ones (2), ones (2), ones(3))
+%! bisapdf (ones (2), ones (2), ones (3))
 %!error<bisapdf: X, BETA, and GAMMA must not be complex.> bisapdf (i, 4, 3)
 %!error<bisapdf: X, BETA, and GAMMA must not be complex.> bisapdf (1, i, 3)
 %!error<bisapdf: X, BETA, and GAMMA must not be complex.> bisapdf (1, 4, i)

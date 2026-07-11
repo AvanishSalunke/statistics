@@ -61,10 +61,10 @@ function y = vmpdf (x, mu, k)
   y(k < 0) = NaN;
 
   ## Check for class type
-  if (isa (x, "single") || isa (mu, "single") || isa (k, "single"))
-    y = cast (y, "single");
+  if (isa (x, 'single') || isa (mu, 'single') || isa (k, 'single'))
+    y = cast (y, 'single');
   else
-    y = cast (y, "double");
+    y = cast (y, 'double');
   endif
 
 endfunction
@@ -76,29 +76,29 @@ endfunction
 %! y2 = vmpdf (x1, 0, 1);
 %! y3 = vmpdf (x1, 0, 2);
 %! y4 = vmpdf (x1, 0, 4);
-%! plot (x1, y1, "-r", x1, y2, "-g", x1, y3, "-b", x1, y4, "-c")
+%! plot (x1, y1, '-r', x1, y2, '-g', x1, y3, '-b', x1, y4, '-c')
 %! grid on
 %! xlim ([-pi, pi])
 %! ylim ([0, 0.8])
-%! legend ({"μ = 0, k = 0.5", "μ = 0, k = 1", ...
-%!          "μ = 0, k = 2", "μ = 0, k = 4"}, "location", "northwest")
-%! title ("Von Mises PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'μ = 0, k = 0.5', 'μ = 0, k = 1', ...
+%!          'μ = 0, k = 2', 'μ = 0, k = 4'}, 'location', 'northwest')
+%! title ('Von Mises PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y0, y1
 %! x = [-pi:pi/2:pi];
 %! y0 = [0.046245, 0.125708, 0.341710, 0.125708, 0.046245];
 %! y1 = [0.046245, 0.069817, 0.654958, 0.014082, 0.000039];
-%!assert (vmpdf (x, 0, 1), y0, 1e-5)
-%!assert (vmpdf (x, zeros (1,5), ones (1,5)), y0, 1e-6)
-%!assert (vmpdf (x, 0, [1 2 3 4 5]), y1, 1e-6)
+%!assert_equal (vmpdf (x, 0, 1), y0, 1e-5)
+%!assert_equal (vmpdf (x, zeros (1,5), ones (1,5)), y0, 1e-6)
+%!assert_equal (vmpdf (x, 0, [1 2 3 4 5]), y1, 1e-6)
 
 ## Test class of input preserved
-%!assert (isa (vmpdf (single (pi), 0, 1), "single"), true)
-%!assert (isa (vmpdf (pi, single (0), 1), "single"), true)
-%!assert (isa (vmpdf (pi, 0, single (1)), "single"), true)
+%!assert_equal (isa (vmpdf (single (pi), 0, 1), 'single'), true)
+%!assert_equal (isa (vmpdf (pi, single (0), 1), 'single'), true)
+%!assert_equal (isa (vmpdf (pi, 0, single (1)), 'single'), true)
 
 ## Test input validation
 %!error<vmpdf: function called with too few input arguments.> vmpdf ()

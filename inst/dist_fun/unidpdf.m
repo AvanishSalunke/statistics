@@ -63,8 +63,8 @@ function y = unidpdf (x, N)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (N, "single"))
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (N, 'single'))
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
@@ -82,27 +82,27 @@ endfunction
 %! x = 0:10;
 %! y1 = unidpdf (x, 5);
 %! y2 = unidpdf (x, 9);
-%! plot (x, y1, "*b", x, y2, "*g")
+%! plot (x, y1, '*b', x, y2, '*g')
 %! grid on
 %! xlim ([0, 10])
 %! ylim ([0, 0.25])
-%! legend ({"N = 5", "N = 9"}, "location", "northeast")
-%! title ("Discrete uniform PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'N = 5', 'N = 9'}, 'location', 'northeast')
+%! title ('Discrete uniform PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-1 0 1 2 10 11];
 %! y = [0 0 0.1 0.1 0.1 0];
-%!assert (unidpdf (x, 10*ones (1,6)), y)
-%!assert (unidpdf (x, 10), y)
-%!assert (unidpdf (x, 10*[0 NaN 1 1 1 1]), [NaN NaN y(3:6)])
-%!assert (unidpdf ([x, NaN], 10), [y, NaN])
+%!assert_equal (unidpdf (x, 10*ones (1,6)), y)
+%!assert_equal (unidpdf (x, 10), y)
+%!assert_equal (unidpdf (x, 10*[0 NaN 1 1 1 1]), [NaN NaN y(3:6)])
+%!assert_equal (unidpdf ([x, NaN], 10), [y, NaN])
 
 ## Test class of input preserved
-%!assert (unidpdf (single ([x, NaN]), 10), single ([y, NaN]))
-%!assert (unidpdf ([x, NaN], single (10)), single ([y, NaN]))
+%!assert_equal (unidpdf (single ([x, NaN]), 10), single ([y, NaN]))
+%!assert_equal (unidpdf ([x, NaN], single (10)), single ([y, NaN]))
 
 ## Test input validation
 %!error<unidpdf: function called with too few input arguments.> unidpdf ()

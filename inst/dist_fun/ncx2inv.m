@@ -18,7 +18,8 @@
 ## -*- texinfo -*-
 ## @deftypefn  {statistics} {@var{x} =} ncx2inv (@var{p}, @var{df}, @var{lambda})
 ##
-## Inverse of the noncentral chi-squared cumulative distribution function (iCDF).
+## Inverse of the noncentral chi-squared cumulative distribution function
+## (iCDF).
 ##
 ## For each element of @var{p}, compute the quantile (the inverse of the CDF) of
 ## the noncentral chi-squared distribution with @var{df} degrees of freedom and
@@ -29,7 +30,8 @@
 ## @code{ncx2inv} uses Newton's method to converge to the solution.
 ##
 ## Further information about the noncentral chi-squared distribution can be
-## found at @url{https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution}
+## found at
+## @url{https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution}
 ##
 ## @seealso{ncx2cdf, ncx2pdf, ncx2rnd, ncx2stat, chi2inv}
 ## @end deftypefn
@@ -53,12 +55,12 @@ function x = ncx2inv (p, df, lambda)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (df, "single") || isa (lambda, "single"))
-    x = NaN (size (p), "single");
-    crit = sqrt (eps ("single"));
+  if (isa (p, 'single') || isa (df, 'single') || isa (lambda, 'single'))
+    x = NaN (size (p), 'single');
+    crit = sqrt (eps ('single'));
   else
-    x = NaN (size (p), "double");
-    crit = sqrt (eps ("double"));
+    x = NaN (size (p), 'double');
+    crit = sqrt (eps ('double'));
   endif
 
   ## For lambda == 0, call chi2inv
@@ -102,7 +104,7 @@ function x = ncx2inv (p, df, lambda)
   sigma = -2 * log (mn) + temp;
   xk = exp (norminv (pk, mu, sigma));
   F = ncx2cdf (xk, df(k), lambda(k));
-  h = ones(size(xk), class (xk));
+  h = ones (size (xk), class (xk));
 
   ## Start iteration with a break out loop
   while (count < count_limit)
@@ -146,16 +148,16 @@ endfunction
 %! x4 = ncx2inv (p, 4, 1);
 %! x5 = ncx2inv (p, 4, 2);
 %! x6 = ncx2inv (p, 4, 3);
-%! plot (p, x1, "-r", p, x2, "-g", p, x3, "-k", ...
-%!       p, x4, "-m", p, x5, "-c", p, x6, "-y")
+%! plot (p, x1, '-r', p, x2, '-g', p, x3, '-k', ...
+%!       p, x4, '-m', p, x5, '-c', p, x6, '-y')
 %! grid on
 %! ylim ([0, 10])
-%! legend ({"df = 2, λ = 1", "df = 2, λ = 2", ...
-%!          "df = 2, λ = 3", "df = 4, λ = 1", ...
-%!          "df = 4, λ = 2", "df = 4, λ = 3"}, "location", "northwest")
-%! title ("Noncentral chi-squared iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'df = 2, λ = 1', 'df = 2, λ = 2', ...
+%!          'df = 2, λ = 3', 'df = 4, λ = 1', ...
+%!          'df = 4, λ = 2', 'df = 4, λ = 3'}, 'location', 'northwest')
+%! title ('Noncentral chi-squared iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 %!demo
 %! ## Compare the noncentral chi-squared CDF with LAMBDA = 2 to the
@@ -164,35 +166,35 @@ endfunction
 %! p = 0.001:0.001:0.999;
 %! x1 = ncx2inv (p, 4, 2);
 %! x2 = chi2inv (p, 4);
-%! plot (p, x1, "-", p, x2, "-");
+%! plot (p, x1, '-', p, x2, '-');
 %! grid on
 %! ylim ([0, 10])
-%! legend ({"Noncentral χ^2(4,2)", "χ^2(4)"}, "location", "northwest")
-%! title ("Noncentral chi-squared vs chi-squared quantile functions")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'Noncentral χ^2(4,2)', 'χ^2(4)'}, 'location', 'northwest')
+%! title ('Noncentral chi-squared vs chi-squared quantile functions')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!test
 %! x = [0,0.3443,0.7226,1.1440,1.6220,2.1770,2.8436,3.6854,4.8447,6.7701,Inf];
-%! assert (ncx2inv ([0:0.1:1], 2, 1), x, 1e-4);
+%! assert_equal (ncx2inv ([0:0.1:1], 2, 1), x, 1e-4);
 %!test
 %! x = [0,0.8295,1.6001,2.3708,3.1785,4.0598,5.0644,6.2765,7.8763,10.4199,Inf];
-%! assert (ncx2inv ([0:0.1:1], 2, 3), x, 1e-4);
+%! assert_equal (ncx2inv ([0:0.1:1], 2, 3), x, 1e-4);
 %!test
 %! x = [0,0.5417,1.3483,2.1796,3.0516,4.0003,5.0777,6.3726,8.0748,10.7686,Inf];
-%! assert (ncx2inv ([0:0.1:1], 1, 4), x, 1e-4);
+%! assert_equal (ncx2inv ([0:0.1:1], 1, 4), x, 1e-4);
 %!test
 %! x = [0.1808, 0.6456, 1.1842, 1.7650, 2.3760, 3.0105];
-%! assert (ncx2inv (0.05, [1, 2, 3, 4, 5, 6], 4), x, 1e-4);
+%! assert_equal (ncx2inv (0.05, [1, 2, 3, 4, 5, 6], 4), x, 1e-4);
 %!test
 %! x = [0.4887, 0.6699, 0.9012, 1.1842, 1.5164, 1.8927];
-%! assert (ncx2inv (0.05, 3, [1, 2, 3, 4, 5, 6]), x, 1e-4);
+%! assert_equal (ncx2inv (0.05, 3, [1, 2, 3, 4, 5, 6]), x, 1e-4);
 %!test
 %! x = [1.3941, 1.6824, 2.0103, 2.3760, NaN, 3.2087];
-%! assert (ncx2inv (0.05, 5, [1, 2, 3, 4, -1, 6]), x, 1e-4);
+%! assert_equal (ncx2inv (0.05, 5, [1, 2, 3, 4, -1, 6]), x, 1e-4);
 %!test
-%! assert (ncx2inv (0.996, 5, 8), 35.51298862765576, 3e-13);
+%! assert_equal (ncx2inv (0.996, 5, 8), 35.51298862765576, 3e-13);
 
 ## Test input validation
 %!error<ncx2inv: function called with too few input arguments.> ncx2inv ()

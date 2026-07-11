@@ -69,7 +69,7 @@ function y = gevpdf (x, k, sigma, mu)
   z = 1 + k .* (x - mu) ./ sigma;
 
   ## Calculate generalized extreme value PDF
-  y = exp(-(z .^ (-1 ./ k))) .* (z .^ (-1 - 1 ./ k)) ./ sigma;
+  y = exp (-(z .^ (-1 ./ k))) .* (z .^ (-1 - 1 ./ k)) ./ sigma;
 
   y(z <= 0) = 0;
 
@@ -91,18 +91,18 @@ endfunction
 %! y4 = gevpdf (x, 1, 2, 5);
 %! y5 = gevpdf (x, 1, 5, 5);
 %! y6 = gevpdf (x, 1, 0.5, 5);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", ...
-%!       x, y4, "-c", x, y5, "-m", x, y6, "-k")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', ...
+%!       x, y4, '-c', x, y5, '-m', x, y6, '-k')
 %! grid on
 %! xlim ([-1, 10])
 %! ylim ([0, 1.1])
-%! legend ({"k = 1, σ = 1, μ = 1", "k = 0.5, σ = 1, μ = 1", ...
-%!          "k = 1, σ = 1, μ = 5", "k = 1, σ = 2, μ = 5", ...
-%!          "k = 1, σ = 5, μ = 5", "k = 1, σ = 0.5, μ = 5"}, ...
-%!         "location", "northeast")
-%! title ("Generalized extreme value PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'k = 1, σ = 1, μ = 1', 'k = 0.5, σ = 1, μ = 1', ...
+%!          'k = 1, σ = 1, μ = 5', 'k = 1, σ = 2, μ = 5', ...
+%!          'k = 1, σ = 5, μ = 5', 'k = 1, σ = 0.5, μ = 5'}, ...
+%!         'location', 'northeast')
+%! title ('Generalized extreme value PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!test
@@ -112,7 +112,7 @@ endfunction
 %! mu = 0;
 %! y = gevpdf (x, k, sigma, mu);
 %! expected_y = [0.367879   0.143785   0.088569   0.063898   0.049953   0.040997];
-%! assert (y, expected_y, 0.001);
+%! assert_equal (y, expected_y, 0.001);
 %!test
 %! x = -0.5:0.5:2.5;
 %! sigma = 0.5;
@@ -120,7 +120,7 @@ endfunction
 %! mu = 0;
 %! y = gevpdf (x, k, sigma, mu);
 %! expected_y = [0 0.735759   0.303265   0.159229   0.097350   0.065498   0.047027];
-%! assert (y, expected_y, 0.001);
+%! assert_equal (y, expected_y, 0.001);
 %!test # check for continuity for k near 0
 %! x = 1;
 %! sigma = 0.5;
@@ -128,7 +128,7 @@ endfunction
 %! mu = 0;
 %! y = gevpdf (x, k, sigma, mu);
 %! expected_y = [0.23820   0.23764   0.23704   0.23641   0.23576   0.23508   0.23438];
-%! assert (y, expected_y, 0.001);
+%! assert_equal (y, expected_y, 0.001);
 
 ## Test input validation
 %!error<gevpdf: function called with too few input arguments.> gevpdf ()
@@ -136,13 +136,13 @@ endfunction
 %!error<gevpdf: function called with too few input arguments.> gevpdf (1, 2)
 %!error<gevpdf: function called with too few input arguments.> gevpdf (1, 2, 3)
 %!error<gevpdf: X, K, SIGMA, and MU must be of common size or scalars.> ...
-%! gevpdf (ones (3), ones (2), ones(2), ones(2))
+%! gevpdf (ones (3), ones (2), ones (2), ones (2))
 %!error<gevpdf: X, K, SIGMA, and MU must be of common size or scalars.> ...
-%! gevpdf (ones (2), ones (3), ones(2), ones(2))
+%! gevpdf (ones (2), ones (3), ones (2), ones (2))
 %!error<gevpdf: X, K, SIGMA, and MU must be of common size or scalars.> ...
-%! gevpdf (ones (2), ones (2), ones(3), ones(2))
+%! gevpdf (ones (2), ones (2), ones (3), ones (2))
 %!error<gevpdf: X, K, SIGMA, and MU must be of common size or scalars.> ...
-%! gevpdf (ones (2), ones (2), ones(2), ones(3))
+%! gevpdf (ones (2), ones (2), ones (2), ones (3))
 %!error<gevpdf: X, K, SIGMA, and MU must not be complex.> gevpdf (i, 2, 3, 4)
 %!error<gevpdf: X, K, SIGMA, and MU must not be complex.> gevpdf (1, i, 3, 4)
 %!error<gevpdf: X, K, SIGMA, and MU must not be complex.> gevpdf (1, 2, i, 4)

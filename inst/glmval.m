@@ -27,7 +27,7 @@
 ## coefficient estimates @var{b}, a matrix of predictors @var{X}, in which each
 ## column corresponds to a distinct predictor variable, and a link function
 ## @var{link}, which can be any of the character vectors, numeric scalar, or
-## custom-defined link functions used as values for the @qcode{"link"}
+## custom-defined link functions used as values for the @qcode{'link'}
 ## name-value pair argument in the @code{glmfit} function.
 ##
 ## @code{[@var{yhat}, @var{y_lo}, @var{y_hi}] = glmval (@var{b}, @var{X},
@@ -40,23 +40,23 @@
 ## @code{[@dots{}] = glmval (@dots{}, @var{Name}, @var{Value})} specifies
 ## additional options using @qcode{Name-Value} pair arguments.
 ##
-## @multitable @columnfractions 0.18 0.02 0.8
-## @headitem @var{Name} @tab @tab @var{Value}
+## @multitable @columnfractions 0.18 0.8
+## @headitem @var{Name} @tab @var{Value}
 ##
-## @item @qcode{"confidence"} @tab @tab A scalar value between 0 and 1
+## @item @qcode{'confidence'} @tab A scalar value between 0 and 1
 ## specifying the confidence level for the confidence bounds.
 ##
-## @item @qcode{"Constant"} @tab @tab A character vector specifying whether to
+## @item @qcode{'Constant'} @tab A character vector specifying whether to
 ## include a constant term in the model.  Valid options are @var{"on"} (default)
 ## and @var{"off"}.
 ##
-## @item @qcode{"simultaneous"} @tab @tab Specifies whether to
-## include a constant term in the model. Options are
-## @var{"on"} (default) or @var{"off"}.
+## @item @qcode{'simultaneous'} @tab A logical or numeric (@code{0} or
+## @code{1}) scalar specifying whether the confidence bounds are simultaneous.
+## The default is @code{false}, which yields nonsimultaneous (pointwise) bounds.
 ##
-## @item @qcode{"size"} @tab @tab A numeric scalar or a vector with one value
+## @item @qcode{'size'} @tab A numeric scalar or a vector with one value
 ## for each row of @var{X} specifying the size parameter @math{N} for a binomial
-## model.
+## model.  @qcode{'BinomialSize'} is accepted as an alias for @qcode{'size'}.
 ## @end multitable
 ##
 ## @seealso{glmfit}
@@ -84,7 +84,7 @@ function [yhat, y_lo, y_hi] = glmval (b, X, link, varargin)
   if (nargin > 3)
     if (isstruct (varargin{1}))
       stats = varargin{1};
-      rf = {"s", "se", "coeffcorr", "estdisp", "dfe"};
+      rf = {'s', 'se', 'coeffcorr', 'estdisp', 'dfe'};
       if (! all (ismember (rf, fieldnames (stats))))
         error ("glmval: invalid 'stats' structure.");
       endif
@@ -106,50 +106,52 @@ function [yhat, y_lo, y_hi] = glmval (b, X, link, varargin)
   while (numel (varargin) > 0)
     switch (tolower (varargin {1}))
 
-      case "confidence"
+      case 'confidence'
         confidence = varargin {2};
         if (! (isscalar (confidence) && isnumeric (confidence)
                                      && confidence > 0 && confidence < 1))
           error ("glmval: 'Confidence' must be a scalar between 0 and 1.");
         endif
 
-      case "constant"
+      case 'constant'
         constant = tolower (varargin {2});
-        if (strcmpi (constant, "on"))
+        if (strcmpi (constant, 'on'))
           constant = true;
-        elseif (strcmpi (constant, "off"))
+        elseif (strcmpi (constant, 'off'))
           constant = false;
         else
           error ("glmval: 'Constant' should be either 'on' or 'off'.");
         endif
 
-      case "offset"
+      case 'offset'
         offset = varargin {2};
         if (! (isnumeric (offset) && isequal (numel (offset), size (X, 1))))
-          error (["glmval: 'Offset' must be a numeric vector", ...
-                  " of the same length as the rows in X."]);
+          error (strcat ("glmval: 'Offset' must be a numeric vector", " of the same length as the rows in X."));
         endif
         offset = offset(:);
 
-      case "simultaneous"
+      case 'simultaneous'
         simultaneous = varargin {2};
-        if (! (islogical (simultaneous) && isscalar (simultaneous)))
-          error ("glmval: 'simultaneous' must be a boolean scalar.");
+        if (! isscalar (simultaneous) ...
+            || ! (islogical (simultaneous) || isnumeric (simultaneous)) ...
+            || ! any (simultaneous == [0, 1]))
+          error (strcat ("glmval: 'simultaneous' must be a logical or", ...
+                         " numeric (0 or 1) scalar."));
         endif
+        simultaneous = logical (simultaneous);
 
-      case "size"
+      case {'size', 'binomialsize'}
         N = varargin {2};
         if (! isnumeric (N) ||
             ! (isscalar (N) || isvector (N) && isequal (numel (N), size (X, 1))))
-          error (["glmval: 'size' must be a scalar or a vector with", ...
-                  " one value for each row of X."]);
+          error (strcat ("glmval: 'size' must be a scalar or a vector with", " one value for each row of X."));
         endif
         N = N(:);
 
       otherwise
         error ("glmval: unknown parameter name.");
     endswitch
-    varargin (1:2) = [];
+    varargin(1:2) = [];
   endwhile
 
   ## Adjust X based on constant
@@ -159,13 +161,12 @@ function [yhat, y_lo, y_hi] = glmval (b, X, link, varargin)
 
   ## Predict yhat
   eta = X * b + offset;
-  yhat = N .* ilink (eta);
+  yhat = N .* ilink(eta);
 
   ## Compute lower and upper bounds
   if (nargout > 1)
     if (isempty (stats))
-      error (["glmval: cannot compute confidence", ...
-              " intervals without STATS structure."]);
+      error (strcat ("glmval: cannot compute confidence", " intervals without STATS structure."));
     endif
     if (isnan (stats.s))
       y_lo = NaN (size (yhat));
@@ -196,8 +197,8 @@ endfunction
 %! x = [210, 230, 250, 270, 290, 310, 330, 350, 370, 390, 410, 430]';
 %! n = [48, 42, 31, 34, 31, 21, 23, 23, 21, 16, 17, 21]';
 %! y = [1, 2, 0, 3, 8, 8, 14, 17, 19, 15, 17, 21]';
-%! b = glmfit (x, [y n], "binomial", "Link", "probit");
-%! yfit = glmval (b, x, "probit", "Size", n);
+%! b = glmfit (x, [y n], 'binomial', 'Link', 'probit');
+%! yfit = glmval (b, x, 'probit', 'Size', n);
 %! plot (x, y./n, 'o', x, yfit ./ n, '-')
 
 ## Test input validation
@@ -205,41 +206,41 @@ endfunction
 %!error <glmval: too few input arguments.> glmval (1)
 %!error <glmval: too few input arguments.> glmval (1, 2)
 %!error <glmval: B must be a numeric vector of coefficient estimates.> ...
-%! glmval ("asd", [1; 1; 1], 'probit')
+%! glmval ('asd', [1; 1; 1], 'probit')
 %!error <glmval: B must be a numeric vector of coefficient estimates.> ...
 %! glmval ([], [1; 1; 1], 'probit')
 %!error <glmval: X must be a numeric matrix.> ...
 %! glmval ([0.1; 0.3; 0.4], [], 'probit')
 %!error <glmval: X must be a numeric matrix.> ...
-%! glmval ([0.1; 0.3; 0.4], "asd", 'probit')
+%! glmval ([0.1; 0.3; 0.4], 'asd', 'probit')
 %!error <glmval: structure with custom link functions must be a scalar.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", {1, 2}))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', {1, 2}))
 %!error <glmval: structure with custom link functions requires the fields 'Link', 'Derivative', and 'Inverse'.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", "norminv"))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', 'norminv'))
 %!error <glmval: bad 'Link' function in custom link function structure.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", "some", "Derivative", @(x)x, "Inverse", "normcdf"))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', 'some', 'Derivative', @(x)x, 'Inverse', 'normcdf'))
 %!error <glmval: bad 'Link' function in custom link function structure.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", 1, "Derivative", @(x)x, "Inverse", "normcdf"))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', 1, 'Derivative', @(x)x, 'Inverse', 'normcdf'))
 %!error <glmval: custom 'Link' function must return an output of the same size as input.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", @(x) [x, x], "Derivative", @(x)x, "Inverse", "normcdf"))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', @(x) [x, x], 'Derivative', @(x)x, 'Inverse', 'normcdf'))
 %!error <glmval: invalid custom 'Link' function.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", "what", "Derivative", @(x)x, "Inverse", "normcdf"))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', 'what', 'Derivative', @(x)x, 'Inverse', 'normcdf'))
 %!error <glmval: bad 'Derivative' function in custom link function structure.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", @(x)x, "Derivative", "some", "Inverse", "normcdf"))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', @(x)x, 'Derivative', 'some', 'Inverse', 'normcdf'))
 %!error <glmval: bad 'Derivative' function in custom link function structure.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", @(x)x, "Derivative", 1, "Inverse", "normcdf"))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', @(x)x, 'Derivative', 1, 'Inverse', 'normcdf'))
 %!error <glmval: custom 'Derivative' function must return an output of the same size as input.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", @(x)x, "Derivative", @(x) [x, x], "Inverse", "normcdf"))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', @(x)x, 'Derivative', @(x) [x, x], 'Inverse', 'normcdf'))
 %!error <glmval: invalid custom 'Derivative' function.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", @(x)x, "Derivative", "what", "Inverse", "normcdf"))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', @(x)x, 'Derivative', 'what', 'Inverse', 'normcdf'))
 %!error <glmval: bad 'Inverse' function in custom link function structure.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", @(x)x, "Derivative", "normcdf", "Inverse", "some"))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', @(x)x, 'Derivative', 'normcdf', 'Inverse', 'some'))
 %!error <glmval: bad 'Inverse' function in custom link function structure.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", @(x)x, "Derivative", "normcdf", "Inverse", 1))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', @(x)x, 'Derivative', 'normcdf', 'Inverse', 1))
 %!error <glmval: custom 'Inverse' function must return an output of the same size as input.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", @(x)x, "Derivative", "normcdf", "Inverse", @(x) [x, x]))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', @(x)x, 'Derivative', 'normcdf', 'Inverse', @(x) [x, x]))
 %!error <glmval: invalid custom 'Inverse' function.> ...
-%! glmval (rand (3,1), rand (5,2), struct ("Link", @(x)x, "Derivative", "normcdf", "Inverse", "what"))
+%! glmval (rand (3,1), rand (5,2), struct ('Link', @(x)x, 'Derivative', 'normcdf', 'Inverse', 'what'))
 %!error <glmval: cell array with custom link functions must have three elements.> ...
 %! glmval (rand (3,1), rand (5,2), {'log'})
 %!error <glmval: cell array with custom link functions must have three elements.> ...
@@ -247,19 +248,19 @@ endfunction
 %!error <glmval: cell array with custom link functions must have three elements.> ...
 %! glmval (rand (3,1), rand (5,2), {1, 2, 3, 4})
 %!error <glmval: bad 'Link' function in custom link function cell array.> ...
-%! glmval (rand (3,1), rand (5,2), {"log", "dfv", "dfgvd"})
+%! glmval (rand (3,1), rand (5,2), {'log', 'dfv', 'dfgvd'})
 %!error <glmval: custom 'Link' function must return an output of the same size as input.> ...
-%! glmval (rand (3,1), rand (5,2), {@(x) [x, x], "dfv", "dfgvd"})
+%! glmval (rand (3,1), rand (5,2), {@(x) [x, x], 'dfv', 'dfgvd'})
 %!error <glmval: invalid custom 'Link' function.> ...
-%! glmval (rand (3,1), rand (5,2), {@(x) what (x), "dfv", "dfgvd"})
+%! glmval (rand (3,1), rand (5,2), {@(x) what (x), 'dfv', 'dfgvd'})
 %!error <glmval: bad 'Derivative' function in custom link function cell array.> ...
-%! glmval (rand (3,1), rand (5,2), {@(x) x, "dfv", "dfgvd"})
+%! glmval (rand (3,1), rand (5,2), {@(x) x, 'dfv', 'dfgvd'})
 %!error <glmval: custom 'Derivative' function must return an output of the same size as input.> ...
-%! glmval (rand (3,1), rand (5,2), {@(x) x, @(x) [x, x], "dfgvd"})
+%! glmval (rand (3,1), rand (5,2), {@(x) x, @(x) [x, x], 'dfgvd'})
 %!error <glmval: invalid custom 'Derivative' function.> ...
-%! glmval (rand (3,1), rand (5,2), {@(x) x, @(x) what (x), "dfgvd"})
+%! glmval (rand (3,1), rand (5,2), {@(x) x, @(x) what (x), 'dfgvd'})
 %!error <glmval: bad 'Inverse' function in custom link function cell array.> ...
-%! glmval (rand (3,1), rand (5,2), {@(x) x, @(x) x, "dfgvd"})
+%! glmval (rand (3,1), rand (5,2), {@(x) x, @(x) x, 'dfgvd'})
 %!error <glmval: custom 'Inverse' function must return an output of the same size as input.> ...
 %! glmval (rand (3,1), rand (5,2), {@(x) x, @(x) x, @(x) [x, x]})
 %!error <glmval: invalid custom 'Inverse' function.> ...
@@ -271,13 +272,13 @@ endfunction
 %!error <glmval: numeric input for custom link function must be a finite real scalar value.> ...
 %! glmval (rand (3,1), rand (5,2), [1i])
 %!error <glmval: canonical link function name must be a character vector.> ...
-%! glmval (rand (3,1), rand (5,2), ["log"; "log1"])
+%! glmval (rand (3,1), rand (5,2), ['log'; 'log1'])
 %!error <glmval: canonical link function 'somelinkfunction' is not supported.> ...
 %! glmval (rand (3,1), rand (5,2), 'somelinkfunction')
 %!error <glmval: invalid value for custom link function.> ...
 %! glmval (rand (3,1), rand (5,2), true)
 %!error <glmval: invalid 'stats' structure.> ...
-%! glmval (rand (3,1), rand (5,2), 'probit', struct ("s", 1))
+%! glmval (rand (3,1), rand (5,2), 'probit', struct ('s', 1))
 %!error <glmval: Name-Value arguments must be in pairs.> ...
 %! glmval (rand (3,1), rand (5,2), 'probit', 'confidence')
 %!error <glmval: 'Confidence' must be a scalar between 0 and 1.> ...
@@ -296,12 +297,24 @@ endfunction
 %! glmval (rand (3, 1), rand (5, 2), 'probit', 'offset', [1; 2; 3; 4])
 %!error <glmval: 'Offset' must be a numeric vector of the same length as the rows in X.> ...
 %! glmval (rand (3, 1), rand (5, 2), 'probit', 'offset', 'asdfg')
-%!error <glmval: 'simultaneous' must be a boolean scalar.> ...
+%!test  # numeric 0/1 are accepted for 'simultaneous' (MATLAB compatibility)
+%! b = [0.2; 0.5];
+%! X = [1; 2; 3];
+%! assert (numel (glmval (b, X, 'logit', 'simultaneous', 0)), 3);
+%! assert (numel (glmval (b, X, 'logit', 'simultaneous', 1)), 3);
+
+%!test  # 'BinomialSize' is accepted as an alias for 'size'
+%! b = [0.2; 0.5; -0.3];
+%! X = [0.1 0.2; 0.3 0.4; 0.5 0.6; 0.7 0.8];
+%! assert (glmval (b, X, 'logit', 'BinomialSize', 10), ...
+%!         glmval (b, X, 'logit', 'size', 10));
+
+%!error <glmval: 'simultaneous' must be a logical or numeric \(0 or 1\) scalar.> ...
 %! glmval (rand (3, 1), rand (5, 2), 'probit', 'simultaneous', 'asdfg')
-%!error <glmval: 'simultaneous' must be a boolean scalar.> ...
+%!error <glmval: 'simultaneous' must be a logical or numeric \(0 or 1\) scalar.> ...
 %! glmval (rand (3, 1), rand (5, 2), 'probit', 'simultaneous', [true, false])
 %!error <glmval: 'size' must be a scalar or a vector with one value for each row of X.> ...
-%! glmval (rand (3, 1), rand (5, 2), 'probit', 'size', "asd")
+%! glmval (rand (3, 1), rand (5, 2), 'probit', 'size', 'asd')
 %!error <glmval: 'size' must be a scalar or a vector with one value for each row of X.> ...
 %! glmval (rand (3, 1), rand (5, 2), 'probit', 'size', [2, 3, 4])
 %!error <glmval: 'size' must be a scalar or a vector with one value for each row of X.> ...

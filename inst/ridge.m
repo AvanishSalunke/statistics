@@ -38,9 +38,9 @@
 ##
 ## @itemize
 ## @item
-## @code{y} must be an @math{Nx1} numeric vector with the response data.
+## @code{y} must be an @math{N*1} numeric vector with the response data.
 ## @item
-## @code{X} must be an @math{Nxp} numeric matrix with the predictor data.
+## @code{X} must be an @math{N*p} numeric matrix with the predictor data.
 ## @item
 ## @code{k} must be a numeric vector with the ridge parameters.
 ## @item
@@ -148,13 +148,13 @@ endfunction
 %! b = ridge (y, D, k);
 %!
 %! figure
-%! plot (k, b, "LineWidth", 2)
+%! plot (k, b, 'LineWidth', 2)
 %! ylim ([-100, 100])
 %! grid on
-%! xlabel ("Ridge Parameter")
-%! ylabel ("Standardized Coefficient")
-%! title ("Ridge Trace")
-%! legend ("x1", "x2", "x3", "x1x2", "x1x3", "x2x3")
+%! xlabel ('Ridge Parameter')
+%! ylabel ('Standardized Coefficient')
+%! title ('Ridge Trace')
+%! legend ('x1', 'x2', 'x3', 'x1x2', 'x1x3', 'x2x3')
 %!
 %!demo
 %!
@@ -162,68 +162,68 @@ endfunction
 %! X = [Acceleration Weight Displacement Horsepower];
 %! y = MPG;
 %!
-%! n = length(y);
+%! n = length (y);
 %!
-%! rand("seed",1); % For reproducibility
+%! rand ('seed',1); % For reproducibility
 %!
-%! c = cvpartition(n,'HoldOut',0.3);
+%! c = cvpartition (n,'HoldOut',0.3);
 %! idxTrain = training(c,1);
-%! idxTest = ~idxTrain;
+%! idxTest = ! idxTrain;
 %!
 %! idxTrain = training(c,1);
-%! idxTest = ~idxTrain;
+%! idxTest = ! idxTrain;
 %!
 %! k = 5;
-%! b = ridge(y(idxTrain),X(idxTrain,:),k,0);
+%! b = ridge (y(idxTrain),X(idxTrain,:),k,0);
 %!
 %! % Predict MPG values for the test data using the model.
 %! yhat = b(1) + X(idxTest,:)*b(2:end);
-%! scatter(y(idxTest),yhat)
+%! scatter (y(idxTest),yhat)
 %!
 %! hold on
-%! plot(y(idxTest),y(idxTest),"r")
-%! xlabel('Actual MPG')
-%! ylabel('Predicted MPG')
+%! plot (y(idxTest),y(idxTest),'r')
+%! xlabel ('Actual MPG')
+%! ylabel ('Predicted MPG')
 %! hold off
 %!
 
 ## Test output
 %!test
 %! b = ridge ([1 2 3 4]', [1 2 3 4; 2 3 4 5]', 1);
-%! assert (b, [0.5533; 0.5533], 1e-4);
+%! assert_equal (b, [0.5533; 0.5533], 1e-4);
 %!test
 %! b = ridge ([1 2 3 4]', [1 2 3 4; 2 3 4 5]', 2);
-%! assert (b, [0.4841; 0.4841], 1e-4);
+%! assert_equal (b, [0.4841; 0.4841], 1e-4);
 %!test
 %! load acetylene
 %! x = [x1, x2, x3];
 %! b = ridge (y, x, 0);
-%! assert (b,[10.2273;1.97128;-0.601818],1e-4);
+%! assert_equal (b,[10.2273;1.97128;-0.601818],1e-4);
 %!test
 %! load acetylene
 %! x = [x1, x2, x3];
 %! b = ridge (y, x, 0.0005);
-%! assert (b,[10.2233;1.9712;-0.6056],1e-4);
+%! assert_equal (b,[10.2233;1.9712;-0.6056],1e-4);
 %!test
 %! load acetylene
 %! x = [x1, x2, x3];
 %! b = ridge (y, x, 0.001);
-%! assert (b,[10.2194;1.9711;-0.6094],1e-4);
+%! assert_equal (b,[10.2194;1.9711;-0.6094],1e-4);
 %!test
 %! load acetylene
 %! x = [x1, x2, x3];
 %! b = ridge (y, x, 0.002);
-%! assert (b,[10.2116;1.9709;-0.6169],1e-4);
+%! assert_equal (b,[10.2116;1.9709;-0.6169],1e-4);
 %!test
 %! load acetylene
 %! x = [x1, x2, x3];
 %! b = ridge (y, x, 0.005);
-%! assert (b,[10.1882;1.9704;-0.6393],1e-4);
+%! assert_equal (b,[10.1882;1.9704;-0.6393],1e-4);
 %!test
 %! load acetylene
 %! x = [x1, x2, x3];
 %! b = ridge (y, x, 0.01);
-%! assert (b,[10.1497;1.9695;-0.6761],1e-4);
+%! assert_equal (b,[10.1497;1.9695;-0.6761],1e-4);
 
 ## Test input validation
 %!error<ridge: function called with too few input arguments.> ridge (1)
@@ -237,4 +237,4 @@ endfunction
 %!error<ridge: wrong value for SCALED argument.> ...
 %! ridge ([1; 2; 3], ones (3), 3, 2)
 %!error<ridge: wrong value for SCALED argument.> ...
-%! ridge ([1; 2; 3], ones (3), 3, "some")
+%! ridge ([1; 2; 3], ones (3), 3, 'some')

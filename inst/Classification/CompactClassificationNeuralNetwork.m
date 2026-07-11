@@ -38,7 +38,7 @@ classdef CompactClassificationNeuralNetwork
   ## @seealso{ClassificationNeuralNetwork, fitcnet}
   ## @end deftp
 
-  properties (Access = public)
+  properties(Access = public)
     ## -*- texinfo -*-
     ## @deftp {CompactClassificationNeuralNetwork} {property} NumPredictors
     ##
@@ -111,20 +111,22 @@ classdef CompactClassificationNeuralNetwork
     ## built-in functions.  Nevertheless, the @qcode{ScoreTransform} property
     ## always stores their function handle equivalent.
     ##
-    ## @multitable @columnfractions 0.2 0.05 0.75
-    ## @headitem @var{Value} @tab @tab @var{Description}
-    ## @item @qcode{"doublelogit"} @tab @tab @math{1 ./ (1 + exp (-2 * x))}
-    ## @item @qcode{"invlogit"} @tab @tab @math{1 ./ (1 + exp (-x))}
-    ## @item @qcode{"ismax"} @tab @tab Sets the score for the class with the
+    ## @multitable @columnfractions 0.2 0.75
+    ## @headitem @var{Value} @tab @var{Description}
+    ## @item @qcode{'doublelogit'} @tab @math{1 ./ (1 + exp (-2 * x))}
+    ## @item @qcode{'invlogit'} @tab @math{1 ./ (1 + exp (-x))}
+    ## @item @qcode{'ismax'} @tab Sets the score for the class with the
     ## largest score to 1, and for all other classes to 0
-    ## @item @qcode{"logit"} @tab @tab @math{log (x ./ (1 - x))}
-    ## @item @qcode{"none"} @tab @tab @math{x} (no transformation)
-    ## @item @qcode{"identity"} @tab @tab @math{x} (no transformation)
-    ## @item @qcode{"sign"} @tab @tab @math{-1 for x < 0, 0 for x = 0, 1 for x > 0}
-    ## @item @qcode{"symmetric"} @tab @tab @math{2 * x - 1}
-    ## @item @qcode{"symmetricismax"} @tab @tab Sets the score for the class
+    ## @item @qcode{'logit'} @tab @math{log (x ./ (1 - x))}
+    ## @item @qcode{'none'} @tab @math{x} (no transformation)
+    ## @item @qcode{'identity'} @tab @math{x} (no transformation)
+    ## @item @qcode{'sign'} @tab
+    ## @math{-1 for x < 0, 0 for x = 0, 1 for x >
+    ## 0}
+    ## @item @qcode{'symmetric'} @tab @math{2 * x - 1}
+    ## @item @qcode{'symmetricismax'} @tab Sets the score for the class
     ## with the largest score to 1, and for all other classes to -1
-    ## @item @qcode{"symmetriclogit"} @tab @tab @math{2 ./ (1 + exp (-x)) - 1}
+    ## @item @qcode{'symmetriclogit'} @tab @math{2 ./ (1 + exp (-x)) - 1}
     ## @end multitable
     ##
     ## @end deftp
@@ -190,9 +192,9 @@ classdef CompactClassificationNeuralNetwork
     ##
     ## A character vector or cell array of character vectors specifying the
     ## activation functions used in the hidden layers of the neural network.
-    ## Supported activation functions include: @qcode{"linear"},
-    ## @qcode{"sigmoid"}, @qcode{"relu"}, @qcode{"tanh"}, @qcode{"softmax"},
-    ## @qcode{"lrelu"}, @qcode{"prelu"}, @qcode{"elu"}, and @qcode{"gelu"}.
+    ## Supported activation functions include: @qcode{'linear'},
+    ## @qcode{'sigmoid'}, @qcode{'relu'}, @qcode{'tanh'}, @qcode{'softmax'},
+    ## @qcode{'lrelu'}, @qcode{'prelu'}, @qcode{'elu'}, and @qcode{'gelu'}.
     ## This property is read-only.
     ##
     ## @end deftp
@@ -283,14 +285,14 @@ classdef CompactClassificationNeuralNetwork
     ## Solver used for training
     ##
     ## A character vector specifying the solver algorithm used to train the
-    ## neural network model.  Currently only @qcode{"Gradient Descent"} is
+    ## neural network model.  Currently only @qcode{'Gradient Descent'} is
     ## supported.  This property is read-only.
     ##
     ## @end deftp
     Solver                = [];
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     ## constructor
     function this = CompactClassificationNeuralNetwork (Mdl = [])
@@ -298,7 +300,7 @@ classdef CompactClassificationNeuralNetwork
       ## Check for appropriate class
       if (isempty (Mdl))
         return;
-      elseif (! strcmpi (class (Mdl), "ClassificationNeuralNetwork"))
+      elseif (! strcmpi (class (Mdl), 'ClassificationNeuralNetwork'))
         error (strcat ("CompactClassificationNeuralNetwork: invalid", ...
                        " classification object."));
       endif
@@ -343,23 +345,23 @@ classdef CompactClassificationNeuralNetwork
       ## Print selected properties
       fprintf ("%+25s: '%s'\n", 'ResponseName', this.ResponseName);
       if (iscellstr (this.ClassNames))
-        str = repmat ({"'%s'"}, 1, numel (this.ClassNames));
+        str = repmat ({'''%s'''}, 1, numel (this.ClassNames));
         str = strcat ('{', strjoin (str, ' '), '}');
         str = sprintf (str, this.ClassNames{:});
       else # numeric
-        str = repmat ({"%d"}, 1, numel (this.ClassNames));
+        str = repmat ({'%d'}, 1, numel (this.ClassNames));
         str = strcat ('[', strjoin (str, ' '), ']');
         str = sprintf (str, this.ClassNames);
       endif
       fprintf ("%+25s: '%s'\n", 'ClassNames', str);
       fprintf ("%+25s: '%s'\n", 'ScoreTransform', this.ScoreTransform);
       fprintf ("%+25s: '%d'\n", 'NumPredictors', this.NumPredictors);
-      str = repmat ({"%d"}, 1, numel (this.LayerSizes));
+      str = repmat ({'%d'}, 1, numel (this.LayerSizes));
       str = strcat ('[', strjoin (str, ' '), ']');
       str = sprintf (str, this.LayerSizes);
       fprintf ("%+25s: '%s'\n", 'LayerSizes', str);
       if (iscellstr (this.Activations))
-        str = repmat ({"'%s'"}, 1, numel (this.Activations));
+        str = repmat ({'''%s'''}, 1, numel (this.Activations));
         str = strcat ('{', strjoin (str, ' '), '}');
         str = sprintf (str, this.Activations{:});
         fprintf ("%+25s: '%s'\n", 'Activations', str);
@@ -421,7 +423,7 @@ classdef CompactClassificationNeuralNetwork
           endif
           switch (s.subs)
             case 'ScoreTransform'
-              name = "CompactClassificationNeuralNetwork";
+              name = 'CompactClassificationNeuralNetwork';
               this.ScoreTransform = parseScoreTransform (val, name);
             otherwise
               error (strcat ("CompactClassificationNeuralNetwork.subsasgn:", ...
@@ -433,7 +435,7 @@ classdef CompactClassificationNeuralNetwork
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {CompactClassificationNeuralNetwork} {@var{label} =} predict (@var{obj}, @var{XC})
@@ -452,7 +454,7 @@ classdef CompactClassificationNeuralNetwork
     ## @var{obj} must be a @qcode{CompactClassificationNeuralNetwork} class
     ## object.
     ## @item
-    ## @var{XC} must be an @math{MxP} numeric matrix with the same number of
+    ## @var{XC} must be an @math{M*P} numeric matrix with the same number of
     ## features @math{P} as the corresponding predictors of the neural network
     ## model in @var{obj}.
     ## @end itemize
@@ -502,14 +504,14 @@ classdef CompactClassificationNeuralNetwork
 
       if (nargout > 1)
         ## Apply ScoreTransform to return probability estimates
-        if (! strcmp (this.ScoreTransform, "none"))
+        if (! strcmp (this.ScoreTransform, 'none'))
           f = this.ScoreTransform;
-          if (! strcmp (class (f), "function_handle"))
+          if (! strcmp (class (f), 'function_handle'))
             error (strcat ("CompactClassificationNeuralNetwork.predict:", ...
                            " 'ScoreTransform' must be a", ...
                            " 'function_handle' object."));
           endif
-          scores = f (scores);
+          scores = f(scores);
         endif
       endif
 
@@ -532,7 +534,7 @@ classdef CompactClassificationNeuralNetwork
 
     function savemodel (this, fname)
       ## Generate variable for class name
-      classdef_name = "CompactClassificationNeuralNetwork";
+      classdef_name = 'CompactClassificationNeuralNetwork';
 
       ## Create variables from model properties
       NumPredictors           = this.NumPredictors;
@@ -554,17 +556,17 @@ classdef CompactClassificationNeuralNetwork
       Solver                  = this.Solver;
 
       ## Save classdef name and all model properties as individual variables
-      save ("-binary", fname, "classdef_name", "NumPredictors", ...
-            "PredictorNames", "ResponseName", "ClassNames", ...
-            "ScoreTransform", "Standardize", "Sigma", "Mu", "LayerSizes", ...
-            "Activations", "OutputLayerActivation", "LearningRate", ...
-            "IterationLimit", "ModelParameters", "ConvergenceInfo", ...
-            "DisplayInfo", "Solver");
+      save ('-binary', fname, 'classdef_name', 'NumPredictors', ...
+            'PredictorNames', 'ResponseName', 'ClassNames', ...
+            'ScoreTransform', 'Standardize', 'Sigma', 'Mu', 'LayerSizes', ...
+            'Activations', 'OutputLayerActivation', 'LearningRate', ...
+            'IterationLimit', 'ModelParameters', 'ConvergenceInfo', ...
+            'DisplayInfo', 'Solver');
     endfunction
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function mdl = load_model (filename, data)
       ## Create a ClassificationNeuralNetwork object
@@ -610,7 +612,7 @@ endclassdef
 %! load fisheriris
 %! x = meas;
 %! y = grp2idx (species);
-%! Mdl = fitcnet (x, y, "IterationLimit", 100);
+%! Mdl = fitcnet (x, y, 'IterationLimit', 100);
 %! CMdl = compact (Mdl);
 
 ## Test input validation for predict method
@@ -623,4 +625,4 @@ endclassdef
 
 ## Test input validation for assigning a new ScoreTransform
 %!error<CompactClassificationNeuralNetwork: unrecognized 'ScoreTransform' function.> ...
-%! CMdl.ScoreTransform = "a";
+%! CMdl.ScoreTransform = 'a';

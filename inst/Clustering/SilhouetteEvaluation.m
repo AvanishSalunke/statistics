@@ -41,8 +41,8 @@ classdef SilhouetteEvaluation < ClusterCriterion
   ##
   ## @item @qcode{ClusterPriors}
   ## A character vector specifying how to evaluate silhouette values across
-  ## clusters: @qcode{"empirical"} (default) uses empirical cluster priors,
-  ## or @qcode{"equal"} treats clusters equally.
+  ## clusters: @qcode{'empirical'} (default) uses empirical cluster priors,
+  ## or @qcode{'equal'} treats clusters equally.
   ##
   ## @item @qcode{ClusterSilhouettes}
   ## A cell array containing silhouette values for each observation for each
@@ -56,7 +56,7 @@ classdef SilhouetteEvaluation < ClusterCriterion
   ## DaviesBouldinEvaluation, GapEvaluation}
   ## @end deftp
 
-  properties (GetAccess = public, SetAccess = protected)
+  properties(GetAccess = public, SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {SilhouetteEvaluation} {property} Distance
     ##
@@ -67,7 +67,7 @@ classdef SilhouetteEvaluation < ClusterCriterion
     ## property is read-only.
     ##
     ## @end deftp
-    Distance = "";
+    Distance = '';
 
     ## -*- texinfo -*-
     ## @deftp {SilhouetteEvaluation} {property} ClusterPriors
@@ -75,11 +75,11 @@ classdef SilhouetteEvaluation < ClusterCriterion
     ## Cluster prior handling
     ##
     ## Specifies how cluster-level silhouette aggregation is computed.  Valid
-    ## values are @qcode{"empirical"} (default) and @qcode{"equal"}.  This
+    ## values are @qcode{'empirical'} (default) and @qcode{'equal'}.  This
     ## property is read-only.
     ##
     ## @end deftp
-    ClusterPriors = "";
+    ClusterPriors = '';
 
     ## -*- texinfo -*-
     ## @deftp {SilhouetteEvaluation} {property} ClusterSilhouettes
@@ -94,7 +94,7 @@ classdef SilhouetteEvaluation < ClusterCriterion
     ClusterSilhouettes = {};
   endproperties
 
-  properties (Access = protected)
+  properties(Access = protected)
     ## -*- texinfo -*-
     ## @deftp {SilhouetteEvaluation} {property} DistanceVector
     ##
@@ -108,7 +108,7 @@ classdef SilhouetteEvaluation < ClusterCriterion
     DistanceVector = [];
   endproperties
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## constructor
     ## -*- texinfo -*-
@@ -121,11 +121,11 @@ classdef SilhouetteEvaluation < ClusterCriterion
     ##
     ## @itemize
     ## @item
-    ## @var{x} is an @math{NxP} numeric matrix of observations (rows) and
+    ## @var{x} is an @math{N*P} numeric matrix of observations (rows) and
     ## predictors (columns).
     ## @item
     ## @var{clust} is a string naming the clustering method (for example
-    ## @qcode{"kmeans"}, @qcode{"linkage"}, or a custom function handle).
+    ## @qcode{'kmeans'}, @qcode{'linkage'}, or a custom function handle).
     ## @item
     ## @var{KList} is a vector of positive integers specifying the cluster
     ## numbers to inspect.
@@ -133,32 +133,32 @@ classdef SilhouetteEvaluation < ClusterCriterion
     ##
     ## Optional name-value pairs:
     ##
-    ## @multitable @columnfractions 0.20 0.02 0.78
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.20 0.78
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Distance"} @tab @tab Distance metric name, function handle,
-    ## or numeric pdist vector.  Default: @qcode{"sqeuclidean"}.
+    ## @item @qcode{'Distance'} @tab Distance metric name, function handle,
+    ## or numeric pdist vector.  Default: @qcode{'sqeuclidean'}.
     ##
-    ## @item @qcode{"ClusterPriors"} @tab @tab Either @qcode{"empirical"}
-    ## (default) or @qcode{"equal"}.
+    ## @item @qcode{'ClusterPriors'} @tab Either @qcode{'empirical'}
+    ## (default) or @qcode{'equal'}.
     ## @end multitable
     ##
     ## @seealso{silhouette, evalclusters, ClusterCriterion}
     ## @end deftypefn
     function this = SilhouetteEvaluation (x, clust, KList, ...
-                    distanceMetric = "sqeuclidean", clusterPriors = "empirical")
-      this@ClusterCriterion(x, clust, KList);
+                    distanceMetric = 'sqeuclidean', clusterPriors = 'empirical')
+      this@ClusterCriterion (x, clust, KList);
 
       ## parsing the distance criterion
       if (ischar (distanceMetric))
-        if (any (strcmpi (distanceMetric, {"sqeuclidean", ...
-                  "euclidean", "cityblock", "cosine", "correlation", ...
-                  "hamming", "jaccard"})))
+        if (any (strcmpi (distanceMetric, {'sqeuclidean', ...
+                  'euclidean', 'cityblock', 'cosine', 'correlation', ...
+                  'hamming', 'jaccard'})))
           this.Distance = lower (distanceMetric);
 
           ## kmeans can use only a subset
-          if (strcmpi (clust, "kmeans") && any (strcmpi (this.Distance, ...
-              {"euclidean", "jaccard"})))
+          if (strcmpi (clust, 'kmeans') && any (strcmpi (this.Distance, ...
+              {'euclidean', 'jaccard'})))
             error (strcat ("SilhouetteEvaluation: invalid distance", ...
                            " criterion '%s' for 'kmeans'."), distanceMetric);
           endif
@@ -166,20 +166,20 @@ classdef SilhouetteEvaluation < ClusterCriterion
           error ("SilhouetteEvaluation: unknown distance criterion '%s'.", ...
                  distanceMetric);
         endif
-      elseif (isa (distanceMetric, "function_handle"))
+      elseif (isa (distanceMetric, 'function_handle'))
         this.Distance = distanceMetric;
 
         ## kmeans cannot use a function handle
-        if (strcmpi (clust, "kmeans"))
+        if (strcmpi (clust, 'kmeans'))
           error (strcat ("SilhouetteEvaluation: invalid distance", ...
                          " criterion for 'kmeans'."));
         endif
       elseif (isvector (distanceMetric) && isnumeric (distanceMetric))
-        this.Distance = "";
+        this.Distance = '';
         this.DistanceVector = distanceMetric; # the validity check is delegated
 
         ## kmeans cannot use a distance vector
-        if (strcmpi (clust, "kmeans"))
+        if (strcmpi (clust, 'kmeans'))
           error (strcat ("SilhouetteEvaluation: invalid", ...
                          " distance criterion for 'kmeans'."));
         endif
@@ -189,7 +189,7 @@ classdef SilhouetteEvaluation < ClusterCriterion
 
       ## parsing the prior probabilities of each cluster
       if (ischar (distanceMetric))
-        if (any (strcmpi (clusterPriors, {"empirical", "equal"})))
+        if (any (strcmpi (clusterPriors, {'empirical', 'equal'})))
           this.ClusterPriors = lower (clusterPriors);
         else
           error (strcat ("SilhouetteEvaluation: unknown prior", ...
@@ -199,7 +199,7 @@ classdef SilhouetteEvaluation < ClusterCriterion
         error ("SilhouetteEvaluation: invalid prior probabilities.");
       endif
 
-      this.CriterionName = "silhouette";
+      this.CriterionName = 'silhouette';
       this.evaluate(this.InspectedK); # evaluate the list of cluster numbers
     endfunction
 
@@ -211,7 +211,7 @@ classdef SilhouetteEvaluation < ClusterCriterion
     ##
     ## @end deftypefn
     function this = addK (this, K)
-      addK@ClusterCriterion(this, K);
+      addK@ClusterCriterion (this, K);
 
       ## if we have new data, we need a new evaluation
       if (this.OptimalK == 0)
@@ -246,9 +246,9 @@ classdef SilhouetteEvaluation < ClusterCriterion
       yLabel = sprintf ("%s value", this.CriterionName);
       h = gca ();
       hold on;
-      plot (this.InspectedK, this.CriterionValues, "bo-");
-      plot (this.OptimalK, this.CriterionValues(this.OptimalIndex), "b*");
-      xlabel ("number of clusters");
+      plot (this.InspectedK, this.CriterionValues, 'bo-');
+      plot (this.OptimalK, this.CriterionValues(this.OptimalIndex), 'b*');
+      xlabel ('number of clusters');
       ylabel (yLabel);
       hold off;
     endfunction
@@ -266,7 +266,7 @@ classdef SilhouetteEvaluation < ClusterCriterion
 
   endmethods
 
-  methods (Access = protected)
+  methods(Access = protected)
     ## evaluate
     ## do the evaluation
     function this = evaluate (this, K)
@@ -277,7 +277,7 @@ classdef SilhouetteEvaluation < ClusterCriterion
         for iter = 1 : length (this.InspectedK)
           ## do it only for the specified K values
           if (any (this.InspectedK(iter) == K))
-            if (isa (this.ClusteringFunction, "function_handle"))
+            if (isa (this.ClusteringFunction, 'function_handle'))
               ## custom function
               ClusteringSolution = ...
                 this.ClusteringFunction(UsableX, this.InspectedK(iter));
@@ -300,36 +300,36 @@ classdef SilhouetteEvaluation < ClusterCriterion
               endif
             else
               switch (this.ClusteringFunction)
-                case "kmeans"
+                case 'kmeans'
                   this.ClusteringSolutions(:, iter) = kmeans (UsableX, ...
-                    this.InspectedK(iter), "Distance", this.Distance, ...
-                    "EmptyAction", "singleton", "Replicates", 5);
+                    this.InspectedK(iter), 'Distance', this.Distance, ...
+                    'EmptyAction', 'singleton', 'Replicates', 5);
 
-                case "linkage"
+                case 'linkage'
                   if (! isempty (this.Distance))
                     ## use clusterdata
                     Distance_tmp = this.Distance;
-                    LinkageMethod = "average"; # for non euclidean methods
-                    if (strcmpi (this.Distance, "sqeuclidean"))
+                    LinkageMethod = 'average'; # for non euclidean methods
+                    if (strcmpi (this.Distance, 'sqeuclidean'))
                       ## pdist uses different names for its algorithms
-                      Distance_tmp = "squaredeuclidean";
-                      LinkageMethod = "ward";
-                    elseif (strcmpi (this.Distance, "euclidean"))
-                      LinkageMethod = "ward";
+                      Distance_tmp = 'squaredeuclidean';
+                      LinkageMethod = 'ward';
+                    elseif (strcmpi (this.Distance, 'euclidean'))
+                      LinkageMethod = 'ward';
                     endif
                     this.ClusteringSolutions(:, iter) = clusterdata (UsableX,...
-                      "MaxClust", this.InspectedK(iter), ...
-                      "Distance", Distance_tmp, "Linkage", LinkageMethod);
+                      'MaxClust', this.InspectedK(iter), ...
+                      'Distance', Distance_tmp, 'Linkage', LinkageMethod);
                   else
                     ## use linkage
-                    Z = linkage (this.DistanceVector, "average");
+                    Z = linkage (this.DistanceVector, 'average');
                     this.ClusteringSolutions(:, iter) = ...
-                         cluster (Z, "MaxClust", this.InspectedK(iter));
+                         cluster (Z, 'MaxClust', this.InspectedK(iter));
                   endif
 
-                case "gmdistribution"
+                case 'gmdistribution'
                   gmm = fitgmdist (UsableX, this.InspectedK(iter), ...
-                        "SharedCov", true, "Replicates", 5);
+                        'SharedCov', true, 'Replicates', 5);
                   this.ClusteringSolutions(:, iter) = cluster (gmm, UsableX);
 
                 otherwise
@@ -348,8 +348,8 @@ classdef SilhouetteEvaluation < ClusterCriterion
           ## Custom call to silhouette to avoid plotting any figures
           this.ClusterSilhouettes{iter} = silhouette (UsableX, ...
                                           this.ClusteringSolutions(:, iter), ...
-                                          "sqeuclidean", "DoNotPlot");
-          if (strcmpi (this.ClusterPriors, "empirical"))
+                                          'sqeuclidean', 'DoNotPlot');
+          if (strcmpi (this.ClusterPriors, 'empirical'))
             this.CriterionValues(iter) = mean (this.ClusterSilhouettes{iter});
           else
             ## equal
@@ -373,8 +373,8 @@ endclassdef
 
 %!test
 %! load fisheriris
-%! eva = evalclusters (meas, "kmeans", "silhouette", "KList", [1:6]);
-%! assert (class (eva), "SilhouetteEvaluation");
+%! eva = evalclusters (meas, 'kmeans', 'silhouette', 'KList', [1:6]);
+%! assert_equal (class (eva), "SilhouetteEvaluation");
 
 %!function C = count_calls_silhouette (X, k)
 %!  global count_calls_silhouette_n;
@@ -386,6 +386,6 @@ endclassdef
 %! global count_calls_silhouette_n;
 %! count_calls_silhouette_n = 0;
 %! evalclusters (rand (20, 2), @count_calls_silhouette, ...
-%!               "silhouette", "KList", [2, 3]);
-%! assert (count_calls_silhouette_n, 2);
+%!               'silhouette', 'KList', [2, 3]);
+%! assert_equal (count_calls_silhouette_n, 2);
 %! clear -global count_calls_silhouette_n;

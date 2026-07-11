@@ -56,7 +56,7 @@ classdef BurrDistribution
   ## burrlike, burrstat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {BurrDistribution} {property} alpha
     ##
@@ -94,7 +94,7 @@ classdef BurrDistribution
     k
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {BurrDistribution} {property} DistributionName
     ##
@@ -104,7 +104,7 @@ classdef BurrDistribution
     ## object. This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "BurrDistribution";
+    DistributionName = 'BurrDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {BurrDistribution} {property} NumParameters
@@ -122,39 +122,39 @@ classdef BurrDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{3x1} cell array of character vectors with each element containing
+    ## A @math{3*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter. This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"alpha", "c", "k"};
+    ParameterNames = {'alpha', 'c', 'k'};
 
     ## -*- texinfo -*-
     ## @deftp {BurrDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{3x1} cell array of character vectors with each element containing
+    ## A @math{3*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter. This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Scale", "1st shape", "2nd shape"};
+    ParameterDescription = {'Scale', '1st shape', '2nd shape'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = false;
-    DistributionCode = "burr";
+    DistributionCode = 'burr';
     ParameterRange = [realmin, realmin, realmin; Inf, Inf, Inf];
     ParameterLogCI = [false, true, false];
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected)
+  properties(GetAccess = public, SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {BurrDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{3x1} numeric vector containing the values of the distribution
+    ## A @math{3*1} numeric vector containing the values of the distribution
     ## parameters. This property is read-only. You can change the distribution
     ## parameters by assigning new values to the @qcode{alpha}, @qcode{c}, and
     ## @qcode{k} properties.
@@ -167,7 +167,7 @@ classdef BurrDistribution
     ##
     ## Covariance matrix of the parameter estimates
     ##
-    ## A @math{3x3} numeric matrix containing the variance-covariance of the
+    ## A @math{3*3} numeric matrix containing the variance-covariance of the
     ## parameter estimates. Diagonal elements contain the variance of each
     ## estimated parameter, and non-diagonal elements contain the covariance
     ## between the parameter estimates. The covariance matrix is only meaningful
@@ -184,7 +184,7 @@ classdef BurrDistribution
     ##
     ## Flag for fixed parameters
     ##
-    ## A @math{1x3} logical vector specifying which parameters are fixed and
+    ## A @math{1*3} logical vector specifying which parameters are fixed and
     ## which are estimated. @qcode{true} values correspond to fixed parameters,
     ## @qcode{false} values correspond to parameter estimates. This property is
     ## read-only.
@@ -197,7 +197,7 @@ classdef BurrDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution. First element contains the lower boundary,
     ## second element contains the upper boundary. This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -238,11 +238,11 @@ classdef BurrDistribution
     InputData
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected, Hidden)
+  properties(GetAccess = public, SetAccess = protected, Hidden)
     ParameterCI
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = BurrDistribution (alpha, c, k)
       if (nargin == 0)
@@ -259,12 +259,12 @@ classdef BurrDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "Burr distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'Burr distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "Burr distribution");
+      __disp__ (this, 'Burr distribution');
     endfunction
 
     function this = set.alpha (this, alpha)
@@ -305,11 +305,11 @@ classdef BurrDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {BurrDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {BurrDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {BurrDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -317,7 +317,7 @@ classdef BurrDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -327,9 +327,9 @@ classdef BurrDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -472,18 +472,19 @@ classdef BurrDistribution
     ## boundaries of the 95% confidence interval for each parameter of the
     ## probability distribution object, @var{pd}.
     ##
-    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes the
+    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes
+    ## the
     ## confidence intervals with additional options specified by
     ## @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Alpha"} @tab @tab A scalar value in the range @math{(0,1)}
+    ## @item @qcode{'Alpha'} @tab A scalar value in the range @math{(0,1)}
     ## specifying the significance level for the confidence interval.  The
     ## default value 0.05 corresponds to a 95% confidence interval.
     ##
-    ## @item @qcode{"Parameter"} @tab @tab A character vector or a cell array of
+    ## @item @qcode{'Parameter'} @tab A character vector or a cell array of
     ## character vectors specifying the parameter names for which to compute
     ## confidence intervals.  By default, @code{paramci} computes confidence
     ## intervals for all distribution parameters.
@@ -544,26 +545,26 @@ classdef BurrDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -584,9 +585,9 @@ classdef BurrDistribution
 
     ## -*- texinfo -*-
     ## @deftypefn  {BurrDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum})
-    ## @deftypefnx {BurrDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {BurrDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{'Display'}, @var{display})
     ## @deftypefnx {BurrDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam})
-    ## @deftypefnx {BurrDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {BurrDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{'Display'}, @var{display})
     ##
     ## Profile likelihood function for a probability distribution object.
     ##
@@ -599,14 +600,14 @@ classdef BurrDistribution
     ## fitted to data.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @qcode{"Display"}, @qcode{"on"})} also plots the profile likelihood
+    ## @qcode{'Display'}, @qcode{'on'})} also plots the profile likelihood
     ## against the default range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
     ## @var{setparam})} defines a user-defined range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @var{setparam}, @qcode{"Display"}, @qcode{"on"})} also plots the profile
+    ## @var{setparam}, @qcode{'Display'}, @qcode{'on'})} also plots the profile
     ## likelihood against the user-defined range of the selected parameter.
     ##
     ## For the Burr distribution, @qcode{@var{pnum} = 1} selects the parameter
@@ -697,7 +698,8 @@ classdef BurrDistribution
     ##
     ## @code{@var{t} = truncate (@var{pd}, @var{lower}, @var{upper})} returns a
     ## probability distribution @var{t}, which is the probability distribution
-    ## @var{pd} truncated to the specified interval with lower limit, @var{lower},
+    ## @var{pd} truncated to the specified interval with lower limit,
+    ## @var{lower},
     ## and upper limit, @var{upper}.  If @var{pd} is fitted to data with
     ## @code{fitdist}, the returned probability distribution @var{t} is not
     ## fitted, does not contain any data or estimated values, and it is as it
@@ -746,7 +748,7 @@ classdef BurrDistribution
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function pd = fit (x, varargin)
       ## Check input arguments
@@ -766,7 +768,7 @@ classdef BurrDistribution
         freq = varargin{3};
       endif
       if (nargin < 5)
-        options.Display = "off";
+        options.Display = 'off';
         options.MaxFunEvals = 400;
         options.MaxIter = 200;
         options.TolX = 1e-6;
@@ -788,7 +790,7 @@ classdef BurrDistribution
       pd.ParameterCI = pci;
       pd.ParameterIsFixed = [false, false, false];
       pd.ParameterCovariance = acov;
-      pd.InputData = struct ("data", x, "cens", censor, "freq", freq);
+      pd.InputData = struct ('data', x, 'cens', censor, 'freq', freq);
     endfunction
 
   endmethods
@@ -816,10 +818,10 @@ endfunction
 %! ## XII distribution to this data and plot a PDF of the fitted distribution
 %! ## superimposed on a histogram of the data
 %!
-%! pd = makedist ("Burr", "alpha", 1, "c", 2, "k", 1)
-%! rand ("seed", 21);
+%! pd = makedist ('Burr', 'alpha', 1, 'c', 2, 'k', 1)
+%! rand ('seed', 21);
 %! data = random (pd, 5000, 1);
-%! pd = fitdist (data, "Burr")
+%! pd = fitdist (data, 'Burr')
 %! plot (pd)
 %! msg = strcat ("Fitted Burr type XII distribution with", ...
 %!               " alpha = %0.2f, c =  %0.2f, and k = %0.2f");
@@ -829,141 +831,141 @@ endfunction
 %!shared pd, t
 %! pd = BurrDistribution;
 %! t = truncate (pd, 2, 4);
-%!assert (cdf (pd, [0:5]), [0, 0.5, 0.6667, 0.75, 0.8, 0.8333], 1e-4);
-%!assert (cdf (t, [0:5]), [0, 0, 0, 0.625, 1, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4]), [0.6, 0.6667, 0.75, 0.8], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4]), [0, 0, 0.625, 1], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [0, 0.25, 0.6667, 1.5, 4, Inf], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [2, 2.2609, 2.5714, 2.9474, 3.4118, 4], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 0.6667, 1.5, 4, Inf, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.5714, 2.9474, 3.4118, 4, NaN], 1e-4);
-%!assert (iqr (pd), 2.6667, 1e-4);
-%!assert (iqr (t), 0.9524, 1e-4);
-%!assert (mean (pd), Inf);
-%!assert (mean (t), 2.8312, 1e-4);
-%!assert (median (pd), 1, 1e-4);
-%!assert (median (t), 2.75, 1e-4);
-%!assert (pdf (pd, [0:5]), [1, 0.25, 0.1111, 0.0625, 0.04, 0.0278], 1e-4);
-%!assert (pdf (t, [0:5]), [0, 0, 0.8333, 0.4687, 0.3, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1:4, NaN]), [0, 0.25, 0.1111, 0.0625, 0.04, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1:4, NaN]), [0, 0, 0.8333, 0.4687, 0.3, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 2), false);
-%!assert (any (random (t, 1000, 1) > 4), false);
-%!assert (std (pd), Inf);
-%!assert (std (t), 0.5674, 1e-4);
-%!assert (var (pd), Inf);
-%!assert (var (t), 0.3220, 1e-4);
+%!assert_equal (cdf (pd, [0:5]), [0, 0.5, 0.6667, 0.75, 0.8, 0.8333], 1e-4);
+%!assert_equal (cdf (t, [0:5]), [0, 0, 0, 0.625, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4]), [0.6, 0.6667, 0.75, 0.8], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4]), [0, 0, 0.625, 1], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [0, 0.25, 0.6667, 1.5, 4, Inf], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [2, 2.2609, 2.5714, 2.9474, 3.4118, 4], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 0.6667, 1.5, 4, Inf, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.5714, 2.9474, 3.4118, 4, NaN], 1e-4);
+%!assert_equal (iqr (pd), 2.6667, 1e-4);
+%!assert_equal (iqr (t), 0.9524, 1e-4);
+%!assert_equal (mean (pd), Inf);
+%!assert_equal (mean (t), 2.8312, 1e-4);
+%!assert_equal (median (pd), 1, 1e-4);
+%!assert_equal (median (t), 2.75, 1e-4);
+%!assert_equal (pdf (pd, [0:5]), [1, 0.25, 0.1111, 0.0625, 0.04, 0.0278], 1e-4);
+%!assert_equal (pdf (t, [0:5]), [0, 0, 0.8333, 0.4687, 0.3, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1:4, NaN]), [0, 0.25, 0.1111, 0.0625, 0.04, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1:4, NaN]), [0, 0, 0.8333, 0.4687, 0.3, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 2), false);
+%!assert_equal (any (random (t, 1000, 1) > 4), false);
+%!assert_equal (std (pd), Inf);
+%!assert_equal (std (t), 0.5674, 1e-4);
+%!assert_equal (var (pd), Inf);
+%!assert_equal (var (t), 0.3220, 1e-4);
 
 ## Test input validation
 ## 'BurrDistribution' constructor
 %!error <BurrDistribution: ALPHA must be a positive real scalar.> ...
-%! BurrDistribution(0, 1, 1)
+%! BurrDistribution (0, 1, 1)
 %!error <BurrDistribution: ALPHA must be a positive real scalar.> ...
-%! BurrDistribution(-1, 1, 1)
+%! BurrDistribution (-1, 1, 1)
 %!error <BurrDistribution: ALPHA must be a positive real scalar.> ...
-%! BurrDistribution(Inf, 1, 1)
+%! BurrDistribution (Inf, 1, 1)
 %!error <BurrDistribution: ALPHA must be a positive real scalar.> ...
-%! BurrDistribution(i, 1, 1)
+%! BurrDistribution (i, 1, 1)
 %!error <BurrDistribution: ALPHA must be a positive real scalar.> ...
-%! BurrDistribution("a", 1, 1)
+%! BurrDistribution ('a', 1, 1)
 %!error <BurrDistribution: ALPHA must be a positive real scalar.> ...
-%! BurrDistribution([1, 2], 1, 1)
+%! BurrDistribution ([1, 2], 1, 1)
 %!error <BurrDistribution: ALPHA must be a positive real scalar.> ...
-%! BurrDistribution(NaN, 1, 1)
+%! BurrDistribution (NaN, 1, 1)
 %!error <BurrDistribution: C must be a positive real scalar.> ...
-%! BurrDistribution(1, 0, 1)
+%! BurrDistribution (1, 0, 1)
 %!error <BurrDistribution: C must be a positive real scalar.> ...
-%! BurrDistribution(1, -1, 1)
+%! BurrDistribution (1, -1, 1)
 %!error <BurrDistribution: C must be a positive real scalar.> ...
-%! BurrDistribution(1, Inf, 1)
+%! BurrDistribution (1, Inf, 1)
 %!error <BurrDistribution: C must be a positive real scalar.> ...
-%! BurrDistribution(1, i, 1)
+%! BurrDistribution (1, i, 1)
 %!error <BurrDistribution: C must be a positive real scalar.> ...
-%! BurrDistribution(1, "a", 1)
+%! BurrDistribution (1, 'a', 1)
 %!error <BurrDistribution: C must be a positive real scalar.> ...
-%! BurrDistribution(1, [1, 2], 1)
+%! BurrDistribution (1, [1, 2], 1)
 %!error <BurrDistribution: C must be a positive real scalar.> ...
-%! BurrDistribution(1, NaN, 1)
+%! BurrDistribution (1, NaN, 1)
 %!error <BurrDistribution: K must be a positive real scalar.> ...
-%! BurrDistribution(1, 1, 0)
+%! BurrDistribution (1, 1, 0)
 %!error <BurrDistribution: K must be a positive real scalar.> ...
-%! BurrDistribution(1, 1, -1)
+%! BurrDistribution (1, 1, -1)
 %!error <BurrDistribution: K must be a positive real scalar.> ...
-%! BurrDistribution(1, 1, Inf)
+%! BurrDistribution (1, 1, Inf)
 %!error <BurrDistribution: K must be a positive real scalar.> ...
-%! BurrDistribution(1, 1, i)
+%! BurrDistribution (1, 1, i)
 %!error <BurrDistribution: K must be a positive real scalar.> ...
-%! BurrDistribution(1, 1, "a")
+%! BurrDistribution (1, 1, 'a')
 %!error <BurrDistribution: K must be a positive real scalar.> ...
-%! BurrDistribution(1, 1, [1, 2])
+%! BurrDistribution (1, 1, [1, 2])
 %!error <BurrDistribution: K must be a positive real scalar.> ...
-%! BurrDistribution(1, 1, NaN)
+%! BurrDistribution (1, 1, NaN)
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (BurrDistribution, 2, "uper")
+%! cdf (BurrDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (BurrDistribution, 2, 3)
 
 ## 'paramci' method
 %!shared x
-%! rand ("seed", 4);
+%! rand ('seed', 4);
 %! x = burrrnd (1, 1, 1, [1, 100]);
 %!error <paramci: optional arguments must be in NAME-VALUE pairs.> ...
-%! paramci (BurrDistribution.fit (x), "alpha")
+%! paramci (BurrDistribution.fit (x), 'alpha')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BurrDistribution.fit (x), "alpha", 0)
+%! paramci (BurrDistribution.fit (x), 'alpha', 0)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BurrDistribution.fit (x), "alpha", 1)
+%! paramci (BurrDistribution.fit (x), 'alpha', 1)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BurrDistribution.fit (x), "alpha", [0.5 2])
+%! paramci (BurrDistribution.fit (x), 'alpha', [0.5 2])
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BurrDistribution.fit (x), "alpha", "")
+%! paramci (BurrDistribution.fit (x), 'alpha', '')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BurrDistribution.fit (x), "alpha", {0.05})
+%! paramci (BurrDistribution.fit (x), 'alpha', {0.05})
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BurrDistribution.fit (x), "parameter", "c", "alpha", {0.05})
+%! paramci (BurrDistribution.fit (x), 'parameter', 'c', 'alpha', {0.05})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (BurrDistribution.fit (x), "parameter", {"alpha", "c", "k", "param"})
+%! paramci (BurrDistribution.fit (x), 'parameter', {'alpha', 'c', 'k', 'param'})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (BurrDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", {"alpha", "c", "k", "param"})
+%! paramci (BurrDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', {'alpha', 'c', 'k', 'param'})
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (BurrDistribution.fit (x), "parameter", "param")
+%! paramci (BurrDistribution.fit (x), 'parameter', 'param')
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (BurrDistribution.fit (x), "alpha", 0.01, "parameter", "param")
+%! paramci (BurrDistribution.fit (x), 'alpha', 0.01, 'parameter', 'param')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (BurrDistribution.fit (x), "NAME", "value")
+%! paramci (BurrDistribution.fit (x), 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (BurrDistribution.fit (x), "alpha", 0.01, "NAME", "value")
+%! paramci (BurrDistribution.fit (x), 'alpha', 0.01, 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (BurrDistribution.fit (x), "alpha", 0.01, "parameter", "c", ...
-%!          "NAME", "value")
+%! paramci (BurrDistribution.fit (x), 'alpha', 0.01, 'parameter', 'c', ...
+%!          'NAME', 'value')
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (BurrDistribution, "Parent")
+%! plot (BurrDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (BurrDistribution, "PlotType", 12)
+%! plot (BurrDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (BurrDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (BurrDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (BurrDistribution, "PlotType", "pdfcdf")
+%! plot (BurrDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (BurrDistribution, "Discrete", "pdfcdf")
+%! plot (BurrDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (BurrDistribution, "Discrete", [1, 0])
+%! plot (BurrDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (BurrDistribution, "Discrete", {true})
+%! plot (BurrDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (BurrDistribution, "Parent", 12)
+%! plot (BurrDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (BurrDistribution, "Parent", "hax")
+%! plot (BurrDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (BurrDistribution, "invalidNAME", "pdf")
+%! plot (BurrDistribution, 'invalidNAME', 'pdf')
 %!error <plot: no fitted DATA to plot a probability plot.> ...
-%! plot (BurrDistribution, "PlotType", "probability")
+%! plot (BurrDistribution, 'PlotType', 'probability')
 
 ## 'proflik' method
 %!error <proflik: no fitted data available.> ...
@@ -977,23 +979,23 @@ endfunction
 %!error <proflik: SETPARAM must be a numeric vector.> ...
 %! proflik (BurrDistribution.fit (x), 1, ones (2))
 %!error <proflik: missing VALUE for 'Display' argument.> ...
-%! proflik (BurrDistribution.fit (x), 1, "Display")
+%! proflik (BurrDistribution.fit (x), 1, 'Display')
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (BurrDistribution.fit (x), 1, "Display", 1)
+%! proflik (BurrDistribution.fit (x), 1, 'Display', 1)
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (BurrDistribution.fit (x), 1, "Display", {1})
+%! proflik (BurrDistribution.fit (x), 1, 'Display', {1})
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (BurrDistribution.fit (x), 1, "Display", {"on"})
+%! proflik (BurrDistribution.fit (x), 1, 'Display', {'on'})
 %!error <proflik: invalid VALUE size for 'Display' argument.> ...
-%! proflik (BurrDistribution.fit (x), 1, "Display", ["on"; "on"])
+%! proflik (BurrDistribution.fit (x), 1, 'Display', ['on'; 'on'])
 %!error <proflik: invalid VALUE for 'Display' argument.> ...
-%! proflik (BurrDistribution.fit (x), 1, "Display", "onnn")
+%! proflik (BurrDistribution.fit (x), 1, 'Display', 'onnn')
 %!error <proflik: invalid NAME for optional arguments.> ...
-%! proflik (BurrDistribution.fit (x), 1, "NAME", "on")
+%! proflik (BurrDistribution.fit (x), 1, 'NAME', 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (BurrDistribution.fit (x), 1, {"NAME"}, "on")
+%! proflik (BurrDistribution.fit (x), 1, {'NAME'}, 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (BurrDistribution.fit (x), 1, {[1 2 3 4]}, "Display", "on")
+%! proflik (BurrDistribution.fit (x), 1, {[1 2 3 4]}, 'Display', 'on')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...
@@ -1005,8 +1007,8 @@ endfunction
 
 ## Catch errors when using array of probability objects with available methods
 %!shared pd
-%! pd = BurrDistribution(1, 1, 1);
-%! pd(2) = BurrDistribution(1, 3, 1);
+%! pd = BurrDistribution (1, 1, 1);
+%! pd(2) = BurrDistribution (1, 3, 1);
 %!error <cdf: requires a scalar probability distribution.> cdf (pd, 1)
 %!error <icdf: requires a scalar probability distribution.> icdf (pd, 0.5)
 %!error <iqr: requires a scalar probability distribution.> iqr (pd)

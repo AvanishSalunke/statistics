@@ -55,7 +55,7 @@ classdef RayleighDistribution
   ## rayllike, raylstat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {RayleighDistribution} {property} sigma
     ##
@@ -69,7 +69,7 @@ classdef RayleighDistribution
     sigma
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {RayleighDistribution} {property} DistributionName
     ##
@@ -79,7 +79,7 @@ classdef RayleighDistribution
     ## object.  This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "RayleighDistribution";
+    DistributionName = 'RayleighDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {RayleighDistribution} {property} NumParameters
@@ -101,7 +101,7 @@ classdef RayleighDistribution
     ## the name of a distribution parameter.  This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"sigma"};
+    ParameterNames = {'sigma'};
 
     ## -*- texinfo -*-
     ## @deftp {RayleighDistribution} {property} ParameterDescription
@@ -113,17 +113,17 @@ classdef RayleighDistribution
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Scale"};
+    ParameterDescription = {'Scale'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = true;
-    DistributionCode = "rayl";
+    DistributionCode = 'rayl';
     ParameterRange = [realmin; Inf];
     ParameterLogCI = true;
   endproperties
 
-  properties (GetAccess = public , SetAccess = protected)
+  properties(GetAccess = public , SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {RayleighDistribution} {property} ParameterValues
     ##
@@ -172,7 +172,7 @@ classdef RayleighDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution.  First element contains the lower boundary,
     ## second element contains the upper boundary.  This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -215,11 +215,11 @@ classdef RayleighDistribution
     InputData
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected, Hidden)
+  properties(GetAccess = public, SetAccess = protected, Hidden)
     ParameterCI
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = RayleighDistribution (sigma)
       if (nargin == 0)
@@ -234,12 +234,12 @@ classdef RayleighDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "Rayleigh distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'Rayleigh distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "Rayleigh distribution");
+      __disp__ (this, 'Rayleigh distribution');
     endfunction
 
     function this = set.sigma (this, sigma)
@@ -256,11 +256,11 @@ classdef RayleighDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {RayleighDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {RayleighDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {RayleighDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -268,7 +268,7 @@ classdef RayleighDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -278,9 +278,9 @@ classdef RayleighDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -427,14 +427,14 @@ classdef RayleighDistribution
     ## the confidence intervals with additional options specified by
     ## @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Alpha"} @tab @tab A scalar value in the range @math{(0,1)}
+    ## @item @qcode{'Alpha'} @tab A scalar value in the range @math{(0,1)}
     ## specifying the significance level for the confidence interval.  The
     ## default value 0.05 corresponds to a 95% confidence interval.
     ##
-    ## @item @qcode{"Parameter"} @tab @tab A character vector or a cell array of
+    ## @item @qcode{'Parameter'} @tab A character vector or a cell array of
     ## character vectors specifying the parameter names for which to compute
     ## confidence intervals.  By default, @code{paramci} computes confidence
     ## intervals for all distribution parameters.
@@ -495,26 +495,26 @@ classdef RayleighDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -535,9 +535,9 @@ classdef RayleighDistribution
 
     ## -*- texinfo -*-
     ## @deftypefn  {RayleighDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum})
-    ## @deftypefnx {RayleighDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {RayleighDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{'Display'}, @var{display})
     ## @deftypefnx {RayleighDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam})
-    ## @deftypefnx {RayleighDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {RayleighDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{'Display'}, @var{display})
     ##
     ## Profile likelihood function for a probability distribution object.
     ##
@@ -550,14 +550,14 @@ classdef RayleighDistribution
     ## fitted to data.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @qcode{"Display"}, @qcode{"on"})} also plots the profile likelihood
+    ## @qcode{'Display'}, @qcode{'on'})} also plots the profile likelihood
     ## against the default range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
     ## @var{setparam})} defines a user-defined range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @var{setparam}, @qcode{"Display"}, @qcode{"on"})} also plots the profile
+    ## @var{setparam}, @qcode{'Display'}, @qcode{'on'})} also plots the profile
     ## likelihood against the user-defined range of the selected parameter.
     ##
     ## For the Rayleigh distribution, @qcode{@var{pnum} = 1} selects
@@ -688,7 +688,7 @@ classdef RayleighDistribution
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function pd = fit (x, varargin)
       ## Check input arguments
@@ -721,7 +721,7 @@ classdef RayleighDistribution
       pd.ParameterCI = pci;
       pd.ParameterIsFixed = false;
       pd.ParameterCovariance = acov;
-      pd.InputData = struct ("data", x, "cens", censor, "freq", freq);
+      pd.InputData = struct ('data', x, 'cens', censor, 'freq', freq);
     endfunction
 
   endmethods
@@ -740,64 +740,64 @@ endfunction
 %! ## parameter sigma = 2.  Fit a Rayleigh distribution to this data and plot
 %! ## a PDF of the fitted distribution superimposed on a histogram of the data.
 %!
-%! pd_fixed = makedist ("Rayleigh", "sigma", 2)
-%! rand ("seed", 2);
+%! pd_fixed = makedist ('Rayleigh', 'sigma', 2)
+%! rand ('seed', 2);
 %! data = random (pd_fixed, 5000, 1);
-%! pd_fitted = fitdist (data, "Rayleigh")
+%! pd_fitted = fitdist (data, 'Rayleigh')
 %! plot (pd_fitted)
-%! msg = "Fitted Rayleigh distribution with sigma = %0.2f";
+%! msg = 'Fitted Rayleigh distribution with sigma = %0.2f';
 %! title (sprintf (msg, pd_fitted.sigma))
 
 ## Test output
 %!shared pd, t
 %! pd = RayleighDistribution;
 %! t = truncate (pd, 2, 4);
-%!assert (cdf (pd, [0:5]), [0, 0.3935, 0.8647, 0.9889, 0.9997, 1], 1e-4);
-%!assert (cdf (t, [0:5]), [0, 0, 0, 0.9202, 1, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4, NaN]), [0.6753, 0.8647, 0.9889, 0.9997, NaN], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4, NaN]), [0, 0, 0.9202, 1, NaN], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [0, 0.6680, 1.0108, 1.3537, 1.7941, Inf], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [2, 2.1083, 2.2402, 2.4135, 2.6831, 4], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 1.0108, 1.3537, 1.7941, Inf, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.2402, 2.4135, 2.6831, 4, NaN], 1e-4);
-%!assert (iqr (pd), 0.9066, 1e-4);
-%!assert (iqr (t), 0.4609, 1e-4);
-%!assert (mean (pd), 1.2533, 1e-4);
-%!assert (mean (t), 2.4169, 1e-4);
-%!assert (median (pd), 1.1774, 1e-4);
-%!assert (median (t), 2.3198, 1e-4);
-%!assert (pdf (pd, [0:5]), [0, 0.6065, 0.2707, 0.0333, 0.0013, 0], 1e-4);
-%!assert (pdf (t, [0:5]), [0, 0, 2.0050, 0.2469, 0.0099, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1.5, NaN]), [0, 0.4870, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 2), false);
-%!assert (any (random (t, 1000, 1) > 4), false);
-%!assert (std (pd), 0.6551, 1e-4);
-%!assert (std (t), 0.3591, 1e-4);
-%!assert (var (pd), 0.4292, 1e-4);
-%!assert (var (t), 0.1290, 1e-4);
+%!assert_equal (cdf (pd, [0:5]), [0, 0.3935, 0.8647, 0.9889, 0.9997, 1], 1e-4);
+%!assert_equal (cdf (t, [0:5]), [0, 0, 0, 0.9202, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4, NaN]), [0.6753, 0.8647, 0.9889, 0.9997, NaN], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4, NaN]), [0, 0, 0.9202, 1, NaN], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [0, 0.6680, 1.0108, 1.3537, 1.7941, Inf], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [2, 2.1083, 2.2402, 2.4135, 2.6831, 4], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 1.0108, 1.3537, 1.7941, Inf, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.2402, 2.4135, 2.6831, 4, NaN], 1e-4);
+%!assert_equal (iqr (pd), 0.9066, 1e-4);
+%!assert_equal (iqr (t), 0.4609, 1e-4);
+%!assert_equal (mean (pd), 1.2533, 1e-4);
+%!assert_equal (mean (t), 2.4169, 1e-4);
+%!assert_equal (median (pd), 1.1774, 1e-4);
+%!assert_equal (median (t), 2.3198, 1e-4);
+%!assert_equal (pdf (pd, [0:5]), [0, 0.6065, 0.2707, 0.0333, 0.0013, 0], 1e-4);
+%!assert_equal (pdf (t, [0:5]), [0, 0, 2.0050, 0.2469, 0.0099, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1.5, NaN]), [0, 0.4870, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 2), false);
+%!assert_equal (any (random (t, 1000, 1) > 4), false);
+%!assert_equal (std (pd), 0.6551, 1e-4);
+%!assert_equal (std (t), 0.3591, 1e-4);
+%!assert_equal (var (pd), 0.4292, 1e-4);
+%!assert_equal (var (t), 0.1290, 1e-4);
 
 ## Test input validation
 ## 'RayleighDistribution' constructor
 %!error <RayleighDistribution: SIGMA must be a positive real scalar.> ...
-%! RayleighDistribution(0)
+%! RayleighDistribution (0)
 %!error <RayleighDistribution: SIGMA must be a positive real scalar.> ...
-%! RayleighDistribution(-1)
+%! RayleighDistribution (-1)
 %!error <RayleighDistribution: SIGMA must be a positive real scalar.> ...
-%! RayleighDistribution(Inf)
+%! RayleighDistribution (Inf)
 %!error <RayleighDistribution: SIGMA must be a positive real scalar.> ...
-%! RayleighDistribution(i)
+%! RayleighDistribution (i)
 %!error <RayleighDistribution: SIGMA must be a positive real scalar.> ...
-%! RayleighDistribution("a")
+%! RayleighDistribution ('a')
 %!error <RayleighDistribution: SIGMA must be a positive real scalar.> ...
-%! RayleighDistribution([1, 2])
+%! RayleighDistribution ([1, 2])
 %!error <RayleighDistribution: SIGMA must be a positive real scalar.> ...
-%! RayleighDistribution(NaN)
+%! RayleighDistribution (NaN)
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (RayleighDistribution, 2, "uper")
+%! cdf (RayleighDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (RayleighDistribution, 2, 3)
 
@@ -805,59 +805,59 @@ endfunction
 %!shared x
 %! x = raylrnd (1, [1, 100]);
 %!error <paramci: optional arguments must be in NAME-VALUE pairs.> ...
-%! paramci (RayleighDistribution.fit (x), "alpha")
+%! paramci (RayleighDistribution.fit (x), 'alpha')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (RayleighDistribution.fit (x), "alpha", 0)
+%! paramci (RayleighDistribution.fit (x), 'alpha', 0)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (RayleighDistribution.fit (x), "alpha", 1)
+%! paramci (RayleighDistribution.fit (x), 'alpha', 1)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (RayleighDistribution.fit (x), "alpha", [0.5 2])
+%! paramci (RayleighDistribution.fit (x), 'alpha', [0.5 2])
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (RayleighDistribution.fit (x), "alpha", "")
+%! paramci (RayleighDistribution.fit (x), 'alpha', '')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (RayleighDistribution.fit (x), "alpha", {0.05})
+%! paramci (RayleighDistribution.fit (x), 'alpha', {0.05})
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (RayleighDistribution.fit (x), "parameter", "sigma", "alpha", {0.05})
+%! paramci (RayleighDistribution.fit (x), 'parameter', 'sigma', 'alpha', {0.05})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (RayleighDistribution.fit (x), "parameter", {"sigma", "param"})
+%! paramci (RayleighDistribution.fit (x), 'parameter', {'sigma', 'param'})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (RayleighDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", {"sigma", "param"})
+%! paramci (RayleighDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', {'sigma', 'param'})
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (RayleighDistribution.fit (x), "parameter", "param")
+%! paramci (RayleighDistribution.fit (x), 'parameter', 'param')
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (RayleighDistribution.fit (x), "alpha", 0.01, "parameter", "param")
+%! paramci (RayleighDistribution.fit (x), 'alpha', 0.01, 'parameter', 'param')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (RayleighDistribution.fit (x), "NAME", "value")
+%! paramci (RayleighDistribution.fit (x), 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (RayleighDistribution.fit (x), "alpha", 0.01, "NAME", "value")
+%! paramci (RayleighDistribution.fit (x), 'alpha', 0.01, 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (RayleighDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", "sigma", "NAME", "value")
+%! paramci (RayleighDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', 'sigma', 'NAME', 'value')
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (RayleighDistribution, "Parent")
+%! plot (RayleighDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (RayleighDistribution, "PlotType", 12)
+%! plot (RayleighDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (RayleighDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (RayleighDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (RayleighDistribution, "PlotType", "pdfcdf")
+%! plot (RayleighDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (RayleighDistribution, "Discrete", "pdfcdf")
+%! plot (RayleighDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (RayleighDistribution, "Discrete", [1, 0])
+%! plot (RayleighDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (RayleighDistribution, "Discrete", {true})
+%! plot (RayleighDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (RayleighDistribution, "Parent", 12)
+%! plot (RayleighDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (RayleighDistribution, "Parent", "hax")
+%! plot (RayleighDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (RayleighDistribution, "invalidNAME", "pdf")
+%! plot (RayleighDistribution, 'invalidNAME', 'pdf')
 %!error <plot: no fitted DATA to plot a probability plot.> ...
-%! plot (RayleighDistribution, "PlotType", "probability")
+%! plot (RayleighDistribution, 'PlotType', 'probability')
 
 ## 'proflik' method
 %!error <proflik: no fitted data available.> ...
@@ -871,23 +871,23 @@ endfunction
 %!error <proflik: SETPARAM must be a numeric vector.> ...
 %! proflik (RayleighDistribution.fit (x), 1, ones (2))
 %!error <proflik: missing VALUE for 'Display' argument.> ...
-%! proflik (RayleighDistribution.fit (x), 1, "Display")
+%! proflik (RayleighDistribution.fit (x), 1, 'Display')
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (RayleighDistribution.fit (x), 1, "Display", 1)
+%! proflik (RayleighDistribution.fit (x), 1, 'Display', 1)
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (RayleighDistribution.fit (x), 1, "Display", {1})
+%! proflik (RayleighDistribution.fit (x), 1, 'Display', {1})
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (RayleighDistribution.fit (x), 1, "Display", {"on"})
+%! proflik (RayleighDistribution.fit (x), 1, 'Display', {'on'})
 %!error <proflik: invalid VALUE size for 'Display' argument.> ...
-%! proflik (RayleighDistribution.fit (x), 1, "Display", ["on"; "on"])
+%! proflik (RayleighDistribution.fit (x), 1, 'Display', ['on'; 'on'])
 %!error <proflik: invalid VALUE for 'Display' argument.> ...
-%! proflik (RayleighDistribution.fit (x), 1, "Display", "onnn")
+%! proflik (RayleighDistribution.fit (x), 1, 'Display', 'onnn')
 %!error <proflik: invalid NAME for optional arguments.> ...
-%! proflik (RayleighDistribution.fit (x), 1, "NAME", "on")
+%! proflik (RayleighDistribution.fit (x), 1, 'NAME', 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (RayleighDistribution.fit (x), 1, {"NAME"}, "on")
+%! proflik (RayleighDistribution.fit (x), 1, {'NAME'}, 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (RayleighDistribution.fit (x), 1, {[1 2 3 4]}, "Display", "on")
+%! proflik (RayleighDistribution.fit (x), 1, {[1 2 3 4]}, 'Display', 'on')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...
@@ -899,8 +899,8 @@ endfunction
 
 ## Catch errors when using array of probability objects with available methods
 %!shared pd
-%! pd = RayleighDistribution(1);
-%! pd(2) = RayleighDistribution(3);
+%! pd = RayleighDistribution (1);
+%! pd(2) = RayleighDistribution (3);
 %!error <cdf: requires a scalar probability distribution.> cdf (pd, 1)
 %!error <icdf: requires a scalar probability distribution.> icdf (pd, 0.5)
 %!error <iqr: requires a scalar probability distribution.> iqr (pd)

@@ -77,7 +77,7 @@ endfunction
 %!error<normstat: function called with too few input arguments.> normstat ()
 %!error<normstat: function called with too few input arguments.> normstat (1)
 %!error<normstat: MU and SIGMA must be numeric.> normstat ({}, 2)
-%!error<normstat: MU and SIGMA must be numeric.> normstat (1, "")
+%!error<normstat: MU and SIGMA must be numeric.> normstat (1, '')
 %!error<normstat: MU and SIGMA must not be complex.> normstat (i, 2)
 %!error<normstat: MU and SIGMA must not be complex.> normstat (1, i)
 %!error<normstat: MU and SIGMA must be of common size or scalars.> ...
@@ -91,12 +91,12 @@ endfunction
 %! sigma = 0.2:0.2:1.2;
 %! [m, v] = normstat (mu, sigma);
 %! expected_v = [0.0400, 0.1600, 0.3600, 0.6400, 1.0000, 1.4400];
-%! assert (m, mu);
-%! assert (v, expected_v, 0.001);
+%! assert_equal (m, mu);
+%! assert_equal (v, expected_v, 0.001);
 %!test
 %! sigma = 0.2:0.2:1.2;
 %! [m, v] = normstat (0, sigma);
 %! expected_mn = [0, 0, 0, 0, 0, 0];
 %! expected_v = [0.0400, 0.1600, 0.3600, 0.6400, 1.0000, 1.4400];
-%! assert (m, expected_mn, 0.001);
-%! assert (v, expected_v, 0.001);
+%! assert_equal (m, expected_mn, 0.001);
+%! assert_equal (v, expected_v, 0.001);

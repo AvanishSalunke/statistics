@@ -78,7 +78,7 @@ endfunction
 %!error<unifstat: function called with too few input arguments.> unifstat ()
 %!error<unifstat: function called with too few input arguments.> unifstat (1)
 %!error<unifstat: A and B must be numeric.> unifstat ({}, 2)
-%!error<unifstat: A and B must be numeric.> unifstat (1, "")
+%!error<unifstat: A and B must be numeric.> unifstat (1, '')
 %!error<unifstat: A and B must not be complex.> unifstat (i, 2)
 %!error<unifstat: A and B must not be complex.> unifstat (1, i)
 %!error<unifstat: A and B must be of common size or scalars.> ...
@@ -93,12 +93,12 @@ endfunction
 %! [m, v] = unifstat (a, b);
 %! expected_m = [1.5000, 3.0000, 4.5000, 6.0000, 7.5000, 9.0000];
 %! expected_v = [0.0833, 0.3333, 0.7500, 1.3333, 2.0833, 3.0000];
-%! assert (m, expected_m, 0.001);
-%! assert (v, expected_v, 0.001);
+%! assert_equal (m, expected_m, 0.001);
+%! assert_equal (v, expected_v, 0.001);
 %!test
 %! a = 1:6;
 %! [m, v] = unifstat (a, 10);
 %! expected_m = [5.5000, 6.0000, 6.5000, 7.0000, 7.5000, 8.0000];
 %! expected_v = [6.7500, 5.3333, 4.0833, 3.0000, 2.0833, 1.3333];
-%! assert (m, expected_m, 0.001);
-%! assert (v, expected_v, 0.001);
+%! assert_equal (m, expected_m, 0.001);
+%! assert_equal (v, expected_v, 0.001);

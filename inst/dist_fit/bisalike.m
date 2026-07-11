@@ -96,7 +96,7 @@ function [nlogL, acov] = bisalike (params, x, censor, freq)
   if (n_censored > 0)
     censored = (censor == 1);
     z_censored = z(censored);
-    Scen = 0.5 * erfc (z_censored ./ sqrt(2));
+    Scen = 0.5 * erfc (z_censored ./ sqrt (2));
     L(censored) = log (Scen);
   endif
   nlogL = -sum (freq .* L);
@@ -142,7 +142,7 @@ function ngrad = bisa_ngrad (params, x, censor, freq)
   if (n_censored > 0)
     censored = (censor == 1);
     z_censored = z(censored);
-    Scen = 0.5 * erfc (z_censored ./ sqrt(2));
+    Scen = 0.5 * erfc (z_censored ./ sqrt (2));
   endif
   dL1 = (w .^ 2 - 1) .* 0.5 .* z ./ (w .* beta);
   dL2 = (z .^ 2 - 1) ./ gamma;
@@ -161,10 +161,10 @@ endfunction
 ## Test results
 %!test
 %! nlogL = bisalike ([16.2649, 1.0156], [1:50]);
-%! assert (nlogL, 215.5905, 1e-4);
+%! assert_equal (nlogL, 215.5905, 1e-4);
 %!test
 %! nlogL = bisalike ([2.5585, 0.5839], [1:5]);
-%! assert (nlogL, 8.9950, 1e-4);
+%! assert_equal (nlogL, 8.9950, 1e-4);
 
 ## Test input validation
 %!error<bisalike: function called with too few input arguments.> bisalike (3.25)

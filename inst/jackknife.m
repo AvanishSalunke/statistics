@@ -30,7 +30,8 @@
 ##
 ## @example
 ## @group
-## jackstat (@var{i}) = @var{E}(@var{x}(1 : @var{i} - 1, @var{i} + 1 : length(@var{x})))
+## jackstat (@var{i}) = @var{E}(@var{x}(1 : @var{i} - 1,
+##                              @var{i} + 1 : length(@var{x})))
 ## @end group
 ## @end example
 ##
@@ -86,40 +87,40 @@
 
 function jackstat = jackknife (anEstimator, varargin)
 
-	## Convert function name to handle if necessary, or throw an error.
-	if (! strcmp (typeinfo (anEstimator), "function handle"))
-		if (isascii (anEstimator))
-			anEstimator = str2func (anEstimator);
-		else
-			error (strcat ("jackknife: estimators must be passed as function", ...
+  ## Convert function name to handle if necessary, or throw an error.
+  if (! strcmp (typeinfo (anEstimator), 'function handle'))
+    if (isascii (anEstimator))
+      anEstimator = str2func (anEstimator);
+    else
+      error (strcat ("jackknife: estimators must be passed as function", ...
                      " names or handles."));
-		endif
-	endif
+    endif
+  endif
 
-	## Simple jackknifing can be done with a single vector argument, and
-	## first and foremost with a function that does not care about cell-arrays.
-	if (length (varargin) == 1 && isnumeric (varargin {1}))
-		aSample = varargin{1};
-		g = length (aSample);
-		jackstat = zeros (1, g);
-		for k = 1:g
-			jackstat (k) = anEstimator (aSample([1:k - 1,k + 1:g]));
-		endfor
+  ## Simple jackknifing can be done with a single vector argument, and
+  ## first and foremost with a function that does not care about cell-arrays.
+  if (length (varargin) == 1 && isnumeric (varargin {1}))
+    aSample = varargin{1};
+    g = length (aSample);
+    jackstat = zeros (1, g);
+    for k = 1:g
+      jackstat(k) = anEstimator(aSample([1:k - 1,k + 1:g]));
+    endfor
 
-	## More complicated input requires more work, however.
-	else
-		g = cellfun (@(x) length (x), varargin);
+  ## More complicated input requires more work, however.
+  else
+    g = cellfun (@(x) length (x), varargin);
 
-		if (any (g - g(1)))
-			error ("jackknife: all passed data must be of equal length.");
-		endif
-		g = g(1);
-		jackstat = zeros (1, g);
+    if (any (g - g(1)))
+      error ("jackknife: all passed data must be of equal length.");
+    endif
+    g = g(1);
+    jackstat = zeros (1, g);
 
-		for k = 1:g
-			jackstat(k) = anEstimator (cellfun (@(x) x( [ 1 : k - 1, k + 1 : g ]), ...
-                                 varargin, "UniformOutput", false));
-		endfor
+    for k = 1:g
+      jackstat(k) = anEstimator(cellfun (@(x) x( [ 1 : k - 1, k + 1 : g ]), ...
+                                 varargin, 'UniformOutput', false));
+    endfor
   endif
 
 endfunction
@@ -127,33 +128,33 @@ endfunction
 
 %!demo
 %! for k = 1:1000
-%!   rand ("seed", k);  # for reproducibility
+%!   rand ('seed', k);  # for reproducibility
 %!   x = rand (10, 1);
 %!   s(k) = std (x);
 %!   jackstat = jackknife (@std, x);
 %!   j(k) = 10 * std (x) - 9 * mean (jackstat);
 %! endfor
-%! figure();
-%! hist ([s', j'], 0:sqrt(1/12)/10:2*sqrt(1/12))
+%! figure ();
+%! hist ([s', j'], 0:sqrt (1/12)/10:2*sqrt (1/12))
 
 %!demo
 %! for k = 1:1000
-%!   randn ("seed", k); # for reproducibility
+%!   randn ('seed', k); # for reproducibility
 %!   x = randn (1, 50);
-%!   rand ("seed", k);  # for reproducibility
+%!   rand ('seed', k);  # for reproducibility
 %!   y = rand (1, 50);
-%!   jackstat = jackknife (@(x) std(x{1})/std(x{2}), y, x);
+%!   jackstat = jackknife (@(x) std (x{1})/std (x{2}), y, x);
 %!   j(k) = 50 * std (y) / std (x) - 49 * mean (jackstat);
 %!   v(k) = sumsq ((50 * std (y) / std (x) - 49 * jackstat) - j(k)) / (50 * 49);
 %! endfor
 %! t = (j - sqrt (1 / 12)) ./ sqrt (v);
-%! figure();
+%! figure ();
 %! plot (sort (tcdf (t, 49)), ...
-%!       "-;Almost linear mapping indicates good fit with t-distribution.;")
+%!       '-;Almost linear mapping indicates good fit with t-distribution.;')
 
 ## Test output
 %!test
 %! ##Example from Quenouille, Table 1
 %! d=[0.18 4.00 1.04 0.85 2.14 1.01 3.01 2.33 1.57 2.19];
-%! jackstat = jackknife ( @(x) 1/mean(x), d );
-%! assert ( 10 / mean(d) - 9 * mean(jackstat), 0.5240, 1e-5 );
+%! jackstat = jackknife ( @(x) 1/mean (x), d );
+%! assert_equal ( 10 / mean (d) - 9 * mean (jackstat), 0.5240, 1e-5 );

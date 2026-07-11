@@ -19,10 +19,10 @@
 ## @deftypefn  {statistics} {@var{p} =} evcdf (@var{x})
 ## @deftypefnx {statistics} {@var{p} =} evcdf (@var{x}, @var{mu})
 ## @deftypefnx {statistics} {@var{p} =} evcdf (@var{x}, @var{mu}, @var{sigma})
-## @deftypefnx {statistics} {@var{p} =} evcdf (@dots{}, @qcode{"upper"})
+## @deftypefnx {statistics} {@var{p} =} evcdf (@dots{}, @qcode{'upper'})
 ## @deftypefnx {statistics} {[@var{p}, @var{plo}, @var{pup}] =} evcdf (@var{x}, @var{mu}, @var{sigma}, @var{pcov})
 ## @deftypefnx {statistics} {[@var{p}, @var{plo}, @var{pup}] =} evcdf (@var{x}, @var{mu}, @var{sigma}, @var{pcov}, @var{alpha})
-## @deftypefnx {statistics} {[@var{p}, @var{plo}, @var{pup}] =} evcdf (@dots{}, @qcode{"upper"})
+## @deftypefnx {statistics} {[@var{p}, @var{plo}, @var{pup}] =} evcdf (@dots{}, @qcode{'upper'})
 ##
 ## Extreme value cumulative distribution function (CDF).
 ##
@@ -38,7 +38,7 @@
 ## When called with three output arguments, i.e. @qcode{[@var{p}, @var{plo},
 ## @var{pup}]}, @code{evcdf} computes the confidence bounds for @var{p} when the
 ## input parameters @var{mu} and @var{sigma} are estimates.  In such case,
-## @var{pcov}, a @math{2x2} matrix containing the covariance matrix of the
+## @var{pcov}, a @math{2*2} matrix containing the covariance matrix of the
 ## estimated parameters, is necessary.  Optionally, @var{alpha}, which has a
 ## default value of 0.05, specifies the @qcode{100 * (1 - @var{alpha})} percent
 ## confidence bounds.  @var{plo} and @var{pup} are arrays of the same size as
@@ -67,11 +67,11 @@ function [varargout] = evcdf (x, varargin)
   endif
 
   ## Check for 'upper' flag
-  if (nargin > 1 && strcmpi (varargin{end}, "upper"))
+  if (nargin > 1 && strcmpi (varargin{end}, 'upper'))
     uflag = true;
     varargin(end) = [];
   elseif (nargin > 1 && ischar (varargin{end}) && ...
-          ! strcmpi (varargin{end}, "upper"))
+          ! strcmpi (varargin{end}, 'upper'))
     error ("evcdf: invalid argument for upper tail.");
   else
     uflag = false;
@@ -135,10 +135,10 @@ function [varargout] = evcdf (x, varargin)
   endif
 
   ## Check for appropriate class
-  if (isa (x, "single") || isa (mu, "single") || isa (sigma, "single"));
-    is_class = "single";
+  if (isa (x, 'single') || isa (mu, 'single') || isa (sigma, 'single'));
+    is_class = 'single';
   else
-    is_class = "double";
+    is_class = 'double';
   endif
 
   ## Prepare output
@@ -194,36 +194,36 @@ endfunction
 %! p2 = evcdf (x, 1.0, 2);
 %! p3 = evcdf (x, 1.5, 3);
 %! p4 = evcdf (x, 3.0, 4);
-%! plot (x, p1, "-b", x, p2, "-g", x, p3, "-r", x, p4, "-c")
+%! plot (x, p1, '-b', x, p2, '-g', x, p3, '-r', x, p4, '-c')
 %! grid on
-%! legend ({"μ = 0.5, σ = 2", "μ = 1.0, σ = 2", ...
-%!          "μ = 1.5, σ = 3", "μ = 3.0, σ = 4"}, "location", "southeast")
-%! title ("Extreme value CDF")
-%! xlabel ("values in x")
-%! ylabel ("probability")
+%! legend ({'μ = 0.5, σ = 2', 'μ = 1.0, σ = 2', ...
+%!          'μ = 1.5, σ = 3', 'μ = 3.0, σ = 4'}, 'location', 'southeast')
+%! title ('Extreme value CDF')
+%! xlabel ('values in x')
+%! ylabel ('probability')
 
 ## Test output
 %!shared x, y
 %! x = [-Inf, 1, 2, Inf];
 %! y = [0, 0.6321, 0.9340, 1];
-%!assert (evcdf (x, ones (1,4), ones (1,4)), y, 1e-4)
-%!assert (evcdf (x, 1, ones (1,4)), y, 1e-4)
-%!assert (evcdf (x, ones (1,4), 1), y, 1e-4)
-%!assert (evcdf (x, [0, -Inf, NaN, Inf], 1), [0, 1, NaN, NaN], 1e-4)
-%!assert (evcdf (x, 1, [Inf, NaN, -1, 0]), [NaN, NaN, NaN, NaN], 1e-4)
-%!assert (evcdf ([x(1:2), NaN, x(4)], 1, 1), [y(1:2), NaN, y(4)], 1e-4)
-%!assert (evcdf (x, "upper"), [1, 0.0660, 0.0006, 0], 1e-4)
+%!assert_equal (evcdf (x, ones (1,4), ones (1,4)), y, 1e-4)
+%!assert_equal (evcdf (x, 1, ones (1,4)), y, 1e-4)
+%!assert_equal (evcdf (x, ones (1,4), 1), y, 1e-4)
+%!assert_equal (evcdf (x, [0, -Inf, NaN, Inf], 1), [0, 1, NaN, NaN], 1e-4)
+%!assert_equal (evcdf (x, 1, [Inf, NaN, -1, 0]), [NaN, NaN, NaN, NaN], 1e-4)
+%!assert_equal (evcdf ([x(1:2), NaN, x(4)], 1, 1), [y(1:2), NaN, y(4)], 1e-4)
+%!assert_equal (evcdf (x, 'upper'), [1, 0.0660, 0.0006, 0], 1e-4)
 
 ## Test class of input preserved
-%!assert (evcdf ([x, NaN], 1, 1), [y, NaN], 1e-4)
-%!assert (evcdf (single ([x, NaN]), 1, 1), single ([y, NaN]), 1e-4)
-%!assert (evcdf ([x, NaN], single (1), 1), single ([y, NaN]), 1e-4)
-%!assert (evcdf ([x, NaN], 1, single (1)), single ([y, NaN]), 1e-4)
+%!assert_equal (evcdf ([x, NaN], 1, 1), [y, NaN], 1e-4)
+%!assert_equal (evcdf (single ([x, NaN]), 1, 1), single ([y, NaN]), 1e-4)
+%!assert_equal (evcdf ([x, NaN], single (1), 1), single ([y, NaN]), 1e-4)
+%!assert_equal (evcdf ([x, NaN], 1, single (1)), single ([y, NaN]), 1e-4)
 
 ## Test input validation
 %!error<evcdf: invalid number of input arguments.> evcdf ()
 %!error<evcdf: invalid number of input arguments.> evcdf (1,2,3,4,5,6,7)
-%!error<evcdf: invalid argument for upper tail.> evcdf (1, 2, 3, 4, "uper")
+%!error<evcdf: invalid argument for upper tail.> evcdf (1, 2, 3, 4, 'uper')
 %!error<evcdf: X, MU, and SIGMA must be of common size or scalars.> ...
 %! evcdf (ones (3), ones (2), ones (2))
 %!error<evcdf: invalid size of covariance matrix.> evcdf (2, 3, 4, [1, 2])
@@ -234,7 +234,7 @@ endfunction
 %!error<evcdf: invalid value for alpha.> [p, plo, pup] = ...
 %! evcdf (1, 2, 3, [1, 0; 0, 1], 1.22)
 %!error<evcdf: invalid value for alpha.> [p, plo, pup] = ...
-%! evcdf (1, 2, 3, [1, 0; 0, 1], "alpha", "upper")
+%! evcdf (1, 2, 3, [1, 0; 0, 1], 'alpha', 'upper')
 %!error<evcdf: X, MU, and SIGMA must not be complex.> evcdf (i, 2, 2)
 %!error<evcdf: X, MU, and SIGMA must not be complex.> evcdf (2, i, 2)
 %!error<evcdf: X, MU, and SIGMA must not be complex.> evcdf (2, 2, i)

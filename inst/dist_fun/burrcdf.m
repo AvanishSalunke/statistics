@@ -19,7 +19,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {statistics} {@var{p} =} burrcdf (@var{x}, @var{lambda}, @var{c}, @var{k})
-## @deftypefnx {statistics} {@var{p} =} burrcdf (@var{x}, @var{lambda}, @var{c}, @var{k}, @qcode{"upper"})
+## @deftypefnx {statistics} {@var{p} =} burrcdf (@var{x}, @var{lambda}, @var{c}, @var{k}, @qcode{'upper'})
 ##
 ## Burr type XII cumulative distribution function (CDF).
 ##
@@ -49,7 +49,7 @@ function p = burrcdf (x, lambda, c, k, uflag)
 
   ## Check for valid "upper" flag
   if (nargin > 4)
-    if (! strcmpi (uflag, "upper"))
+    if (! strcmpi (uflag, 'upper'))
       error ("burrcdf: invalid argument for upper tail.");
     else
       uflag = true;
@@ -72,9 +72,9 @@ function p = burrcdf (x, lambda, c, k, uflag)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (lambda, "single") || isa (c, "single") ...
-                        || isa (k, "single"))
-    p = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (lambda, 'single') || isa (c, 'single') ...
+                        || isa (k, 'single'))
+    p = zeros (size (x), 'single');
   else
     p = zeros (size (x));
   endif
@@ -88,7 +88,7 @@ function p = burrcdf (x, lambda, c, k, uflag)
               & (k > 0) & (k < Inf);
 
   ## Compute Burr CDF
-  if (isscalar (lambda) && isscalar(c) && isscalar(k))
+  if (isscalar (lambda) && isscalar (c) && isscalar (k))
     if (uflag)
       p(j) = (1 + (x(j) / lambda) .^ c) .^ (-k);
     else
@@ -113,33 +113,33 @@ endfunction
 %! p4 = burrcdf (x, 1, 2, 1);
 %! p5 = burrcdf (x, 1, 3, 1);
 %! p6 = burrcdf (x, 1, 0.5, 2);
-%! plot (x, p1, "-b", x, p2, "-g", x, p3, "-r", ...
-%!       x, p4, "-c", x, p5, "-m", x, p6, "-k")
+%! plot (x, p1, '-b', x, p2, '-g', x, p3, '-r', ...
+%!       x, p4, '-c', x, p5, '-m', x, p6, '-k')
 %! grid on
-%! legend ({"λ = 1, c = 1, k = 1", "λ = 1, c = 1, k = 2", ...
-%!          "λ = 1, c = 1, k = 3", "λ = 1, c = 2, k = 1", ...
-%!          "λ = 1, c = 3, k = 1", "λ = 1, c = 0.5, k = 2"}, ...
-%!         "location", "southeast")
-%! title ("Burr type XII CDF")
-%! xlabel ("values in x")
-%! ylabel ("probability")
+%! legend ({'λ = 1, c = 1, k = 1', 'λ = 1, c = 1, k = 2', ...
+%!          'λ = 1, c = 1, k = 3', 'λ = 1, c = 2, k = 1', ...
+%!          'λ = 1, c = 3, k = 1', 'λ = 1, c = 0.5, k = 2'}, ...
+%!         'location', 'southeast')
+%! title ('Burr type XII CDF')
+%! xlabel ('values in x')
+%! ylabel ('probability')
 
 ## Test output
 %!shared x, y
 %! x = [-1, 0, 1, 2, Inf];
 %! y = [0, 0, 1/2, 2/3, 1];
-%!assert (burrcdf (x, ones(1,5), ones (1,5), ones (1,5)), y, eps)
-%!assert (burrcdf (x, 1, 1, 1), y, eps)
-%!assert (burrcdf (x, [1, 1, NaN, 1, 1], 1, 1), [y(1:2), NaN, y(4:5)], eps)
-%!assert (burrcdf (x, 1, [1, 1, NaN, 1, 1], 1), [y(1:2), NaN, y(4:5)], eps)
-%!assert (burrcdf (x, 1, 1, [1, 1, NaN, 1, 1]), [y(1:2), NaN, y(4:5)], eps)
-%!assert (burrcdf ([x, NaN], 1, 1, 1), [y, NaN], eps)
+%!assert_equal (burrcdf (x, ones (1,5), ones (1,5), ones (1,5)), y, eps)
+%!assert_equal (burrcdf (x, 1, 1, 1), y, eps)
+%!assert_equal (burrcdf (x, [1, 1, NaN, 1, 1], 1, 1), [y(1:2), NaN, y(4:5)], eps)
+%!assert_equal (burrcdf (x, 1, [1, 1, NaN, 1, 1], 1), [y(1:2), NaN, y(4:5)], eps)
+%!assert_equal (burrcdf (x, 1, 1, [1, 1, NaN, 1, 1]), [y(1:2), NaN, y(4:5)], eps)
+%!assert_equal (burrcdf ([x, NaN], 1, 1, 1), [y, NaN], eps)
 
 ## Test class of input preserved
-%!assert (burrcdf (single ([x, NaN]), 1, 1, 1), single ([y, NaN]), eps("single"))
-%!assert (burrcdf ([x, NaN], single (1), 1, 1), single ([y, NaN]), eps("single"))
-%!assert (burrcdf ([x, NaN], 1, single (1), 1), single ([y, NaN]), eps("single"))
-%!assert (burrcdf ([x, NaN], 1, 1, single (1)), single ([y, NaN]), eps("single"))
+%!assert_equal (burrcdf (single ([x, NaN]), 1, 1, 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (burrcdf ([x, NaN], single (1), 1, 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (burrcdf ([x, NaN], 1, single (1), 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (burrcdf ([x, NaN], 1, 1, single (1)), single ([y, NaN]), eps ('single'))
 
 ## Test input validation
 %!error<burrcdf: function called with too few input arguments.> burrcdf ()
@@ -148,16 +148,16 @@ endfunction
 %!error<burrcdf: function called with too few input arguments.> burrcdf (1, 2, 3)
 %!error<burrcdf: function called with too many inputs> ...
 %! burrcdf (1, 2, 3, 4, 5, 6)
-%!error<burrcdf: invalid argument for upper tail.> burrcdf (1, 2, 3, 4, "tail")
+%!error<burrcdf: invalid argument for upper tail.> burrcdf (1, 2, 3, 4, 'tail')
 %!error<burrcdf: invalid argument for upper tail.> burrcdf (1, 2, 3, 4, 5)
 %!error<burrcdf: X, LAMBDA, C, and K must be of common size or scalars.> ...
-%! burrcdf (ones (3), ones (2), ones(2), ones(2))
+%! burrcdf (ones (3), ones (2), ones (2), ones (2))
 %!error<burrcdf: X, LAMBDA, C, and K must be of common size or scalars.> ...
-%! burrcdf (ones (2), ones (3), ones(2), ones(2))
+%! burrcdf (ones (2), ones (3), ones (2), ones (2))
 %!error<burrcdf: X, LAMBDA, C, and K must be of common size or scalars.> ...
-%! burrcdf (ones (2), ones (2), ones(3), ones(2))
+%! burrcdf (ones (2), ones (2), ones (3), ones (2))
 %!error<burrcdf: X, LAMBDA, C, and K must be of common size or scalars.> ...
-%! burrcdf (ones (2), ones (2), ones(2), ones(3))
+%! burrcdf (ones (2), ones (2), ones (2), ones (3))
 %!error<burrcdf: X, LAMBDA, C, and K must not be complex.> burrcdf (i, 2, 3, 4)
 %!error<burrcdf: X, LAMBDA, C, and K must not be complex.> burrcdf (1, i, 3, 4)
 %!error<burrcdf: X, LAMBDA, C, and K must not be complex.> burrcdf (1, 2, i, 4)

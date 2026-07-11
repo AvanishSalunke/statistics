@@ -45,7 +45,7 @@ function y = laplacepdf (x, mu, beta)
   endif
 
   ## Check for common size of X, MU, and BETA
-  if (! isscalar (x) || ! isscalar (mu) || ! isscalar(beta))
+  if (! isscalar (x) || ! isscalar (mu) || ! isscalar (beta))
     [retval, x, mu, beta] = common_size (x, mu, beta);
     if (retval > 0)
       error (strcat ("laplacepdf: X, MU, and BETA must be of", ...
@@ -59,8 +59,8 @@ function y = laplacepdf (x, mu, beta)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (mu, "single") || isa (beta, "single"));
-    y = NaN (size (x), "single");
+  if (isa (x, 'single') || isa (mu, 'single') || isa (beta, 'single'));
+    y = NaN (size (x), 'single');
   else
     y = NaN (size (x));
   endif
@@ -81,27 +81,27 @@ endfunction
 %! y2 = laplacepdf (x, 0, 2);
 %! y3 = laplacepdf (x, 0, 4);
 %! y4 = laplacepdf (x, -5, 4);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-c")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-c')
 %! grid on
 %! xlim ([-10, 10])
 %! ylim ([0, 0.6])
-%! legend ({"μ = 0, β = 1", "μ = 0, β = 2", ...
-%!          "μ = 0, β = 4", "μ = -5, β = 4"}, "location", "northeast")
-%! title ("Laplace PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'μ = 0, β = 1', 'μ = 0, β = 2', ...
+%!          'μ = 0, β = 4', 'μ = -5, β = 4'}, 'location', 'northeast')
+%! title ('Laplace PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test results
 %!shared x, y
 %! x = [-Inf -log(2) 0 log(2) Inf];
 %! y = [0, 1/4, 1/2, 1/4, 0];
-%!assert (laplacepdf ([x, NaN], 0, 1), [y, NaN])
-%!assert (laplacepdf (x, 0, [-2, -1, 0, 1, 2]), [nan(1, 3), 0.25, 0])
+%!assert_equal (laplacepdf ([x, NaN], 0, 1), [y, NaN])
+%!assert_equal (laplacepdf (x, 0, [-2, -1, 0, 1, 2]), [nan(1, 3), 0.25, 0])
 
 ## Test class of input preserved
-%!assert (laplacepdf (single ([x, NaN]), 0, 1), single ([y, NaN]))
-%!assert (laplacepdf ([x, NaN], single (0), 1), single ([y, NaN]))
-%!assert (laplacepdf ([x, NaN], 0, single (1)), single ([y, NaN]))
+%!assert_equal (laplacepdf (single ([x, NaN]), 0, 1), single ([y, NaN]))
+%!assert_equal (laplacepdf ([x, NaN], single (0), 1), single ([y, NaN]))
+%!assert_equal (laplacepdf ([x, NaN], 0, single (1)), single ([y, NaN]))
 
 ## Test input validation
 %!error<laplacepdf: function called with too few input arguments.> laplacepdf ()

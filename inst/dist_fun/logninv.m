@@ -66,14 +66,14 @@ function x = logninv (p, mu = 0, sigma = 1)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (mu, "single") || isa (sigma, "single"))
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (mu, 'single') || isa (sigma, 'single'))
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
 
   ## Compute lognormal iCDF
-  k = !(p >= 0) | !(p <= 1) | !(sigma > 0) | !(sigma < Inf);
+  k = ! (p >= 0) | ! (p <= 1) | ! (sigma > 0) | ! (sigma < Inf);
   x(k) = NaN;
 
   k = (p == 1) & (sigma > 0) & (sigma < Inf);
@@ -94,30 +94,30 @@ endfunction
 %! x1 = logninv (p, 0, 1);
 %! x2 = logninv (p, 0, 0.5);
 %! x3 = logninv (p, 0, 0.25);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r')
 %! grid on
 %! ylim ([0, 3])
-%! legend ({"μ = 0, σ = 1", "μ = 0, σ = 0.5", "μ = 0, σ = 0.25"}, ...
-%!         "location", "northwest")
-%! title ("Log-normal iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'μ = 0, σ = 1', 'μ = 0, σ = 0.5', 'μ = 0, σ = 0.25'}, ...
+%!         'location', 'northwest')
+%! title ('Log-normal iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.5 1 2];
-%!assert (logninv (p, ones (1,5), ones (1,5)), [NaN 0 e Inf NaN], 2*eps)
-%!assert (logninv (p, 1, ones (1,5)), [NaN 0 e Inf NaN], 2*eps)
-%!assert (logninv (p, ones (1,5), 1), [NaN 0 e Inf NaN], 2*eps)
-%!assert (logninv (p, [1 1 NaN 0 1], 1), [NaN 0 NaN Inf NaN])
-%!assert (logninv (p, 1, [1 0 NaN Inf 1]), [NaN NaN NaN NaN NaN])
-%!assert (logninv ([p(1:2) NaN p(4:5)], 1, 2), [NaN 0 NaN Inf NaN])
+%!assert_equal (logninv (p, ones (1,5), ones (1,5)), [NaN 0 e Inf NaN], 2*eps)
+%!assert_equal (logninv (p, 1, ones (1,5)), [NaN 0 e Inf NaN], 2*eps)
+%!assert_equal (logninv (p, ones (1,5), 1), [NaN 0 e Inf NaN], 2*eps)
+%!assert_equal (logninv (p, [1 1 NaN 0 1], 1), [NaN 0 NaN Inf NaN])
+%!assert_equal (logninv (p, 1, [1 0 NaN Inf 1]), [NaN NaN NaN NaN NaN])
+%!assert_equal (logninv ([p(1:2) NaN p(4:5)], 1, 2), [NaN 0 NaN Inf NaN])
 
 ## Test class of input preserved
-%!assert (logninv ([p, NaN], 1, 1), [NaN 0 e Inf NaN NaN], 2*eps)
-%!assert (logninv (single ([p, NaN]), 1, 1), single ([NaN 0 e Inf NaN NaN]))
-%!assert (logninv ([p, NaN], single (1), 1), single ([NaN 0 e Inf NaN NaN]))
-%!assert (logninv ([p, NaN], 1, single (1)), single ([NaN 0 e Inf NaN NaN]))
+%!assert_equal (logninv ([p, NaN], 1, 1), [NaN 0 e Inf NaN NaN], 2*eps)
+%!assert_equal (logninv (single ([p, NaN]), 1, 1), single ([NaN 0 e Inf NaN NaN]))
+%!assert_equal (logninv ([p, NaN], single (1), 1), single ([NaN 0 e Inf NaN NaN]))
+%!assert_equal (logninv ([p, NaN], 1, single (1)), single ([NaN 0 e Inf NaN NaN]))
 
 ## Test input validation
 %!error logninv ()

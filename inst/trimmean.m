@@ -19,7 +19,7 @@
 ## -*- texinfo -*-
 ## @deftypefn  {statistics} {@var{m} =} trimmean (@var{x}, @var{p})
 ## @deftypefnx {statistics} {@var{m} =} trimmean (@var{x}, @var{p}, @var{flag})
-## @deftypefnx {statistics} {@var{m} =} trimmean (@dots{}, @qcode{"all"})
+## @deftypefnx {statistics} {@var{m} =} trimmean (@dots{}, @qcode{'all'})
 ## @deftypefnx {statistics} {@var{m} =} trimmean (@dots{}, @var{dim})
 ## @deftypefnx {statistics} {@var{m} =} trimmean (@dots{}, @var{vecdim})
 ##
@@ -49,19 +49,19 @@
 ## @code{@var{m} = trimmean (@var{x}, @var{p}, @var{flag})} specifies how to
 ## trim when @math{k}, i.e. half the number of outliers, is not an integer.
 ## @var{flag} can be specified as one of the following values:
-## @multitable @columnfractions 0.2 0.05 0.75
-## @headitem Value @tab @tab Description
-## @item @qcode{"round"} @tab @tab Round @math{k} to the nearest integer.  This
+## @multitable @columnfractions 0.2 0.75
+## @headitem Value @tab Description
+## @item @qcode{'round'} @tab Round @math{k} to the nearest integer.  This
 ## is the default.
-## @item @qcode{"floor"} @tab @tab Round @math{k} down to the next smaller
+## @item @qcode{'floor'} @tab Round @math{k} down to the next smaller
 ## integer.
-## @item @qcode{"weighted"} @tab @tab If @math{k = i + f}, where @math{i} is an
+## @item @qcode{'weighted'} @tab If @math{k = i + f}, where @math{i} is an
 ## integer and @math{f} is a fraction, compute a weighted mean with weight
 ## @math{(1 - f)} for the @math{(i + 1)}-th and @math{(n - i)}-th values, and
 ## full weight for the values between them.
 ## @end multitable
 ##
-## @code{@var{m} = trimmean (@dots{}, @qcode{"all"})} returns the trimmed mean
+## @code{@var{m} = trimmean (@dots{}, @qcode{'all'})} returns the trimmed mean
 ## of all the values in @var{x} using any of the input argument combinations in
 ## the previous syntaxes.
 ##
@@ -98,10 +98,10 @@ function m = trimmean (x, p, varargin)
     flag = [];
     dim = [];
   elseif (nargin < 4)
-    if (ischar (varargin{1}) && ! strcmpi (varargin{1}, "all"))
+    if (ischar (varargin{1}) && ! strcmpi (varargin{1}, 'all'))
       flag = varargin{1};
       dim = [];
-    elseif (isnumeric (varargin{1}) || strcmpi (varargin{1}, "all"))
+    elseif (isnumeric (varargin{1}) || strcmpi (varargin{1}, 'all'))
       flag = [];
       dim = varargin{1};
     endif
@@ -122,9 +122,9 @@ function m = trimmean (x, p, varargin)
 
   ## Check FLAG
   if (isempty (flag))
-    flag = "round";
+    flag = 'round';
   endif
-  if (! any (strcmpi (flag, {"round", "floor", "weighted"})))
+  if (! any (strcmpi (flag, {'round', 'floor', 'weighted'})))
     error ("trimmean: invalid FLAG argument.");
   endif
 
@@ -132,7 +132,7 @@ function m = trimmean (x, p, varargin)
   if (isempty (dim))
     (dim = find (szx != 1, 1)) || (dim = 1);
   endif
-  if (strcmpi (dim, "all"))
+  if (strcmpi (dim, 'all'))
     x = x(:);
     dim = 1;
     szx = size (x);
@@ -206,14 +206,14 @@ function m = trimmean (x, p, varargin)
         n = 0;
     else
         n = size (x, 1);
-    end
+    endif
     m = trim (x, n, p, flag, sizem);
     m = reshape (m, sizem);
   ## With missing data, each column is computed separately
   else
     m = NaN (sizem, class (x));
     for j = 1:prod (sizem(2:end))
-      n = find (! isnan (x(:,j)), 1, "last");
+      n = find (! isnan (x(:,j)), 1, 'last');
       m(j) = trim (x(:,j), n, p, flag, [1, 1]);
     endfor
   endif
@@ -228,7 +228,7 @@ endfunction
 ## Help function for handling different flags
 function m = trim (x, n, p, flag, sizem)
   switch (lower (flag))
-    case "round"
+    case 'round'
       k = n * p / 200;
       k0 = round (k - eps (k));
       if (! isempty (n) && n > 0 && k0 < n / 2)
@@ -236,14 +236,14 @@ function m = trim (x, n, p, flag, sizem)
       else
         m = NaN (sizem, class (x));
       endif
-    case "floor"
+    case 'floor'
       k0 = floor (n * p / 200);
       if (! isempty (n) && n > 0 && k0 < n / 2)
         m = mean (x((k0+1):(n-k0),:), 1);
       else
         m = NaN (sizem, class (x));
       endif
-    case "weighted"
+    case 'weighted'
       k = n * p / 200;
       k0 = floor (k);
       fr = 1 + k0 - k;
@@ -260,49 +260,49 @@ endfunction
 %!test
 %! x = reshape (1:40, [5, 4, 2]);
 %! x([3, 37]) = -100;
-%! assert (trimmean (x, 10, "all"), 19.4722, 1e-4);
+%! assert_equal (trimmean (x, 10, 'all'), 19.4722, 1e-4);
 %!test
 %! x = reshape (1:40, [5, 4, 2]);
 %! x([3, 37]) = -100;
 %! out = trimmean (x, 10, [1, 2]);
-%! assert (out(1,1,1), 10.3889, 1e-4);
-%! assert (out(1,1,2), 29.6111, 1e-4);
+%! assert_equal (out(1,1,1), 10.3889, 1e-4);
+%! assert_equal (out(1,1,2), 29.6111, 1e-4);
 %!test
 %! x = reshape (1:40, [5, 4, 2]);
 %! x([3, 37]) = -100;
 %! x([4, 38]) = NaN;
-%! assert (trimmean (x, 10, "all"), 19.3824, 1e-4);
+%! assert_equal (trimmean (x, 10, 'all'), 19.3824, 1e-4);
 %!test
 %! x = reshape (1:40, [5, 4, 2]);
 %! x([3, 37]) = -100;
 %! out = trimmean (x, 10, 1);
-%! assert (out(:,:,1), [-17.6, 8, 13, 18]);
-%! assert (out(:,:,2), [23, 28, 33, 10.6]);
+%! assert_equal (out(:,:,1), [-17.6, 8, 13, 18]);
+%! assert_equal (out(:,:,2), [23, 28, 33, 10.6]);
 %!test
 %! x = reshape (1:40, [5, 4, 2]);
 %! x([3, 37]) = -100;
 %! x([4, 38]) = NaN;
 %! out = trimmean (x, 10, 1);
-%! assert (out(:,:,1), [-23, 8, 13, 18]);
-%! assert (out(:,:,2), [23, 28, 33, 3.75]);
+%! assert_equal (out(:,:,1), [-23, 8, 13, 18]);
+%! assert_equal (out(:,:,2), [23, 28, 33, 3.75]);
 %!test
 %! x = reshape (1:40, [5, 4, 2]);
 %! x([3, 37]) = -100;
 %! out = trimmean (x, 10, 2);
-%! assert (out(:,:,1), [8.5; 9.5; -15.25; 11.5; 12.5]);
-%! assert (out(:,:,2), [28.5; -4.75; 30.5; 31.5; 32.5]);
+%! assert_equal (out(:,:,1), [8.5; 9.5; -15.25; 11.5; 12.5]);
+%! assert_equal (out(:,:,2), [28.5; -4.75; 30.5; 31.5; 32.5]);
 %!test
 %! x = reshape (1:40, [5, 4, 2]);
 %! x([3, 37]) = -100;
 %! x([4, 38]) = NaN;
 %! out = trimmean (x, 10, 2);
-%! assert (out(:,:,1), [8.5; 9.5; -15.25; 14; 12.5]);
-%! assert (out(:,:,2), [28.5; -4.75; 28; 31.5; 32.5]);
+%! assert_equal (out(:,:,1), [8.5; 9.5; -15.25; 14; 12.5]);
+%! assert_equal (out(:,:,2), [28.5; -4.75; 28; 31.5; 32.5]);
 %!test
 %! x = reshape (1:40, [5, 4, 2]);
 %! x([3, 37]) = -100;
 %! out = trimmean (x, 10, [1, 2, 3]);
-%! assert (out, trimmean (x, 10, "all"));
+%! assert_equal (out, trimmean (x, 10, 'all'));
 
 ## Test N-D array with NaNs
 %!test
@@ -310,69 +310,69 @@ endfunction
 %! x([3, 37]) = -100;
 %! x([4, 38]) = NaN;
 %! out = trimmean (x, 10, [1, 2]);
-%! assert (out(1,1,1), 10.7647, 1e-4);
-%! assert (out(1,1,2), 29.1176, 1e-4);
+%! assert_equal (out(1,1,1), 10.7647, 1e-4);
+%! assert_equal (out(1,1,2), 29.1176, 1e-4);
 %!test
 %! x = reshape (1:40, [5, 4, 2]);
 %! x([3, 37]) = -100;
 %! x([4, 38]) = NaN;
 %! out = trimmean (x, 10, [1, 3]);
-%! assert (out, [2.5556, 18, 23, 11.6667], 1e-4);
+%! assert_equal (out, [2.5556, 18, 23, 11.6667], 1e-4);
 %!test
 %! x = reshape (1:40, [5, 4, 2]);
 %! x([3, 37]) = -100;
 %! x([4, 38]) = NaN;
 %! out = trimmean (x, 10, [2, 3]);
-%! assert (out, [18.5; 2.3750; 3.2857; 24; 22.5], 1e-4);
+%! assert_equal (out, [18.5; 2.3750; 3.2857; 24; 22.5], 1e-4);
 
 %!test
 %! x = reshape (1:40, [5, 4, 2]);
 %! x([3, 37]) = -100;
 %! x([4, 38]) = NaN;
 %! out = trimmean (x, 10, [1, 2, 3]);
-%! assert (out, trimmean (x, 10, "all"));
+%! assert_equal (out, trimmean (x, 10, 'all'));
 %!test
 %! x = reshape (1:40, [5, 4, 2]);
 %! x([3, 37]) = -100;
 %! x([4, 38]) = NaN;
 %! out = trimmean (x, 10, [2, 3, 5]);
-%! assert (out, [18.5; 2.3750; 3.2857; 24; 22.5], 1e-4);
+%! assert_equal (out, [18.5; 2.3750; 3.2857; 24; 22.5], 1e-4);
 
 ## Test bug reported in PR #381
-%!assert (trimmean ([1, 2, 3, 4, 5], 40), 3)
+%!assert_equal (trimmean ([1, 2, 3, 4, 5], 40), 3)
 
 ## Test special cases
-%!assert (trimmean (reshape (1:40, [5, 4, 2]), 10, 4), reshape(1:40, [5, 4, 2]))
-%!assert (trimmean ([], 10), NaN)
-%!assert (trimmean ([1;2;3;4;5], 10, 2), [1;2;3;4;5])
+%!assert_equal (trimmean (reshape (1:40, [5, 4, 2]), 10, 4), reshape (1:40, [5, 4, 2]))
+%!assert_equal (trimmean ([], 10), NaN)
+%!assert_equal (trimmean ([1;2;3;4;5], 10, 2), [1;2;3;4;5])
 
 %!test
 %! ## Row vector with explicit dimension 1
-%! assert (trimmean ([1, 2, 3], 10, 1), [1, 2, 3]);
+%! assert_equal (trimmean ([1, 2, 3], 10, 1), [1, 2, 3]);
 
 %!test
 %! ## Row vector with explicit dimension 2 
-%! assert (trimmean ([1, 2, 3], 10, 2), 2);
+%! assert_equal (trimmean ([1, 2, 3], 10, 2), 2);
 
 %!test
 %! ## Empty array with non-operating dimension preserved (dim=1)
-%! assert (trimmean (zeros (0, 5), 10, 1), NaN (1, 5));
+%! assert_equal (trimmean (zeros (0, 5), 10, 1), NaN (1, 5));
 
 %!test
 %! ## Empty array with non-operating dimension preserved (dim=2)
-%! assert (trimmean (zeros (2, 0), 10, 2), NaN (2, 1));
+%! assert_equal (trimmean (zeros (2, 0), 10, 2), NaN (2, 1));
 
 ## Test input validation
 %!error<Invalid call to trimmean.  Correct usage is:> trimmean (1)
 %!error<Invalid call to trimmean.  Correct usage is:> trimmean (1,2,3,4,5)
 %!error<trimmean: invalid percent.> trimmean ([1 2 3 4], -10)
 %!error<trimmean: invalid percent.> trimmean ([1 2 3 4], 100)
-%!error<trimmean: invalid FLAG argument.> trimmean ([1 2 3 4], 10, "flag")
-%!error<trimmean: invalid FLAG argument.> trimmean ([1 2 3 4], 10, "flag", 1)
+%!error<trimmean: invalid FLAG argument.> trimmean ([1 2 3 4], 10, 'flag')
+%!error<trimmean: invalid FLAG argument.> trimmean ([1 2 3 4], 10, 'flag', 1)
 %!error<trimmean: DIM must be a positive integer scalar or vector.> ...
 %! trimmean ([1 2 3 4], 10, -1)
 %!error<trimmean: DIM must be a positive integer scalar or vector.> ...
-%! trimmean ([1 2 3 4], 10, "floor", -1)
+%! trimmean ([1 2 3 4], 10, 'floor', -1)
 %!error<trimmean: DIM must be a positive integer scalar or vector.> ...
 %! trimmean (reshape (1:40, [5, 4, 2]), 10, [-1, 2])
 %!error<trimmean: VECDIM must contain non-repeating positive integers.> ...

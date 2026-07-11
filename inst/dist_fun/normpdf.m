@@ -67,8 +67,8 @@ function y = normpdf (x, mu, sigma)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (mu, "single") || isa (sigma, "single"))
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (mu, 'single') || isa (sigma, 'single'))
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
@@ -81,7 +81,7 @@ function y = normpdf (x, mu, sigma)
       y = NaN (size (x), class (y));
     endif
   else
-    k = isinf (mu) | !(sigma > 0) | !(sigma < Inf);
+    k = isinf (mu) | ! (sigma > 0) | ! (sigma < Inf);
     y(k) = NaN;
 
     k = ! isinf (mu) & (sigma > 0) & (sigma < Inf);
@@ -101,31 +101,31 @@ endfunction
 %! y2 = normpdf (x, 0, 1);
 %! y3 = normpdf (x, 0, 2);
 %! y4 = normpdf (x, -2, 0.8);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-c")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-c')
 %! grid on
 %! xlim ([-5, 5])
 %! ylim ([0, 0.9])
-%! legend ({"μ = 0, σ = 0.5", "μ = 0, σ = 1", ...
-%!          "μ = 0, σ = 2", "μ = -2, σ = 0.8"}, "location", "northeast")
-%! title ("Normal PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'μ = 0, σ = 0.5', 'μ = 0, σ = 1', ...
+%!          'μ = 0, σ = 2', 'μ = -2, σ = 0.8'}, 'location', 'northeast')
+%! title ('Normal PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-Inf, 1, 2, Inf];
 %! y = 1 / sqrt (2 * pi) * exp (-(x - 1) .^ 2 / 2);
-%!assert (normpdf (x, ones (1,4), ones (1,4)), y, eps)
-%!assert (normpdf (x, 1, ones (1,4)), y, eps)
-%!assert (normpdf (x, ones (1,4), 1), y, eps)
-%!assert (normpdf (x, [0 -Inf NaN Inf], 1), [y(1) NaN NaN NaN], eps)
-%!assert (normpdf (x, 1, [Inf NaN -1 0]), [NaN NaN NaN NaN], eps)
-%!assert (normpdf ([x, NaN], 1, 1), [y, NaN], eps)
+%!assert_equal (normpdf (x, ones (1,4), ones (1,4)), y, eps)
+%!assert_equal (normpdf (x, 1, ones (1,4)), y, eps)
+%!assert_equal (normpdf (x, ones (1,4), 1), y, eps)
+%!assert_equal (normpdf (x, [0 -Inf NaN Inf], 1), [y(1) NaN NaN NaN], eps)
+%!assert_equal (normpdf (x, 1, [Inf NaN -1 0]), [NaN NaN NaN NaN], eps)
+%!assert_equal (normpdf ([x, NaN], 1, 1), [y, NaN], eps)
 
 ## Test class of input preserved
-%!assert (normpdf (single ([x, NaN]), 1, 1), single ([y, NaN]), eps ("single"))
-%!assert (normpdf ([x, NaN], single (1), 1), single ([y, NaN]), eps ("single"))
-%!assert (normpdf ([x, NaN], 1, single (1)), single ([y, NaN]), eps ("single"))
+%!assert_equal (normpdf (single ([x, NaN]), 1, 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (normpdf ([x, NaN], single (1), 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (normpdf ([x, NaN], 1, single (1)), single ([y, NaN]), eps ('single'))
 
 ## Test input validation
 %!error<normpdf: function called with too few input arguments.> normpdf ()

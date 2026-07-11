@@ -76,8 +76,8 @@ function x = nbininv (p, r, ps)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (r, "single") || isa (ps, "single"))
-    x = zeros (size (p), "single");
+  if (isa (p, 'single') || isa (r, 'single') || isa (ps, 'single'))
+    x = zeros (size (p), 'single');
   else
     x = zeros (size (p));
   endif
@@ -167,39 +167,39 @@ endfunction
 %! x2 = nbininv (p, 5, 0.2);
 %! x3 = nbininv (p, 4, 0.4);
 %! x4 = nbininv (p, 10, 0.3);
-%! plot (p, x1, "-r", p, x2, "-g", p, x3, "-k", p, x4, "-m")
+%! plot (p, x1, '-r', p, x2, '-g', p, x3, '-k', p, x4, '-m')
 %! grid on
 %! ylim ([0, 40])
-%! legend ({"r = 2, ps = 0.15", "r = 5, ps = 0.2", "r = 4, p = 0.4", ...
-%!          "r = 10, ps = 0.3"}, "location", "northwest")
-%! title ("Negative binomial iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x (number of failures)")
+%! legend ({'r = 2, ps = 0.15', 'r = 5, ps = 0.2', 'r = 4, p = 0.4', ...
+%!          'r = 10, ps = 0.3'}, 'location', 'northwest')
+%! title ('Negative binomial iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x (number of failures)')
 
 ## Test output
 %!shared p
 %! p = [-1 0 3/4 1 2];
-%!assert (nbininv (p, ones (1,5), 0.5*ones (1,5)), [NaN 0 1 Inf NaN])
-%!assert (nbininv (p, 1, 0.5*ones (1,5)), [NaN 0 1 Inf NaN])
-%!assert (nbininv (p, ones (1,5), 0.5), [NaN 0 1 Inf NaN])
-%!assert (nbininv (p, [1 0 NaN Inf 1], 0.5), [NaN NaN NaN NaN NaN])
-%!assert (nbininv (p, [1 0 1.5 Inf 1], 0.5), [NaN NaN 2 NaN NaN])
-%!assert (nbininv (p, 1, 0.5*[1 -Inf NaN Inf 1]), [NaN NaN NaN NaN NaN])
-%!assert (nbininv ([p(1:2) NaN p(4:5)], 1, 0.5), [NaN 0 NaN Inf NaN])
+%!assert_equal (nbininv (p, ones (1,5), 0.5*ones (1,5)), [NaN 0 1 Inf NaN])
+%!assert_equal (nbininv (p, 1, 0.5*ones (1,5)), [NaN 0 1 Inf NaN])
+%!assert_equal (nbininv (p, ones (1,5), 0.5), [NaN 0 1 Inf NaN])
+%!assert_equal (nbininv (p, [1 0 NaN Inf 1], 0.5), [NaN NaN NaN NaN NaN])
+%!assert_equal (nbininv (p, [1 0 1.5 Inf 1], 0.5), [NaN NaN 2 NaN NaN])
+%!assert_equal (nbininv (p, 1, 0.5*[1 -Inf NaN Inf 1]), [NaN NaN NaN NaN NaN])
+%!assert_equal (nbininv ([p(1:2) NaN p(4:5)], 1, 0.5), [NaN 0 NaN Inf NaN])
 
 ## Test class of input preserved
-%!assert (nbininv ([p, NaN], 1, 0.5), [NaN 0 1 Inf NaN NaN])
-%!assert (nbininv (single ([p, NaN]), 1, 0.5), single ([NaN 0 1 Inf NaN NaN]))
-%!assert (nbininv ([p, NaN], single (1), 0.5), single ([NaN 0 1 Inf NaN NaN]))
-%!assert (nbininv ([p, NaN], 1, single (0.5)), single ([NaN 0 1 Inf NaN NaN]))
+%!assert_equal (nbininv ([p, NaN], 1, 0.5), [NaN 0 1 Inf NaN NaN])
+%!assert_equal (nbininv (single ([p, NaN]), 1, 0.5), single ([NaN 0 1 Inf NaN NaN]))
+%!assert_equal (nbininv ([p, NaN], single (1), 0.5), single ([NaN 0 1 Inf NaN NaN]))
+%!assert_equal (nbininv ([p, NaN], 1, single (0.5)), single ([NaN 0 1 Inf NaN NaN]))
 
 ## Test accuracy, to within +/- 1 since it is a discrete distribution
 %!shared y, tol
 %! y = magic (3) + 1;
 %! tol = 1;
-%!assert (nbininv (nbincdf (1:10, 3, 0.1), 3, 0.1), 1:10, tol)
-%!assert (nbininv (nbincdf (1:10, 3./(1:10), 0.1), 3./(1:10), 0.1), 1:10, tol)
-%!assert (nbininv (nbincdf (y, 3./y, 1./y), 3./y, 1./y), y, tol)
+%!assert_equal (nbininv (nbincdf (1:10, 3, 0.1), 3, 0.1), 1:10, tol)
+%!assert_equal (nbininv (nbincdf (1:10, 3./(1:10), 0.1), 3./(1:10), 0.1), 1:10, tol)
+%!assert_equal (nbininv (nbincdf (y, 3./y, 1./y), 3./y, 1./y), y, tol)
 
 ## Test input validation
 %!error<nbininv: function called with too few input arguments.> nbininv ()

@@ -98,20 +98,20 @@ endfunction
 
 %!demo
 %! ## Sample 3 populations from 3 different Poisson distributions
-%! randp ("seed", 2);    # for reproducibility
+%! randp ('seed', 2);    # for reproducibility
 %! r1 = poissrnd (1, 1000, 1);
-%! randp ("seed", 2);    # for reproducibility
+%! randp ('seed', 2);    # for reproducibility
 %! r2 = poissrnd (4, 1000, 1);
-%! randp ("seed", 3);    # for reproducibility
+%! randp ('seed', 3);    # for reproducibility
 %! r3 = poissrnd (10, 1000, 1);
 %! r = [r1, r2, r3];
 %!
 %! ## Plot them normalized and fix their colors
 %! hist (r, [0:20], 1);
-%! h = findobj (gca, "Type", "patch");
-%! set (h(1), "facecolor", "c");
-%! set (h(2), "facecolor", "g");
-%! set (h(3), "facecolor", "r");
+%! h = findobj (gca, 'Type', 'patch');
+%! set (h(1), 'facecolor', 'c');
+%! set (h(2), 'facecolor', 'g');
+%! set (h(3), 'facecolor', 'r');
 %! hold on
 %!
 %! ## Estimate their lambda parameter
@@ -120,48 +120,48 @@ endfunction
 %! ## Plot their estimated PDFs
 %! x = [0:20];
 %! y = poisspdf (x, lambdahat(1));
-%! plot (x, y, "-pr");
+%! plot (x, y, '-pr');
 %! y = poisspdf (x, lambdahat(2));
-%! plot (x, y, "-sg");
+%! plot (x, y, '-sg');
 %! y = poisspdf (x, lambdahat(3));
-%! plot (x, y, "-^c");
+%! plot (x, y, '-^c');
 %! xlim ([0, 20])
 %! ylim ([0, 0.4])
-%! legend ({"Normalized HIST of sample 1 with λ=1", ...
-%!          "Normalized HIST of sample 2 with λ=4", ...
-%!          "Normalized HIST of sample 3 with λ=10", ...
+%! legend ({'Normalized HIST of sample 1 with λ=1', ...
+%!          'Normalized HIST of sample 2 with λ=4', ...
+%!          'Normalized HIST of sample 3 with λ=10', ...
 %!          sprintf("PDF for sample 1 with estimated λ=%0.2f", ...
 %!                  lambdahat(1)), ...
 %!          sprintf("PDF for sample 2 with estimated λ=%0.2f", ...
 %!                  lambdahat(2)), ...
 %!          sprintf("PDF for sample 3 with estimated λ=%0.2f", ...
 %!                  lambdahat(3))})
-%! title ("Three population samples from different Poisson distributions")
+%! title ('Three population samples from different Poisson distributions')
 %! hold off
 
 ## Test output
 %!test
 %! x = [1 3 2 4 5 4 3 4];
 %! [lhat, lci] = poissfit (x);
-%! assert (lhat, 3.25)
-%! assert (lci, [2.123007901949543; 4.762003010390628], 1e-14)
+%! assert_equal (lhat, 3.25)
+%! assert_equal (lci, [2.123007901949543; 4.762003010390628], 1e-14)
 %!test
 %! x = [1 3 2 4 5 4 3 4];
 %! [lhat, lci] = poissfit (x, 0.01);
-%! assert (lhat, 3.25)
-%! assert (lci, [1.842572740234582; 5.281369033298528], 1e-14)
+%! assert_equal (lhat, 3.25)
+%! assert_equal (lci, [1.842572740234582; 5.281369033298528], 1e-14)
 %!test
 %! x = [1 2 3 4 5];
 %! f = [1 1 2 3 1];
 %! [lhat, lci] = poissfit (x, [], f);
-%! assert (lhat, 3.25)
-%! assert (lci, [2.123007901949543; 4.762003010390628], 1e-14)
+%! assert_equal (lhat, 3.25)
+%! assert_equal (lci, [2.123007901949543; 4.762003010390628], 1e-14)
 %!test
 %! x = [1 2 3 4 5];
 %! f = [1 1 2 3 1];
 %! [lhat, lci] = poissfit (x, 0.01, f);
-%! assert (lhat, 3.25)
-%! assert (lci, [1.842572740234582; 5.281369033298528], 1e-14)
+%! assert_equal (lhat, 3.25)
+%! assert_equal (lci, [1.842572740234582; 5.281369033298528], 1e-14)
 
 ## Test input validation
 %!error<poissfit: X cannot have negative values.> poissfit ([1 2 -1 3])

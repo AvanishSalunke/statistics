@@ -22,18 +22,18 @@
 ## Perform principal axis factor analysis on data matrix.
 ##
 ## @code{@var{loadings} = factoran (@var{X}, @var{nfac})} performs principal
-## axis factoring to extract @var{nfac} factors from the @math{N x P} data
+## axis factoring to extract @var{nfac} factors from the @math{N * P} data
 ## matrix @var{X}, where rows correspond to observations and columns to
-## variables.  The output @var{loadings} is a @math{P x @var{nfac}} matrix
+## variables.  The output @var{loadings} is a @math{P * @var{nfac}} matrix
 ## whose columns contain the loadings on each factor, in decreasing order of
 ## importance.
 ##
 ## @code{[@var{loadings}, @var{specvar}] = factoran (@dots{})} also returns a
-## @math{P x 1} vector @var{specvar} containing the specific variances (unique
+## @math{P * 1} vector @var{specvar} containing the specific variances (unique
 ## variances) for each variable.
 ##
 ## @code{[@var{loadings}, @var{specvar}, @var{fscores}] = factoran (@dots{})}
-## also returns the @math{N x @var{nfac}} matrix @var{fscores} of estimated
+## also returns the @math{N * @var{nfac}} matrix @var{fscores} of estimated
 ## factor scores, computed using the regression method.
 ##
 ## The analysis is performed on the correlation matrix of the standardized
@@ -85,7 +85,7 @@ function [loadings, specvar, fscores] = factoran (X, nfac)
   for it = 1 : maxit
     Rstar = R - diag (1 - h2);
     [V, D] = eig (Rstar);
-    [~, idx] = sort (diag (D), "descend");
+    [~, idx] = sort (diag (D), 'descend');
     V = V(:, idx);
     ev = diag (D(idx, idx));
     Ltmp = V(:, 1:nfac) * diag (sqrt (ev(1:nfac)));
@@ -106,8 +106,8 @@ function [loadings, specvar, fscores] = factoran (X, nfac)
   ## Force sign convention: largest absolute value in each column positive
   [~, m_ind] = max (abs (loadings), [], 1);
   for j = 1 : nfac
-    if (loadings (m_ind(j), j) < 0)
-      loadings (:, j) = - loadings (:, j);
+    if (loadings(m_ind(j), j) < 0)
+      loadings(:, j) = - loadings(:, j);
     endif
   endfor
 
@@ -157,9 +157,9 @@ endfunction
 %! l_out = [0.7071; 0.7071];
 %! s_out = [0.5000; 0.5000];
 %! f_out = [-0.7071; -0.7071; 1.4142];
-%! assert (loadings, l_out, 1.3e-4);
-%! assert (specvar, s_out, 1.3e-4);
-%! assert (fscores, f_out, 1.3e-4);
+%! assert_equal (loadings, l_out, 1.3e-4);
+%! assert_equal (specvar, s_out, 1.3e-4);
+%! assert_equal (fscores, f_out, 1.3e-4);
 
 ## Test input validation
 %!error factoran ()

@@ -57,8 +57,8 @@ function x = bisainv (p, beta, gamma)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (beta, "single") || isa (gamma, "single"))
-    x = zeros (size (p), "single");
+  if (isa (p, 'single') || isa (beta, 'single') || isa (gamma, 'single'))
+    x = zeros (size (p), 'single');
   else
     x = zeros (size (p));
   endif
@@ -98,14 +98,14 @@ endfunction
 %! x3 = bisainv (p, 1, 2);
 %! x4 = bisainv (p, 1, 5);
 %! x5 = bisainv (p, 1, 10);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-c", p, x5, "-m")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-c', p, x5, '-m')
 %! grid on
 %! ylim ([0, 10])
-%! legend ({"β = 1, γ = 0.5", "β = 1, γ = 1", "β = 1, γ = 2", ...
-%!          "β = 1, γ = 5", "β = 1, γ = 10"}, "location", "northwest")
-%! title ("Birnbaum-Saunders iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'β = 1, γ = 0.5', 'β = 1, γ = 1', 'β = 1, γ = 2', ...
+%!          'β = 1, γ = 5', 'β = 1, γ = 10'}, 'location', 'northwest')
+%! title ('Birnbaum-Saunders iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 %!demo
 %! ## Plot various iCDFs from the Birnbaum-Saunders distribution
@@ -115,32 +115,32 @@ endfunction
 %! x3 = bisainv (p, 1, 0.5);
 %! x4 = bisainv (p, 3, 0.5);
 %! x5 = bisainv (p, 5, 0.5);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-c", p, x5, "-m")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-c', p, x5, '-m')
 %! grid on
 %! ylim ([0, 10])
-%! legend ({"β = 1, γ = 0.3", "β = 2, γ = 0.3", "β = 1, γ = 0.5", ...
-%!          "β = 3, γ = 0.5", "β = 5, γ = 0.5"}, "location", "northwest")
-%! title ("Birnbaum-Saunders iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'β = 1, γ = 0.3', 'β = 2, γ = 0.3', 'β = 1, γ = 0.5', ...
+%!          'β = 3, γ = 0.5', 'β = 5, γ = 0.5'}, 'location', 'northwest')
+%! title ('Birnbaum-Saunders iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p, y, f
-%! f = @(p,b,c) (b * (c * norminv (p) + sqrt (4 + (c * norminv(p))^2))^2) / 4;
+%! f = @(p,b,c) (b * (c * norminv (p) + sqrt (4 + (c * norminv (p))^2))^2) / 4;
 %! p = [-1, 0, 1/4, 1/2, 1, 2];
 %! y = [NaN, 0, f(1/4, 1, 1), 1, Inf, NaN];
-%!assert (bisainv (p, ones (1,6), ones (1,6)), y)
-%!assert (bisainv (p, 1, ones (1,6)), y)
-%!assert (bisainv (p, ones (1,6), 1), y)
-%!assert (bisainv (p, 1, 1), y)
-%!assert (bisainv (p, 1, [1, 1, 1, NaN, 1, 1]), [y(1:3), NaN, y(5:6)])
-%!assert (bisainv (p, [1, 1, 1, NaN, 1, 1], 1), [y(1:3), NaN, y(5:6)])
-%!assert (bisainv ([p, NaN], 1, 1), [y, NaN])
+%!assert_equal (bisainv (p, ones (1,6), ones (1,6)), y)
+%!assert_equal (bisainv (p, 1, ones (1,6)), y)
+%!assert_equal (bisainv (p, ones (1,6), 1), y)
+%!assert_equal (bisainv (p, 1, 1), y)
+%!assert_equal (bisainv (p, 1, [1, 1, 1, NaN, 1, 1]), [y(1:3), NaN, y(5:6)])
+%!assert_equal (bisainv (p, [1, 1, 1, NaN, 1, 1], 1), [y(1:3), NaN, y(5:6)])
+%!assert_equal (bisainv ([p, NaN], 1, 1), [y, NaN])
 
 ## Test class of input preserved
-%!assert (bisainv (single ([p, NaN]), 1, 1), single ([y, NaN]), eps ("single"))
-%!assert (bisainv ([p, NaN], 1, single (1)), single ([y, NaN]), eps ("single"))
-%!assert (bisainv ([p, NaN], single (1), 1), single ([y, NaN]), eps ("single"))
+%!assert_equal (bisainv (single ([p, NaN]), 1, 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (bisainv ([p, NaN], 1, single (1)), single ([y, NaN]), eps ('single'))
+%!assert_equal (bisainv ([p, NaN], single (1), 1), single ([y, NaN]), eps ('single'))
 
 ## Test input validation
 %!error<bisainv: function called with too few input arguments.> bisainv ()
@@ -148,11 +148,11 @@ endfunction
 %!error<bisainv: function called with too few input arguments.> bisainv (1, 2)
 %!error<bisainv: function called with too many inputs> bisainv (1, 2, 3, 4)
 %!error<bisainv: P, BETA, and GAMMA must be of common size or scalars.> ...
-%! bisainv (ones (3), ones (2), ones(2))
+%! bisainv (ones (3), ones (2), ones (2))
 %!error<bisainv: P, BETA, and GAMMA must be of common size or scalars.> ...
-%! bisainv (ones (2), ones (3), ones(2))
+%! bisainv (ones (2), ones (3), ones (2))
 %!error<bisainv: P, BETA, and GAMMA must be of common size or scalars.> ...
-%! bisainv (ones (2), ones (2), ones(3))
+%! bisainv (ones (2), ones (2), ones (3))
 %!error<bisainv: P, BETA, and GAMMA must not be complex.> bisainv (i, 4, 3)
 %!error<bisainv: P, BETA, and GAMMA must not be complex.> bisainv (1, i, 3)
 %!error<bisainv: P, BETA, and GAMMA must not be complex.> bisainv (1, 4, i)

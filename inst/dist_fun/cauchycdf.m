@@ -19,7 +19,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {statistics} {@var{p} =} cauchycdf (@var{x}, @var{x0}, @var{gamma})
-## @deftypefnx {statistics} {@var{p} =} cauchycdf (@var{x}, @var{x0}, @var{gamma}, @qcode{"upper"})
+## @deftypefnx {statistics} {@var{p} =} cauchycdf (@var{x}, @var{x0}, @var{gamma}, @qcode{'upper'})
 ##
 ## Cauchy cumulative distribution function (CDF).
 ##
@@ -48,7 +48,7 @@ function p = cauchycdf (x, x0, gamma, uflag)
 
   ## Check for valid "upper" flag
   if (nargin > 3)
-    if (! strcmpi (uflag, "upper"))
+    if (! strcmpi (uflag, 'upper'))
       error ("cauchycdf: invalid argument for upper tail.");
     else
       uflag = true;
@@ -72,8 +72,8 @@ function p = cauchycdf (x, x0, gamma, uflag)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (x0, "single") || isa (gamma, "single"));
-    p = NaN (size (x), "single");
+  if (isa (x, 'single') || isa (x0, 'single') || isa (gamma, 'single'));
+    p = NaN (size (x), 'single');
   else
     p = NaN (size (x));
   endif
@@ -105,31 +105,31 @@ endfunction
 %! p2 = cauchycdf (x, 0, 1);
 %! p3 = cauchycdf (x, 0, 2);
 %! p4 = cauchycdf (x, -2, 1);
-%! plot (x, p1, "-b", x, p2, "-g", x, p3, "-r", x, p4, "-c")
+%! plot (x, p1, '-b', x, p2, '-g', x, p3, '-r', x, p4, '-c')
 %! grid on
 %! xlim ([-5, 5])
-%! legend ({"x0 = 0, γ = 0.5", "x0 = 0, γ = 1", ...
-%!          "x0 = 0, γ = 2", "x0 = -2, γ = 1"}, "location", "southeast")
-%! title ("Cauchy CDF")
-%! xlabel ("values in x")
-%! ylabel ("probability")
+%! legend ({'x0 = 0, γ = 0.5', 'x0 = 0, γ = 1', ...
+%!          'x0 = 0, γ = 2', 'x0 = -2, γ = 1'}, 'location', 'southeast')
+%! title ('Cauchy CDF')
+%! xlabel ('values in x')
+%! ylabel ('probability')
 
 ## Test output
 %!shared x, y
 %! x = [-1 0 0.5 1 2];
 %! y = 1/pi * atan ((x-1) / 2) + 1/2;
-%!assert (cauchycdf (x, ones (1,5), 2*ones (1,5)), y)
-%!assert (cauchycdf (x, 1, 2*ones (1,5)), y)
-%!assert (cauchycdf (x, ones (1,5), 2), y)
-%!assert (cauchycdf (x, [-Inf 1 NaN 1 Inf], 2), [NaN y(2) NaN y(4) NaN])
-%!assert (cauchycdf (x, 1, 2*[0 1 NaN 1 Inf]), [NaN y(2) NaN y(4) NaN])
-%!assert (cauchycdf ([x(1:2) NaN x(4:5)], 1, 2), [y(1:2) NaN y(4:5)])
-%!assert (cauchycdf ([x, NaN], 1, 2), [y, NaN])
+%!assert_equal (cauchycdf (x, ones (1,5), 2*ones (1,5)), y)
+%!assert_equal (cauchycdf (x, 1, 2*ones (1,5)), y)
+%!assert_equal (cauchycdf (x, ones (1,5), 2), y)
+%!assert_equal (cauchycdf (x, [-Inf 1 NaN 1 Inf], 2), [NaN y(2) NaN y(4) NaN])
+%!assert_equal (cauchycdf (x, 1, 2*[0 1 NaN 1 Inf]), [NaN y(2) NaN y(4) NaN])
+%!assert_equal (cauchycdf ([x(1:2) NaN x(4:5)], 1, 2), [y(1:2) NaN y(4:5)])
+%!assert_equal (cauchycdf ([x, NaN], 1, 2), [y, NaN])
 
 ## Test class of input preserved
-%!assert (cauchycdf (single ([x, NaN]), 1, 2), single ([y, NaN]), eps ("single"))
-%!assert (cauchycdf ([x, NaN], single (1), 2), single ([y, NaN]), eps ("single"))
-%!assert (cauchycdf ([x, NaN], 1, single (2)), single ([y, NaN]), eps ("single"))
+%!assert_equal (cauchycdf (single ([x, NaN]), 1, 2), single ([y, NaN]), eps ('single'))
+%!assert_equal (cauchycdf ([x, NaN], single (1), 2), single ([y, NaN]), eps ('single'))
+%!assert_equal (cauchycdf ([x, NaN], 1, single (2)), single ([y, NaN]), eps ('single'))
 
 ## Test input validation
 %!error<cauchycdf: function called with too few input arguments.> cauchycdf ()
@@ -138,7 +138,7 @@ endfunction
 %! cauchycdf (1, 2)
 %!error<cauchycdf: function called with too many inputs> ...
 %! cauchycdf (1, 2, 3, 4, 5)
-%!error<cauchycdf: invalid argument for upper tail.> cauchycdf (1, 2, 3, "tail")
+%!error<cauchycdf: invalid argument for upper tail.> cauchycdf (1, 2, 3, 'tail')
 %!error<cauchycdf: invalid argument for upper tail.> cauchycdf (1, 2, 3, 4)
 %!error<cauchycdf: X, X0, and GAMMA must be of common size or scalars.> ...
 %! cauchycdf (ones (3), ones (2), ones (2))

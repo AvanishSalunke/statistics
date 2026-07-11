@@ -56,8 +56,8 @@ function y = cauchypdf (x, x0, gamma)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (x0, "single") || isa (gamma, "single"))
-    y = NaN (size (x), "single");
+  if (isa (x, 'single') || isa (x0, 'single') || isa (gamma, 'single'))
+    y = NaN (size (x), 'single');
   else
     y = NaN (size (x));
   endif
@@ -80,36 +80,36 @@ endfunction
 %! y2 = cauchypdf (x, 0, 1);
 %! y3 = cauchypdf (x, 0, 2);
 %! y4 = cauchypdf (x, -2, 1);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-c")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-c')
 %! grid on
 %! xlim ([-5, 5])
 %! ylim ([0, 0.7])
-%! legend ({"x0 = 0, γ = 0.5", "x0 = 0, γ = 1", ...
-%!          "x0 = 0, γ = 2", "x0 = -2, γ = 1"}, "location", "northeast")
-%! title ("Cauchy PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'x0 = 0, γ = 0.5', 'x0 = 0, γ = 1', ...
+%!          'x0 = 0, γ = 2', 'x0 = -2, γ = 1'}, 'location', 'northeast')
+%! title ('Cauchy PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-1 0 0.5 1 2];
 %! y = 1/pi * ( 2 ./ ((x-1).^2 + 2^2) );
-%!assert (cauchypdf (x, ones (1,5), 2*ones (1,5)), y)
-%!assert (cauchypdf (x, 1, 2*ones (1,5)), y)
-%!assert (cauchypdf (x, ones (1,5), 2), y)
-%!assert (cauchypdf (x, [-Inf 1 NaN 1 Inf], 2), [NaN y(2) NaN y(4) NaN])
-%!assert (cauchypdf (x, 1, 2*[0 1 NaN 1 Inf]), [NaN y(2) NaN y(4) NaN])
-%!assert (cauchypdf ([x, NaN], 1, 2), [y, NaN])
+%!assert_equal (cauchypdf (x, ones (1,5), 2*ones (1,5)), y)
+%!assert_equal (cauchypdf (x, 1, 2*ones (1,5)), y)
+%!assert_equal (cauchypdf (x, ones (1,5), 2), y)
+%!assert_equal (cauchypdf (x, [-Inf 1 NaN 1 Inf], 2), [NaN y(2) NaN y(4) NaN])
+%!assert_equal (cauchypdf (x, 1, 2*[0 1 NaN 1 Inf]), [NaN y(2) NaN y(4) NaN])
+%!assert_equal (cauchypdf ([x, NaN], 1, 2), [y, NaN])
 
 ## Test class of input preserved
-%!assert (cauchypdf (single ([x, NaN]), 1, 2), single ([y, NaN]), eps ("single"))
-%!assert (cauchypdf ([x, NaN], single (1), 2), single ([y, NaN]), eps ("single"))
-%!assert (cauchypdf ([x, NaN], 1, single (2)), single ([y, NaN]), eps ("single"))
+%!assert_equal (cauchypdf (single ([x, NaN]), 1, 2), single ([y, NaN]), eps ('single'))
+%!assert_equal (cauchypdf ([x, NaN], single (1), 2), single ([y, NaN]), eps ('single'))
+%!assert_equal (cauchypdf ([x, NaN], 1, single (2)), single ([y, NaN]), eps ('single'))
 
 ## Cauchy (0,1) == Student's T distribution with 1 DOF
 %!test
 %! x = rand (10, 1);
-%! assert (cauchypdf (x, 0, 1), tpdf (x, 1), eps);
+%! assert_equal (cauchypdf (x, 0, 1), tpdf (x, 1), eps);
 
 ## Test input validation
 %!error<cauchypdf: function called with too few input arguments.> cauchypdf ()
@@ -118,11 +118,11 @@ endfunction
 %! cauchypdf (1, 2)
 %!error<cauchypdf: function called with too many inputs> cauchypdf (1, 2, 3, 4)
 %!error<cauchypdf: X, X0, and GAMMA must be of common size or scalars.> ...
-%! cauchypdf (ones (3), ones (2), ones(2))
+%! cauchypdf (ones (3), ones (2), ones (2))
 %!error<cauchypdf: X, X0, and GAMMA must be of common size or scalars.> ...
-%! cauchypdf (ones (2), ones (3), ones(2))
+%! cauchypdf (ones (2), ones (3), ones (2))
 %!error<cauchypdf: X, X0, and GAMMA must be of common size or scalars.> ...
-%! cauchypdf (ones (2), ones (2), ones(3))
+%! cauchypdf (ones (2), ones (2), ones (3))
 %!error<cauchypdf: X, X0, and GAMMA must not be complex.> cauchypdf (i, 4, 3)
 %!error<cauchypdf: X, X0, and GAMMA must not be complex.> cauchypdf (1, i, 3)
 %!error<cauchypdf: X, X0, and GAMMA must not be complex.> cauchypdf (1, 4, i)

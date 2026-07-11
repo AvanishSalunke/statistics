@@ -39,14 +39,17 @@
 ## Data is a single vector @var{Y} with groups specified by a corresponding
 ## matrix or cell array of group labels @var{GROUP}, where each column of
 ## @var{GROUP} has the same number of rows as @var{Y}. For example, if
-## @code{@var{Y} = [23; 27; 31; 29; 30; 32]; @var{GROUP} = [1, 2; 1, 3; 1, 2; 2, 3; 2, 3; 3, 2];}
+## @code{@var{Y} = [23; 27; 31; 29; 30; 32]; @var{GROUP} = [1, 2; 1, 3; 1, 2; 2,
+## 3; 2, 3; 3,
+## 2];}
 ## then observation 23 was measured under conditions 1,2; observation 27 was
-## measured under conditions 1,3; and so on. If the @var{GROUP} provided is empty,
-## then the linear model is fit with just the intercept (no predictors).
+## measured under conditions 1,3; and so on. If the @var{GROUP} provided is
+## empty, then the linear model is fit with just the intercept (no predictors).
 ##
 ## @code{anovan} can take a number of optional parameters as name-value pairs.
 ##
-## @code{[@dots{}] = anovan (@var{Y}, @var{GROUP}, "continuous", @var{continuous})}
+## @code{[@dots{}] = anovan (@var{Y}, @var{GROUP}, "continuous",
+## @var{continuous})}
 ##
 ## @itemize
 ## @item
@@ -151,7 +154,8 @@
 ## planned contrasts (see below).
 ## @end itemize
 ##
-## @code{[@dots{}] = anovan (@var{Y}, @var{GROUP}, "contrasts", @var{contrasts})}
+## @code{[@dots{}] = anovan (@var{Y}, @var{GROUP}, "contrasts",
+## @var{contrasts})}
 ##
 ## @itemize
 ## @item
@@ -233,7 +237,8 @@
 ## confidence interval bounds, t-statistics, and p-values relating to the
 ## contrasts. The number appended to each term name in @var{stats}.coeffnames
 ## corresponds to the column number in the relevant contrast matrix for that
-## factor. The @var{stats} structure can be used as input for @code{multcompare}.
+## factor. The @var{stats} structure can be used as input for
+## @code{multcompare}.
 ##
 ## @code{[@var{p}, @var{atab}, @var{stats}, @var{terms}] = anovan (@dots{})}
 ## returns the model term definitions.
@@ -251,8 +256,8 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
     if ((numel (varargin) / 2) != fix (numel (varargin) / 2))
       error ("anovan: wrong number of arguments.")
     endif
-    MODELTYPE = "linear";
-    DISPLAY = "on";
+    MODELTYPE = 'linear';
+    DISPLAY = 'on';
     SSTYPE = 3;
     VARNAMES = [];
     CONTINUOUS = [];
@@ -264,26 +269,26 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
       name = varargin{idx-2};
       value = varargin{idx-1};
       switch (lower (name))
-        case "model"
+        case 'model'
           MODELTYPE = value;
-        case "continuous"
+        case 'continuous'
           CONTINUOUS = value;
-        case "random"
+        case 'random'
           RANDOM = value;
-        case "nested"
+        case 'nested'
           error (strcat ("anovan: nested ANOVA is not supported. Please use", ...
                          " anova2 for fully balanced nested ANOVA designs."));
-        case "sstype"
+        case 'sstype'
           SSTYPE = value;
-        case "varnames"
+        case 'varnames'
           VARNAMES = value;
-        case {"display","displayopt"}
+        case {'display','displayopt'}
           DISPLAY = value;
-        case "contrasts"
+        case 'contrasts'
           CONTRASTS = value;
-        case "alpha"
+        case 'alpha'
           ALPHA = value;
-        case "weights"
+        case 'weights'
           WEIGHTS = value;
         otherwise
           error ("anovan: parameter '%s' is not supported.", name);
@@ -348,7 +353,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
     if (! isempty (VARNAMES))
       if (iscell (VARNAMES))
         if (all (cellfun (@ischar, VARNAMES)))
-          nvarnames = numel(VARNAMES);
+          nvarnames = numel (VARNAMES);
         else
           error (strcat ("anovan: all variable names must", ...
                          " be character or character arrays."));
@@ -366,7 +371,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
       endif
     else
       nvarnames = N;
-      VARNAMES = arrayfun(@(x) ["X",num2str(x)], 1:N, "UniformOutput", 0);
+      VARNAMES = arrayfun (@(x) ['X',num2str(x)], 1:N, 'UniformOutput', 0);
     endif
     if (nvarnames != N)
       error (strcat ("anovan: number of variable names is not equal", ...
@@ -374,7 +379,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
     endif
 
     ## Evaluate random argument (if applicable)
-    if (! isempty(RANDOM))
+    if (! isempty (RANDOM))
       if (isnumeric (RANDOM))
         if (any (RANDOM != abs (fix (RANDOM))))
           error (strcat ("anovan: the value provided for the RANDOM", ...
@@ -404,7 +409,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
       CONTRASTS = cell (1, N);
       planned = false;
     else
-      if (ischar(CONTRASTS))
+      if (ischar (CONTRASTS))
         contr_str = CONTRASTS;
         CONTRASTS = cell (1, N);
         CONTRASTS(:) = {contr_str};
@@ -414,9 +419,9 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
       endif
       for i = 1:N
         if (! isempty (CONTRASTS{i}))
-          msg = strcat("columns in CONTRASTS must sum to", ...
+          msg = strcat ("columns in CONTRASTS must sum to", ...
                        " 0 for SSTYPE 3. Switching to SSTYPE 2 instead.");
-          if (isnumeric(CONTRASTS{i}))
+          if (isnumeric (CONTRASTS{i}))
             ## Check whether all the columns sum to 0
             if (any (abs (sum (CONTRASTS{i})) > eps ('single')))
               warning (strcat ("Note that the CONTRASTS for predictor", ...
@@ -431,13 +436,13 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
             endif
           else
             if (! ismember (lower (CONTRASTS{i}), ...
-                            {"simple","anova","poly","helmert","effect",...
-                              "sdif","sdiff","treatment"}))
+                            {'simple','anova','poly','helmert','effect',...
+                              'sdif','sdiff','treatment'}))
               error (strcat ("anovan: valid built-in contrasts are:", ...
                              " 'simple', 'poly', 'helmert',",...
                              "'effect', 'sdif' or 'treatment'."));
             endif
-            if (strcmpi (CONTRASTS{i}, "treatment") && (SSTYPE==3))
+            if (strcmpi (CONTRASTS{i}, 'treatment') && (SSTYPE==3))
               warning (msg);
               SSTYPE = 2;
             endif
@@ -449,10 +454,10 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
 
     ## Evaluate alpha input argument
     if (! isa (ALPHA,'numeric') || numel (ALPHA) != 1)
-      error("anovan: alpha must be a numeric scalar value.");
+      error ("anovan: alpha must be a numeric scalar value.");
     endif
     if ((ALPHA <= 0) || (ALPHA >= 1))
-      error("anovan: alpha must be a value between 0 and 1.");
+      error ("anovan: alpha must be a value between 0 and 1.");
     endif
 
     ## Remove NaN or non-finite observations
@@ -460,7 +465,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
       excl = any ([isnan(Y), isinf(Y)], 2);
     else
       XC = GROUP(:,CONTINUOUS);
-      if iscell(XC)
+      if iscell (XC)
         XC = cell2mat (XC);
       endif
       excl = any ([isnan(Y), isinf(Y), any(isnan(XC),2), any(isinf(XC),2)], 2);
@@ -473,15 +478,15 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
     n = numel (Y);     # recalculate total number of observations
 
     ## Evaluate weights input argument
-    if (! isempty(WEIGHTS))
-      if (! isnumeric(WEIGHTS))
+    if (! isempty (WEIGHTS))
+      if (! isnumeric (WEIGHTS))
         error ("anovan: WEIGHTS must be a numeric datatype.");
       endif
       if (any (size (WEIGHTS) != [n,1]))
         error (strcat ("anovan: WEIGHTS must be a vector", ...
                        " with the same dimensions as Y."));
       endif
-      if (any(!(WEIGHTS > 0)) || any (isinf (WEIGHTS)))
+      if (any (! (WEIGHTS > 0)) || any (isinf (WEIGHTS)))
         error ("anovan: WEIGHTS must be a vector of positive finite values.");
       endif
       # Create diagonal matrix of normalized weights
@@ -496,11 +501,11 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
                   " cannot exceed the number of columns of GROUP.");
     if (ischar (MODELTYPE))
       switch (lower (MODELTYPE))
-        case "linear"
+        case 'linear'
           MODELTYPE = 1;
-        case {"interaction","interactions"}
+        case {'interaction','interactions'}
           MODELTYPE = 2;
-        case "full"
+        case 'full'
           MODELTYPE = N;
         otherwise
           error ("anovan: model type not recognised");
@@ -538,11 +543,11 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
           Nx = zeros (1, N-1);
           Nx = 0;
           for k = 1:N
-            Nx = Nx + nchoosek(N,k);
+            Nx = Nx + nchoosek (N,k);
           endfor
           for j = 1:MODELTYPE
             v(1:j) = 1;
-            TERMS(j) = flipud (unique (perms (v), "rows"));
+            TERMS(j) = flipud (unique (perms (v), 'rows'));
           endfor
           TERMS = cell2mat (TERMS);
       endswitch
@@ -566,7 +571,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
     endif
     ## Drop terms that include interactions with factors specified as random effects.
     drop = any (bsxfun (@and, TERMS(:,RANDOM), (Ng > 1)), 2);
-    TERMS (drop, :) = [];
+    TERMS(drop, :) = [];
     Ng(drop) = [];
     ## Evaluate terms
     Nm = sum (Ng == 1);
@@ -598,13 +603,13 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
           R = sse;
         endfor
         [b, sse, resid, ucov, hat] = lmfit (XS, Y, W);
-        sstype_char = "I";
+        sstype_char = 'I';
       case {2,'h'}
         ## Type II (partially sequential, or hierarchical) sums-of-squares
         ss = zeros (Nt,1);
         for j = 1:Nt
           i = find (TERMS(j,:));
-          k = cat (1, 1, 1 + find (any (!TERMS(:,i),2)));
+          k = cat (1, 1, 1 + find (any (! TERMS(:,i),2)));
           XS = cell2mat (X(k));
           [jnk, R1] = lmfit (XS, Y, W);
           k = cat (1, j+1, k);
@@ -613,7 +618,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
           ss(j) = R1 - R2;
         endfor
         [b, sse, resid, ucov, hat] = lmfit (cell2mat (X), Y, W);
-        sstype_char = "II";
+        sstype_char = 'II';
       case 3
         ## Type III (partial, constrained or marginal) sums-of-squares
         ss = zeros (Nt, 1);
@@ -623,7 +628,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
           [jnk, R] = lmfit (XS, Y, W);
           ss(j) = R - sse;
         endfor
-        sstype_char = "III";
+        sstype_char = 'III';
       otherwise
         error ("anovan: sstype value not supported.");
     endswitch
@@ -638,17 +643,17 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
 
     ## Prepare model formula and cell array containing the ANOVA table
     T = cell (Nt + 3, 7);
-    T(1,:) = {"Source", "Sum Sq.", "d.f.", "Mean Sq.", "Eta Sq.", "F", "Prob>F"};
+    T(1,:) = {'Source', 'Sum Sq.', 'd.f.', 'Mean Sq.', 'Eta Sq.', 'F', 'Prob>F'};
     T(2:Nt+1,2:7) = num2cell ([ss df ms partial_eta_sq F P]);
-    T(end-1,1:4) = {"Error", sse, dfe, mse};
-    T(end,1:3) = {"Total", sst, dft};
+    T(end-1,1:4) = {'Error', sse, dfe, mse};
+    T(end,1:3) = {'Total', sst, dft};
     formula = sprintf ("Y ~ 1");  # Initialize model formula
     for i = 1:Nt
       str = sprintf ("%s*", VARNAMES{find (TERMS(i,:))});
       T(i+1,1) = str(1:end-1);
       ## Append model term to formula
-      str = regexprep (str, "\\*", ":");
-      if (strcmp (str(end-1), "'"))
+      str = regexprep (str, "\\*", ':');
+      if (strcmp (str(end-1), ''''))
         ## Random intercept term
         formula = sprintf ("%s + (1|%s)", formula, str(1:end-2));
         ## Remove statistics for random factors from the ANOVA table
@@ -675,7 +680,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
     coeff_stats(:,6) = p;                                # p-values
     ## Assign NaN to p-value to avoid printing statistics relating to
     ## coefficients for 'random' effects
-    hi = 1 + cumsum(df);
+    hi = 1 + cumsum (df);
     for ignore = RANDOM
       p(hi(ignore)-df(ignore)+1:hi(ignore)) = NaN;
     endfor
@@ -686,65 +691,65 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
         .* h ./ (1 - h).^2;  % Cook's distance
 
     ## Create STATS structure for MULTCOMPARE
-    STATS = struct ("source","anovan", ...
-                    "resid", resid, ...      # These are weighted (not raw) residuals
-                    "coeffs", coeff_stats, ...
-                    "Rtr", [], ...           # Not used by Octave
-                    "rowbasis", [], ...      # Not used by Octave
-                    "dfe", dfe, ...
-                    "mse", mse, ...
-                    "nullproject", [], ...   # Not used by Octave
-                    "terms", TERMS, ...
-                    "nlevels", nlevels, ...
-                    "continuous", cont_vec, ...
-                    "vmeans", vmeans, ...
-                    "termcols", termcols, ...
-                    "coeffnames", {cellstr(char(coeffnames{:}))}, ...
-                    "vars", [], ...          # Not used by Octave
-                    "varnames", {VARNAMES}, ...
-                    "grpnames", {levels}, ...
-                    "vnested", [], ...       # Not used since "nested" argument name is not supported
-                    "ems", [], ...           # Not used since "nested" argument name is not supported
-                    "denom", [], ...         # Not used since interactions with random factors is not supported
-                    "dfdenom", [], ...       # Not used since interactions with random factors is not supported
-                    "msdenom", [], ...       # Not used since interactions with random factors is not supported
-                    "varest", [], ...        # Not used since interactions with random factors is not supported
-                    "varci", [], ...         # Not used since interactions with random factors is not supported
-                    "txtdenom", [], ...      # Not used since interactions with random factors is not supported
-                    "txtems", [], ...        # Not used since interactions with random factors is not supported
-                    "rtnames", [], ...       # Not used since interactions with random factors is not supported
+    STATS = struct ('source','anovan', ...
+                    'resid', resid, ...      # These are weighted (not raw) residuals
+                    'coeffs', coeff_stats, ...
+                    'Rtr', [], ...           # Not used by Octave
+                    'rowbasis', [], ...      # Not used by Octave
+                    'dfe', dfe, ...
+                    'mse', mse, ...
+                    'nullproject', [], ...   # Not used by Octave
+                    'terms', TERMS, ...
+                    'nlevels', nlevels, ...
+                    'continuous', cont_vec, ...
+                    'vmeans', vmeans, ...
+                    'termcols', termcols, ...
+                    'coeffnames', {cellstr(char(coeffnames{:}))}, ...
+                    'vars', [], ...          # Not used by Octave
+                    'varnames', {VARNAMES}, ...
+                    'grpnames', {levels}, ...
+                    'vnested', [], ...       # Not used since "nested" argument name is not supported
+                    'ems', [], ...           # Not used since "nested" argument name is not supported
+                    'denom', [], ...         # Not used since interactions with random factors is not supported
+                    'dfdenom', [], ...       # Not used since interactions with random factors is not supported
+                    'msdenom', [], ...       # Not used since interactions with random factors is not supported
+                    'varest', [], ...        # Not used since interactions with random factors is not supported
+                    'varci', [], ...         # Not used since interactions with random factors is not supported
+                    'txtdenom', [], ...      # Not used since interactions with random factors is not supported
+                    'txtems', [], ...        # Not used since interactions with random factors is not supported
+                    'rtnames', [], ...       # Not used since interactions with random factors is not supported
                     ## Additional STATS fields used exclusively by Octave
-                    "center_continuous", center_continuous, ...
-                    "random", RANDOM, ...
-                    "formula", formula, ...
-                    "alpha", ALPHA, ...
-                    "df", df, ...
-                    "contrasts", {CONTRASTS}, ...
-                    "X", sparse (cell2mat (X)), ...
-                    "Y", Y, ...
-                    "W", sparse (W), ...
-                    "lmfit", @lmfit, ...
-                    "vcov", sparse (ucov * mse), ...
-                    "CooksD", D, ...
-                    "grps", gid, ...
-                    "eta_squared", eta_sq, ...
-                    "partial_eta_squared", partial_eta_sq);
+                    'center_continuous', center_continuous, ...
+                    'random', RANDOM, ...
+                    'formula', formula, ...
+                    'alpha', ALPHA, ...
+                    'df', df, ...
+                    'contrasts', {CONTRASTS}, ...
+                    'X', sparse (cell2mat (X)), ...
+                    'Y', Y, ...
+                    'W', sparse (W), ...
+                    'lmfit', @lmfit, ...
+                    'vcov', sparse (ucov * mse), ...
+                    'CooksD', D, ...
+                    'grps', gid, ...
+                    'eta_squared', eta_sq, ...
+                    'partial_eta_squared', partial_eta_sq);
 
     ## Print ANOVA table
     switch (lower (DISPLAY))
 
-      case {"on", true}
+      case {'on', true}
 
         ## Print model formula
-        fprintf("\nMODEL FORMULA (based on Wilkinson's notation):\n\n%s\n", formula);
+        fprintf ("\nMODEL FORMULA (based on Wilkinson's notation):\n\n%s\n", formula);
 
         ## If applicable, print parameter estimates (a.k.a contrasts) for fixed effects
-        if (planned && ! isempty(GROUP))
+        if (planned && ! isempty (GROUP))
           ## Parameter estimates correspond to the contrasts we set. To avoid
           ## p-hacking, don't print contrasts if we don't specify them to start with
-          fprintf("\nMODEL PARAMETERS (contrasts for the fixed effects)\n\n");
-          fprintf("Parameter               Estimate        SE  Lower.CI  Upper.CI        t Prob>|t|\n");
-          fprintf("--------------------------------------------------------------------------------\n");
+          fprintf ("\nMODEL PARAMETERS (contrasts for the fixed effects)\n\n");
+          fprintf ("Parameter               Estimate        SE  Lower.CI  Upper.CI        t Prob>|t|\n");
+          fprintf ("--------------------------------------------------------------------------------\n");
           for j = 1:size (coeff_stats, 1)
             if (p(j) < 0.001)
               fprintf ("%-20s  %10.3g %9.3g %9.3g %9.3g %8.2f    <.001 \n", ...
@@ -752,7 +757,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
             elseif (p(j) < 0.9995)
               fprintf ("%-20s  %10.3g %9.3g %9.3g %9.3g %8.2f     .%03u \n", ...
                        STATS.coeffnames{j}, STATS.coeffs(j,1:end-1), round (p(j) * 1e+03));
-            elseif (isnan(p(j)))
+            elseif (isnan (p(j)))
               ## Don't display coefficients for 'random' effects since they were
               ## treated as fixed effects
             else
@@ -764,36 +769,36 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
 
         ## Print ANOVA table
         [nrows, ncols] = size (T);
-        fprintf("\nANOVA TABLE (Type %s sums-of-squares):\n\n", sstype_char);
-        fprintf("Source                   Sum Sq.    d.f.    Mean Sq.  R Sq.            F  Prob>F\n");
-        fprintf("--------------------------------------------------------------------------------\n");
+        fprintf ("\nANOVA TABLE (Type %s sums-of-squares):\n\n", sstype_char);
+        fprintf ("Source                   Sum Sq.    d.f.    Mean Sq.  R Sq.            F  Prob>F\n");
+        fprintf ("--------------------------------------------------------------------------------\n");
         for i = 1:Nt
           str = T{i+1,1};
-          l = numel(str);  # Needed to truncate source term name at 18 characters
+          l = numel (str);  # Needed to truncate source term name at 18 characters
           ## Format and print the statistics for each model term
           ## Format F statistics and p-values in APA style
           if (P(i) < 0.001)
             fprintf ("%-20s  %10.5g  %6d  %10.5g  %4.3f  %11.2f   <.001 \n", ...
-                      str(1:min(18,l)), T{i+1,2:end-1});
+                      str(1:min (18,l)), T{i+1,2:end-1});
           elseif (P(i) < 0.9995)
             fprintf ("%-20s  %10.5g  %6d  %10.5g  %4.3f  %11.2f    .%03u \n", ...
-                      str(1:min(18,l)), T{i+1,2:end-1}, round (P(i) * 1e+03));
-          elseif (isnan(P(i)))
-            fprintf ("%-20s  %10.5g  %6d \n", str(1:min(18,l)), T{i+1,2:3});
+                      str(1:min (18,l)), T{i+1,2:end-1}, round (P(i) * 1e+03));
+          elseif (isnan (P(i)))
+            fprintf ("%-20s  %10.5g  %6d \n", str(1:min (18,l)), T{i+1,2:3});
           else
             fprintf ("%-20s  %10.5g  %6d  %10.5g  %4.3f  %11.2f    1.000 \n", ...
-                      str(1:min(18,l)), T{i+1,2:end-1});
+                      str(1:min (18,l)), T{i+1,2:end-1});
           endif
         endfor
-        fprintf("Error                 %10.5g  %6d  %10.5g\n", T{end-1,2:4});
-        fprintf("Total                 %10.5g  %6d \n", T{end,2:3});
-        fprintf("\n");
+        fprintf ("Error                 %10.5g  %6d  %10.5g\n", T{end-1,2:4});
+        fprintf ("Total                 %10.5g  %6d \n", T{end,2:3});
+        fprintf ("\n");
 
         ## Make figure of diagnostic plots
-        figure ("Name", "Diagnostic Plots: Model Residuals");
+        figure ('Name', 'Diagnostic Plots: Model Residuals');
         t = STATS.resid ./ (sqrt (mse * (1 - h))); % Studentized residuals
         fit = STATS.X * STATS.coeffs(:,1);         % Fitted values
-        [jnk, DI] = sort (D, "descend");           % Indices of sorted D
+        [jnk, DI] = sort (D, 'descend');           % Indices of sorted D
         nk = 4;                               % Top nk residuals with largest D
 
         ## Normal quantile-quantile plot
@@ -801,12 +806,12 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
         x = ((1 : n)' - .5) / n;
         [ts, I] = sort (t);
         q = norminv (x);
-        plot (q, ts, "ok", "markersize", 3);
+        plot (q, ts, 'ok', 'markersize', 3);
         box off;
         grid on;
-        xlabel ("Theoretical quantiles");
-        ylabel ("Studentized Residuals");
-        title ("Normal Q-Q Plot");
+        xlabel ('Theoretical quantiles');
+        ylabel ('Studentized Residuals');
+        title ('Normal Q-Q Plot');
         arrayfun (@(i) text (q(I == DI(i)), t(DI(i)), ...
                              sprintf ("  %u", DI(i))), [1:min(nk,n)])
         iqr = [0.25; 0.75];
@@ -814,22 +819,22 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
         xl = norminv (iqr);
         slope = diff (yl) / diff (xl);
         int = yl(1) - slope * xl(1);
-        ax1_xlim = get (gca, "XLim");
-        hold on; plot (ax1_xlim, slope * ax1_xlim + int, "k-"); hold off;
-        set (gca, "Xlim", ax1_xlim);
+        ax1_xlim = get (gca, 'XLim');
+        hold on; plot (ax1_xlim, slope * ax1_xlim + int, 'k-'); hold off;
+        set (gca, 'Xlim', ax1_xlim);
 
         ## Spread-Location Plot
         subplot (2, 2, 2);
-        plot (fit, sqrt (abs (t)), "ko", "markersize", 3);
+        plot (fit, sqrt (abs (t)), 'ko', 'markersize', 3);
         box off;
-        xlabel ("Fitted values");
-        ylabel ("sqrt ( | Studentized Residuals | )");
-        title ("Spread-Location Plot")
-        ax2_xlim = get (gca, "XLim");
+        xlabel ('Fitted values');
+        ylabel ('sqrt ( | Studentized Residuals | )');
+        title ('Spread-Location Plot')
+        ax2_xlim = get (gca, 'XLim');
         hold on;
-        plot (ax2_xlim, ones (1, 2) * sqrt (2), "k:");
-        plot (ax2_xlim, ones (1, 2) * sqrt (3), "k-.");
-        plot (ax2_xlim, ones (1, 2) * sqrt (4), "k--");
+        plot (ax2_xlim, ones (1, 2) * sqrt (2), 'k:');
+        plot (ax2_xlim, ones (1, 2) * sqrt (3), 'k-.');
+        plot (ax2_xlim, ones (1, 2) * sqrt (4), 'k--');
         hold off;
         arrayfun (@(i) text (fit(DI(i)), sqrt (abs (t(DI(i)))), ...
                              sprintf ("  %u", DI(i))), [1:min(nk,n)]);
@@ -837,41 +842,41 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
 
         ## Residual-Leverage plot
         subplot (2, 2, 3);
-        plot (h, t, "ko", "markersize", 3);
+        plot (h, t, 'ko', 'markersize', 3);
         box off;
-        xlabel ("Leverage")
-        ylabel ("Studentized Residuals");
-        title ("Residual-Leverage Plot")
-        ax3_xlim = get (gca, "XLim");
-        ax3_ylim = get (gca, "YLim");
-        hold on; plot (ax3_xlim, zeros (1, 2), "k-"); hold off;
+        xlabel ('Leverage')
+        ylabel ('Studentized Residuals');
+        title ('Residual-Leverage Plot')
+        ax3_xlim = get (gca, 'XLim');
+        ax3_ylim = get (gca, 'YLim');
+        hold on; plot (ax3_xlim, zeros (1, 2), 'k-'); hold off;
         arrayfun (@(i) text (h(DI(i)), t(DI(i)), ...
                              sprintf ("  %u", DI(i))), [1:min(nk,n)]);
-        set (gca, "ygrid", "on");
+        set (gca, 'ygrid', 'on');
         xlim (ax3_xlim); ylim (ax3_ylim);
 
         ## Cook's distance stem plot
         subplot (2, 2, 4);
-        stem (D, "ko", "markersize", 3);
+        stem (D, 'ko', 'markersize', 3);
         box off;
-        xlabel ("Obs. number")
-        ylabel ("Cook's distance")
-        title ("Cook's Distance Stem Plot")
+        xlabel ('Obs. number')
+        ylabel ('Cook''s distance')
+        title ('Cook''s Distance Stem Plot')
         xlim ([0, n]);
-        ax4_xlim = get (gca, "XLim");
-        ax4_ylim = get (gca, "YLim");
+        ax4_xlim = get (gca, 'XLim');
+        ax4_ylim = get (gca, 'YLim');
         hold on;
-        plot (ax4_xlim, ones (1, 2) * 4 / dfe, "k:");
-        plot (ax4_xlim, ones (1, 2) * 0.5, "k-.");
-        plot (ax4_xlim, ones (1, 2), "k--");
+        plot (ax4_xlim, ones (1, 2) * 4 / dfe, 'k:');
+        plot (ax4_xlim, ones (1, 2) * 0.5, 'k-.');
+        plot (ax4_xlim, ones (1, 2), 'k--');
         hold off;
         arrayfun (@(i) text (DI(i), D(DI(i)), ...
                              sprintf ("  %u", DI(i))), [1:min(nk,n)]);
         xlim (ax4_xlim); ylim (ax4_ylim);
 
-        set (findall ( gcf, "-property", "FontSize"), "FontSize", 7)
+        set (findall ( gcf, '-property', 'FontSize'), 'FontSize', 7)
 
-      case {"off", false}
+      case {'off', false}
 
         ## do nothing
 
@@ -907,12 +912,12 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
             gid(:,j) = cell2mat ([GROUP(:,j)]);
           else
             gid(:,j) = GROUP(:,j);
-          end
+          endif
 
         else
 
           ## CATEGORICAL PREDICTOR
-          levels{j} = unique (GROUP(:,j), "stable");
+          levels{j} = unique (GROUP(:,j), 'stable');
           if isnumeric (levels{j})
             levels{j} = num2cell (levels{j});
           endif
@@ -932,7 +937,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
       X = cell (1, 1 + Nm + Nx);
       X(1) = ones (n, 1);
       coeffnames = cell (1, 1 + Nm + Nx);
-      coeffnames(1) = "(Intercept)";
+      coeffnames(1) = '(Intercept)';
       vmeans = zeros (Nm, 1);
       center_continuous = cont_vec;
       for j = 1:Nm
@@ -943,7 +948,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
             X(1+j) = cell2mat (GROUP(:,j));
           else
             X(1+j) = GROUP(:,j);
-          end
+          endif
           if (strcmpi (CONTRASTS{j}, 'treatment'))
             ## Don't center continuous variables if contrasts are 'treatment'
             center_continuous(j) = false;
@@ -963,23 +968,23 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
             CONTRASTS{j} = contr_simple (nlevels(j));
           else
             switch (lower (CONTRASTS{j}))
-              case {"simple","anova"}
+              case {'simple','anova'}
                 ## SIMPLE EFFECT CODING (DEFAULT)
                 ## The first level is the reference level
                 CONTRASTS{j} = contr_simple (nlevels(j));
-              case "poly"
+              case 'poly'
                 ## POLYNOMIAL CONTRAST CODING
                 CONTRASTS{j} = contr_poly (nlevels(j));
-              case "helmert"
+              case 'helmert'
                 ## HELMERT CONTRAST CODING
                 CONTRASTS{j} = contr_helmert (nlevels(j));
-              case "effect"
+              case 'effect'
                 ## DEVIATION EFFECT CONTRAST CODING
                 CONTRASTS{j} = contr_sum (nlevels(j));
-              case {"sdif","sdiff"}
+              case {'sdif','sdiff'}
                 ## SUCCESSIVE DEVIATIONS CONTRAST CODING
                 CONTRASTS{j} = contr_sdif (nlevels(j));
-              case "treatment"
+              case 'treatment'
                 ## The first level is the reference level
                 CONTRASTS{j} = contr_treatment (nlevels(j));
               otherwise
@@ -1005,7 +1010,7 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
           C = CONTRASTS{j};
           func = @(x) x(gid(:,j));
           X(1+j) = cell2mat (cellfun (func, num2cell (C, 1), ...
-                                      "UniformOutput", false));
+                                      'UniformOutput', false));
           ## Create names of the coefficients relating to continuous main effects
           coeffnames{1+j} = cell (df(j),1);
           for v = 1:df(j)
@@ -1023,9 +1028,9 @@ function [P, T, STATS, TERMS] = anovan (Y, GROUP, varargin)
           df(Nm+i) = prod (df(I-1));
           termcols(1+Nm+i) = prod (df(I-1) + 1);
           tmp = ones (n,1);
-          for j = 1:numel(I);
+          for j = 1:numel (I);
             tmp = num2cell (tmp, 1);
-            for k = 1:numel(tmp)
+            for k = 1:numel (tmp)
               tmp(k) = bsxfun (@times, tmp{k}, X{I(j)});
             endfor
             tmp = cell2mat (tmp);
@@ -1051,7 +1056,7 @@ function C = contr_simple (N)
   ## These contrasts are centered (i.e. sum to 0)
   ## Ideal for unordered factors, with comparison to a reference level
   ## The first factor level is the reference level
-  C =  cat (1, zeros (1,N-1), eye(N-1)) - 1/N;
+  C =  cat (1, zeros (1,N-1), eye (N-1)) - 1/N;
 
 endfunction
 
@@ -1065,7 +1070,7 @@ function C = contr_poly (N)
   C(:,1) = [];
   s = ones (1, N-1);
   s(1:2:N-1) *= -1;
-  f = (sign(C(1,:)) != s);
+  f = (sign (C(1,:)) != s);
   C(:,f) *= -1;
 
 endfunction
@@ -1101,7 +1106,7 @@ function C = contr_treatment (N)
   ## Not compatible with SSTYPE 3 since contrasts are not centered
   ## Ideal for unordered factors, with comparison to a reference level
   ## The first factor level is the reference level
-  C =  cat (1, zeros (1,N-1), eye(N-1));
+  C =  cat (1, zeros (1,N-1), eye (N-1));
 
 endfunction
 
@@ -1158,10 +1163,10 @@ endfunction
 %! # t = sqrt (1.44) = 1.20.
 %!
 %! score = [54 23 45 54 45 43 34 65 77 46 65]';
-%! gender = {"male" "male" "male" "male" "male" "female" "female" "female" ...
-%!           "female" "female" "female"}';
+%! gender = {'male' 'male' 'male' 'male' 'male' 'female' 'female' 'female' ...
+%!           'female' 'female' 'female'}';
 %!
-%! [P, ATAB, STATS] = anovan (score, gender, "display", "on", "varnames", "gender");
+%! [P, ATAB, STATS] = anovan (score, gender, 'display', 'on', 'varnames', 'gender');
 
 %!demo
 %!
@@ -1172,14 +1177,14 @@ endfunction
 %! # subject as a random factor (').
 %!
 %! score = [4.5 5.6; 3.7 6.4; 5.3 6.4; 5.4 6.0; 3.9 5.7]';
-%! treatment = {"before" "after"; "before" "after"; "before" "after";
-%!              "before" "after"; "before" "after"}';
-%! subject = {"GS" "GS"; "JM" "JM"; "HM" "HM"; "JW" "JW"; "PS" "PS"}';
+%! treatment = {'before' 'after'; 'before' 'after'; 'before' 'after';
+%!              'before' 'after'; 'before' 'after'}';
+%! subject = {'GS' 'GS'; 'JM' 'JM'; 'HM' 'HM'; 'JW' 'JW'; 'PS' 'PS'}';
 %!
 %! [P, ATAB, STATS] = anovan (score(:), {treatment(:), subject(:)}, ...
-%!                            "model", "full", "random", 2, "sstype", 2, ...
-%!                            "varnames", {"treatment", "subject"}, ...
-%!                            "display", "on");
+%!                            'model', 'full', 'random', 2, 'sstype', 2, ...
+%!                            'varnames', {'treatment', 'subject'}, ...
+%!                            'display', 'on');
 
 %!demo
 %!
@@ -1188,12 +1193,12 @@ endfunction
 %!
 %! strength = [82 86 79 83 84 85 86 87 74 82 ...
 %!            78 75 76 77 79 79 77 78 82 79]';
-%! alloy = {"st","st","st","st","st","st","st","st", ...
-%!          "al1","al1","al1","al1","al1","al1", ...
-%!          "al2","al2","al2","al2","al2","al2"}';
+%! alloy = {'st','st','st','st','st','st','st','st', ...
+%!          'al1','al1','al1','al1','al1','al1', ...
+%!          'al2','al2','al2','al2','al2','al2'}';
 %!
-%! [P, ATAB, STATS] = anovan (strength, alloy, "display", "on", ...
-%!                            "varnames", "alloy");
+%! [P, ATAB, STATS] = anovan (strength, alloy, 'display', 'on', ...
+%!                            'varnames', 'alloy');
 
 %!demo
 %!
@@ -1211,8 +1216,8 @@ endfunction
 %!             6  6  6;  7  7  7;  8  8  8;  9  9  9; 10 10 10];
 %!
 %! [P, ATAB, STATS] = anovan (words(:), {seconds(:), subject(:)}, ...
-%!                            "model", "full", "random", 2, "sstype", 2, ...
-%!                            "display", "on", "varnames", {"seconds", "subject"});
+%!                            'model', 'full', 'random', 2, 'sstype', 2, ...
+%!                            'display', 'on', 'varnames', {'seconds', 'subject'});
 
 %!demo
 %!
@@ -1222,18 +1227,18 @@ endfunction
 %!
 %! popcorn = [5.5, 4.5, 3.5; 5.5, 4.5, 4.0; 6.0, 4.0, 3.0; ...
 %!            6.5, 5.0, 4.0; 7.0, 5.5, 5.0; 7.0, 5.0, 4.5];
-%! brands = {"Gourmet", "National", "Generic"; ...
-%!           "Gourmet", "National", "Generic"; ...
-%!           "Gourmet", "National", "Generic"; ...
-%!           "Gourmet", "National", "Generic"; ...
-%!           "Gourmet", "National", "Generic"; ...
-%!           "Gourmet", "National", "Generic"};
-%! popper = {"oil", "oil", "oil"; "oil", "oil", "oil"; "oil", "oil", "oil"; ...
-%!           "air", "air", "air"; "air", "air", "air"; "air", "air", "air"};
+%! brands = {'Gourmet', 'National', 'Generic'; ...
+%!           'Gourmet', 'National', 'Generic'; ...
+%!           'Gourmet', 'National', 'Generic'; ...
+%!           'Gourmet', 'National', 'Generic'; ...
+%!           'Gourmet', 'National', 'Generic'; ...
+%!           'Gourmet', 'National', 'Generic'};
+%! popper = {'oil', 'oil', 'oil'; 'oil', 'oil', 'oil'; 'oil', 'oil', 'oil'; ...
+%!           'air', 'air', 'air'; 'air', 'air', 'air'; 'air', 'air', 'air'};
 %!
 %! [P, ATAB, STATS] = anovan (popcorn(:), {brands(:), popper(:)}, ...
-%!                            "display", "on", "model", "full", ...
-%!                            "varnames", {"brands", "popper"});
+%!                            'display', 'on', 'model', 'full', ...
+%!                            'varnames', {'brands', 'popper'});
 
 %!demo
 %!
@@ -1243,13 +1248,13 @@ endfunction
 %!
 %! salary = [24 26 25 24 27 24 27 23 15 17 20 16, ...
 %!           25 29 27 19 18 21 20 21 22 19]';
-%! gender = {"f" "f" "f" "f" "f" "f" "f" "f" "f" "f" "f" "f"...
-%!           "m" "m" "m" "m" "m" "m" "m" "m" "m" "m"}';
+%! gender = {'f' 'f' 'f' 'f' 'f' 'f' 'f' 'f' 'f' 'f' 'f' 'f'...
+%!           'm' 'm' 'm' 'm' 'm' 'm' 'm' 'm' 'm' 'm'}';
 %! degree = [1 1 1 1 1 1 1 1 0 0 0 0 1 1 1 0 0 0 0 0 0 0]';
 %!
-%! [P, ATAB, STATS] = anovan (salary, {gender, degree}, "model", "full", ...
-%!                            "sstype", 3, "display", "on", "varnames", ...
-%!                            {"gender", "degree"});
+%! [P, ATAB, STATS] = anovan (salary, {gender, degree}, 'model', 'full', ...
+%!                            'sstype', 3, 'display', 'on', 'varnames', ...
+%!                            {'gender', 'degree'});
 
 %!demo
 %!
@@ -1257,16 +1262,16 @@ endfunction
 %! # adding sugar and/or milk on the tendency of coffee to make people babble,
 %! # in from Navarro (2019): 16.10
 %!
-%! sugar = {"real" "fake" "fake" "real" "real" "real" "none" "none" "none" ...
-%!          "fake" "fake" "fake" "real" "real" "real" "none" "none" "fake"}';
-%! milk = {"yes" "no" "no" "yes" "yes" "no" "yes" "yes" "yes" ...
-%!         "no" "no" "yes" "no" "no" "no" "no" "no" "yes"}';
+%! sugar = {'real' 'fake' 'fake' 'real' 'real' 'real' 'none' 'none' 'none' ...
+%!          'fake' 'fake' 'fake' 'real' 'real' 'real' 'none' 'none' 'fake'}';
+%! milk = {'yes' 'no' 'no' 'yes' 'yes' 'no' 'yes' 'yes' 'yes' ...
+%!         'no' 'no' 'yes' 'no' 'no' 'no' 'no' 'no' 'yes'}';
 %! babble = [4.6 4.4 3.9 5.6 5.1 5.5 3.9 3.5 3.7...
 %!           5.6 4.7 5.9 6.0 5.4 6.6 5.8 5.3 5.7]';
 %!
-%! [P, ATAB, STATS] = anovan (babble, {sugar, milk}, "model", "full",  ...
-%!                            "sstype", 3, "display", "on", ...
-%!                            "varnames", {"sugar", "milk"});
+%! [P, ATAB, STATS] = anovan (babble, {sugar, milk}, 'model', 'full',  ...
+%!                            'sstype', 3, 'display', 'on', ...
+%!                            'varnames', {'sugar', 'milk'});
 
 %!demo
 %!
@@ -1276,12 +1281,12 @@ endfunction
 %! # * Missing values introduced to make the sample sizes unequal to test the
 %! #   calculation of different types of sums-of-squares
 %!
-%! drug = {"X" "X" "X" "X" "X" "X" "X" "X" "X" "X" "X" "X" ...
-%!         "X" "X" "X" "X" "X" "X" "X" "X" "X" "X" "X" "X";
-%!         "Y" "Y" "Y" "Y" "Y" "Y" "Y" "Y" "Y" "Y" "Y" "Y" ...
-%!         "Y" "Y" "Y" "Y" "Y" "Y" "Y" "Y" "Y" "Y" "Y" "Y";
-%!         "Z" "Z" "Z" "Z" "Z" "Z" "Z" "Z" "Z" "Z" "Z" "Z" ...
-%!         "Z" "Z" "Z" "Z" "Z" "Z" "Z" "Z" "Z" "Z" "Z" "Z"};
+%! drug = {'X' 'X' 'X' 'X' 'X' 'X' 'X' 'X' 'X' 'X' 'X' 'X' ...
+%!         'X' 'X' 'X' 'X' 'X' 'X' 'X' 'X' 'X' 'X' 'X' 'X';
+%!         'Y' 'Y' 'Y' 'Y' 'Y' 'Y' 'Y' 'Y' 'Y' 'Y' 'Y' 'Y' ...
+%!         'Y' 'Y' 'Y' 'Y' 'Y' 'Y' 'Y' 'Y' 'Y' 'Y' 'Y' 'Y';
+%!         'Z' 'Z' 'Z' 'Z' 'Z' 'Z' 'Z' 'Z' 'Z' 'Z' 'Z' 'Z' ...
+%!         'Z' 'Z' 'Z' 'Z' 'Z' 'Z' 'Z' 'Z' 'Z' 'Z' 'Z' 'Z'};
 %! feedback = [1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0;
 %!             1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0;
 %!             1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0];
@@ -1296,9 +1301,9 @@ endfunction
 %!       202 228 190 206 224 204 205 199 170 160 NaN NaN];
 %!
 %! [P, ATAB, STATS] = anovan (BP(:), {drug(:), feedback(:), diet(:)}, ...
-%!                                    "model", "full", "sstype", 3, ...
-%!                                    "display", "on", ...
-%!                                    "varnames", {"drug", "feedback", "diet"});
+%!                                    'model', 'full', 'sstype', 3, ...
+%!                                    'display', 'on', ...
+%!                                    'varnames', {'drug', 'feedback', 'diet'});
 
 %!demo
 %!
@@ -1311,15 +1316,15 @@ endfunction
 %!
 %! measurement = [444 614 423 625 408  856 447 719 ...
 %!                764 831 586 782 609 1002 606 766]';
-%! strain= {"NIH","NIH","BALB/C","BALB/C","A/J","A/J","129/Ola","129/Ola", ...
-%!          "NIH","NIH","BALB/C","BALB/C","A/J","A/J","129/Ola","129/Ola"}';
-%! treatment={"C" "T" "C" "T" "C" "T" "C" "T" "C" "T" "C" "T" "C" "T" "C" "T"}';
+%! strain= {'NIH','NIH','BALB/C','BALB/C','A/J','A/J','129/Ola','129/Ola', ...
+%!          'NIH','NIH','BALB/C','BALB/C','A/J','A/J','129/Ola','129/Ola'}';
+%! treatment={'C' 'T' 'C' 'T' 'C' 'T' 'C' 'T' 'C' 'T' 'C' 'T' 'C' 'T' 'C' 'T'}';
 %! block = [1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2]';
 %!
 %! [P, ATAB, STATS] = anovan (measurement/10, {strain, treatment, block}, ...
-%!                            "sstype", 2, "model", "full", "random", 3, ...
-%!                            "display", "on", ...
-%!                            "varnames", {"strain", "treatment", "block"});
+%!                            'sstype', 2, 'model', 'full', 'random', 3, ...
+%!                            'display', 'on', ...
+%!                            'varnames', {'strain', 'treatment', 'block'});
 
 %!demo
 %!
@@ -1333,13 +1338,13 @@ endfunction
 %! temp = [20.8 20.8 24 24 24 24 26.2 26.2 26.2 26.2 28.4 ...
 %!         29 30.4 30.4 17.2 18.3 18.3 18.3 18.9 18.9 20.4 ...
 %!         21 21 22.1 23.5 24.2 25.9 26.5 26.5 26.5 28.6]';
-%! species = {"ex" "ex" "ex" "ex" "ex" "ex" "ex" "ex" "ex" "ex" "ex" ...
-%!            "ex" "ex" "ex" "niv" "niv" "niv" "niv" "niv" "niv" "niv" ...
-%!            "niv" "niv" "niv" "niv" "niv" "niv" "niv" "niv" "niv" "niv"};
+%! species = {'ex' 'ex' 'ex' 'ex' 'ex' 'ex' 'ex' 'ex' 'ex' 'ex' 'ex' ...
+%!            'ex' 'ex' 'ex' 'niv' 'niv' 'niv' 'niv' 'niv' 'niv' 'niv' ...
+%!            'niv' 'niv' 'niv' 'niv' 'niv' 'niv' 'niv' 'niv' 'niv' 'niv'};
 %!
-%! [P, ATAB, STATS] = anovan (pulse, {species, temp}, "model", "linear", ...
-%!                           "continuous", 2, "sstype", "h", "display", "on", ...
-%!                           "varnames", {"species", "temp"});
+%! [P, ATAB, STATS] = anovan (pulse, {species, temp}, 'model', 'linear', ...
+%!                           'continuous', 2, 'sstype', 'h', 'display', 'on', ...
+%!                           'varnames', {'species', 'temp'});
 
 %!demo
 %!
@@ -1353,26 +1358,26 @@ endfunction
 %!          84.9 96.1 94.6 82.5 90.7 87.0 86.8 93.3 87.6 92.4 ...
 %!          100. 80.5 92.9 84.0 88.4 91.1 85.7 91.3 92.3 87.9 ...
 %!          91.7 88.6 75.8 75.7 75.3 82.4 80.1 86.0 81.8 82.5]';
-%! treatment = {"yes" "yes" "yes" "yes" "yes" "yes" "yes" "yes" "yes" "yes" ...
-%!              "yes" "yes" "yes" "yes" "yes" "yes" "yes" "yes" "yes" "yes" ...
-%!              "yes" "yes" "yes" "yes" "yes" "yes" "yes" "yes" "yes" "yes" ...
-%!              "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  ...
-%!              "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  ...
-%!              "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"}';
-%! exercise = {"lo"  "lo"  "lo"  "lo"  "lo"  "lo"  "lo"  "lo"  "lo"  "lo"  ...
-%!             "mid" "mid" "mid" "mid" "mid" "mid" "mid" "mid" "mid" "mid" ...
-%!             "hi"  "hi"  "hi"  "hi"  "hi"  "hi"  "hi"  "hi"  "hi"  "hi"  ...
-%!             "lo"  "lo"  "lo"  "lo"  "lo"  "lo"  "lo"  "lo"  "lo"  "lo"  ...
-%!             "mid" "mid" "mid" "mid" "mid" "mid" "mid" "mid" "mid" "mid" ...
-%!             "hi"  "hi"  "hi"  "hi"  "hi"  "hi"  "hi"  "hi"  "hi"  "hi"}';
+%! treatment = {'yes' 'yes' 'yes' 'yes' 'yes' 'yes' 'yes' 'yes' 'yes' 'yes' ...
+%!              'yes' 'yes' 'yes' 'yes' 'yes' 'yes' 'yes' 'yes' 'yes' 'yes' ...
+%!              'yes' 'yes' 'yes' 'yes' 'yes' 'yes' 'yes' 'yes' 'yes' 'yes' ...
+%!              'no'  'no'  'no'  'no'  'no'  'no'  'no'  'no'  'no'  'no'  ...
+%!              'no'  'no'  'no'  'no'  'no'  'no'  'no'  'no'  'no'  'no'  ...
+%!              'no'  'no'  'no'  'no'  'no'  'no'  'no'  'no'  'no'  'no'}';
+%! exercise = {'lo'  'lo'  'lo'  'lo'  'lo'  'lo'  'lo'  'lo'  'lo'  'lo'  ...
+%!             'mid' 'mid' 'mid' 'mid' 'mid' 'mid' 'mid' 'mid' 'mid' 'mid' ...
+%!             'hi'  'hi'  'hi'  'hi'  'hi'  'hi'  'hi'  'hi'  'hi'  'hi'  ...
+%!             'lo'  'lo'  'lo'  'lo'  'lo'  'lo'  'lo'  'lo'  'lo'  'lo'  ...
+%!             'mid' 'mid' 'mid' 'mid' 'mid' 'mid' 'mid' 'mid' 'mid' 'mid' ...
+%!             'hi'  'hi'  'hi'  'hi'  'hi'  'hi'  'hi'  'hi'  'hi'  'hi'}';
 %! age = [59 65 70 66 61 65 57 61 58 55 62 61 60 59 55 57 60 63 62 57 ...
 %!        58 56 57 59 59 60 55 53 55 58 68 62 61 54 59 63 60 67 60 67 ...
 %!        75 54 57 62 65 60 58 61 65 57 56 58 58 58 52 53 60 62 61 61]';
 %!
 %! [P, ATAB, STATS] = anovan (score, {treatment, exercise, age}, ...
-%!                            "model", [1 0 0; 0 1 0; 0 0 1; 1 1 0], ...
-%!                            "continuous", 3, "sstype", "h", "display", "on", ...
-%!                            "varnames", {"treatment", "exercise", "age"});
+%!                            'model', [1 0 0; 0 1 0; 0 0 1; 1 1 0], ...
+%!                            'continuous', 3, 'sstype', 'h', 'display', 'on', ...
+%!                            'varnames', {'treatment', 'exercise', 'age'});
 
 %!demo
 %!
@@ -1393,8 +1398,8 @@ endfunction
 %!      -0.6002401  0.0000000  0.0  0.5
 %!      -0.6002401  0.0000000  0.0 -0.5];
 %!
-%! [P,ATAB, STATS] = anovan (dv, g, "contrasts", C, "varnames", "score", ...
-%!                          "alpha", 0.05, "display", "on");
+%! [P,ATAB, STATS] = anovan (dv, g, 'contrasts', C, 'varnames', 'score', ...
+%!                          'alpha', 0.05, 'display', 'on');
 
 %!demo
 %!
@@ -1413,15 +1418,15 @@ endfunction
 %!      10, 25, 66, 43, 47, 56,  6, 39, ...
 %!      11, 39, 26, 35, 25, 14, 24, 17]';
 %!
-%! [P,ATAB,STATS] = anovan(y, g, "display", "off");
+%! [P,ATAB,STATS] = anovan (y, g, 'display', 'off');
 %! fitted = STATS.X * STATS.coeffs(:,1); # fitted values
 %! b = polyfit (fitted, abs (STATS.resid), 1);
 %! v = polyval (b, fitted);  # Variance as a function of the fitted values
-%! figure("Name", "Regression of the absolute residuals on the fitted values");
-%! plot (fitted, abs (STATS.resid),'ob');hold on; plot(fitted,v,'-r'); hold off;
-%! xlabel("Fitted values"); ylabel("Absolute residuals");
+%! figure ('Name', 'Regression of the absolute residuals on the fitted values');
+%! plot (fitted, abs (STATS.resid),'ob');hold on; plot (fitted,v,'-r'); hold off;
+%! xlabel ('Fitted values'); ylabel ('Absolute residuals');
 %!
-%! [P,ATAB,STATS] = anovan (y, g, "weights", v.^-1);
+%! [P,ATAB,STATS] = anovan (y, g, 'weights', v.^-1);
 
 
 ## Test 1 for anovan example 1
@@ -1432,10 +1437,10 @@ endfunction
 %!           'female' 'female' 'female'}';
 %!
 %! [P, T, STATS] = anovan (score,gender,'display','off');
-%! assert (P(1), 0.2612876773271042, 1e-09);              # compared to p calculated by MATLAB anovan
-%! assert (sqrt(T{2,6}), abs(1.198608733288208), 1e-09);  # compared to abs(t) calculated from sqrt(F) by MATLAB anovan
-%! assert (P(1), 0.2612876773271047, 1e-09);              # compared to p calculated by MATLAB ttest2
-%! assert (sqrt(T{2,6}), abs(-1.198608733288208), 1e-09); # compared to abs(t) calculated by MATLAB ttest2
+%! assert_equal (P(1), 0.2612876773271042, 1e-09);              # compared to p calculated by MATLAB anovan
+%! assert_equal (sqrt (T{2,6}), abs (1.198608733288208), 1e-09);  # compared to abs(t) calculated from sqrt(F) by MATLAB anovan
+%! assert_equal (P(1), 0.2612876773271047, 1e-09);              # compared to p calculated by MATLAB ttest2
+%! assert_equal (sqrt (T{2,6}), abs (-1.198608733288208), 1e-09); # compared to abs(t) calculated by MATLAB ttest2
 
 ## Test 2 for anovan example 2
 ## Test compares anovan to results from MATLAB's anovan and ttest functions
@@ -1446,10 +1451,10 @@ endfunction
 %! subject = {'GS' 'GS'; 'JM' 'JM'; 'HM' 'HM'; 'JW' 'JW'; 'PS' 'PS'}';
 %!
 %! [P, ATAB, STATS] = anovan (score(:),{treatment(:),subject(:)},'display','off','sstype',2);
-%! assert (P(1), 0.016004356735364, 1e-09);              # compared to p calculated by MATLAB anovan
-%! assert (sqrt(ATAB{2,6}), abs(4.00941576558195), 1e-09);  # compared to abs(t) calculated from sqrt(F) by MATLAB anovan
-%! assert (P(1), 0.016004356735364, 1e-09);              # compared to p calculated by MATLAB ttest2
-%! assert (sqrt(ATAB{2,6}), abs(-4.00941576558195), 1e-09); # compared to abs(t) calculated by MATLAB ttest2
+%! assert_equal (P(1), 0.016004356735364, 1e-09);              # compared to p calculated by MATLAB anovan
+%! assert_equal (sqrt (ATAB{2,6}), abs (4.00941576558195), 1e-09);  # compared to abs(t) calculated from sqrt(F) by MATLAB anovan
+%! assert_equal (P(1), 0.016004356735364, 1e-09);              # compared to p calculated by MATLAB ttest2
+%! assert_equal (sqrt (ATAB{2,6}), abs (-4.00941576558195), 1e-09); # compared to abs(t) calculated by MATLAB ttest2
 
 ## Test 3 for anovan example 3
 ## Test compares anovan to results from MATLAB's anovan and anova1 functions
@@ -1461,8 +1466,8 @@ endfunction
 %!          'al2','al2','al2','al2','al2','al2'}';
 %!
 %! [P, ATAB, STATS] = anovan (strength,{alloy},'display','off');
-%! assert (P(1), 0.000152643638830491, 1e-09);
-%! assert (ATAB{2,6}, 15.4, 1e-09);
+%! assert_equal (P(1), 0.000152643638830491, 1e-09);
+%! assert_equal (ATAB{2,6}, 15.4, 1e-09);
 
 ## Test 4 for anovan example 4
 ## Test compares anovan to results from MATLAB's anovan function
@@ -1475,10 +1480,10 @@ endfunction
 %!            1 2 5; 1 2 5; 1 2 5; 1 2 5; 1 2 5;];
 %!
 %! [P, ATAB, STATS] = anovan (words(:),{seconds(:),subject(:)},'model','full','random',2,'sstype',2,'display','off');
-%! assert (P(1), 1.51865926758752e-07, 1e-09);
-%! assert (ATAB{2,2}, 52.2666666666667, 1e-09);
-%! assert (ATAB{3,2}, 942.533333333333, 1e-09);
-%! assert (ATAB{4,2}, 11.0666666666667, 1e-09);
+%! assert_equal (P(1), 1.51865926758752e-07, 1e-09);
+%! assert_equal (ATAB{2,2}, 52.2666666666667, 1e-09);
+%! assert_equal (ATAB{3,2}, 942.533333333333, 1e-09);
+%! assert_equal (ATAB{4,2}, 11.0666666666667, 1e-09);
 
 ## Test 5 for anovan example 5
 ## Test compares anovan to results from MATLAB's anovan function
@@ -1495,12 +1500,12 @@ endfunction
 %!           'air', 'air', 'air'; 'air', 'air', 'air'; 'air', 'air', 'air'};
 %!
 %! [P, ATAB, STATS] = anovan (popcorn(:),{brands(:),popper(:)},'display','off','model','full');
-%! assert (P(1), 7.67895738278171e-07, 1e-09);
-%! assert (P(2), 0.000100373896304998, 1e-09);
-%! assert (P(3), 0.746215396636649, 1e-09);
-%! assert (ATAB{2,6}, 56.7, 1e-09);
-%! assert (ATAB{3,6}, 32.4, 1e-09);
-%! assert (ATAB{4,6}, 0.29999999999997, 1e-09);
+%! assert_equal (P(1), 7.67895738278171e-07, 1e-09);
+%! assert_equal (P(2), 0.000100373896304998, 1e-09);
+%! assert_equal (P(3), 0.746215396636649, 1e-09);
+%! assert_equal (ATAB{2,6}, 56.7, 1e-09);
+%! assert_equal (ATAB{3,6}, 32.4, 1e-09);
+%! assert_equal (ATAB{4,6}, 0.29999999999997, 1e-09);
 
 ## Test 6 for anovan example 6
 ## Test compares anovan to results from MATLAB's anovan function
@@ -1512,37 +1517,37 @@ endfunction
 %! degree = [1 1 1 1 1 1 1 1 0 0 0 0 1 1 1 0 0 0 0 0 0 0]';
 %!
 %! [P, ATAB, STATS] = anovan (salary,{gender,degree},'model','full','sstype',1,'display','off');
-%! assert (P(1), 0.747462549227232, 1e-09);
-%! assert (P(2), 1.03809316857694e-08, 1e-09);
-%! assert (P(3), 0.523689833702691, 1e-09);
-%! assert (ATAB{2,2}, 0.296969696969699, 1e-09);
-%! assert (ATAB{3,2}, 272.391841491841, 1e-09);
-%! assert (ATAB{4,2}, 1.17482517482512, 1e-09);
-%! assert (ATAB{5,2}, 50.0000000000001, 1e-09);
+%! assert_equal (P(1), 0.747462549227232, 1e-09);
+%! assert_equal (P(2), 1.03809316857694e-08, 1e-09);
+%! assert_equal (P(3), 0.523689833702691, 1e-09);
+%! assert_equal (ATAB{2,2}, 0.296969696969699, 1e-09);
+%! assert_equal (ATAB{3,2}, 272.391841491841, 1e-09);
+%! assert_equal (ATAB{4,2}, 1.17482517482512, 1e-09);
+%! assert_equal (ATAB{5,2}, 50.0000000000001, 1e-09);
 %! [P, ATAB, STATS] = anovan (salary,{degree,gender},'model','full','sstype',1,'display','off');
-%! assert (P(1), 2.53445097305047e-08, 1e-09);
-%! assert (P(2), 0.00388133678528749, 1e-09);
-%! assert (P(3), 0.523689833702671, 1e-09);
-%! assert (ATAB{2,2}, 242.227272727273, 1e-09);
-%! assert (ATAB{3,2}, 30.4615384615384, 1e-09);
-%! assert (ATAB{4,2}, 1.17482517482523, 1e-09);
-%! assert (ATAB{5,2}, 50.0000000000001, 1e-09);
+%! assert_equal (P(1), 2.53445097305047e-08, 1e-09);
+%! assert_equal (P(2), 0.00388133678528749, 1e-09);
+%! assert_equal (P(3), 0.523689833702671, 1e-09);
+%! assert_equal (ATAB{2,2}, 242.227272727273, 1e-09);
+%! assert_equal (ATAB{3,2}, 30.4615384615384, 1e-09);
+%! assert_equal (ATAB{4,2}, 1.17482517482523, 1e-09);
+%! assert_equal (ATAB{5,2}, 50.0000000000001, 1e-09);
 %! [P, ATAB, STATS] = anovan (salary,{gender,degree},'model','full','sstype',2,'display','off');
-%! assert (P(1), 0.00388133678528743, 1e-09);
-%! assert (P(2), 1.03809316857694e-08, 1e-09);
-%! assert (P(3), 0.523689833702691, 1e-09);
-%! assert (ATAB{2,2}, 30.4615384615385, 1e-09);
-%! assert (ATAB{3,2}, 272.391841491841, 1e-09);
-%! assert (ATAB{4,2}, 1.17482517482512, 1e-09);
-%! assert (ATAB{5,2}, 50.0000000000001, 1e-09);
+%! assert_equal (P(1), 0.00388133678528743, 1e-09);
+%! assert_equal (P(2), 1.03809316857694e-08, 1e-09);
+%! assert_equal (P(3), 0.523689833702691, 1e-09);
+%! assert_equal (ATAB{2,2}, 30.4615384615385, 1e-09);
+%! assert_equal (ATAB{3,2}, 272.391841491841, 1e-09);
+%! assert_equal (ATAB{4,2}, 1.17482517482512, 1e-09);
+%! assert_equal (ATAB{5,2}, 50.0000000000001, 1e-09);
 %! [P, ATAB, STATS] = anovan (salary,{gender,degree},'model','full','sstype',3,'display','off');
-%! assert (P(1), 0.00442898146583742, 1e-09);
-%! assert (P(2), 1.30634252053587e-08, 1e-09);
-%! assert (P(3), 0.523689833702691, 1e-09);
-%! assert (ATAB{2,2}, 29.3706293706294, 1e-09);
-%! assert (ATAB{3,2}, 264.335664335664, 1e-09);
-%! assert (ATAB{4,2}, 1.17482517482512, 1e-09);
-%! assert (ATAB{5,2}, 50.0000000000001, 1e-09);
+%! assert_equal (P(1), 0.00442898146583742, 1e-09);
+%! assert_equal (P(2), 1.30634252053587e-08, 1e-09);
+%! assert_equal (P(3), 0.523689833702691, 1e-09);
+%! assert_equal (ATAB{2,2}, 29.3706293706294, 1e-09);
+%! assert_equal (ATAB{3,2}, 264.335664335664, 1e-09);
+%! assert_equal (ATAB{4,2}, 1.17482517482512, 1e-09);
+%! assert_equal (ATAB{5,2}, 50.0000000000001, 1e-09);
 
 ## Test 7 for anovan example 7
 ## Test compares anovan to results from MATLAB's anovan function
@@ -1555,37 +1560,37 @@ endfunction
 %!           5.6 4.7 5.9 6.0 5.4 6.6 5.8 5.3 5.7]';
 %!
 %! [P, ATAB, STATS] = anovan (babble,{sugar,milk},'model','full','sstype',1,'display','off');
-%! assert (P(1), 0.0108632139833963, 1e-09);
-%! assert (P(2), 0.0810606976703546, 1e-09);
-%! assert (P(3), 0.00175433329935627, 1e-09);
-%! assert (ATAB{2,2}, 3.55752380952381, 1e-09);
-%! assert (ATAB{3,2}, 0.956108477471702, 1e-09);
-%! assert (ATAB{4,2}, 5.94386771300448, 1e-09);
-%! assert (ATAB{5,2}, 3.1625, 1e-09);
+%! assert_equal (P(1), 0.0108632139833963, 1e-09);
+%! assert_equal (P(2), 0.0810606976703546, 1e-09);
+%! assert_equal (P(3), 0.00175433329935627, 1e-09);
+%! assert_equal (ATAB{2,2}, 3.55752380952381, 1e-09);
+%! assert_equal (ATAB{3,2}, 0.956108477471702, 1e-09);
+%! assert_equal (ATAB{4,2}, 5.94386771300448, 1e-09);
+%! assert_equal (ATAB{5,2}, 3.1625, 1e-09);
 %! [P, ATAB, STATS] = anovan (babble,{milk,sugar},'model','full','sstype',1,'display','off');
-%! assert (P(1), 0.0373333189297505, 1e-09);
-%! assert (P(2), 0.017075098787169, 1e-09);
-%! assert (P(3), 0.00175433329935627, 1e-09);
-%! assert (ATAB{2,2}, 1.444, 1e-09);
-%! assert (ATAB{3,2}, 3.06963228699552, 1e-09);
-%! assert (ATAB{4,2}, 5.94386771300448, 1e-09);
-%! assert (ATAB{5,2}, 3.1625, 1e-09);
+%! assert_equal (P(1), 0.0373333189297505, 1e-09);
+%! assert_equal (P(2), 0.017075098787169, 1e-09);
+%! assert_equal (P(3), 0.00175433329935627, 1e-09);
+%! assert_equal (ATAB{2,2}, 1.444, 1e-09);
+%! assert_equal (ATAB{3,2}, 3.06963228699552, 1e-09);
+%! assert_equal (ATAB{4,2}, 5.94386771300448, 1e-09);
+%! assert_equal (ATAB{5,2}, 3.1625, 1e-09);
 %! [P, ATAB, STATS] = anovan (babble,{sugar,milk},'model','full','sstype',2,'display','off');
-%! assert (P(1), 0.017075098787169, 1e-09);
-%! assert (P(2), 0.0810606976703546, 1e-09);
-%! assert (P(3), 0.00175433329935627, 1e-09);
-%! assert (ATAB{2,2}, 3.06963228699552, 1e-09);
-%! assert (ATAB{3,2}, 0.956108477471702, 1e-09);
-%! assert (ATAB{4,2}, 5.94386771300448, 1e-09);
-%! assert (ATAB{5,2}, 3.1625,  1e-09);
+%! assert_equal (P(1), 0.017075098787169, 1e-09);
+%! assert_equal (P(2), 0.0810606976703546, 1e-09);
+%! assert_equal (P(3), 0.00175433329935627, 1e-09);
+%! assert_equal (ATAB{2,2}, 3.06963228699552, 1e-09);
+%! assert_equal (ATAB{3,2}, 0.956108477471702, 1e-09);
+%! assert_equal (ATAB{4,2}, 5.94386771300448, 1e-09);
+%! assert_equal (ATAB{5,2}, 3.1625,  1e-09);
 %! [P, ATAB, STATS] = anovan (babble,{sugar,milk},'model','full','sstype',3,'display','off');
-%! assert (P(1), 0.0454263063473954, 1e-09);
-%! assert (P(2), 0.0746719907091438, 1e-09);
-%! assert (P(3), 0.00175433329935627, 1e-09);
-%! assert (ATAB{2,2}, 2.13184977578476, 1e-09);
-%! assert (ATAB{3,2}, 1.00413461538462, 1e-09);
-%! assert (ATAB{4,2}, 5.94386771300448, 1e-09);
-%! assert (ATAB{5,2}, 3.1625, 1e-09);
+%! assert_equal (P(1), 0.0454263063473954, 1e-09);
+%! assert_equal (P(2), 0.0746719907091438, 1e-09);
+%! assert_equal (P(3), 0.00175433329935627, 1e-09);
+%! assert_equal (ATAB{2,2}, 2.13184977578476, 1e-09);
+%! assert_equal (ATAB{3,2}, 1.00413461538462, 1e-09);
+%! assert_equal (ATAB{4,2}, 5.94386771300448, 1e-09);
+%! assert_equal (ATAB{5,2}, 3.1625, 1e-09);
 
 ## Test 8 for anovan example 8
 ## Test compares anovan to results from MATLAB's anovan function
@@ -1610,53 +1615,53 @@ endfunction
 %!       202 228 190 206 224 204 205 199 170 160 NaN NaN];
 %!
 %! [P, ATAB, STATS] = anovan (BP(:),{drug(:),feedback(:),diet(:)},'model','full','sstype', 1,'display','off');
-%! assert (P(1), 7.02561843825325e-05, 1e-09);
-%! assert (P(2), 0.000425806013389362, 1e-09);
-%! assert (P(3), 6.16780773446401e-07, 1e-09);
-%! assert (P(4), 0.261347622678438, 1e-09);
-%! assert (P(5), 0.0542278432357043, 1e-09);
-%! assert (P(6), 0.590353225626655, 1e-09);
-%! assert (P(7), 0.0861628249564267, 1e-09);
-%! assert (ATAB{2,2}, 3614.70355731226, 1e-09);
-%! assert (ATAB{3,2}, 2227.46639771024, 1e-09);
-%! assert (ATAB{4,2}, 5008.25614451819, 1e-09);
-%! assert (ATAB{5,2}, 437.066007908781, 1e-09);
-%! assert (ATAB{6,2}, 976.180770397332, 1e-09);
-%! assert (ATAB{7,2}, 46.616653365254, 1e-09);
-%! assert (ATAB{8,2}, 814.345251396648, 1e-09);
-%! assert (ATAB{9,2}, 9065.8,  1e-09);
+%! assert_equal (P(1), 7.02561843825325e-05, 1e-09);
+%! assert_equal (P(2), 0.000425806013389362, 1e-09);
+%! assert_equal (P(3), 6.16780773446401e-07, 1e-09);
+%! assert_equal (P(4), 0.261347622678438, 1e-09);
+%! assert_equal (P(5), 0.0542278432357043, 1e-09);
+%! assert_equal (P(6), 0.590353225626655, 1e-09);
+%! assert_equal (P(7), 0.0861628249564267, 1e-09);
+%! assert_equal (ATAB{2,2}, 3614.70355731226, 1e-09);
+%! assert_equal (ATAB{3,2}, 2227.46639771024, 1e-09);
+%! assert_equal (ATAB{4,2}, 5008.25614451819, 1e-09);
+%! assert_equal (ATAB{5,2}, 437.066007908781, 1e-09);
+%! assert_equal (ATAB{6,2}, 976.180770397332, 1e-09);
+%! assert_equal (ATAB{7,2}, 46.616653365254, 1e-09);
+%! assert_equal (ATAB{8,2}, 814.345251396648, 1e-09);
+%! assert_equal (ATAB{9,2}, 9065.8,  1e-09);
 %! [P, ATAB, STATS] = anovan (BP(:),{drug(:),feedback(:),diet(:)},'model','full','sstype',2,'display','off');
-%! assert (P(1), 9.4879638470754e-05, 1e-09);
-%! assert (P(2), 0.00124177666315809, 1e-09);
-%! assert (P(3), 6.86162012732911e-07, 1e-09);
-%! assert (P(4), 0.260856132341256, 1e-09);
-%! assert (P(5), 0.0523758623892078, 1e-09);
-%! assert (P(6), 0.590353225626655, 1e-09);
-%! assert (P(7), 0.0861628249564267, 1e-09);
-%! assert (ATAB{2,2}, 3481.72176560122, 1e-09);
-%! assert (ATAB{3,2}, 1837.08812970469, 1e-09);
-%! assert (ATAB{4,2}, 4957.20277938622, 1e-09);
-%! assert (ATAB{5,2}, 437.693674777847, 1e-09);
-%! assert (ATAB{6,2}, 988.431929811402, 1e-09);
-%! assert (ATAB{7,2}, 46.616653365254, 1e-09);
-%! assert (ATAB{8,2}, 814.345251396648, 1e-09);
-%! assert (ATAB{9,2}, 9065.8,  1e-09);
+%! assert_equal (P(1), 9.4879638470754e-05, 1e-09);
+%! assert_equal (P(2), 0.00124177666315809, 1e-09);
+%! assert_equal (P(3), 6.86162012732911e-07, 1e-09);
+%! assert_equal (P(4), 0.260856132341256, 1e-09);
+%! assert_equal (P(5), 0.0523758623892078, 1e-09);
+%! assert_equal (P(6), 0.590353225626655, 1e-09);
+%! assert_equal (P(7), 0.0861628249564267, 1e-09);
+%! assert_equal (ATAB{2,2}, 3481.72176560122, 1e-09);
+%! assert_equal (ATAB{3,2}, 1837.08812970469, 1e-09);
+%! assert_equal (ATAB{4,2}, 4957.20277938622, 1e-09);
+%! assert_equal (ATAB{5,2}, 437.693674777847, 1e-09);
+%! assert_equal (ATAB{6,2}, 988.431929811402, 1e-09);
+%! assert_equal (ATAB{7,2}, 46.616653365254, 1e-09);
+%! assert_equal (ATAB{8,2}, 814.345251396648, 1e-09);
+%! assert_equal (ATAB{9,2}, 9065.8,  1e-09);
 %! [P, ATAB, STATS] = anovan (BP(:),{drug(:),feedback(:),diet(:)},'model','full','sstype', 3,'display','off');
-%! assert (P(1), 0.000106518678028207, 1e-09);
-%! assert (P(2), 0.00125371366571508, 1e-09);
-%! assert (P(3), 5.30813260778464e-07, 1e-09);
-%! assert (P(4), 0.308353667232981, 1e-09);
-%! assert (P(5), 0.0562901327343161, 1e-09);
-%! assert (P(6), 0.599091042141092, 1e-09);
-%! assert (P(7), 0.0861628249564267, 1e-09);
-%! assert (ATAB{2,2}, 3430.88156424581, 1e-09);
-%! assert (ATAB{3,2}, 1833.68031496063, 1e-09);
-%! assert (ATAB{4,2}, 5080.48346456693, 1e-09);
-%! assert (ATAB{5,2}, 382.07709497207, 1e-09);
-%! assert (ATAB{6,2}, 963.037988826813, 1e-09);
-%! assert (ATAB{7,2}, 44.4519685039322, 1e-09);
-%! assert (ATAB{8,2}, 814.345251396648, 1e-09);
-%! assert (ATAB{9,2}, 9065.8, 1e-09);
+%! assert_equal (P(1), 0.000106518678028207, 1e-09);
+%! assert_equal (P(2), 0.00125371366571508, 1e-09);
+%! assert_equal (P(3), 5.30813260778464e-07, 1e-09);
+%! assert_equal (P(4), 0.308353667232981, 1e-09);
+%! assert_equal (P(5), 0.0562901327343161, 1e-09);
+%! assert_equal (P(6), 0.599091042141092, 1e-09);
+%! assert_equal (P(7), 0.0861628249564267, 1e-09);
+%! assert_equal (ATAB{2,2}, 3430.88156424581, 1e-09);
+%! assert_equal (ATAB{3,2}, 1833.68031496063, 1e-09);
+%! assert_equal (ATAB{4,2}, 5080.48346456693, 1e-09);
+%! assert_equal (ATAB{5,2}, 382.07709497207, 1e-09);
+%! assert_equal (ATAB{6,2}, 963.037988826813, 1e-09);
+%! assert_equal (ATAB{7,2}, 44.4519685039322, 1e-09);
+%! assert_equal (ATAB{8,2}, 814.345251396648, 1e-09);
+%! assert_equal (ATAB{9,2}, 9065.8, 1e-09);
 
 ## Test 9 for anovan example 9
 ## Test compares anovan to results from MATLAB's anovan function
@@ -1669,14 +1674,14 @@ endfunction
 %! block = [1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2]';
 %!
 %! [P, ATAB, STATS] = anovan (measurement/10,{strain,treatment,block},'model','full','random',3,'display','off');
-%! assert (P(1), 0.0914352969909372, 1e-09);
-%! assert (P(2), 5.04077373924908e-05, 1e-09);
-%! assert (P(4), 0.0283196918836667, 1e-09);
-%! assert (ATAB{2,2}, 286.132500000002, 1e-09);
-%! assert (ATAB{3,2}, 2275.29, 1e-09);
-%! assert (ATAB{4,2}, 1242.5625, 1e-09);
-%! assert (ATAB{5,2}, 495.905000000001, 1e-09);
-%! assert (ATAB{6,2}, 207.007499999999, 1e-09);
+%! assert_equal (P(1), 0.0914352969909372, 1e-09);
+%! assert_equal (P(2), 5.04077373924908e-05, 1e-09);
+%! assert_equal (P(4), 0.0283196918836667, 1e-09);
+%! assert_equal (ATAB{2,2}, 286.132500000002, 1e-09);
+%! assert_equal (ATAB{3,2}, 2275.29, 1e-09);
+%! assert_equal (ATAB{4,2}, 1242.5625, 1e-09);
+%! assert_equal (ATAB{5,2}, 495.905000000001, 1e-09);
+%! assert_equal (ATAB{6,2}, 207.007499999999, 1e-09);
 
 ## Test 10 for anovan example 10
 ## Test compares anovan to results from MATLAB's anovan function
@@ -1692,13 +1697,13 @@ endfunction
 %!            'niv' 'niv' 'niv' 'niv' 'niv' 'niv' 'niv' 'niv' 'niv' 'niv'};
 %!
 %! [P, ATAB, STATS] = anovan (pulse,{species,temp},'model','linear','continuous',2,'sstype','h','display','off');
-%! assert (P(1), 6.27153318786007e-14, 1e-09);
-%! assert (P(2), 2.48773241196644e-25, 1e-09);
-%! assert (ATAB{2,2}, 598.003953318404, 1e-09);
-%! assert (ATAB{3,2}, 4376.08256843712, 1e-09);
-%! assert (ATAB{4,2}, 89.3498685376726, 1e-09);
-%! assert (ATAB{2,6}, 187.399388123951, 1e-09);
-%! assert (ATAB{3,6}, 1371.35413763454, 1e-09);
+%! assert_equal (P(1), 6.27153318786007e-14, 1e-09);
+%! assert_equal (P(2), 2.48773241196644e-25, 1e-09);
+%! assert_equal (ATAB{2,2}, 598.003953318404, 1e-09);
+%! assert_equal (ATAB{3,2}, 4376.08256843712, 1e-09);
+%! assert_equal (ATAB{4,2}, 89.3498685376726, 1e-09);
+%! assert_equal (ATAB{2,6}, 187.399388123951, 1e-09);
+%! assert_equal (ATAB{3,6}, 1371.35413763454, 1e-09);
 
 ## Test 11 for anovan example 11
 ## Test compares anovan to results from MATLAB's anovan function
@@ -1726,18 +1731,18 @@ endfunction
 %!        75 54 57 62 65 60 58 61 65 57 56 58 58 58 52 53 60 62 61 61]';
 %!
 %! [P, ATAB, STATS] = anovan (score,{treatment,exercise,age},'model','full','continuous',3,'sstype','h','display','off');
-%! assert (P(5), 0.9245630968248468, 1e-09);
-%! assert (P(6), 0.791115159521822, 1e-09);
-%! assert (P(7), 0.9296668751457956, 1e-09);
+%! assert_equal (P(5), 0.9245630968248468, 1e-09);
+%! assert_equal (P(6), 0.791115159521822, 1e-09);
+%! assert_equal (P(7), 0.9296668751457956, 1e-09);
 %! [P, ATAB, STATS] = anovan (score,{treatment,exercise,age},'model',[1 0 0; 0 1 0; 0 0 1; 1 1 0],'continuous',3,'sstype','h','display','off');
-%! assert (P(1), 0.00158132928938933, 1e-09);
-%! assert (P(2), 2.12537505039986e-07, 1e-09);
-%! assert (P(3), 0.00390292555160047, 1e-09);
-%! assert (P(4), 0.0164086580775543, 1e-09);
-%! assert (ATAB{2,6}, 11.0956027650549, 1e-09);
-%! assert (ATAB{3,6}, 20.8195665467178, 1e-09);
-%! assert (ATAB{4,6}, 9.10966630720186, 1e-09);
-%! assert (ATAB{5,6}, 4.4457923698584, 1e-09);
+%! assert_equal (P(1), 0.00158132928938933, 1e-09);
+%! assert_equal (P(2), 2.12537505039986e-07, 1e-09);
+%! assert_equal (P(3), 0.00390292555160047, 1e-09);
+%! assert_equal (P(4), 0.0164086580775543, 1e-09);
+%! assert_equal (ATAB{2,6}, 11.0956027650549, 1e-09);
+%! assert_equal (ATAB{3,6}, 20.8195665467178, 1e-09);
+%! assert_equal (ATAB{4,6}, 9.10966630720186, 1e-09);
+%! assert_equal (ATAB{5,6}, 4.4457923698584, 1e-09);
 
 ## Test 12 for anovan example 12
 ## Test compares anovan regression coefficients to R:
@@ -1756,22 +1761,22 @@ endfunction
 %!      -0.6002401  0.0000000  0.0 -0.5];
 %!
 %! [P,ATAB,STATS] = anovan (dv,g,'contrasts',{C},'display','off');
-%! assert (STATS.coeffs(1,1), 19.4001, 1e-04);
-%! assert (STATS.coeffs(2,1), -9.3297, 1e-04);
-%! assert (STATS.coeffs(3,1), -5.0000, 1e-04);
-%! assert (STATS.coeffs(4,1), -8.0000, 1e-04);
-%! assert (STATS.coeffs(5,1), -8.0000, 1e-04);
-%! assert (STATS.coeffs(1,2), 0.4831, 1e-04);
-%! assert (STATS.coeffs(2,2), 0.9694, 1e-04);
-%! assert (STATS.coeffs(3,2), 1.3073, 1e-04);
-%! assert (STATS.coeffs(4,2), 1.6411, 1e-04);
-%! assert (STATS.coeffs(5,2), 1.4507, 1e-04);
-%! assert (STATS.coeffs(1,5), 40.161, 1e-03);
-%! assert (STATS.coeffs(2,5), -9.624, 1e-03);
-%! assert (STATS.coeffs(3,5), -3.825, 1e-03);
-%! assert (STATS.coeffs(4,5), -4.875, 1e-03);
-%! assert (STATS.coeffs(5,5), -5.515, 1e-03);
-%! assert (STATS.coeffs(2,6), 5.74e-11, 1e-12);
-%! assert (STATS.coeffs(3,6), 0.000572, 1e-06);
-%! assert (STATS.coeffs(4,6), 2.86e-05, 1e-07);
-%! assert (STATS.coeffs(5,6), 4.44e-06, 1e-08);
+%! assert_equal (STATS.coeffs(1,1), 19.4001, 1e-04);
+%! assert_equal (STATS.coeffs(2,1), -9.3297, 1e-04);
+%! assert_equal (STATS.coeffs(3,1), -5.0000, 1e-04);
+%! assert_equal (STATS.coeffs(4,1), -8.0000, 1e-04);
+%! assert_equal (STATS.coeffs(5,1), -8.0000, 1e-04);
+%! assert_equal (STATS.coeffs(1,2), 0.4831, 1e-04);
+%! assert_equal (STATS.coeffs(2,2), 0.9694, 1e-04);
+%! assert_equal (STATS.coeffs(3,2), 1.3073, 1e-04);
+%! assert_equal (STATS.coeffs(4,2), 1.6411, 1e-04);
+%! assert_equal (STATS.coeffs(5,2), 1.4507, 1e-04);
+%! assert_equal (STATS.coeffs(1,5), 40.161, 1e-03);
+%! assert_equal (STATS.coeffs(2,5), -9.624, 1e-03);
+%! assert_equal (STATS.coeffs(3,5), -3.825, 1e-03);
+%! assert_equal (STATS.coeffs(4,5), -4.875, 1e-03);
+%! assert_equal (STATS.coeffs(5,5), -5.515, 1e-03);
+%! assert_equal (STATS.coeffs(2,6), 5.74e-11, 1e-12);
+%! assert_equal (STATS.coeffs(3,6), 0.000572, 1e-06);
+%! assert_equal (STATS.coeffs(4,6), 2.86e-05, 1e-07);
+%! assert_equal (STATS.coeffs(5,6), 4.44e-06, 1e-08);

@@ -71,7 +71,7 @@ function [m, v] = evstat (mu, sigma)
   sigma(sigma <= 0) = NaN;
 
   ## Calculate mean and variance
-  m = mu + psi(1) .* sigma;
+  m = mu + psi (1) .* sigma;
   v = (pi .* sigma) .^ 2 ./ 6;
 
 endfunction
@@ -80,7 +80,7 @@ endfunction
 %!error<evstat: function called with too few input arguments.> evstat ()
 %!error<evstat: function called with too few input arguments.> evstat (1)
 %!error<evstat: MU and SIGMA must be numeric.> evstat ({}, 2)
-%!error<evstat: MU and SIGMA must be numeric.> evstat (1, "")
+%!error<evstat: MU and SIGMA must be numeric.> evstat (1, '')
 %!error<evstat: MU and SIGMA must not be complex.> evstat (i, 2)
 %!error<evstat: MU and SIGMA must not be complex.> evstat (1, i)
 %!error<evstat: MU and SIGMA must be of common size or scalars.> ...
@@ -93,6 +93,6 @@ endfunction
 %! x = [-5, 0, 1, 2, 3];
 %! y0 = [NaN, NaN, 0.4228, 0.8456, 1.2684];
 %! y1 = [-5.5772, -3.4633, -3.0405, -2.6177, -2.1949];
-%!assert (evstat (x, x), y0, 1e-4)
-%!assert (evstat (x, x+6), y1, 1e-4)
-%!assert (evstat (x, x-6), NaN (1,5))
+%!assert_equal (evstat (x, x), y0, 1e-4)
+%!assert_equal (evstat (x, x+6), y1, 1e-4)
+%!assert_equal (evstat (x, x-6), NaN (1,5))

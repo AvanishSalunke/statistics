@@ -62,8 +62,8 @@ function x = gaminv (p, a, b)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (a, "single") || isa (b, "single"))
-    x = zeros (size (p), "single");
+  if (isa (p, 'single') || isa (a, 'single') || isa (b, 'single'))
+    x = zeros (size (p), 'single');
   else
     x = zeros (size (p));
   endif
@@ -92,7 +92,7 @@ function x = gaminv (p, a, b)
 
     ## Call GAMMAINCINV to find a root of GAMMAINC
     q = gammaincinv (p, a);
-    tol = sqrt (eps (ones (1, 1, class(q))));
+    tol = sqrt (eps (ones (1, 1, class (q))));
     check_cdf = ((abs (gammainc (q, a) - p) ./ p) > tol);
     ## Check for any cdf being far off from tolerance
     if (any (check_cdf(:)))
@@ -113,43 +113,43 @@ endfunction
 %! x5 = gaminv (p, 9, 0.5);
 %! x6 = gaminv (p, 7.5, 1);
 %! x7 = gaminv (p, 0.5, 1);
-%! plot (p, x1, "-r", p, x2, "-g", p, x3, "-y", p, x4, "-m", ...
-%!       p, x5, "-k", p, x6, "-b", p, x7, "-c")
+%! plot (p, x1, '-r', p, x2, '-g', p, x3, '-y', p, x4, '-m', ...
+%!       p, x5, '-k', p, x6, '-b', p, x7, '-c')
 %! ylim ([0, 20])
 %! grid on
-%! legend ({"α = 1, β = 2", "α = 2, β = 2", "α = 3, β = 2", ...
-%!          "α = 5, β = 1", "α = 9, β = 0.5", "α = 7.5, β = 1", ...
-%!          "α = 0.5, β = 1"}, "location", "northwest")
-%! title ("Gamma iCDF")
-%! xlabel ("probability")
-%! ylabel ("x")
+%! legend ({'α = 1, β = 2', 'α = 2, β = 2', 'α = 3, β = 2', ...
+%!          'α = 5, β = 1', 'α = 9, β = 0.5', 'α = 7.5, β = 1', ...
+%!          'α = 0.5, β = 1'}, 'location', 'northwest')
+%! title ('Gamma iCDF')
+%! xlabel ('probability')
+%! ylabel ('x')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.63212055882855778 1 2];
-%!assert (gaminv (p, ones (1,5), ones (1,5)), [NaN 0 1 Inf NaN], eps)
-%!assert (gaminv (p, 1, ones (1,5)), [NaN 0 1 Inf NaN], eps)
-%!assert (gaminv (p, ones (1,5), 1), [NaN 0 1 Inf NaN], eps)
-%!assert (gaminv (p, [1 -Inf NaN Inf 1], 1), [NaN NaN NaN NaN NaN])
-%!assert (gaminv (p, 1, [1 -Inf NaN Inf 1]), [NaN NaN NaN NaN NaN])
-%!assert (gaminv ([p(1:2) NaN p(4:5)], 1, 1), [NaN 0 NaN Inf NaN])
-%!assert (gaminv ([p(1:2) NaN p(4:5)], 1, 1), [NaN 0 NaN Inf NaN])
+%!assert_equal (gaminv (p, ones (1,5), ones (1,5)), [NaN 0 1 Inf NaN], eps)
+%!assert_equal (gaminv (p, 1, ones (1,5)), [NaN 0 1 Inf NaN], eps)
+%!assert_equal (gaminv (p, ones (1,5), 1), [NaN 0 1 Inf NaN], eps)
+%!assert_equal (gaminv (p, [1 -Inf NaN Inf 1], 1), [NaN NaN NaN NaN NaN])
+%!assert_equal (gaminv (p, 1, [1 -Inf NaN Inf 1]), [NaN NaN NaN NaN NaN])
+%!assert_equal (gaminv ([p(1:2) NaN p(4:5)], 1, 1), [NaN 0 NaN Inf NaN])
+%!assert_equal (gaminv ([p(1:2) NaN p(4:5)], 1, 1), [NaN 0 NaN Inf NaN])
 
 ## Test for accuracy when p is small. Results compared to Matlab
-%!assert (gaminv (1e-16, 1, 1), 1e-16, eps)
-%!assert (gaminv (1e-16, 1, 2), 2e-16, eps)
-%!assert (gaminv (1e-20, 3, 5), 1.957434012161815e-06, eps)
-%!assert (gaminv (1e-15, 1, 1), 1e-15, eps)
-%!assert (gaminv (1e-35, 1, 1), 1e-35, eps)
+%!assert_equal (gaminv (1e-16, 1, 1), 1e-16, eps)
+%!assert_equal (gaminv (1e-16, 1, 2), 2e-16, eps)
+%!assert_equal (gaminv (1e-20, 3, 5), 1.957434012161815e-06, eps)
+%!assert_equal (gaminv (1e-15, 1, 1), 1e-15, eps)
+%!assert_equal (gaminv (1e-35, 1, 1), 1e-35, eps)
 
 ## Test class of input preserved
-%!assert (gaminv ([p, NaN], 1, 1), [NaN 0 1 Inf NaN NaN], eps)
-%!assert (gaminv (single ([p, NaN]), 1, 1), single ([NaN 0 1 Inf NaN NaN]), ...
-%! eps ("single"))
-%!assert (gaminv ([p, NaN], single (1), 1), single ([NaN 0 1 Inf NaN NaN]), ...
-%! eps ("single"))
-%!assert (gaminv ([p, NaN], 1, single (1)), single ([NaN 0 1 Inf NaN NaN]), ...
-%! eps ("single"))
+%!assert_equal (gaminv ([p, NaN], 1, 1), [NaN 0 1 Inf NaN NaN], eps)
+%!assert_equal (gaminv (single ([p, NaN]), 1, 1), single ([NaN 0 1 Inf NaN NaN]), ...
+%! eps ('single'))
+%!assert_equal (gaminv ([p, NaN], single (1), 1), single ([NaN 0 1 Inf NaN NaN]), ...
+%! eps ('single'))
+%!assert_equal (gaminv ([p, NaN], 1, single (1)), single ([NaN 0 1 Inf NaN NaN]), ...
+%! eps ('single'))
 
 ## Test input validation
 %!error<gaminv: function called with too few input arguments.> gaminv ()

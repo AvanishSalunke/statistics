@@ -25,11 +25,11 @@
 ##
 ## Optional parameters are:
 ## @itemize
-## @item @qcode{"start"}:  Initialization conditions.  Possible values are:
+## @item @qcode{'start'}:  Initialization conditions.  Possible values are:
 ## @itemize
-## @item @qcode{"randSample"} (default) Takes means uniformly from rows of data.
-## @item @qcode{"plus"} Use k-means++ to initialize means.
-## @item @qcode{"cluster"} Performs an initial clustering with 10% of the data.
+## @item @qcode{'randSample'} (default) Takes means uniformly from rows of data.
+## @item @qcode{'plus'} Use k-means++ to initialize means.
+## @item @qcode{'cluster'} Performs an initial clustering with 10% of the data.
 ## @item @var{vector} A vector whose length is the number of rows in data, and
 ## whose values are 1 to k specify the components each row is initially
 ## allocated to.  The mean, variance, and weight of each component is calculated
@@ -37,42 +37,42 @@
 ## @item @var{structure} A structure with fields @qcode{mu}, @qcode{Sigma} and
 ## @qcode{ComponentProportion}.
 ## @end itemize
-## For @qcode{"randSample"}, @qcode{"plus"}, and @qcode{"cluster"}, the initial
+## For @qcode{'randSample'}, @qcode{'plus'}, and @qcode{'cluster'}, the initial
 ## variance of each component is the variance of the entire data sample.
 ##
-## @item @qcode{"Replicates"}: Number of random restarts to perform.
+## @item @qcode{'Replicates'}: Number of random restarts to perform.
 ##
-## @item @qcode{"RegularizationValue"} or @qcode{"Regularize"}: A small number
+## @item @qcode{'RegularizationValue'} or @qcode{'Regularize'}: A small number
 ## added to the diagonal entries of the covariance to prevent singular
 ## covariances.
 ##
-## @item @qcode{"SharedCovariance"} or @qcode{"SharedCov"} (logical). True if
+## @item @qcode{'SharedCovariance'} or @qcode{'SharedCov'} (logical). True if
 ## all components must share the same variance, to reduce the number of free
 ## parameters
 ##
-## @item @qcode{"CovarianceType"} or @qcode{"CovType"} (string). Possible values
+## @item @qcode{'CovarianceType'} or @qcode{'CovType'} (string). Possible values
 ## are:
 ## @itemize
-## @item @qcode{"full"} (default) Allow arbitrary covariance matrices.
-## @item @qcode{"diagonal"} Force covariances to be diagonal, to reduce the
+## @item @qcode{'full'} (default) Allow arbitrary covariance matrices.
+## @item @qcode{'diagonal'} Force covariances to be diagonal, to reduce the
 ## number of free parameters.
 ## @end itemize
 ##
-## @item @qcode{"Options"}: A structure with all of the following fields:
+## @item @qcode{'Options'}: A structure with all of the following fields:
 ## @itemize
 ## @item @qcode{MaxIter} Maximum number of EM iterations (default 100).
 ## @item @qcode{TolFun} Threshold increase in likelihood to terminate EM
 ## (default 1e-6).
 ## @item @qcode{Display} Possible values are:
 ## @itemize
-## @item @qcode{"off"} (default): Display nothing.
-## @item @qcode{"final"}: Display the total number of iterations and likelihood
+## @item @qcode{'off'} (default): Display nothing.
+## @item @qcode{'final'}: Display the total number of iterations and likelihood
 ## once the execution completes.
-## @item @qcode{"iter"}: Display the number of iteration and likelihood after
+## @item @qcode{'iter'}: Display the number of iteration and likelihood after
 ## each iteration.
 ## @end itemize
 ## @end itemize
-## @item @qcode{"Weight"}:  A column vector or @math{Nx2} matrix. The first
+## @item @qcode{'Weight'}:  A column vector or @math{N*2} matrix. The first
 ## column consists of non-negative weights given to the samples.  If these are
 ## all integers, this is equivalent to specifying @qcode{@var{weight}(i)} copies
 ## of row @qcode{i} of @var{data}, but potentially faster.  If a row of
@@ -97,11 +97,11 @@ function obj = fitgmdist (data, k, varargin)
   ## defaults for options
   diagonalCovar  = false;      # "full".  (true is "diagonal")
   sharedCovar    = false;
-  start          = "randSample";
+  start          = 'randSample';
   replicates     = 1;
   option.MaxIter = 100;
   option.TolFun  = 1e-6;
-  option.Display = "off";      # "off" (1 is "final", 2 is "iter")
+  option.Display = 'off';      # "off" (1 is "final", 2 is "iter")
   Regularizer    = 0;
   weights        = [];         # Each row i counts as "weights(i,1)" rows
 
@@ -117,19 +117,19 @@ function obj = fitgmdist (data, k, varargin)
   while (! isempty (prop))
     try
       switch (lower (prop{1}))
-        case {"sharedcovariance", "sharedcov"}
+        case {'sharedcovariance', 'sharedcov'}
           sharedCovar = prop{2};
-        case {"covariancetype", "covartype"}
+        case {'covariancetype', 'covartype'}
           diagonalCovar  = prop{2};
-        case {"regularizationvalue", "regularize"}
+        case {'regularizationvalue', 'regularize'}
           Regularizer = prop{2};
-        case "replicates"
+        case 'replicates'
           replicates = prop{2};
-        case "start"
+        case 'start'
           start = prop{2};
-        case "weights"
+        case 'weights'
           weights = prop{2};
-        case "options"
+        case 'options'
           option.MaxIter = prop{2}.MaxIter;
           option.TolFun  = prop{2}.TolFun;
           option.Display = prop{2}.Display;
@@ -162,20 +162,20 @@ function obj = fitgmdist (data, k, varargin)
   MaxIter = option.MaxIter;
   TolFun  = option.TolFun;
   switch (lower (option.Display))
-    case "off"
+    case 'off'
       Display = 0;
-    case "final"
+    case 'final'
       Display = 1;
-    case "iter"
+    case 'iter'
       Display = 2;
-    case "notify"
+    case 'notify'
       Display = 0;
     otherwise
       error ("fitgmdist: Unknown Display option %s.", option.Display);
   endswitch
 
   try
-    p = ones(1, k) / k;        # Default is uniform component proportions
+    p = ones (1, k) / k;        # Default is uniform component proportions
   catch ME
     if (! isscalar (k) || ! isnumeric (k))
       error ("fitgmdist: The second argument must be a numeric scalar.");
@@ -188,7 +188,7 @@ function obj = fitgmdist (data, k, varargin)
   if (ischar (start))
     start = lower (start);
     switch (start)
-      case {"randsample", "plus", "cluster", "randsamplep", "plusp", "clusterp"}
+      case {'randsample', 'plus', 'cluster', 'randsamplep', 'plusp', 'clusterp'}
       otherwise
         error ("fitgmdist: Unknown Start value %s\n.", start);
     endswitch
@@ -201,7 +201,7 @@ function obj = fitgmdist (data, k, varargin)
         Sigma = start.Sigma;
         if (isfield (start, 'ComponentProportion'))
           p = start.ComponentProportion(:)';
-        end
+        endif
         if (any (size (data, 2) != [size(mu, 2), size(Sigma, 1)]) || ...
             any (k != [size(mu,1), size(p,2)]))
           error ("fitgmdist: Start parameter has mismatched dimensions.");
@@ -236,9 +236,9 @@ function obj = fitgmdist (data, k, varargin)
   ## Check for the "CovarianceType" property
   if (! islogical (diagonalCovar))
     try
-      if (strcmpi (diagonalCovar, "diagonal"))
+      if (strcmpi (diagonalCovar, 'diagonal'))
         diagonalCovar = true;
-      elseif (strcmpi (diagonalCovar, "full"))
+      elseif (strcmpi (diagonalCovar, 'full'))
         diagonalCovar = false;
       else
         error ("fitgmdist: CovarianceType must be Full or Diagonal.");
@@ -274,7 +274,7 @@ function obj = fitgmdist (data, k, varargin)
       endif
       non_zero = (weights(:,1) > 0);
       weights = weights(non_zero,:);
-      data    = data   (non_zero,:);
+      data    = data(non_zero,:);
 
       nRows = rows (data);
       raw_samples = sum (weights(:,1));
@@ -290,7 +290,7 @@ function obj = fitgmdist (data, k, varargin)
     if (! isnumeric (data) || ! ismatrix (data) || ! isreal (data))
       error ("fitgmdist: first input argument must be a DxN real data matrix.");
     elseif (k > nRows || k < 0)
-      if (exists ("non_zero", "var") && k <= length (non_zero))
+      if (exists ('non_zero', 'var') && k <= length (non_zero))
         error (strcat ("fitgmdist: The number of non-zero weights (%d)", ...
                        " must be at least the number of components", ...
                        " (%d)."), nRows, k);
@@ -336,14 +336,14 @@ function obj = fitgmdist (data, k, varargin)
       if (! isempty (start))
         ## Initialize the means
         switch (start)
-          case {"randsample"}
+          case {'randsample'}
             if (isempty (weights))
               idx = randperm (nRows, k);
             else
               idx = randsample (nRows, k, false, weights);
             endif
             mu = data(idx, :);
-          case {"plus"}           # k-means++, by Arthur and Vassilios
+          case {'plus'}           # k-means++, by Arthur and Vassilios
             mu(1,:) = data(randi (nRows),:);
             d = inf (nRows, 1);   # Distance to nearest centroid so far
             for i = 2:k
@@ -356,14 +356,14 @@ function obj = fitgmdist (data, k, varargin)
               endif
               mu(i,:) = data(find (cs > rand * cs(end), 1), :);
             endfor
-          case {"cluster"}
+          case {'cluster'}
             subsamp = max (k, ceil (nRows/10));
             if (isempty (weights))
               idx = randperm (nRows, subsamp);
             else
               idx = randsample (nRows, subsamp, false, weights);
             endif
-            [~, mu] = kmeans (data(idx), k, "start", "sample");
+            [~, mu] = kmeans (data(idx), k, 'start', 'sample');
         endswitch
 
         ## Initialize the variance, unless set explicitly
@@ -394,12 +394,12 @@ function obj = fitgmdist (data, k, varargin)
             sig = Sigma(:,:,i);
           endif
           if (diagonalCovar)
-            sig = diag(sig);
+            sig = diag (sig);
           endif
           try
-            p_x_l (:, i) = mvnpdf (data, mu(i, :), sig);
+            p_x_l(:, i) = mvnpdf (data, mu(i, :), sig);
           catch ME
-            if (strfind (ME.message, "positive definite"))
+            if (strfind (ME.message, 'positive definite'))
               error (strcat ("fitgmdist: Covariance is not positive", ...
                              " definite.  Increase RegularizationValue."));
             else
@@ -427,8 +427,8 @@ function obj = fitgmdist (data, k, varargin)
         endif
         for i = 1:k
           ## Sigma
-          deviation = bsxfun(@minus, data, mu(i,:));
-          lhs = bsxfun(@times, p_l_x(:,i), deviation);
+          deviation = bsxfun (@minus, data, mu(i,:));
+          lhs = bsxfun (@times, p_l_x(:,i), deviation);
 
           ## Calculate covariance
           ## Iterate either over elements of the covariance matrix,
@@ -447,7 +447,7 @@ function obj = fitgmdist (data, k, varargin)
           endif
 
           if (diagonalCovar)
-            sig = diag(sig)';
+            sig = diag (sig)';
           endif
 
           if (sharedCovar)
@@ -467,9 +467,9 @@ function obj = fitgmdist (data, k, varargin)
         else
           new_log_likeli = sum (weights(:,1) .* log (sum (p_x_l, 2)));
         endif
-        incr  = (new_log_likeli - log_likeli)/max(1,abs(new_log_likeli));
+        incr  = (new_log_likeli - log_likeli)/max (1,abs (new_log_likeli));
         if (Display == 2)
-          fprintf("iter %d  log-likelihood %g\n", iter-1, new_log_likeli);
+          fprintf ("iter %d  log-likelihood %g\n", iter-1, new_log_likeli);
         endif
         log_likeli = new_log_likeli;
       endwhile
@@ -536,8 +536,8 @@ endfunction
 %!
 %! ## Plot the result
 %! figure
-%! [heights, bins] = hist3([C1; C2]);
-%! [xx, yy] = meshgrid(bins{1}, bins{2});
+%! [heights, bins] = hist3 ([C1; C2]);
+%! [xx, yy] = meshgrid (bins{1}, bins{2});
 %! bbins = [xx(:), yy(:)];
 %! contour (reshape (GMModel.pdf (bbins), size (heights)));
 
@@ -547,20 +547,20 @@ endfunction
 %! initial_orientations = [38.0; 18.0];
 %! initial_weights = ones (1, nbOrientations) / nbOrientations;
 %! initial_Sigma = 10 * ones (1, 1, nbOrientations);
-%! start = struct ("mu", initial_orientations, "Sigma", initial_Sigma, ...
-%!                 "ComponentProportion", initial_weights);
-%! GMModel_Theta = fitgmdist (Angle_Theta, nbOrientations, "Start", start , ...
-%!                            "RegularizationValue", 0.0001)
+%! start = struct ('mu', initial_orientations, 'Sigma', initial_Sigma, ...
+%!                 'ComponentProportion', initial_weights);
+%! GMModel_Theta = fitgmdist (Angle_Theta, nbOrientations, 'Start', start , ...
+%!                            'RegularizationValue', 0.0001)
 
 ## Test results against MATLAB example
 %!test
 %! load fisheriris
 %! classes = unique (species);
-%! [~, score] = pca (meas, "NumComponents", 2);
+%! [~, score] = pca (meas, 'NumComponents', 2);
 %! options.MaxIter = 1000;
 %! options.TolFun = 1e-6;
-%! options.Display = "off";
-%! GMModel = fitgmdist (score, 2, "Options", options);
-%! assert (isa (GMModel, "gmdistribution"), true);
-%! assert (GMModel.mu, [1.3212, -0.0954; -2.6424, 0.1909], 1e-4);
+%! options.Display = 'off';
+%! GMModel = fitgmdist (score, 2, 'Options', options);
+%! assert_equal (isa (GMModel, 'gmdistribution'), true);
+%! assert_equal (GMModel.mu, [1.3212, -0.0954; -2.6424, 0.1909], 1e-4);
 

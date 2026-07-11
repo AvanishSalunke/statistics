@@ -21,10 +21,10 @@
 ## @deftypefn  {statistics} {@var{p} =} logncdf (@var{x})
 ## @deftypefnx {statistics} {@var{p} =} logncdf (@var{x}, @var{mu})
 ## @deftypefnx {statistics} {@var{p} =} logncdf (@var{x}, @var{mu}, @var{sigma})
-## @deftypefnx {statistics} {@var{p} =} logncdf (@dots{}, @qcode{"upper"})
+## @deftypefnx {statistics} {@var{p} =} logncdf (@dots{}, @qcode{'upper'})
 ## @deftypefnx {statistics} {[@var{p}, @var{plo}, @var{pup}] =} logncdf (@var{x}, @var{mu}, @var{sigma}, @var{pcov})
 ## @deftypefnx {statistics} {[@var{p}, @var{plo}, @var{pup}] =} logncdf (@var{x}, @var{mu}, @var{sigma}, @var{pcov}, @var{alpha})
-## @deftypefnx {statistics} {[@var{p}, @var{plo}, @var{pup}] =} logncdf (@dots{}, @qcode{"upper"})
+## @deftypefnx {statistics} {[@var{p}, @var{plo}, @var{pup}] =} logncdf (@dots{}, @qcode{'upper'})
 ##
 ## Lognormal cumulative distribution function (CDF).
 ##
@@ -46,7 +46,7 @@
 ## When called with three output arguments, i.e. @qcode{[@var{p}, @var{plo},
 ## @var{pup}]}, @code{logncdf} computes the confidence bounds for @var{p} when
 ## the input parameters @var{mu} and @var{sigma} are estimates.  In such case,
-## @var{pcov}, a @math{2x2} matrix containing the covariance matrix of the
+## @var{pcov}, a @math{2*2} matrix containing the covariance matrix of the
 ## estimated parameters, is necessary.  Optionally, @var{alpha}, which has a
 ## default value of 0.05, specifies the @qcode{100 * (1 - @var{alpha})} percent
 ## confidence bounds.  @var{plo} and @var{pup} are arrays of the same size as
@@ -70,11 +70,11 @@ function [varargout] = logncdf (x, varargin)
   endif
 
   ## Check for "upper" flag
-  if (nargin > 1 && strcmpi (varargin{end}, "upper"))
+  if (nargin > 1 && strcmpi (varargin{end}, 'upper'))
     uflag = true;
     varargin(end) = [];
   elseif (nargin > 1  && ischar (varargin{end}) && ...
-          ! strcmpi (varargin{end}, "upper"))
+          ! strcmpi (varargin{end}, 'upper'))
     error ("logncdf: invalid argument for upper tail.");
   elseif (nargin > 2 && isempty (varargin{end}))
     uflag = false;
@@ -141,14 +141,14 @@ function [varargout] = logncdf (x, varargin)
   if (uflag)
     z = -z;
   endif
-  p = 0.5 * erfc (-z ./ sqrt(2));
+  p = 0.5 * erfc (-z ./ sqrt (2));
 
   ## Compute confidence bounds (if requested)
   if (nargout >= 2)
     zvar = (pcov(1,1) + 2 * pcov(1,2) * z + pcov(2,2) * z .^ 2) ./ (sigma .^ 2);
     if (any (zvar(:) < 0))
       error ("logncdf: bad covariance matrix.");
-    end
+    endif
     normz = -norminv (alpha / 2);
     halfwidth = normz * sqrt (zvar);
     zlo = z - halfwidth;
@@ -159,10 +159,10 @@ function [varargout] = logncdf (x, varargin)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (mu, "single") || isa (sigma, "single"));
-    is_class = "single";
+  if (isa (x, 'single') || isa (mu, 'single') || isa (sigma, 'single'));
+    is_class = 'single';
   else
-    is_class = "double";
+    is_class = 'double';
   endif
 
   ## Prepare output
@@ -180,36 +180,36 @@ endfunction
 %! p1 = logncdf (x, 0, 1);
 %! p2 = logncdf (x, 0, 0.5);
 %! p3 = logncdf (x, 0, 0.25);
-%! plot (x, p1, "-b", x, p2, "-g", x, p3, "-r")
+%! plot (x, p1, '-b', x, p2, '-g', x, p3, '-r')
 %! grid on
-%! legend ({"μ = 0, σ = 1", "μ = 0, σ = 0.5", "μ = 0, σ = 0.25"}, ...
-%!         "location", "southeast")
-%! title ("Log-normal CDF")
-%! xlabel ("values in x")
-%! ylabel ("probability")
+%! legend ({'μ = 0, σ = 1', 'μ = 0, σ = 0.5', 'μ = 0, σ = 0.25'}, ...
+%!         'location', 'southeast')
+%! title ('Log-normal CDF')
+%! xlabel ('values in x')
+%! ylabel ('probability')
 
 ## Test output
 %!shared x, y
 %! x = [-1, 0, 1, e, Inf];
 %! y = [0, 0, 0.5, 1/2+1/2*erf(1/2), 1];
-%!assert (logncdf (x, zeros (1,5), sqrt(2)*ones (1,5)), y, eps)
-%!assert (logncdf (x, zeros (1,5), sqrt(2)*ones (1,5), []), y, eps)
-%!assert (logncdf (x, 0, sqrt(2)*ones (1,5)), y, eps)
-%!assert (logncdf (x, zeros (1,5), sqrt(2)), y, eps)
-%!assert (logncdf (x, [0 1 NaN 0 1], sqrt(2)), [0 0 NaN y(4:5)], eps)
-%!assert (logncdf (x, 0, sqrt(2)*[0 NaN Inf 1 1]), [NaN NaN y(3:5)], eps)
-%!assert (logncdf ([x(1:3) NaN x(5)], 0, sqrt(2)), [y(1:3) NaN y(5)], eps)
+%!assert_equal (logncdf (x, zeros (1,5), sqrt (2)*ones (1,5)), y, eps)
+%!assert_equal (logncdf (x, zeros (1,5), sqrt (2)*ones (1,5), []), y, eps)
+%!assert_equal (logncdf (x, 0, sqrt (2)*ones (1,5)), y, eps)
+%!assert_equal (logncdf (x, zeros (1,5), sqrt (2)), y, eps)
+%!assert_equal (logncdf (x, [0 1 NaN 0 1], sqrt (2)), [0 0 NaN y(4:5)], eps)
+%!assert_equal (logncdf (x, 0, sqrt (2)*[0 NaN Inf 1 1]), [NaN NaN y(3:5)], eps)
+%!assert_equal (logncdf ([x(1:3) NaN x(5)], 0, sqrt (2)), [y(1:3) NaN y(5)], eps)
 
 ## Test class of input preserved
-%!assert (logncdf ([x, NaN], 0, sqrt(2)), [y, NaN], eps)
-%!assert (logncdf (single ([x, NaN]), 0, sqrt(2)), single ([y, NaN]), eps ("single"))
-%!assert (logncdf ([x, NaN], single (0), sqrt(2)), single ([y, NaN]), eps ("single"))
-%!assert (logncdf ([x, NaN], 0, single (sqrt(2))), single ([y, NaN]), eps ("single"))
+%!assert_equal (logncdf ([x, NaN], 0, sqrt (2)), [y, NaN], eps)
+%!assert_equal (logncdf (single ([x, NaN]), 0, sqrt (2)), single ([y, NaN]), eps ('single'))
+%!assert_equal (logncdf ([x, NaN], single (0), sqrt (2)), single ([y, NaN]), eps ('single'))
+%!assert_equal (logncdf ([x, NaN], 0, single (sqrt (2))), single ([y, NaN]), eps ('single'))
 
 ## Test input validation
 %!error<logncdf: invalid number of input arguments.> logncdf ()
 %!error<logncdf: invalid number of input arguments.> logncdf (1,2,3,4,5,6,7)
-%!error<logncdf: invalid argument for upper tail.> logncdf (1, 2, 3, 4, "uper")
+%!error<logncdf: invalid argument for upper tail.> logncdf (1, 2, 3, 4, 'uper')
 %!error<logncdf: X, MU, and SIGMA must be of common size or scalars.> ...
 %! logncdf (ones (3), ones (2), ones (2))
 %!error<logncdf: invalid size of covariance matrix.> logncdf (2, 3, 4, [1, 2])
@@ -220,7 +220,7 @@ endfunction
 %!error<logncdf: invalid value for alpha.> [p, plo, pup] = ...
 %! logncdf (1, 2, 3, [1, 0; 0, 1], 1.22)
 %!error<logncdf: invalid value for alpha.> [p, plo, pup] = ...
-%! logncdf (1, 2, 3, [1, 0; 0, 1], "alpha", "upper")
+%! logncdf (1, 2, 3, [1, 0; 0, 1], 'alpha', 'upper')
 %!error<logncdf: X, MU, and SIGMA must not be complex.> logncdf (i, 2, 2)
 %!error<logncdf: X, MU, and SIGMA must not be complex.> logncdf (2, i, 2)
 %!error<logncdf: X, MU, and SIGMA must not be complex.> logncdf (2, 2, i)

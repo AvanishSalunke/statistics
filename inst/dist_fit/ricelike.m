@@ -162,7 +162,7 @@ function ngrad = rice_grad (params, x, censor, freq)
   XNS = (xsigma .^ 2 + theta .^ 2) ./ 2;
 
   ## Compute derivatives
-  I_1 = besseli(1, xstheta, 1);
+  I_1 = besseli (1, xstheta, 1);
   dII = I_1 ./ I_0;
   dL1 = (-theta + dII .* xsigma) ./ sigma;
   dL2 = -2 * (1 - XNS + dII .* xstheta) ./ sigma;
@@ -191,8 +191,8 @@ endfunction
 function Q = marcumQ1 (a, b)
 
   ## Prepare output matrix
-  if (isa (a, "single") || isa (b, "single"))
-   Q = NaN (size (b), "single");
+  if (isa (a, 'single') || isa (b, 'single'))
+   Q = NaN (size (b), 'single');
   else
    Q = NaN (size (b));
   endif
@@ -202,13 +202,13 @@ function Q = marcumQ1 (a, b)
   Q(a != Inf & b == Inf) = 0;
   Q(a == Inf & b != Inf) = 1;
   z = isnan (Q) & a == 0 & b != Inf;
-  if (any(z))
+  if (any (z))
     Q(z) = exp ((-b(z) .^ 2) ./ 2);
   endif
 
   ## Compute the remaining cases
   z = isnan (Q) & ! isnan (a) & ! isnan (b);
-  if (any(z(:)))
+  if (any (z(:)))
     aa = (a(z) .^ 2) ./ 2;
     bb = (b(z) .^ 2) ./ 2;
     eA = exp (-aa);
@@ -216,14 +216,14 @@ function Q = marcumQ1 (a, b)
     h = eA;
     d = eB .* h;
     s = d;
-    j = (d > s.*eps(class(d)));
+    j = (d > s.*eps (class (d)));
     k = 1;
     while (any (j))
       eA = aa .* eA ./ k;
       h = h + eA;
       eB = bb .* eB ./ (k + 1);
       d = eB .* h;
-      s(j) = s (j) + d(j);
+      s(j) = s(j) + d(j);
       j = (d > s .* eps (class (d)));
       k = k + 1;
     endwhile
@@ -234,10 +234,10 @@ endfunction
 ## Test output
 %!test
 %! nlogL = ricelike ([15.3057344, 17.6668458], [1:50]);
-%! assert (nlogL, 204.5230311010569, 1e-12);
+%! assert_equal (nlogL, 204.5230311010569, 1e-12);
 %!test
 %! nlogL = ricelike ([2.312346885, 1.681228265], [1:5]);
-%! assert (nlogL, 8.65562164930058, 1e-12);
+%! assert_equal (nlogL, 8.65562164930058, 1e-12);
 
 ## Test input validation
 %!error<ricelike: function called with too few input arguments.> ricelike (3.25)

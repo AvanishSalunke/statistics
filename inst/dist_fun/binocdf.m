@@ -19,7 +19,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {statistics} {@var{p} =} binocdf (@var{x}, @var{n}, @var{ps})
-## @deftypefnx {statistics} {@var{p} =} binocdf (@var{x}, @var{n}, @var{ps}, @qcode{"upper"})
+## @deftypefnx {statistics} {@var{p} =} binocdf (@var{x}, @var{n}, @var{ps}, @qcode{'upper'})
 ##
 ## Binomial cumulative distribution function (CDF).
 ##
@@ -49,7 +49,7 @@ function p = binocdf (x, n, ps, uflag)
 
   ## Check for valid "upper" flag
   if (nargin == 4)
-    if (strcmp (uflag, "upper"))
+    if (strcmp (uflag, 'upper'))
        uflag = true;
     else
        error ("binocdf: invalid argument for upper tail.");
@@ -72,14 +72,14 @@ function p = binocdf (x, n, ps, uflag)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (n, "single") || isa (ps, "single"));
-    p = nan (size (x), "single");
+  if (isa (x, 'single') || isa (n, 'single') || isa (ps, 'single'));
+    p = nan (size (x), 'single');
   else
     p = nan (size (x));
   endif
 
   k = (x >= n) & (n >= 0) & (n == fix (n) & (ps >= 0) & (ps <= 1));
-  p(k) = !uflag;
+  p(k) = ! uflag;
 
   k = (x < 0) & (n >= 0) & (n == fix (n) & (ps >= 0) & (ps <= 1));
   p(k) = uflag;
@@ -108,45 +108,45 @@ endfunction
 %! p1 = binocdf (x, 20, 0.5);
 %! p2 = binocdf (x, 20, 0.7);
 %! p3 = binocdf (x, 40, 0.5);
-%! plot (x, p1, "*b", x, p2, "*g", x, p3, "*r")
+%! plot (x, p1, '*b', x, p2, '*g', x, p3, '*r')
 %! grid on
-%! legend ({"n = 20, ps = 0.5", "n = 20, ps = 0.7", ...
-%!          "n = 40, ps = 0.5"}, "location", "southeast")
-%! title ("Binomial CDF")
-%! xlabel ("values in x (number of successes)")
-%! ylabel ("probability")
+%! legend ({'n = 20, ps = 0.5', 'n = 20, ps = 0.7', ...
+%!          'n = 40, ps = 0.5'}, 'location', 'southeast')
+%! title ('Binomial CDF')
+%! xlabel ('values in x (number of successes)')
+%! ylabel ('probability')
 
 ## Test output
 %!shared x, p, p1
 %! x = [-1 0 1 2 3];
 %! p = [0 1/4 3/4 1 1];
 %! p1 = 1 - p;
-%!assert (binocdf (x, 2 * ones (1, 5), 0.5 * ones (1, 5)), p, eps)
-%!assert (binocdf (x, 2, 0.5 * ones (1, 5)), p, eps)
-%!assert (binocdf (x, 2 * ones (1, 5), 0.5), p, eps)
-%!assert (binocdf (x, 2 * [0 -1 NaN 1.1 1], 0.5), [0 NaN NaN NaN 1])
-%!assert (binocdf (x, 2, 0.5 * [0 -1 NaN 3 1]), [0 NaN NaN NaN 1])
-%!assert (binocdf ([x(1:2) NaN x(4:5)], 2, 0.5), [p(1:2) NaN p(4:5)], eps)
-%!assert (binocdf (99, 100, 0.1, "upper"), 1e-100, 1e-112);
-%!assert (binocdf (x, 2 * ones (1, 5), 0.5*ones (1,5), "upper"), p1, eps)
-%!assert (binocdf (x, 2, 0.5 * ones (1, 5), "upper"), p1, eps)
-%!assert (binocdf (x, 2 * ones (1, 5), 0.5, "upper"), p1, eps)
-%!assert (binocdf (x, 2 * [0 -1 NaN 1.1 1], 0.5, "upper"), [1 NaN NaN NaN 0])
-%!assert (binocdf (x, 2, 0.5 * [0 -1 NaN 3 1], "upper"), [1 NaN NaN NaN 0])
-%!assert (binocdf ([x(1:2) NaN x(4:5)], 2, 0.5, "upper"), [p1(1:2) NaN p1(4:5)])
-%!assert (binocdf ([x, NaN], 2, 0.5), [p, NaN], eps)
+%!assert_equal (binocdf (x, 2 * ones (1, 5), 0.5 * ones (1, 5)), p, eps)
+%!assert_equal (binocdf (x, 2, 0.5 * ones (1, 5)), p, eps)
+%!assert_equal (binocdf (x, 2 * ones (1, 5), 0.5), p, eps)
+%!assert_equal (binocdf (x, 2 * [0 -1 NaN 1.1 1], 0.5), [0 NaN NaN NaN 1])
+%!assert_equal (binocdf (x, 2, 0.5 * [0 -1 NaN 3 1]), [0 NaN NaN NaN 1])
+%!assert_equal (binocdf ([x(1:2) NaN x(4:5)], 2, 0.5), [p(1:2) NaN p(4:5)], eps)
+%!assert_equal (binocdf (99, 100, 0.1, 'upper'), 1e-100, 1e-112);
+%!assert_equal (binocdf (x, 2 * ones (1, 5), 0.5*ones (1,5), 'upper'), p1, eps)
+%!assert_equal (binocdf (x, 2, 0.5 * ones (1, 5), 'upper'), p1, eps)
+%!assert_equal (binocdf (x, 2 * ones (1, 5), 0.5, 'upper'), p1, eps)
+%!assert_equal (binocdf (x, 2 * [0 -1 NaN 1.1 1], 0.5, 'upper'), [1 NaN NaN NaN 0])
+%!assert_equal (binocdf (x, 2, 0.5 * [0 -1 NaN 3 1], 'upper'), [1 NaN NaN NaN 0])
+%!assert_equal (binocdf ([x(1:2) NaN x(4:5)], 2, 0.5, 'upper'), [p1(1:2) NaN p1(4:5)])
+%!assert_equal (binocdf ([x, NaN], 2, 0.5), [p, NaN], eps)
 
 ## Test class of input preserved
-%!assert (binocdf (single ([x, NaN]), 2, 0.5), single ([p, NaN]))
-%!assert (binocdf ([x, NaN], single (2), 0.5), single ([p, NaN]))
-%!assert (binocdf ([x, NaN], 2, single (0.5)), single ([p, NaN]))
+%!assert_equal (binocdf (single ([x, NaN]), 2, 0.5), single ([p, NaN]))
+%!assert_equal (binocdf ([x, NaN], single (2), 0.5), single ([p, NaN]))
+%!assert_equal (binocdf ([x, NaN], 2, single (0.5)), single ([p, NaN]))
 
 ## Test input validation
 %!error<binocdf: function called with too few input arguments.> binocdf ()
 %!error<binocdf: function called with too few input arguments.> binocdf (1)
 %!error<binocdf: function called with too few input arguments.> binocdf (1, 2)
 %!error<binocdf: function called with too many inputs> binocdf (1, 2, 3, 4, 5)
-%!error<binocdf: invalid argument for upper tail.> binocdf (1, 2, 3, "tail")
+%!error<binocdf: invalid argument for upper tail.> binocdf (1, 2, 3, 'tail')
 %!error<binocdf: invalid argument for upper tail.> binocdf (1, 2, 3, 4)
 %!error<binocdf: X, N, and PS must be of common size or scalars.> ...
 %! binocdf (ones (3), ones (2), ones (2))

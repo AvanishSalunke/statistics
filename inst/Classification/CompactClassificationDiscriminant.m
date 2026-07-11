@@ -41,7 +41,7 @@ classdef CompactClassificationDiscriminant
   ## @seealso{fitcdiscr, ClassificationDiscriminant}
   ## @end deftp
 
-  properties (Access = public)
+  properties(Access = public)
     ## -*- texinfo -*-
     ## @deftp {CompactClassificationDiscriminant} {property} NumPredictors
     ##
@@ -143,20 +143,22 @@ classdef CompactClassificationDiscriminant
     ## built-in functions.  Nevertheless, the @qcode{ScoreTransform} property
     ## always stores their function handle equivalent.
     ##
-    ## @multitable @columnfractions 0.2 0.05 0.75
-    ## @headitem @var{Value} @tab @tab @var{Description}
-    ## @item @qcode{"doublelogit"} @tab @tab @math{1 ./ (1 + exp (-2 * x))}
-    ## @item @qcode{"invlogit"} @tab @tab @math{log (x ./ (1 - x))}
-    ## @item @qcode{"ismax"} @tab @tab Sets the score for the class with the
+    ## @multitable @columnfractions 0.2 0.75
+    ## @headitem @var{Value} @tab @var{Description}
+    ## @item @qcode{'doublelogit'} @tab @math{1 ./ (1 + exp (-2 * x))}
+    ## @item @qcode{'invlogit'} @tab @math{log (x ./ (1 - x))}
+    ## @item @qcode{'ismax'} @tab Sets the score for the class with the
     ## largest score to 1, and for all other classes to 0
-    ## @item @qcode{"logit"} @tab @tab @math{1 ./ (1 + exp (-x))}
-    ## @item @qcode{"none"} @tab @tab @math{x} (no transformation)
-    ## @item @qcode{"identity"} @tab @tab @math{x} (no transformation)
-    ## @item @qcode{"sign"} @tab @tab @math{-1 for x < 0, 0 for x = 0, 1 for x > 0}
-    ## @item @qcode{"symmetric"} @tab @tab @math{2 * x - 1}
-    ## @item @qcode{"symmetricismax"} @tab @tab Sets the score for the class
+    ## @item @qcode{'logit'} @tab @math{1 ./ (1 + exp (-x))}
+    ## @item @qcode{'none'} @tab @math{x} (no transformation)
+    ## @item @qcode{'identity'} @tab @math{x} (no transformation)
+    ## @item @qcode{'sign'} @tab
+    ## @math{-1 for x < 0, 0 for x = 0, 1 for x >
+    ## 0}
+    ## @item @qcode{'symmetric'} @tab @math{2 * x - 1}
+    ## @item @qcode{'symmetricismax'} @tab Sets the score for the class
     ## with the largest score to 1, and for all other classes to -1
-    ## @item @qcode{"symmetriclogit"} @tab @tab @math{2 ./ (1 + exp (-x)) - 1}
+    ## @item @qcode{'symmetriclogit'} @tab @math{2 ./ (1 + exp (-x)) - 1}
     ## @end multitable
     ##
     ## @end deftp
@@ -168,7 +170,7 @@ classdef CompactClassificationDiscriminant
     ## Within-class covariance
     ##
     ## A numeric array specifying the within-class covariance. For linear
-    ## discriminant type (currently supported) this is a @math{PxP} matrix,
+    ## discriminant type (currently supported) this is a @math{P*P} matrix,
     ## where @math{P} is the number of predictors.  This property is read-only.
     ##
     ## @end deftp
@@ -179,9 +181,9 @@ classdef CompactClassificationDiscriminant
     ##
     ## Class means
     ##
-    ## A @math{KxP} numeric matrix specifying the mean of the multivariate
+    ## A @math{K*P} numeric matrix specifying the mean of the multivariate
     ## normal distribution of each corresponding class, where @math{K} is the
-    ## number of classes and @math{P} is the number of predictors.  This property
+    ## number of classes and @math{P} is the number of predictors. This property
     ## is read-only.
     ##
     ## @end deftp
@@ -192,11 +194,11 @@ classdef CompactClassificationDiscriminant
     ##
     ## Coefficient matrices
     ##
-    ## A @math{KxK} structure containing the coefficient matrices, where
+    ## A @math{K*K} structure containing the coefficient matrices, where
     ## @math{K} is the number of classes.  If the @qcode{'FillCoeffs'} parameter
-    ## was set to @qcode{'off'} in the original @code{ClassificationDiscriminant}
-    ## model, then @qcode{Coeffs} is empty @qcode{([])}.  This property is
-    ## read-only.
+    ## was set to @qcode{'off'} in the original
+    ## @code{ClassificationDiscriminant} model, then @qcode{Coeffs} is empty
+    ## @qcode{([])}. This property is read-only.
     ##
     ## @qcode{Coeffs(i,j)} contains the coefficients of the linear (currently
     ## supported) boundaries between the classes @code{i} and @code{j} in the
@@ -271,11 +273,11 @@ classdef CompactClassificationDiscriminant
     LogDetSigma     = [];
   endproperties
 
-  properties (Access = private, Hidden)
+  properties(Access = private, Hidden)
     STname = 'none';
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     ## Constructor
     function this = CompactClassificationDiscriminant (Mdl = [])
@@ -283,7 +285,7 @@ classdef CompactClassificationDiscriminant
       ## Check for appropriate class
       if (isempty (Mdl))
         return;
-      elseif (! strcmpi (class (Mdl), "ClassificationDiscriminant"))
+      elseif (! strcmpi (class (Mdl), 'ClassificationDiscriminant'))
         error (strcat ("CompactClassificationDiscriminant: invalid", ...
                        " classification object."));
       endif
@@ -325,11 +327,11 @@ classdef CompactClassificationDiscriminant
       ## Print selected properties
       fprintf ("%+25s: '%s'\n", 'ResponseName', this.ResponseName);
       if (iscellstr (this.ClassNames))
-        str = repmat ({"'%s'"}, 1, numel (this.ClassNames));
+        str = repmat ({'''%s'''}, 1, numel (this.ClassNames));
         str = strcat ('{', strjoin (str, ' '), '}');
         str = sprintf (str, this.ClassNames{:});
       else # numeric
-        str = repmat ({"%d"}, 1, numel (this.ClassNames));
+        str = repmat ({'%d'}, 1, numel (this.ClassNames));
         str = strcat ('[', strjoin (str, ' '), ']');
         str = sprintf (str, this.ClassNames);
       endif
@@ -391,7 +393,7 @@ classdef CompactClassificationDiscriminant
           endif
           switch (s.subs)
             case 'ScoreTransform'
-              name = "CompactClassificationDiscriminant";
+              name = 'CompactClassificationDiscriminant';
               [this.ScoreTransform, this.STname] = parseScoreTransform ...
                                                    (varargin{2}, name);
             otherwise
@@ -404,7 +406,7 @@ classdef CompactClassificationDiscriminant
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {CompactClassificationDiscriminant} {@var{label} =} predict (@var{obj}, @var{XC})
@@ -420,9 +422,10 @@ classdef CompactClassificationDiscriminant
     ##
     ## @itemize
     ## @item
-    ## @var{obj} must be a @qcode{CompactClassificationDiscriminant} class object.
+    ## @var{obj} must be a @qcode{CompactClassificationDiscriminant} class
+    ## object.
     ## @item
-    ## @var{XC} must be an @math{MxP} numeric matrix with the same number of
+    ## @var{XC} must be an @math{M*P} numeric matrix with the same number of
     ## features @math{P} as the corresponding predictors of the discriminant
     ## model in @var{obj}.
     ## @end itemize
@@ -506,11 +509,11 @@ classdef CompactClassificationDiscriminant
     ## @item
     ## @code{obj} is a @var{CompactClassificationDiscriminant} object.
     ## @item
-    ## @code{X} must be a @math{NxP} numeric matrix of input data where rows
+    ## @code{X} must be a @math{N*P} numeric matrix of input data where rows
     ## correspond to observations and columns correspond to features or
     ## variables.
     ## @item
-    ## @code{Y} is @math{Nx1} matrix or cell matrix containing the class labels
+    ## @code{Y} is @math{N*1} matrix or cell matrix containing the class labels
     ## of corresponding predictor data in @var{X}. @var{Y} must have same
     ## numbers of rows as @var{X}.
     ## @end itemize
@@ -518,32 +521,32 @@ classdef CompactClassificationDiscriminant
     ## @code{@var{L} = loss (@dots{}, @var{name}, @var{value})} allows
     ## additional options specified by @var{name}-@var{value} pairs:
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"LossFun"} @tab @tab Specifies the loss function to use.
+    ## @item @qcode{'LossFun'} @tab Specifies the loss function to use.
     ## Can be a function handle with four input arguments (C, S, W, Cost)
     ## which returns a scalar value or one of:
     ## 'binodeviance', 'classifcost', 'classiferror', 'exponential',
     ## 'hinge', 'logit','mincost', 'quadratic'.
     ## @itemize
     ## @item
-    ## @code{C} is a logical matrix of size @math{NxK}, where @math{N} is the
+    ## @code{C} is a logical matrix of size @math{N*K}, where @math{N} is the
     ## number of observations and @math{K} is the number of classes.
     ## The element @code{C(i,j)} is true if the class label of the i-th
     ## observation is equal to the j-th class.
     ## @item
-    ## @code{S} is a numeric matrix of size @math{NxK}, where each element
+    ## @code{S} is a numeric matrix of size @math{N*K}, where each element
     ## represents the classification score for the corresponding class.
     ## @item
     ## @code{W} is a numeric vector of length @math{N}, representing
     ## the observation weights.
     ## @item
-    ## @code{Cost} is a @math{KxK} matrix representing the misclassification
+    ## @code{Cost} is a @math{K*K} matrix representing the misclassification
     ## costs.
     ## @end itemize
     ##
-    ## @item @qcode{"Weights"} @tab @tab Specifies observation weights, must be
+    ## @item @qcode{'Weights'} @tab Specifies observation weights, must be
     ## a numeric vector of length equal to the number of rows in X.
     ## Default is @code{ones (size (X, 1))}. loss normalizes the weights so that
     ## observation weights in each class sum to the prior probability of that
@@ -590,8 +593,8 @@ classdef CompactClassificationDiscriminant
         Value = varargin{2};
         switch (tolower (varargin{1}))
           case 'lossfun'
-            lf_opt = {"binodeviance", "classifcost", "classiferror", ...
-                      "exponential", "hinge","logit", "mincost", "quadratic"};
+            lf_opt = {'binodeviance', 'classifcost', 'classiferror', ...
+                      'exponential', 'hinge','logit', 'mincost', 'quadratic'};
             if (isa (Value, 'function_handle'))
               ## Check if the loss function is valid
               if (nargin (Value) != 4)
@@ -606,7 +609,7 @@ classdef CompactClassificationDiscriminant
                 S_test = zeros (n, K);
                 W_test = ones (n, 1);
                 Cost_test = ones (K) - eye (K);
-                test_output = Value (C_test, S_test, W_test, Cost_test);
+                test_output = Value(C_test, S_test, W_test, Cost_test);
                 if (! isscalar (test_output))
                   error (strcat ("CompactClassificationDiscriminant.loss:", ...
                                  " custom loss function must return", ...
@@ -644,7 +647,7 @@ classdef CompactClassificationDiscriminant
                            " invalid parameter name in optional pair", ...
                            " arguments."));
         endswitch
-        varargin (1:2) = [];
+        varargin(1:2) = [];
       endwhile
 
       ## Check for missing values in X
@@ -713,7 +716,7 @@ classdef CompactClassificationDiscriminant
 
       ## Compute the loss using custom loss function
       if (isa (LossFun, 'function_handle'))
-        L = LossFun (C, scores, Weights, this.Cost);
+        L = LossFun(C, scores, Weights, this.Cost);
         return;
       endif
 
@@ -783,11 +786,11 @@ classdef CompactClassificationDiscriminant
     ## @item
     ## @code{obj} is a @var{CompactClassificationDiscriminant} object.
     ## @item
-    ## @code{X} must be a @math{NxP} numeric matrix of input data where rows
+    ## @code{X} must be a @math{N*P} numeric matrix of input data where rows
     ## correspond to observations and columns correspond to features or
     ## variables.
     ## @item
-    ## @code{Y} is @math{Nx1} matrix or cell matrix containing the class labels
+    ## @code{Y} is @math{N*1} matrix or cell matrix containing the class labels
     ## of corresponding predictor data in @var{X}. @var{Y} must have same
     ## numbers of rows as @var{X}.
     ## @end itemize
@@ -894,7 +897,7 @@ classdef CompactClassificationDiscriminant
     ## @end deftypefn
     function savemodel (this, fname)
       ## Generate variable for class name
-      classdef_name = "CompactClassificationDiscriminant";
+      classdef_name = 'CompactClassificationDiscriminant';
 
       ## Create variables from model properties
       NumPredictors   = this.NumPredictors;
@@ -915,15 +918,15 @@ classdef CompactClassificationDiscriminant
       LogDetSigma     = this.LogDetSigma;
 
       ## Save classdef name and all model properties as individual variables
-      save ("-binary", fname, "classdef_name", "NumPredictors", ...
-            "PredictorNames", "ResponseName", "ClassNames", "Prior", ...
-            "Cost", "ScoreTransform", "STname", "Sigma", "Mu", "Coeffs", ...
-            "Delta", "DiscrimType", "Gamma", "MinGamma", "LogDetSigma");
+      save ('-binary', fname, 'classdef_name', 'NumPredictors', ...
+            'PredictorNames', 'ResponseName', 'ClassNames', 'Prior', ...
+            'Cost', 'ScoreTransform', 'STname', 'Sigma', 'Mu', 'Coeffs', ...
+            'Delta', 'DiscrimType', 'Gamma', 'MinGamma', 'LogDetSigma');
     endfunction
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function mdl = load_model (filename, data)
       ## Create a CompactClassificationDiscriminant object
@@ -966,7 +969,7 @@ endclassdef
 %! x = meas;
 %! y = species;
 %! PredictorNames = {'Sepal Length', 'Sepal Width', 'Petal Length', 'Petal Width'};
-%! Mdl = fitcdiscr (x, y, "PredictorNames", PredictorNames);
+%! Mdl = fitcdiscr (x, y, 'PredictorNames', PredictorNames);
 %! CMdl = compact (Mdl);
 %! sigma = [0.265008, 0.092721, 0.167514, 0.038401; ...
 %!          0.092721, 0.115388, 0.055244, 0.032710; ...
@@ -978,19 +981,19 @@ endclassdef
 %! xCentered = [ 9.4000e-02,  7.2000e-02, -6.2000e-02, -4.6000e-02; ...
 %!              -1.0600e-01, -4.2800e-01, -6.2000e-02, -4.6000e-02; ...
 %!              -3.0600e-01, -2.2800e-01, -1.6200e-01, -4.6000e-02];
-%! assert (class (CMdl), "CompactClassificationDiscriminant");
-%! assert ({CMdl.DiscrimType, CMdl.ResponseName}, {"linear", "Y"})
-%! assert ({CMdl.Gamma, CMdl.MinGamma}, {0, 0}, 1e-15)
-%! assert (CMdl.ClassNames, unique (species))
-%! assert (CMdl.Sigma, sigma, 1e-6)
-%! assert (CMdl.Mu, mu, 1e-14)
-%! assert (CMdl.LogDetSigma, -9.9585, 1e-4)
-%! assert (CMdl.PredictorNames, PredictorNames)
+%! assert_equal (class (CMdl), "CompactClassificationDiscriminant");
+%! assert_equal ({CMdl.DiscrimType, CMdl.ResponseName}, {'linear', 'Y'})
+%! assert_equal ({CMdl.Gamma, CMdl.MinGamma}, {0, 0}, 1e-15)
+%! assert_equal (CMdl.ClassNames, unique (species))
+%! assert_equal (CMdl.Sigma, sigma, 1e-6)
+%! assert_equal (CMdl.Mu, mu, 1e-14)
+%! assert_equal (CMdl.LogDetSigma, -9.9585, 1e-4)
+%! assert_equal (CMdl.PredictorNames, PredictorNames)
 %!test
 %! load fisheriris
 %! x = meas;
 %! y = species;
-%! Mdl = fitcdiscr (x, y, "Gamma", 0.5);
+%! Mdl = fitcdiscr (x, y, 'Gamma', 0.5);
 %! CMdl = compact (Mdl);
 %! sigma = [0.265008, 0.046361, 0.083757, 0.019201; ...
 %!          0.046361, 0.115388, 0.027622, 0.016355; ...
@@ -1002,13 +1005,13 @@ endclassdef
 %! xCentered = [ 9.4000e-02,  7.2000e-02, -6.2000e-02, -4.6000e-02; ...
 %!              -1.0600e-01, -4.2800e-01, -6.2000e-02, -4.6000e-02; ...
 %!              -3.0600e-01, -2.2800e-01, -1.6200e-01, -4.6000e-02];
-%! assert (class (CMdl), "CompactClassificationDiscriminant");
-%! assert ({CMdl.DiscrimType, CMdl.ResponseName}, {"linear", "Y"})
-%! assert ({CMdl.Gamma, CMdl.MinGamma}, {0.5, 0})
-%! assert (CMdl.ClassNames, unique (species))
-%! assert (CMdl.Sigma, sigma, 1e-6)
-%! assert (CMdl.Mu, mu, 1e-14)
-%! assert (CMdl.LogDetSigma, -8.6884, 1e-4)
+%! assert_equal (class (CMdl), "CompactClassificationDiscriminant");
+%! assert_equal ({CMdl.DiscrimType, CMdl.ResponseName}, {'linear', 'Y'})
+%! assert_equal ({CMdl.Gamma, CMdl.MinGamma}, {0.5, 0})
+%! assert_equal (CMdl.ClassNames, unique (species))
+%! assert_equal (CMdl.Sigma, sigma, 1e-6)
+%! assert_equal (CMdl.Mu, mu, 1e-14)
+%! assert_equal (CMdl.LogDetSigma, -8.6884, 1e-4)
 
 ## Test input validation for constructor
 %!error<CompactClassificationDiscriminant: invalid classification object.> ...
@@ -1019,16 +1022,16 @@ endclassdef
 %! load fisheriris
 %! x = meas;
 %! y = species;
-%! Mdl = fitcdiscr (meas, species, "Gamma", 0.5);
+%! Mdl = fitcdiscr (meas, species, 'Gamma', 0.5);
 %! CMdl = compact (Mdl);
 %! [label, score, cost] = predict (CMdl, [2, 2, 2, 2]);
-%! assert (label, {'versicolor'})
-%! assert (score, [0, 0.9999, 0.0001], 1e-4)
-%! assert (cost, [1, 0.0001, 0.9999], 1e-4)
+%! assert_equal (label, {'versicolor'})
+%! assert_equal (score, [0, 0.9999, 0.0001], 1e-4)
+%! assert_equal (cost, [1, 0.0001, 0.9999], 1e-4)
 %! [label, score, cost] = predict (CMdl, [2.5, 2.5, 2.5, 2.5]);
-%! assert (label, {'versicolor'})
-%! assert (score, [0, 0.6368, 0.3632], 1e-4)
-%! assert (cost, [1, 0.3632, 0.6368], 1e-4)
+%! assert_equal (label, {'versicolor'})
+%! assert_equal (score, [0, 0.6368, 0.3632], 1e-4)
+%! assert_equal (cost, [1, 0.3632, 0.6368], 1e-4)
 %!test
 %! load fisheriris
 %! x = meas;
@@ -1040,9 +1043,9 @@ endclassdef
 %! l = {'setosa'; 'versicolor'; 'virginica'};
 %! s = [1, 0, 0; 0, 1, 0; 0, 0, 1];
 %! c = [0, 1, 1; 1, 0, 1; 1, 1, 0];
-%! assert (label, l)
-%! assert (score, s, 1e-4)
-%! assert (cost, c, 1e-4)
+%! assert_equal (label, l)
+%! assert_equal (score, s, 1e-4)
+%! assert_equal (cost, c, 1e-4)
 
 %!shared MODEL
 %! X = rand (10,2);
@@ -1064,56 +1067,56 @@ endclassdef
 %! x = mean (meas);
 %! y = {'versicolor'};
 %! L = loss (model, x, y);
-%! assert (L, 0)
+%! assert_equal (L, 0)
 %!test
 %! x = [1, 2; 3, 4; 5, 6];
 %! y = {'A'; 'B'; 'A'};
-%! model = fitcdiscr (x, y, "Gamma", 0.4);
+%! model = fitcdiscr (x, y, 'Gamma', 0.4);
 %! x_test = [1, 6; 3, 3];
 %! y_test = {'A'; 'B'};
 %! L = loss (model, x_test, y_test);
-%! assert (L, 0.3333, 1e-4)
+%! assert_equal (L, 0.3333, 1e-4)
 %!test
 %! x = [1, 2; 3, 4; 5, 6; 7, 8];
 %! y = ['1'; '2'; '3'; '1'];
-%! model = fitcdiscr (x, y, "gamma" , 0.5);
+%! model = fitcdiscr (x, y, 'gamma' , 0.5);
 %! x_test = [3, 3];
 %! y_test = ['1'];
 %! L = loss (model, x_test, y_test, 'LossFun', 'quadratic');
-%! assert (L, 0.2423, 1e-4)
+%! assert_equal (L, 0.2423, 1e-4)
 %!test
 %! x = [1, 2; 3, 4; 5, 6; 7, 8];
 %! y = ['1'; '2'; '3'; '1'];
-%! model = fitcdiscr (x, y, "gamma" , 0.5);
+%! model = fitcdiscr (x, y, 'gamma' , 0.5);
 %! x_test = [3, 3; 5, 7];
 %! y_test = ['1'; '2'];
 %! L = loss (model, x_test, y_test, 'LossFun', 'classifcost');
-%! assert (L, 0.3333, 1e-4)
+%! assert_equal (L, 0.3333, 1e-4)
 %!test
 %! x = [1, 2; 3, 4; 5, 6; 7, 8];
 %! y = ['1'; '2'; '3'; '1'];
-%! model = fitcdiscr (x, y, "gamma" , 0.5);
+%! model = fitcdiscr (x, y, 'gamma' , 0.5);
 %! x_test = [3, 3; 5, 7];
 %! y_test = ['1'; '2'];
 %! L = loss (model, x_test, y_test, 'LossFun', 'hinge');
-%! assert (L, 0.5886, 1e-4)
+%! assert_equal (L, 0.5886, 1e-4)
 %!test
 %! x = [1, 2; 3, 4; 5, 6; 7, 8];
 %! y = ['1'; '2'; '3'; '1'];
-%! model = fitcdiscr (x, y, "gamma" , 0.5);
+%! model = fitcdiscr (x, y, 'gamma' , 0.5);
 %! x_test = [3, 3; 5, 7];
 %! y_test = ['1'; '2'];
 %! W = [1; 2];
 %! L = loss (model, x_test, y_test, 'LossFun', 'logit', 'Weights', W);
-%! assert (L, 0.5107, 1e-4)
+%! assert_equal (L, 0.5107, 1e-4)
 %!test
 %! x = [1, 2; 3, 4; 5, 6];
 %! y = {'A'; 'B'; 'A'};
-%! model = fitcdiscr (x, y, "gamma" , 0.5);
+%! model = fitcdiscr (x, y, 'gamma' , 0.5);
 %! x_with_nan = [1, 2; NaN, 4];
 %! y_test = {'A'; 'B'};
 %! L = loss (model, x_with_nan, y_test);
-%! assert (L, 0.3333, 1e-4)
+%! assert_equal (L, 0.3333, 1e-4)
 %!test
 %! x = [1, 2; 3, 4; 5, 6];
 %! y = {'A'; 'B'; 'A'};
@@ -1121,20 +1124,20 @@ endclassdef
 %! x_with_nan = [1, 2; NaN, 4];
 %! y_test = {'A'; 'B'};
 %! L = loss (model, x_with_nan, y_test, 'LossFun', 'logit');
-%! assert (isnan (L))
+%! assert_equal (isnan (L), true)
 %!test
 %! x = [1, 2; 3, 4; 5, 6];
 %! y = {'A'; 'B'; 'A'};
 %! model = fitcdiscr (x, y);
 %! customLossFun = @(C, S, W, Cost) sum (W .* sum (abs (C - S), 2));
 %! L = loss (model, x, y, 'LossFun', customLossFun);
-%! assert (L, 0.8889, 1e-4)
+%! assert_equal (L, 0.8889, 1e-4)
 %!test
 %! x = [1, 2; 3, 4; 5, 6];
 %! y = [1; 2; 1];
 %! model = fitcdiscr (x, y);
 %! L = loss (model, x, y, 'LossFun', 'classiferror');
-%! assert (L, 0.3333, 1e-4)
+%! assert_equal (L, 0.3333, 1e-4)
 
 ## Test input validation for loss method
 %!error<CompactClassificationDiscriminant.loss: too few input arguments.> ...
@@ -1156,13 +1159,13 @@ endclassdef
 %! X = mean (meas);
 %! Y = {'versicolor'};
 %! m = margin (mdl, X, Y);
-%! assert (m, 1, 1e-6)
+%! assert_equal (m, 1, 1e-6)
 %!test
 %! X = [1, 2; 3, 4; 5, 6];
 %! Y = [1; 2; 1];
-%! mdl = fitcdiscr (X, Y, "gamma", 0.5);
+%! mdl = fitcdiscr (X, Y, 'gamma', 0.5);
 %! m = margin (mdl, X, Y);
-%! assert (m, [0.3333; -0.3333; 0.3333], 1e-4)
+%! assert_equal (m, [0.3333; -0.3333; 0.3333], 1e-4)
 
 ## Test input validation for margin method
 %!error<CompactClassificationDiscriminant.margin: too few input arguments.> ...

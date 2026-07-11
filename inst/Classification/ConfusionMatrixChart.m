@@ -40,7 +40,7 @@ classdef ConfusionMatrixChart < handle
   ## @seealso{confusionchart}
   ## @end deftp
 
-  properties (Access = public)
+  properties(Access = public)
     ## -*- texinfo -*-
     ## @deftp {ConfusionMatrixChart} {property} XLabel
     ##
@@ -50,7 +50,7 @@ classdef ConfusionMatrixChart < handle
     ## "Predicted Class".
     ##
     ## @end deftp
-    XLabel = "Predicted Class";
+    XLabel = 'Predicted Class';
 
     ## -*- texinfo -*-
     ## @deftp {ConfusionMatrixChart} {property} YLabel
@@ -61,7 +61,7 @@ classdef ConfusionMatrixChart < handle
     ## "True Class".
     ##
     ## @end deftp
-    YLabel = "True Class";
+    YLabel = 'True Class';
 
     ## -*- texinfo -*-
     ## @deftp {ConfusionMatrixChart} {property} Title
@@ -72,7 +72,7 @@ classdef ConfusionMatrixChart < handle
     ## Default is empty string.
     ##
     ## @end deftp
-    Title  = "";
+    Title  = '';
 
     ## -*- texinfo -*-
     ## @deftp {ConfusionMatrixChart} {property} FontName
@@ -83,7 +83,7 @@ classdef ConfusionMatrixChart < handle
     ## in the chart.  Default is empty string, which uses the axes font name.
     ##
     ## @end deftp
-    FontName  = "";
+    FontName  = '';
 
     ## -*- texinfo -*-
     ## @deftp {ConfusionMatrixChart} {property} FontSize
@@ -129,33 +129,33 @@ classdef ConfusionMatrixChart < handle
     ## values.  Supported values are:
     ##
     ## @itemize
-    ## @item @qcode{"absolute"} - Display absolute counts (default)
-    ## @item @qcode{"column-normalized"} - Normalize by column totals
-    ## @item @qcode{"row-normalized"} - Normalize by row totals
-    ## @item @qcode{"total-normalized"} - Normalize by total number of
+    ## @item @qcode{'absolute'} - Display absolute counts (default)
+    ## @item @qcode{'column-normalized'} - Normalize by column totals
+    ## @item @qcode{'row-normalized'} - Normalize by row totals
+    ## @item @qcode{'total-normalized'} - Normalize by total number of
     ## observations
     ## @end itemize
     ##
     ## @end deftp
-    Normalization = "absolute";
+    Normalization = 'absolute';
 
     ## -*- texinfo -*-
     ## @deftp {ConfusionMatrixChart} {property} ColumnSummary
     ##
     ## Column summary display
     ##
-    ## A character vector specifying whether and how to display column summaries.
-    ## Supported values are:
+    ## A character vector specifying whether and how to display column
+    ## summaries. Supported values are:
     ##
     ## @itemize
-    ## @item @qcode{"off"} - Do not display column summary (default)
-    ## @item @qcode{"absolute"} - Display absolute counts
-    ## @item @qcode{"column-normalized"} - Display normalized by column
-    ## @item @qcode{"total-normalized"} - Display normalized by total
+    ## @item @qcode{'off'} - Do not display column summary (default)
+    ## @item @qcode{'absolute'} - Display absolute counts
+    ## @item @qcode{'column-normalized'} - Display normalized by column
+    ## @item @qcode{'total-normalized'} - Display normalized by total
     ## @end itemize
     ##
     ## @end deftp
-    ColumnSummary = "off";
+    ColumnSummary = 'off';
 
     ## -*- texinfo -*-
     ## @deftp {ConfusionMatrixChart} {property} RowSummary
@@ -166,14 +166,14 @@ classdef ConfusionMatrixChart < handle
     ## Supported values are:
     ##
     ## @itemize
-    ## @item @qcode{"off"} - Do not display row summary (default)
-    ## @item @qcode{"absolute"} - Display absolute counts
-    ## @item @qcode{"row-normalized"} - Display normalized by row
-    ## @item @qcode{"total-normalized"} - Display normalized by total
+    ## @item @qcode{'off'} - Do not display row summary (default)
+    ## @item @qcode{'absolute'} - Display absolute counts
+    ## @item @qcode{'row-normalized'} - Display normalized by row
+    ## @item @qcode{'total-normalized'} - Display normalized by total
     ## @end itemize
     ##
     ## @end deftp
-    RowSummary = "off";
+    RowSummary = 'off';
 
     ## -*- texinfo -*-
     ## @deftp {ConfusionMatrixChart} {property} GridVisible
@@ -184,12 +184,12 @@ classdef ConfusionMatrixChart < handle
     ## confusion matrix.  Supported values are:
     ##
     ## @itemize
-    ## @item @qcode{"on"} - Display grid lines (default)
-    ## @item @qcode{"off"} - Hide grid lines
+    ## @item @qcode{'on'} - Display grid lines (default)
+    ## @item @qcode{'off'} - Hide grid lines
     ## @end itemize
     ##
     ## @end deftp
-    GridVisible = "on";
+    GridVisible = 'on';
 
     ## -*- texinfo -*-
     ## @deftp {ConfusionMatrixChart} {property} HandleVisibility
@@ -197,10 +197,10 @@ classdef ConfusionMatrixChart < handle
     ## Handle visibility
     ##
     ## A character vector specifying the visibility of the object's handle.
-    ## Supported values are @qcode{"on"}, @qcode{"off"}, and @qcode{"callback"}.
+    ## Supported values are @qcode{'on'}, @qcode{'off'}, and @qcode{'callback'}.
     ##
     ## @end deftp
-    HandleVisibility = "";
+    HandleVisibility = '';
 
     ## -*- texinfo -*-
     ## @deftp {ConfusionMatrixChart} {property} OuterPosition
@@ -230,15 +230,15 @@ classdef ConfusionMatrixChart < handle
     ## Position units
     ##
     ## A character vector specifying the units for the position properties.
-    ## Supported values are @qcode{"centimeters"}, @qcode{"characters"},
-    ## @qcode{"inches"}, @qcode{"normalized"}, @qcode{"pixels"}, and
-    ## @qcode{"points"}.
+    ## Supported values are @qcode{'centimeters'}, @qcode{'characters'},
+    ## @qcode{'inches'}, @qcode{'normalized'}, @qcode{'pixels'}, and
+    ## @qcode{'points'}.
     ##
     ## @end deftp
-    Units = "";
+    Units = '';
   endproperties
 
-  properties (GetAccess = public, SetAccess = private)
+  properties(GetAccess = public, SetAccess = private)
     ## -*- texinfo -*-
     ## @deftp {ConfusionMatrixChart} {property} ClassLabels
     ##
@@ -274,7 +274,7 @@ classdef ConfusionMatrixChart < handle
     Parent = 0;
   endproperties
 
-  properties (Access = protected, Hidden)
+  properties(Access = protected, Hidden)
     ## Axes handle
     hax = 0.0;
 
@@ -291,7 +291,7 @@ classdef ConfusionMatrixChart < handle
     RowSummaryAbsoluteValues = [];
   endproperties
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {statistics} {@var{cmc} =} ConfusionMatrixChart (@var{hax}, @var{cm}, @var{cl})
@@ -316,69 +316,70 @@ classdef ConfusionMatrixChart < handle
     ## labels. The number of labels must match the size of the confusion matrix.
     ## @end itemize
     ##
-    ## @code{@var{cmc} = ConfusionMatrixChart (@dots{}, @var{name}, @var{value})}
+    ## @code{@var{cmc} = ConfusionMatrixChart (@dots{}, @var{name},
+    ## @var{value})}
     ## returns a ConfusionMatrixChart object with additional parameters
     ## specified by @qcode{@var{name}, @var{value}} paired arguments:
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"XLabel"} @tab @tab A character vector specifying the
+    ## @item @qcode{'XLabel'} @tab A character vector specifying the
     ## x-axis label. Default is "Predicted Class".
     ##
-    ## @item @qcode{"YLabel"} @tab @tab A character vector specifying the
+    ## @item @qcode{'YLabel'} @tab A character vector specifying the
     ## y-axis label. Default is "True Class".
     ##
-    ## @item @qcode{"Title"} @tab @tab A character vector specifying the chart
+    ## @item @qcode{'Title'} @tab A character vector specifying the chart
     ## title. Default is empty string.
     ##
-    ## @item @qcode{"FontName"} @tab @tab A character vector specifying the
+    ## @item @qcode{'FontName'} @tab A character vector specifying the
     ## font name for text elements. Default is the axes font name.
     ##
-    ## @item @qcode{"FontSize"} @tab @tab A numeric scalar specifying the
+    ## @item @qcode{'FontSize'} @tab A numeric scalar specifying the
     ## font size for text elements. Default is the axes font size.
     ##
-    ## @item @qcode{"DiagonalColor"} @tab @tab A 1x3 RGB vector specifying
+    ## @item @qcode{'DiagonalColor'} @tab A 1x3 RGB vector specifying
     ## the color for diagonal elements (correct classifications). Default is
     ## [0.0, 0.4471, 0.7412].
     ##
-    ## @item @qcode{"OffDiagonalColor"} @tab @tab A 1x3 RGB vector specifying
+    ## @item @qcode{'OffDiagonalColor'} @tab A 1x3 RGB vector specifying
     ## the color for off-diagonal elements (misclassifications). Default is
     ## [0.8510, 0.3255, 0.0980].
     ##
-    ## @item @qcode{"Normalization"} @tab @tab A character vector specifying
-    ## the normalization method. Supported values are @qcode{"absolute"},
-    ## @qcode{"column-normalized"}, @qcode{"row-normalized"}, and
-    ## @qcode{"total-normalized"}. Default is @qcode{"absolute"}.
+    ## @item @qcode{'Normalization'} @tab A character vector specifying
+    ## the normalization method. Supported values are @qcode{'absolute'},
+    ## @qcode{'column-normalized'}, @qcode{'row-normalized'}, and
+    ## @qcode{'total-normalized'}. Default is @qcode{'absolute'}.
     ##
-    ## @item @qcode{"ColumnSummary"} @tab @tab A character vector specifying
+    ## @item @qcode{'ColumnSummary'} @tab A character vector specifying
     ## whether and how to display column summaries. Supported values are
-    ## @qcode{"off"}, @qcode{"absolute"}, @qcode{"column-normalized"}, and
-    ## @qcode{"total-normalized"}. Default is @qcode{"off"}.
+    ## @qcode{'off'}, @qcode{'absolute'}, @qcode{'column-normalized'}, and
+    ## @qcode{'total-normalized'}. Default is @qcode{'off'}.
     ##
-    ## @item @qcode{"RowSummary"} @tab @tab A character vector specifying
+    ## @item @qcode{'RowSummary'} @tab A character vector specifying
     ## whether and how to display row summaries. Supported values are
-    ## @qcode{"off"}, @qcode{"absolute"}, @qcode{"row-normalized"}, and
-    ## @qcode{"total-normalized"}. Default is @qcode{"off"}.
+    ## @qcode{'off'}, @qcode{'absolute'}, @qcode{'row-normalized'}, and
+    ## @qcode{'total-normalized'}. Default is @qcode{'off'}.
     ##
-    ## @item @qcode{"GridVisible"} @tab @tab A character vector specifying
-    ## whether to display grid lines. Supported values are @qcode{"on"} and
-    ## @qcode{"off"}. Default is @qcode{"on"}.
+    ## @item @qcode{'GridVisible'} @tab A character vector specifying
+    ## whether to display grid lines. Supported values are @qcode{'on'} and
+    ## @qcode{'off'}. Default is @qcode{'on'}.
     ##
-    ## @item @qcode{"HandleVisibility"} @tab @tab A character vector specifying
-    ## the handle visibility. Supported values are @qcode{"on"}, @qcode{"off"},
-    ## and @qcode{"callback"}.
+    ## @item @qcode{'HandleVisibility'} @tab A character vector specifying
+    ## the handle visibility. Supported values are @qcode{'on'}, @qcode{'off'},
+    ## and @qcode{'callback'}.
     ##
-    ## @item @qcode{"OuterPosition"} @tab @tab A 1x4 numeric vector specifying
+    ## @item @qcode{'OuterPosition'} @tab A 1x4 numeric vector specifying
     ## the outer position of the chart.
     ##
-    ## @item @qcode{"Position"} @tab @tab A 1x4 numeric vector specifying
+    ## @item @qcode{'Position'} @tab A 1x4 numeric vector specifying
     ## the position of the chart.
     ##
-    ## @item @qcode{"Units"} @tab @tab A character vector specifying the
-    ## position units. Supported values are @qcode{"centimeters"},
-    ## @qcode{"characters"}, @qcode{"inches"}, @qcode{"normalized"},
-    ## @qcode{"pixels"}, and @qcode{"points"}.
+    ## @item @qcode{'Units'} @tab A character vector specifying the
+    ## position units. Supported values are @qcode{'centimeters'},
+    ## @qcode{'characters'}, @qcode{'inches'}, @qcode{'normalized'},
+    ## @qcode{'pixels'}, and @qcode{'points'}.
     ## @end multitable
     ##
     ## @seealso{confusionchart}
@@ -386,16 +387,16 @@ classdef ConfusionMatrixChart < handle
     function this = ConfusionMatrixChart (hax, cm, cl, args)
       ## class initialization
       this.hax = hax;
-      this.Parent = get (this.hax, "parent");
+      this.Parent = get (this.hax, 'parent');
       this.ClassLabels = cl;
       this.NormalizedValues = cm;
       this.AbsoluteValues = cm;
       this.ClassN = rows (cm);
-      this.FontName = get (this.hax, "fontname");
-      this.FontSize = get (this.hax, "fontsize");
+      this.FontName = get (this.hax, 'fontname');
+      this.FontSize = get (this.hax, 'fontsize');
 
-      set (this.hax, "xlabel", this.XLabel);
-      set (this.hax, "ylabel", this.YLabel);
+      set (this.hax, 'xlabel', this.XLabel);
+      set (this.hax, 'ylabel', this.YLabel);
 
       ## draw the chart
       draw (this);
@@ -405,35 +406,35 @@ classdef ConfusionMatrixChart < handle
         pair_idx = 1;
         while (pair_idx < length (args))
           switch (args{pair_idx})
-            case "XLabel"
+            case 'XLabel'
               this.XLabel = args{pair_idx + 1};
-            case "YLabel"
+            case 'YLabel'
               this.YLabel = args{pair_idx + 1};
-            case "Title"
+            case 'Title'
               this.Title = args{pair_idx + 1};
-            case "FontName"
+            case 'FontName'
               this.FontName = args{pair_idx + 1};
-            case "FontSize"
+            case 'FontSize'
               this.FontSize = args{pair_idx + 1};
-            case "DiagonalColor"
+            case 'DiagonalColor'
               this.DiagonalColor = args{pair_idx + 1};
-            case "OffDiagonalColor"
+            case 'OffDiagonalColor'
               this.OffDiagonalColor = args{pair_idx + 1};
-            case "Normalization"
+            case 'Normalization'
               this.Normalization = args{pair_idx + 1};
-            case "ColumnSummary"
+            case 'ColumnSummary'
               this.ColumnSummary = args{pair_idx + 1};
-            case "RowSummary"
+            case 'RowSummary'
               this.RowSummary = args{pair_idx + 1};
-            case "GridVisible"
+            case 'GridVisible'
               this.GridVisible = args{pair_idx + 1};
-            case "HandleVisibility"
+            case 'HandleVisibility'
               this.HandleVisibility = args{pair_idx + 1};
-            case "OuterPosition"
+            case 'OuterPosition'
               this.OuterPosition = args{pair_idx + 1};
-            case "Position"
+            case 'Position'
               this.Position = args{pair_idx + 1};
-            case "Units"
+            case 'Units'
               this.Units = args{pair_idx + 1};
           otherwise
               close (this.Parent);
@@ -455,7 +456,7 @@ classdef ConfusionMatrixChart < handle
         error ("confusionchart: XLabel must be a string.");
       endif
 
-      this.XLabel = updateAxesProperties (this, "xlabel", string);
+      this.XLabel = updateAxesProperties (this, 'xlabel', string);
     endfunction
 
     function set.YLabel (this, string)
@@ -464,7 +465,7 @@ classdef ConfusionMatrixChart < handle
         error ("confusionchart: YLabel must be a string.");
       endif
 
-      this.YLabel = updateAxesProperties (this, "ylabel", string);
+      this.YLabel = updateAxesProperties (this, 'ylabel', string);
     endfunction
 
     function set.Title (this, string)
@@ -473,7 +474,7 @@ classdef ConfusionMatrixChart < handle
         error ("confusionchart: Title must be a string.");
       endif
 
-      this.Title = updateAxesProperties (this, "title", string);
+      this.Title = updateAxesProperties (this, 'title', string);
     endfunction
 
     function set.FontName (this, string)
@@ -482,7 +483,7 @@ classdef ConfusionMatrixChart < handle
         error ("confusionchart: FontName must be a string.");
       endif
 
-      this.FontName = updateTextProperties (this, "fontname", string);
+      this.FontName = updateTextProperties (this, 'fontname', string);
     endfunction
 
     function set.FontSize (this, value)
@@ -491,7 +492,7 @@ classdef ConfusionMatrixChart < handle
         error ("confusionchart: FontSize must be numeric.");
       endif
 
-      this.FontSize = updateTextProperties (this, "fontsize", value);
+      this.FontSize = updateTextProperties (this, 'fontsize', value);
     endfunction
 
     function set.DiagonalColor (this, color)
@@ -523,8 +524,8 @@ classdef ConfusionMatrixChart < handle
     endfunction
 
     function set.Normalization (this, string)
-      if (! any (strcmp (string, {"absolute", "column-normalized",...
-        "row-normalized", "total-normalized"})))
+      if (! any (strcmp (string, {'absolute', 'column-normalized',...
+        'row-normalized', 'total-normalized'})))
         close (this.Parent);
         error ("confusionchart: invalid value for Normalization.");
       endif
@@ -534,8 +535,8 @@ classdef ConfusionMatrixChart < handle
     endfunction
 
     function set.ColumnSummary (this, string)
-      if (! any (strcmp (string, {"off", "absolute", "column-normalized",...
-        "total-normalized"})))
+      if (! any (strcmp (string, {'off', 'absolute', 'column-normalized',...
+        'total-normalized'})))
         close (this.Parent);
         error ("confusionchart: invalid value for ColumnSummary.");
       endif
@@ -545,8 +546,8 @@ classdef ConfusionMatrixChart < handle
     endfunction
 
     function set.RowSummary (this, string)
-      if (! any (strcmp (string, {"off", "absolute", "row-normalized",...
-        "total-normalized"})))
+      if (! any (strcmp (string, {'off', 'absolute', 'row-normalized',...
+        'total-normalized'})))
         close (this.Parent);
         error ("confusionchart: invalid value for RowSummary.");
       endif
@@ -556,7 +557,7 @@ classdef ConfusionMatrixChart < handle
     endfunction
 
     function set.GridVisible (this, string)
-      if (! any (strcmp (string, {"off", "on"})))
+      if (! any (strcmp (string, {'off', 'on'})))
         close (this.Parent);
         error ("confusionchart: invalid value for GridVisible.");
       endif
@@ -566,12 +567,12 @@ classdef ConfusionMatrixChart < handle
     endfunction
 
     function set.HandleVisibility (this, string)
-      if (! any (strcmp (string, {"off", "on", "callback"})))
+      if (! any (strcmp (string, {'off', 'on', 'callback'})))
         close (this.Parent);
         error ("confusionchart: invalid value for HandleVisibility");
       endif
 
-      set (this.hax, "handlevisibility", string);
+      set (this.hax, 'handlevisibility', string);
     endfunction
 
     function set.OuterPosition (this, vector)
@@ -580,7 +581,7 @@ classdef ConfusionMatrixChart < handle
         error ("confusionchart: invalid value for OuterPosition");
       endif
 
-      set (this.hax, "outerposition", vector);
+      set (this.hax, 'outerposition', vector);
     endfunction
 
     function set.Position (this, vector)
@@ -589,17 +590,17 @@ classdef ConfusionMatrixChart < handle
         error ("confusionchart: invalid value for Position");
       endif
 
-      set (this.hax, "position", vector);
+      set (this.hax, 'position', vector);
     endfunction
 
     function set.Units (this, string)
-      if (! any (strcmp (string, {"centimeters", "characters", "inches", ...
-                                  "normalized", "pixels", "points"})))
+      if (! any (strcmp (string, {'centimeters', 'characters', 'inches', ...
+                                  'normalized', 'pixels', 'points'})))
         close (this.Parent);
         error ("confusionchart: invalid value for Units");
       endif
 
-      set (this.hax, "units", string);
+      set (this.hax, 'units', string);
     endfunction
 
     ## -*- texinfo -*-
@@ -635,13 +636,13 @@ classdef ConfusionMatrixChart < handle
     ## @var{order} can be:
     ## @itemize
     ## @item A cell array of class labels in the desired order
-    ## @item @qcode{"auto"} - Sort class labels alphabetically
-    ## @item @qcode{"ascending-diagonal"} - Sort by ascending diagonal values
-    ## @item @qcode{"descending-diagonal"} - Sort by descending diagonal values
-    ## @item @qcode{"cluster"} - Sort using hierarchical clustering
+    ## @item @qcode{'auto'} - Sort class labels alphabetically
+    ## @item @qcode{'ascending-diagonal'} - Sort by ascending diagonal values
+    ## @item @qcode{'descending-diagonal'} - Sort by descending diagonal values
+    ## @item @qcode{'cluster'} - Sort using hierarchical clustering
     ## @end itemize
     ##
-    ## When using @qcode{"cluster"}, the classes are grouped based on similarity
+    ## When using @qcode{'cluster'}, the classes are grouped based on similarity
     ## using hierarchical clustering, which can help identify groups of
     ## frequently confused classes.
     ##
@@ -664,16 +665,16 @@ classdef ConfusionMatrixChart < handle
       scl = {};
       Idx = [];
 
-      if (strcmp (order, "auto"))
+      if (strcmp (order, 'auto'))
         [scl, Idx] = sort (cl);
-      elseif (strcmp (order, "ascending-diagonal"))
+      elseif (strcmp (order, 'ascending-diagonal'))
         [s, Idx] = sort (diag (nv));
         scl = cl(Idx);
-      elseif (strcmp (order, "descending-diagonal"))
+      elseif (strcmp (order, 'descending-diagonal'))
         [s, Idx] = sort (diag (nv));
         Idx = flip (Idx);
         scl = cl(Idx);
-      elseif (strcmp (order, "cluster"))
+      elseif (strcmp (order, 'cluster'))
         ## the classes are all grouped together
         ## this way one can visually evaluate which are the most similar classes
         ## according to the learning algorithm
@@ -685,7 +686,7 @@ classdef ConfusionMatrixChart < handle
             D(k++) = maxD - (av(i, j) + av(j, i)); # distance
           endfor
         endfor
-        tree = linkage (D, "average"); # clustering
+        tree = linkage (D, 'average'); # clustering
         ## we could have optimal leaf ordering with
         Idx = optimalleaforder (tree, D); # optimal clustering
         ##[~, Idx] = sort (cluster (tree));
@@ -697,13 +698,13 @@ classdef ConfusionMatrixChart < handle
           if (current_node > cm_size)
             node = current_node - cm_size;
             nodes_to_visit = [tree(node,[2 1]) nodes_to_visit];
-          end
+          endif
 
           if (current_node <= cm_size)
             nodecount++;
             Idx(nodecount) = current_node;
-          end
-        end
+          endif
+        endwhile
         ##
         scl = cl(Idx);
       else
@@ -750,64 +751,64 @@ classdef ConfusionMatrixChart < handle
       this.ClassLabels = scl;
 
       ## update the axes
-      set (this.hax, "xtick", (0.5 : 1 : (cm_size - 0.5)), "xticklabel", scl,...
-          "ytick", (0.5 : 1 : (cm_size - 0.5)), "yticklabel", scl);
+      set (this.hax, 'xtick', (0.5 : 1 : (cm_size - 0.5)), 'xticklabel', scl,...
+          'ytick', (0.5 : 1 : (cm_size - 0.5)), 'yticklabel', scl);
 
       ## get text and patch handles
-      kids = get (this.hax, "children");
-      t_kid = kids(find (isprop (kids, "fontname"))); # hack to find texts
-      m_kid = kids(find (strcmp (get (kids, "userdata"), "MainChart")));
-      c_kid = kids(find (strcmp (get (kids, "userdata"), "ColumnSummary")));
-      r_kid = kids(find (strcmp (get (kids, "userdata"), "RowSummary")));
+      kids = get (this.hax, 'children');
+      t_kid = kids(find (isprop (kids, 'fontname'))); # hack to find texts
+      m_kid = kids(find (strcmp (get (kids, 'userdata'), 'MainChart')));
+      c_kid = kids(find (strcmp (get (kids, 'userdata'), 'ColumnSummary')));
+      r_kid = kids(find (strcmp (get (kids, 'userdata'), 'RowSummary')));
 
       ## re-assign colors to the main chart
-      cdata_v = get (m_kid, "cdata");
+      cdata_v = get (m_kid, 'cdata');
       cdata_m = reshape (cdata_v, cm_size, cm_size);
       cdata_m = cdata_m(Idx, :);
       cdata_m = cdata_m(:, Idx);
       cdata_v = reshape (cdata_m, size (cdata_v));
-      set (m_kid, "cdata", cdata_v);
+      set (m_kid, 'cdata', cdata_v);
 
       ## re-assign colors to the column summary
-      cdata_v = get (c_kid, "cdata");
+      cdata_v = get (c_kid, 'cdata');
       cdata_m = reshape (transpose (cdata_v), cm_size, 2);
       cdata_m = cdata_m(Idx, :);
       cdata_v = reshape (cdata_m, size (cdata_v));
-      set (c_kid, "cdata", cdata_v);
+      set (c_kid, 'cdata', cdata_v);
 
       ## re-assign colors to the row summary
-      cdata_v = get (r_kid, "cdata");
+      cdata_v = get (r_kid, 'cdata');
       cdata_m = reshape (cdata_v, cm_size, 2);
       cdata_m = cdata_m(Idx, :);
       cdata_v = reshape (cdata_m, size (cdata_v));
-      set (r_kid, "cdata", cdata_v);
+      set (r_kid, 'cdata', cdata_v);
 
       ## move the text labels
       for i = 1:length (t_kid)
-        t_pos = get (t_kid(i), "userdata");
+        t_pos = get (t_kid(i), 'userdata');
 
         if (t_pos(2) > cm_size)
           ## row summary
           t_pos(1) = find (Idx == (t_pos(1) + 1)) - 1;
-          set (t_kid(i), "userdata", t_pos);
+          set (t_kid(i), 'userdata', t_pos);
 
           t_pos = t_pos([2 1]) + 0.5;
-          set (t_kid(i), "position", t_pos);
+          set (t_kid(i), 'position', t_pos);
         elseif (t_pos(1) > cm_size)
           ## column summary
           t_pos(2) = find (Idx == (t_pos(2) + 1)) - 1;
-          set (t_kid(i), "userdata", t_pos);
+          set (t_kid(i), 'userdata', t_pos);
 
           t_pos = t_pos([2 1]) + 0.5;
-          set (t_kid(i), "position", t_pos);
+          set (t_kid(i), 'position', t_pos);
         else
           ## main chart
           t_pos(1) = find (Idx == (t_pos(1) + 1)) - 1;
           t_pos(2) = find (Idx == (t_pos(2) + 1)) - 1;
-          set (t_kid(i), "userdata", t_pos);
+          set (t_kid(i), 'userdata', t_pos);
 
           t_pos = t_pos([2 1]) + 0.5;
-          set (t_kid(i), "position", t_pos);
+          set (t_kid(i), 'position', t_pos);
         endif
       endfor
 
@@ -815,13 +816,13 @@ classdef ConfusionMatrixChart < handle
     endfunction
   endmethods
 
-  methods (Access = private)
+  methods(Access = private)
     ## convertNamedColor
     ## convert a named colour to a colour triplet
     function ret = convertNamedColor (this, color)
-      vColorNames = ["ymcrgbwk"]';
+      vColorNames = ['ymcrgbwk']';
       vColorTriplets = [1 1 0; 1 0 1; 0 1 1; 1 0 0; 0 1 0; 0 0 1; 1 1 1; 0 0 0];
-      if (strcmp (color, "black"))
+      if (strcmp (color, 'black'))
         color = 'k';
       endif
 
@@ -844,11 +845,11 @@ classdef ConfusionMatrixChart < handle
     ## updateTextProperties
     ## set the properties of the texts
     function ret = updateTextProperties (this, prop, value)
-      hax_kids = get (this.hax, "children");
-      text_kids = hax_kids(isprop (hax_kids , "fontname")); # hack to find texts
-      text_kids(end + 1) = get (this.hax, "xlabel");
-      text_kids(end + 1) = get (this.hax, "ylabel");
-      text_kids(end + 1) = get (this.hax, "title");
+      hax_kids = get (this.hax, 'children');
+      text_kids = hax_kids(isprop (hax_kids , 'fontname')); # hack to find texts
+      text_kids(end + 1) = get (this.hax, 'xlabel');
+      text_kids(end + 1) = get (this.hax, 'ylabel');
+      text_kids(end + 1) = get (this.hax, 'title');
 
       updateAxesProperties (this, prop, value);
       set (text_kids, prop, value);
@@ -859,13 +860,13 @@ classdef ConfusionMatrixChart < handle
     ## setGridVisibility
     ## toggle the visibility of the grid
     function setGridVisibility (this)
-      kids = get (this.hax, "children");
-      kids = kids(find (isprop (kids, "linestyle")));
+      kids = get (this.hax, 'children');
+      kids = kids(find (isprop (kids, 'linestyle')));
 
-      if (strcmp (this.GridVisible, "on"))
-        set (kids, "linestyle", "-");
+      if (strcmp (this.GridVisible, 'on'))
+        set (kids, 'linestyle', '-');
       else
-        set (kids, "linestyle", "none");
+        set (kids, 'linestyle', 'none');
       endif
     endfunction
 
@@ -891,19 +892,19 @@ classdef ConfusionMatrixChart < handle
       colormap (this.hax, cm_colormap);
 
       ## update text colors
-      kids = get (this.hax, "children");
-      t_kids = kids(find (isprop (kids, "fontname"))); # hack to find texts
-      m_patch = kids(find (strcmp (get (kids, "userdata"), "MainChart")));
-      c_patch = kids(find (strcmp (get (kids, "userdata"), "ColumnSummary")));
-      r_patch = kids(find (strcmp (get (kids, "userdata"), "RowSummary")));
+      kids = get (this.hax, 'children');
+      t_kids = kids(find (isprop (kids, 'fontname'))); # hack to find texts
+      m_patch = kids(find (strcmp (get (kids, 'userdata'), 'MainChart')));
+      c_patch = kids(find (strcmp (get (kids, 'userdata'), 'ColumnSummary')));
+      r_patch = kids(find (strcmp (get (kids, 'userdata'), 'RowSummary')));
 
-      m_colors = get (m_patch, "cdata");
-      c_colors = get (c_patch, "cdata");
-      r_colors = get (r_patch, "cdata");
+      m_colors = get (m_patch, 'cdata');
+      c_colors = get (c_patch, 'cdata');
+      r_colors = get (r_patch, 'cdata');
 
       ## when a patch is dark, let's use a pale color for the text
       for i = 1 : length (t_kids)
-        t_pos = get (t_kids(i), "userdata");
+        t_pos = get (t_kids(i), 'userdata');
         color_idx = 1;
 
         if (t_pos(2) > cm_size)
@@ -921,9 +922,9 @@ classdef ConfusionMatrixChart < handle
         endif
 
         if (sum (cm_colormap(color_idx, :)) < 1.8)
-          set (t_kids(i), "color", [.97 .97 1.0]);
+          set (t_kids(i), 'color', [.97 .97 1.0]);
         else
-          set (t_kids(i), "color", [.15 .15 .15]);
+          set (t_kids(i), 'color', [.15 .15 .15]);
         endif
       endfor
     endfunction
@@ -936,8 +937,8 @@ classdef ConfusionMatrixChart < handle
       l_cs = this.ColumnSummaryAbsoluteValues;
       l_rs = this.RowSummaryAbsoluteValues;
 
-      kids = get (this.hax, "children");
-      t_kids = kids(find (isprop (kids, "fontname"))); # hack to find texts
+      kids = get (this.hax, 'children');
+      t_kids = kids(find (isprop (kids, 'fontname'))); # hack to find texts
 
       normalization = this.Normalization;
       column_summary = this.ColumnSummary;
@@ -950,15 +951,15 @@ classdef ConfusionMatrixChart < handle
       cm_labels = cm;
       add_percent = true;
 
-      if (strcmp (normalization, "column-normalized"))
+      if (strcmp (normalization, 'column-normalized'))
         for i = 1 : cm_size
           cm_labels(:,i) = cm_labels(:,i) ./ col_totals(i);
         endfor
-      elseif (strcmp (normalization, "row-normalized"))
+      elseif (strcmp (normalization, 'row-normalized'))
         for i = 1 : cm_size
           cm_labels(i,:) = cm_labels(i,:) ./ row_totals(i);
         endfor
-      elseif (strcmp (normalization, "total-normalized"))
+      elseif (strcmp (normalization, 'total-normalized'))
         cm_labels = cm_labels ./ mat_total;
       else
         add_percent = false;
@@ -970,36 +971,36 @@ classdef ConfusionMatrixChart < handle
       ## update axes
       last_row = cm_size;
       last_col = cm_size;
-      userdata = cell2mat (get (t_kids, "userdata"));
+      userdata = cell2mat (get (t_kids, 'userdata'));
 
       cs_kids = t_kids(find (userdata(:,1) > cm_size));
-      cs_kids(end + 1) = kids(find (strcmp (get (kids, "userdata"),...
-          "ColumnSummary")));
+      cs_kids(end + 1) = kids(find (strcmp (get (kids, 'userdata'),...
+          'ColumnSummary')));
 
-      if (! strcmp ("off", column_summary))
-        set (cs_kids, "visible", "on");
+      if (! strcmp ('off', column_summary))
+        set (cs_kids, 'visible', 'on');
         last_row += 3;
       else
-        set (cs_kids, "visible", "off");
+        set (cs_kids, 'visible', 'off');
       endif
 
       rs_kids = t_kids(find (userdata(:,2) > cm_size));
-      rs_kids(end + 1) = kids(find (strcmp (get (kids, "userdata"),...
-          "RowSummary")));
+      rs_kids(end + 1) = kids(find (strcmp (get (kids, 'userdata'),...
+          'RowSummary')));
 
-      if (! strcmp ("off", row_summary))
-        set (rs_kids, "visible", "on");
+      if (! strcmp ('off', row_summary))
+        set (rs_kids, 'visible', 'on');
         last_col += 3;
       else
-        set (rs_kids, "visible", "off");
+        set (rs_kids, 'visible', 'off');
       endif
 
       axis (this.hax, [0 last_col 0 last_row]);
 
       ## update column summary data
       cs_add_percent = true;
-      if (! strcmp (column_summary, "off"))
-        if (strcmp (column_summary, "column-normalized"))
+      if (! strcmp (column_summary, 'off'))
+        if (strcmp (column_summary, 'column-normalized'))
           for i = 1 : cm_size
             if (col_totals(i) == 0)
               ## avoid division by zero
@@ -1008,7 +1009,7 @@ classdef ConfusionMatrixChart < handle
               l_cs([i, cm_size + i]) = l_cs([i, cm_size + i]) ./ col_totals(i);
             endif
           endfor
-        elseif strcmp (column_summary, "total-normalized")
+        elseif strcmp (column_summary, 'total-normalized')
           l_cs = l_cs ./ mat_total;
         else
           cs_add_percent = false;
@@ -1017,8 +1018,8 @@ classdef ConfusionMatrixChart < handle
 
       ## update row summary data
       rs_add_percent = true;
-      if (! strcmp (row_summary, "off"))
-        if (strcmp (row_summary, "row-normalized"))
+      if (! strcmp (row_summary, 'off'))
+        if (strcmp (row_summary, 'row-normalized'))
           for i = 1 : cm_size
             if (row_totals(i) == 0)
               ## avoid division by zero
@@ -1027,7 +1028,7 @@ classdef ConfusionMatrixChart < handle
               l_rs([i, cm_size + i]) = l_rs([i, cm_size + i]) ./ row_totals(i);
             endif
           endfor
-        elseif (strcmp (row_summary, "total-normalized"))
+        elseif (strcmp (row_summary, 'total-normalized'))
           l_rs = l_rs ./ mat_total;
         else
           rs_add_percent = false;
@@ -1038,16 +1039,16 @@ classdef ConfusionMatrixChart < handle
       label_list = vec (cm_labels);
 
       for i = 1 : length (t_kids)
-        t_pos = get (t_kids(i), "userdata");
-        new_string = "";
+        t_pos = get (t_kids(i), 'userdata');
+        new_string = '';
 
         if (t_pos(2) > cm_size)
           ## this is the row summary
           idx = (t_pos(2) - cm_size - 1) * cm_size + t_pos(1) + 1;
 
           if (rs_add_percent)
-            new_string = num2str (100.0 * l_rs(idx), "%3.1f");
-            new_string = [new_string "%"];
+            new_string = num2str (100.0 * l_rs(idx), '%3.1f');
+            new_string = [new_string '%'];
           else
             new_string = num2str (l_rs(idx));
           endif
@@ -1056,8 +1057,8 @@ classdef ConfusionMatrixChart < handle
           idx = (t_pos(1) - cm_size - 1) * cm_size + t_pos(2) + 1;
 
           if (cs_add_percent)
-            new_string = num2str (100.0 * l_cs(idx), "%3.1f");
-            new_string = [new_string "%"];
+            new_string = num2str (100.0 * l_cs(idx), '%3.1f');
+            new_string = [new_string '%'];
           else
             new_string = num2str (l_cs(idx));
           endif
@@ -1066,14 +1067,14 @@ classdef ConfusionMatrixChart < handle
           idx = t_pos(2) * cm_size + t_pos(1) + 1;
 
           if (add_percent)
-            new_string = num2str (100.0 * label_list(idx), "%3.1f");
-            new_string = [new_string "%"];
+            new_string = num2str (100.0 * label_list(idx), '%3.1f');
+            new_string = [new_string '%'];
           else
             new_string = num2str (label_list(idx));
           endif
         endif
 
-        set (t_kids(i), "string", new_string);
+        set (t_kids(i), 'string', new_string);
       endfor
 
     endfunction
@@ -1086,9 +1087,9 @@ classdef ConfusionMatrixChart < handle
       cm_size = this.ClassN;
 
       ## set up the axes
-      set (this.hax, "xtick", (0.5 : 1 : (cm_size - 0.5)), "xticklabel",  cl,...
-          "ytick", (0.5 : 1 : (cm_size - 0.5)), "yticklabel",  cl );
-      axis ("ij");
+      set (this.hax, 'xtick', (0.5 : 1 : (cm_size - 0.5)), 'xticklabel',  cl,...
+          'ytick', (0.5 : 1 : (cm_size - 0.5)), 'yticklabel',  cl );
+      axis ('ij');
       axis (this.hax, [0 cm_size 0 cm_size]);
 
       ## prepare the patches
@@ -1122,17 +1123,17 @@ classdef ConfusionMatrixChart < handle
       ## display the patches
       ph = patch (this.hax, x_patch, y_patch, c_patch);
 
-      set (ph, "userdata", "MainChart");
+      set (ph, 'userdata', 'MainChart');
 
       ## display the labels
       userdata = [indices_vy; indices_vx]';
       nonzero_idx = find (cm_labels != 0);
       th = text ((x_patch(1, nonzero_idx) + 0.5), (y_patch(1, nonzero_idx) +...
-          0.5), num2str (cm_labels(nonzero_idx)), "parent", this.hax );
+          0.5), num2str (cm_labels(nonzero_idx)), 'parent', this.hax );
 
-      set (th, "horizontalalignment", "center");
+      set (th, 'horizontalalignment', 'center');
       for i = 1 : length (nonzero_idx)
-        set (th(i), "userdata", userdata(nonzero_idx(i), :));
+        set (th(i), 'userdata', userdata(nonzero_idx(i), :));
       endfor
 
       ## patches for the summaries
@@ -1156,19 +1157,19 @@ classdef ConfusionMatrixChart < handle
 
       ph = patch (this.hax, x_cs, y_cs, c_cs);
 
-      set (ph, "userdata", "ColumnSummary");
-      set (ph, "visible", "off" );
+      set (ph, 'userdata', 'ColumnSummary');
+      set (ph, 'visible', 'off' );
 
       userdata = [y_cs(1,:); x_cs(1,:)]';
       nonzero_idx = find (l_cs != 0);
       th = text ((x_cs(1,nonzero_idx) + 0.5), (y_cs(1,nonzero_idx) + 0.5),...
-          num2str (l_cs(nonzero_idx)), "parent", this.hax);
+          num2str (l_cs(nonzero_idx)), 'parent', this.hax);
 
-      set (th, "horizontalalignment", "center");
+      set (th, 'horizontalalignment', 'center');
       for i = 1 : length (nonzero_idx)
-        set (th(i), "userdata", userdata(nonzero_idx(i), :));
+        set (th(i), 'userdata', userdata(nonzero_idx(i), :));
       endfor
-      set (th, "visible", "off");
+      set (th, 'visible', 'off');
 
       ## row summary
       x_rs = y_cs;
@@ -1180,19 +1181,19 @@ classdef ConfusionMatrixChart < handle
 
       ph = patch (this.hax, x_rs, y_rs, c_rs);
 
-      set (ph, "userdata", "RowSummary");
-      set (ph, "visible", "off");
+      set (ph, 'userdata', 'RowSummary');
+      set (ph, 'visible', 'off');
 
       userdata = [y_rs(1,:); x_rs(1,:)]';
       nonzero_idx = find (l_rs != 0);
       th = text ((x_rs(1,nonzero_idx) + 0.5), (y_rs(1,nonzero_idx) + 0.5),...
-          num2str (l_rs(nonzero_idx)), "parent", this.hax);
+          num2str (l_rs(nonzero_idx)), 'parent', this.hax);
 
-      set (th, "horizontalalignment", "center");
+      set (th, 'horizontalalignment', 'center');
       for i = 1 : length (nonzero_idx)
-        set (th(i), "userdata", userdata(nonzero_idx(i), :));
+        set (th(i), 'userdata', userdata(nonzero_idx(i), :));
       endfor
-      set (th, "visible", "off");
+      set (th, 'visible', 'off');
 
       this.ColumnSummaryAbsoluteValues = l_cs;
       this.RowSummaryAbsoluteValues = l_rs;
@@ -1204,16 +1205,16 @@ endclassdef
 %!demo
 %! ## Create a simple ConfusionMatrixChart Object
 %!
-%! cm = ConfusionMatrixChart (gca, [1 2; 1 2], {"A","B"}, {"XLabel","LABEL A"})
+%! cm = ConfusionMatrixChart (gca, [1 2; 1 2], {'A','B'}, {'XLabel','LABEL A'})
 %! NormalizedValues = cm.NormalizedValues
 %! ClassLabels = cm.ClassLabels
 
 ## Test plotting
 %!test
-%! hf = figure ("visible", "off");
+%! hf = figure ('visible', 'off');
 %! unwind_protect
-%!   cm = ConfusionMatrixChart (gca, [1 2; 1 2], {"A","B"}, {"XLabel","LABEL A"});
-%!   assert (isa (cm, "ConfusionMatrixChart"), true);
+%!   cm = ConfusionMatrixChart (gca, [1 2; 1 2], {'A','B'}, {'XLabel','LABEL A'});
+%!   assert_equal (isa (cm, 'ConfusionMatrixChart'), true);
 %! unwind_protect_cleanup
 %!   close (hf);
 %! end_unwind_protect

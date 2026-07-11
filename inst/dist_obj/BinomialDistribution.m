@@ -54,7 +54,7 @@ classdef BinomialDistribution
   ## binolike, binostat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {BinomialDistribution} {property} N
     ##
@@ -80,7 +80,7 @@ classdef BinomialDistribution
     p
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {BinomialDistribution} {property} DistributionName
     ##
@@ -90,7 +90,7 @@ classdef BinomialDistribution
     ## object. This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "BinomialDistribution";
+    DistributionName = 'BinomialDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {BinomialDistribution} {property} NumParameters
@@ -108,39 +108,39 @@ classdef BinomialDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter. This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"N", "p"};
+    ParameterNames = {'N', 'p'};
 
     ## -*- texinfo -*-
     ## @deftp {BinomialDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter. This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Number of trials", "Probability of success"};
+    ParameterDescription = {'Number of trials', 'Probability of success'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = false;
-    DistributionCode = "bino";
+    DistributionCode = 'bino';
     ParameterRange = [realmin, realmin; Inf, 1];
     ParameterLogCI = [true, true];
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected)
+  properties(GetAccess = public, SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {BinomialDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{2x1} numeric vector containing the values of the distribution
+    ## A @math{2*1} numeric vector containing the values of the distribution
     ## parameters. This property is read-only. You can change the distribution
     ## parameters by assigning new values to the @qcode{N} and @qcode{p}
     ## properties.
@@ -153,7 +153,7 @@ classdef BinomialDistribution
     ##
     ## Covariance matrix of the parameter estimates
     ##
-    ## A @math{2x2} numeric matrix containing the variance-covariance of the
+    ## A @math{2*2} numeric matrix containing the variance-covariance of the
     ## parameter estimates. Diagonal elements contain the variance of each
     ## estimated parameter and non-diagonal elements contain the covariance
     ## between the parameter estimates. The covariance matrix is only
@@ -170,7 +170,7 @@ classdef BinomialDistribution
     ##
     ## Flag for fixed parameters
     ##
-    ## A @math{1x2} logical vector specifying which parameters are fixed and
+    ## A @math{1*2} logical vector specifying which parameters are fixed and
     ## which are estimated. @qcode{true} values correspond to fixed parameters,
     ## @qcode{false} values correspond to parameter estimates. This property is
     ## read-only.
@@ -183,7 +183,7 @@ classdef BinomialDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution. First element contains the lower boundary,
     ## second element contains the upper boundary.  This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -224,11 +224,11 @@ classdef BinomialDistribution
     InputData
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected, Hidden)
+  properties(GetAccess = public, SetAccess = protected, Hidden)
     ParameterCI
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = BinomialDistribution (N, p)
       if (nargin == 0)
@@ -244,12 +244,12 @@ classdef BinomialDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "binomial distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'binomial distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "binomial distribution");
+      __disp__ (this, 'binomial distribution');
     endfunction
 
     function this = set.N (this, N)
@@ -278,11 +278,11 @@ classdef BinomialDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {BinomialDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {BinomialDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {BinomialDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -290,7 +290,7 @@ classdef BinomialDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -300,9 +300,9 @@ classdef BinomialDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -417,7 +417,7 @@ classdef BinomialDistribution
         Fa_b = binocdf ([lx, ux], this.N, this.p);
         m = binoinv (sum (Fa_b) / 2, this.N, this.p);
       else
-        if (! __traditional__() && this.p == 0.5 && rem (this.N, 2) == 1)
+        if (! __traditional__ () && this.p == 0.5 && rem (this.N, 2) == 1)
           m = this.mean ();
         else
           m = binoinv (0.5, this.N, this.p);
@@ -430,7 +430,8 @@ classdef BinomialDistribution
     ##
     ## Compute the negative loglikelihood of a probability distribution.
     ##
-    ## @code{@var{nlogL} = negloglik (@var{pd})} computes the negative loglikelihood
+    ## @code{@var{nlogL} = negloglik (@var{pd})} computes the negative
+    ## loglikelihood
     ## of the probability distribution object, @var{pd}.
     ##
     ## @end deftypefn
@@ -455,18 +456,19 @@ classdef BinomialDistribution
     ## boundaries of the 95% confidence interval for each parameter of the
     ## probability distribution object, @var{pd}.
     ##
-    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes the
+    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes
+    ## the
     ## confidence intervals with additional options specified by
     ## @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Alpha"} @tab @tab A scalar value in the range @math{(0,1)}
+    ## @item @qcode{'Alpha'} @tab A scalar value in the range @math{(0,1)}
     ## specifying the significance level for the confidence interval.  The
     ## default value 0.05 corresponds to a 95% confidence interval.
     ##
-    ## @item @qcode{"Parameter"} @tab @tab A character vector or a cell array of
+    ## @item @qcode{'Parameter'} @tab A character vector or a cell array of
     ## character vectors specifying the parameter names for which to compute
     ## confidence intervals.  By default, @code{paramci} computes confidence
     ## intervals for all distribution parameters.
@@ -530,23 +532,23 @@ classdef BinomialDistribution
     ## @multitable @columnfractions 0.18 0.02 0.8
     ## @headitem @tab @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -567,9 +569,9 @@ classdef BinomialDistribution
 
     ## -*- texinfo -*-
     ## @deftypefn  {BinomialDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum})
-    ## @deftypefnx {BinomialDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {BinomialDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{'Display'}, @var{display})
     ## @deftypefnx {BinomialDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam})
-    ## @deftypefnx {BinomialDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {BinomialDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{'Display'}, @var{display})
     ##
     ## Profile likelihood function for a probability distribution object.
     ##
@@ -582,14 +584,14 @@ classdef BinomialDistribution
     ## fitted to data.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @qcode{"Display"}, @qcode{"on"})} also plots the profile likelihood
+    ## @qcode{'Display'}, @qcode{'on'})} also plots the profile likelihood
     ## against the default range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
     ## @var{setparam})} defines a user-defined range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @var{setparam}, @qcode{"Display"}, @qcode{"on"})} also plots the profile
+    ## @var{setparam}, @qcode{'Display'}, @qcode{'on'})} also plots the profile
     ## likelihood against the user-defined range of the selected parameter.
     ##
     ## For the binomial distribution, @qcode{@var{pnum} = 1} selects the
@@ -680,7 +682,8 @@ classdef BinomialDistribution
     ##
     ## @code{@var{t} = truncate (@var{pd}, @var{lower}, @var{upper})} returns a
     ## probability distribution @var{t}, which is the probability distribution
-    ## @var{pd} truncated to the specified interval with lower limit, @var{lower},
+    ## @var{pd} truncated to the specified interval with lower limit,
+    ## @var{lower},
     ## and upper limit, @var{upper}. If @var{pd} is fitted to data with
     ## @code{fitdist}, the returned probability distribution @var{t} is not
     ## fitted, does not contain any data or estimated values, and it is as it
@@ -748,7 +751,7 @@ classdef BinomialDistribution
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function pd = fit (x, ntrials, varargin)
       ## Check input arguments
@@ -763,8 +766,8 @@ classdef BinomialDistribution
         freq = varargin{2};
       endif
       ## Fit data
-      [pshat, psci] = mle (x, "distribution", "binomial", "alpha", alpha, ...
-                              "ntrials", ntrials, "frequency", freq);
+      [pshat, psci] = mle (x, 'distribution', 'binomial', 'alpha', alpha, ...
+                              'ntrials', ntrials, 'frequency', freq);
       phat = [ntrials, pshat];
       pci = [[ntrials; ntrials], psci(:)];
       [~, acov] = binolike (phat, x, freq);
@@ -779,7 +782,7 @@ classdef BinomialDistribution
       pd.ParameterCI = pci;
       pd.ParameterIsFixed = [true, false];
       pd.ParameterCovariance = acov;
-      pd.InputData = struct ("data", x, "cens", [], "freq", freq);
+      pd.InputData = struct ('data', x, 'cens', [], 'freq', freq);
     endfunction
 
   endmethods
@@ -803,135 +806,135 @@ endfunction
 %! pd = BinomialDistribution (5, 0.5);
 %! t = truncate (pd, 2, 4);
 %! t_inf = truncate (pd, 2, Inf);
-%!assert (cdf (pd, [0:5]), [0.0312, 0.1875, 0.5, 0.8125, 0.9688, 1], 1e-4);
-%!assert (cdf (t, [0:5]), [0, 0, 0.4, 0.8, 1, 1], 1e-4);
-%!assert (cdf (t_inf, [0:5]), [0, 0, 0.3846, 0.7692, 0.9615, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4, NaN]), [0.1875, 0.5, 0.8125, 0.9688, NaN], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4, NaN]), [0, 0.4, 0.8, 1, NaN], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [0, 2, 2, 3, 3, 5], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [2, 2, 2, 3, 3, 4], 1e-4);
-%!assert (icdf (t_inf, [0:0.2:1]), [2, 2, 3, 3, 4, 5], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 2, 3, 3, 5, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2, 3, 3, 4, NaN], 1e-4);
-%!assert (iqr (pd), 1);
-%!assert (iqr (t), 1);
-%!assert (mean (pd), 2.5, 1e-10);
-%!assert (mean (t), 2.8, 1e-10);
-%!assert (mean (t_inf), 2.8846, 1e-4);
-%!assert (median (pd), 2.5);
-%!assert (median (t), 3);
-%!assert (pdf (pd, [0:5]), [0.0312, 0.1562, 0.3125, 0.3125, 0.1562, 0.0312], 1e-4);
-%!assert (pdf (t, [0:5]), [0, 0, 0.4, 0.4, 0.2, 0], 1e-4);
-%!assert (pdf (t_inf, [0:5]), [0, 0, 0.3846, 0.3846, 0.1923, 0.0385], 1e-4);
-%!assert (pdf (pd, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 2), false);
-%!assert (any (random (t, 1000, 1) > 4), false);
-%!assert (std (pd), 1.1180, 1e-4);
-%!assert (std (t), 0.7483, 1e-4);
-%!assert (std (t_inf), 0.8470, 1e-4);
-%!assert (var (pd), 1.2500, 1e-4);
-%!assert (var (t), 0.5600, 1e-4);
-%!assert (var (t_inf), 0.7175, 1e-4);
+%!assert_equal (cdf (pd, [0:5]), [0.0312, 0.1875, 0.5, 0.8125, 0.9688, 1], 1e-4);
+%!assert_equal (cdf (t, [0:5]), [0, 0, 0.4, 0.8, 1, 1], 1e-4);
+%!assert_equal (cdf (t_inf, [0:5]), [0, 0, 0.3846, 0.7692, 0.9615, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4, NaN]), [0.1875, 0.5, 0.8125, 0.9688, NaN], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4, NaN]), [0, 0.4, 0.8, 1, NaN], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [0, 2, 2, 3, 3, 5], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [2, 2, 2, 3, 3, 4], 1e-4);
+%!assert_equal (icdf (t_inf, [0:0.2:1]), [2, 2, 3, 3, 4, 5], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 2, 3, 3, 5, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2, 3, 3, 4, NaN], 1e-4);
+%!assert_equal (iqr (pd), 1);
+%!assert_equal (iqr (t), 1);
+%!assert_equal (mean (pd), 2.5, 1e-10);
+%!assert_equal (mean (t), 2.8, 1e-10);
+%!assert_equal (mean (t_inf), 2.8846, 1e-4);
+%!assert_equal (median (pd), 2.5);
+%!assert_equal (median (t), 3);
+%!assert_equal (pdf (pd, [0:5]), [0.0312, 0.1562, 0.3125, 0.3125, 0.1562, 0.0312], 1e-4);
+%!assert_equal (pdf (t, [0:5]), [0, 0, 0.4, 0.4, 0.2, 0], 1e-4);
+%!assert_equal (pdf (t_inf, [0:5]), [0, 0, 0.3846, 0.3846, 0.1923, 0.0385], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 2), false);
+%!assert_equal (any (random (t, 1000, 1) > 4), false);
+%!assert_equal (std (pd), 1.1180, 1e-4);
+%!assert_equal (std (t), 0.7483, 1e-4);
+%!assert_equal (std (t_inf), 0.8470, 1e-4);
+%!assert_equal (var (pd), 1.2500, 1e-4);
+%!assert_equal (var (t), 0.5600, 1e-4);
+%!assert_equal (var (t_inf), 0.7175, 1e-4);
 
 ## Test input validation
 ## 'BinomialDistribution' constructor
 %!error <BinomialDistribution: N must be a positive integer scalar.> ...
-%! BinomialDistribution(Inf, 0.5)
+%! BinomialDistribution (Inf, 0.5)
 %!error <BinomialDistribution: N must be a positive integer scalar.> ...
-%! BinomialDistribution(i, 0.5)
+%! BinomialDistribution (i, 0.5)
 %!error <BinomialDistribution: N must be a positive integer scalar.> ...
-%! BinomialDistribution("a", 0.5)
+%! BinomialDistribution ('a', 0.5)
 %!error <BinomialDistribution: N must be a positive integer scalar.> ...
-%! BinomialDistribution([1, 2], 0.5)
+%! BinomialDistribution ([1, 2], 0.5)
 %!error <BinomialDistribution: N must be a positive integer scalar.> ...
-%! BinomialDistribution(NaN, 0.5)
+%! BinomialDistribution (NaN, 0.5)
 %!error <BinomialDistribution: p must be a real scalar bounded in the range> ...
-%! BinomialDistribution(1, 1.01)
+%! BinomialDistribution (1, 1.01)
 %!error <BinomialDistribution: p must be a real scalar bounded in the range> ...
-%! BinomialDistribution(1, -0.01)
+%! BinomialDistribution (1, -0.01)
 %!error <BinomialDistribution: p must be a real scalar bounded in the range> ...
-%! BinomialDistribution(1, Inf)
+%! BinomialDistribution (1, Inf)
 %!error <BinomialDistribution: p must be a real scalar bounded in the range> ...
-%! BinomialDistribution(1, i)
+%! BinomialDistribution (1, i)
 %!error <BinomialDistribution: p must be a real scalar bounded in the range> ...
-%! BinomialDistribution(1, "a")
+%! BinomialDistribution (1, 'a')
 %!error <BinomialDistribution: p must be a real scalar bounded in the range> ...
-%! BinomialDistribution(1, [1, 2])
+%! BinomialDistribution (1, [1, 2])
 %!error <BinomialDistribution: p must be a real scalar bounded in the range> ...
-%! BinomialDistribution(1, NaN)
+%! BinomialDistribution (1, NaN)
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (BinomialDistribution, 2, "uper")
+%! cdf (BinomialDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (BinomialDistribution, 2, 3)
 
 ## 'paramci' method
 %!shared x
-%! rand ("seed", 2);
+%! rand ('seed', 2);
 %! x = binornd (5, 0.5, [1, 100]);
 %!error <paramci: optional arguments must be in NAME-VALUE pairs.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "alpha")
+%! paramci (BinomialDistribution.fit (x, 6), 'alpha')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "alpha", 0)
+%! paramci (BinomialDistribution.fit (x, 6), 'alpha', 0)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "alpha", 1)
+%! paramci (BinomialDistribution.fit (x, 6), 'alpha', 1)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "alpha", [0.5 2])
+%! paramci (BinomialDistribution.fit (x, 6), 'alpha', [0.5 2])
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "alpha", "")
+%! paramci (BinomialDistribution.fit (x, 6), 'alpha', '')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "alpha", {0.05})
+%! paramci (BinomialDistribution.fit (x, 6), 'alpha', {0.05})
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "parameter", "p", ...
-%!          "alpha", {0.05})
+%! paramci (BinomialDistribution.fit (x, 6), 'parameter', 'p', ...
+%!          'alpha', {0.05})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
 %! paramci (BinomialDistribution.fit (x, 6), ...
-%!          "parameter", {"N", "p", "param"})
+%!          'parameter', {'N', 'p', 'param'})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "alpha", 0.01, ...
-%!          "parameter", {"N", "p", "param"})
+%! paramci (BinomialDistribution.fit (x, 6), 'alpha', 0.01, ...
+%!          'parameter', {'N', 'p', 'param'})
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "parameter", "param")
+%! paramci (BinomialDistribution.fit (x, 6), 'parameter', 'param')
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "parameter", "N")
+%! paramci (BinomialDistribution.fit (x, 6), 'parameter', 'N')
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "alpha", 0.01, ...
-%!          "parameter", "param")
+%! paramci (BinomialDistribution.fit (x, 6), 'alpha', 0.01, ...
+%!          'parameter', 'param')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "NAME", "value")
+%! paramci (BinomialDistribution.fit (x, 6), 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "alpha", 0.01, ...
-%!          "NAME", "value")
+%! paramci (BinomialDistribution.fit (x, 6), 'alpha', 0.01, ...
+%!          'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (BinomialDistribution.fit (x, 6), "alpha", 0.01, ...
-%!          "parameter", "p", "NAME", "value")
+%! paramci (BinomialDistribution.fit (x, 6), 'alpha', 0.01, ...
+%!          'parameter', 'p', 'NAME', 'value')
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (BinomialDistribution, "Parent")
+%! plot (BinomialDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (BinomialDistribution, "PlotType", 12)
+%! plot (BinomialDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (BinomialDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (BinomialDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (BinomialDistribution, "PlotType", "pdfcdf")
+%! plot (BinomialDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (BinomialDistribution, "Discrete", "pdfcdf")
+%! plot (BinomialDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (BinomialDistribution, "Discrete", [1, 0])
+%! plot (BinomialDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (BinomialDistribution, "Discrete", {true})
+%! plot (BinomialDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (BinomialDistribution, "Parent", 12)
+%! plot (BinomialDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (BinomialDistribution, "Parent", "hax")
+%! plot (BinomialDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (BinomialDistribution, "invalidNAME", "pdf")
+%! plot (BinomialDistribution, 'invalidNAME', 'pdf')
 %!error <plot: no fitted DATA to plot a probability plot.> ...
-%! plot (BinomialDistribution, "PlotType", "probability")
+%! plot (BinomialDistribution, 'PlotType', 'probability')
 
 ## 'proflik' method
 %!error <proflik: no fitted data available.> ...
@@ -945,23 +948,23 @@ endfunction
 %!error <proflik: SETPARAM must be a numeric vector.> ...
 %! proflik (BinomialDistribution.fit (x, 6), 2, ones (2))
 %!error <proflik: missing VALUE for 'Display' argument.> ...
-%! proflik (BinomialDistribution.fit (x, 6), 2, "Display")
+%! proflik (BinomialDistribution.fit (x, 6), 2, 'Display')
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (BinomialDistribution.fit (x, 6), 2, "Display", 1)
+%! proflik (BinomialDistribution.fit (x, 6), 2, 'Display', 1)
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (BinomialDistribution.fit (x, 6), 2, "Display", {1})
+%! proflik (BinomialDistribution.fit (x, 6), 2, 'Display', {1})
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (BinomialDistribution.fit (x, 6), 2, "Display", {"on"})
+%! proflik (BinomialDistribution.fit (x, 6), 2, 'Display', {'on'})
 %!error <proflik: invalid VALUE size for 'Display' argument.> ...
-%! proflik (BinomialDistribution.fit (x, 6), 2, "Display", ["on"; "on"])
+%! proflik (BinomialDistribution.fit (x, 6), 2, 'Display', ['on'; 'on'])
 %!error <proflik: invalid VALUE for 'Display' argument.> ...
-%! proflik (BinomialDistribution.fit (x, 6), 2, "Display", "onnn")
+%! proflik (BinomialDistribution.fit (x, 6), 2, 'Display', 'onnn')
 %!error <proflik: invalid NAME for optional arguments.> ...
-%! proflik (BinomialDistribution.fit (x, 6), 2, "NAME", "on")
+%! proflik (BinomialDistribution.fit (x, 6), 2, 'NAME', 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (BinomialDistribution.fit (x, 6), 2, {"NAME"}, "on")
+%! proflik (BinomialDistribution.fit (x, 6), 2, {'NAME'}, 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (BinomialDistribution.fit (x, 6), 2, {[1 2 3]}, "Display", "on")
+%! proflik (BinomialDistribution.fit (x, 6), 2, {[1 2 3]}, 'Display', 'on')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...
@@ -973,8 +976,8 @@ endfunction
 
 ## Catch errors when using array of probability objects with available methods
 %!shared pd
-%! pd = BinomialDistribution(1, 0.5);
-%! pd(2) = BinomialDistribution(1, 0.6);
+%! pd = BinomialDistribution (1, 0.5);
+%! pd(2) = BinomialDistribution (1, 0.6);
 %!error <cdf: requires a scalar probability distribution.> cdf (pd, 1)
 %!error <icdf: requires a scalar probability distribution.> icdf (pd, 0.5)
 %!error <iqr: requires a scalar probability distribution.> iqr (pd)

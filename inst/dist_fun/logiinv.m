@@ -45,7 +45,7 @@ function x = logiinv (p, mu, sigma)
   endif
 
   ## Check for common size of P, MU, and SIGMA
-  if (! isscalar (p) || ! isscalar (mu) || ! isscalar(sigma))
+  if (! isscalar (p) || ! isscalar (mu) || ! isscalar (sigma))
     [retval, p, mu, sigma] = common_size (p, mu, sigma);
     if (retval > 0)
       error ("logiinv: P, MU, and SIGMA must be of common size or scalars.");
@@ -58,8 +58,8 @@ function x = logiinv (p, mu, sigma)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (mu, "single") || isa (sigma, "single"));
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (mu, 'single') || isa (sigma, 'single'));
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -83,28 +83,28 @@ endfunction
 %! x3 = logiinv (p, 9, 4);
 %! x4 = logiinv (p, 6, 2);
 %! x5 = logiinv (p, 2, 1);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-c", p, x5, "-m")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-c', p, x5, '-m')
 %! grid on
-%! legend ({"μ = 5, σ = 2", "μ = 9, σ = 3", "μ = 9, σ = 4", ...
-%!          "μ = 6, σ = 2", "μ = 2, σ = 1"}, "location", "southeast")
-%! title ("Logistic iCDF")
-%! xlabel ("probability")
-%! ylabel ("x")
+%! legend ({'μ = 5, σ = 2', 'μ = 9, σ = 3', 'μ = 9, σ = 4', ...
+%!          'μ = 6, σ = 2', 'μ = 2, σ = 1'}, 'location', 'southeast')
+%! title ('Logistic iCDF')
+%! xlabel ('probability')
+%! ylabel ('x')
 
 ## Test output
 %!test
 %! p = [0.01:0.01:0.99];
-%! assert (logiinv (p, 0, 1), log (p ./ (1-p)), 25*eps);
+%! assert_equal (logiinv (p, 0, 1), log (p ./ (1-p)), 25*eps);
 %!shared p
 %! p = [-1 0 0.5 1 2];
-%!assert (logiinv (p, 0, 1), [NaN -Inf 0 Inf NaN])
-%!assert (logiinv (p, 0, [-1, 0, 1, 2, 3]), [NaN NaN 0 Inf NaN])
+%!assert_equal (logiinv (p, 0, 1), [NaN -Inf 0 Inf NaN])
+%!assert_equal (logiinv (p, 0, [-1, 0, 1, 2, 3]), [NaN NaN 0 Inf NaN])
 
 ## Test class of input preserved
-%!assert (logiinv ([p, NaN], 0, 1), [NaN -Inf 0 Inf NaN NaN])
-%!assert (logiinv (single ([p, NaN]), 0, 1), single ([NaN -Inf 0 Inf NaN NaN]))
-%!assert (logiinv ([p, NaN], single (0), 1), single ([NaN -Inf 0 Inf NaN NaN]))
-%!assert (logiinv ([p, NaN], 0, single (1)), single ([NaN -Inf 0 Inf NaN NaN]))
+%!assert_equal (logiinv ([p, NaN], 0, 1), [NaN -Inf 0 Inf NaN NaN])
+%!assert_equal (logiinv (single ([p, NaN]), 0, 1), single ([NaN -Inf 0 Inf NaN NaN]))
+%!assert_equal (logiinv ([p, NaN], single (0), 1), single ([NaN -Inf 0 Inf NaN NaN]))
+%!assert_equal (logiinv ([p, NaN], 0, single (1)), single ([NaN -Inf 0 Inf NaN NaN]))
 
 ## Test input validation
 %!error<logiinv: function called with too few input arguments.> logiinv ()

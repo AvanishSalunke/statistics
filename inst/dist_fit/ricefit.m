@@ -104,14 +104,14 @@ function [paramhat, paramci] = ricefit (x, alpha, censor, freq, options)
 
   ## Get options structure or add defaults
   if (nargin < 5)
-    options.Display = "off";
+    options.Display = 'off';
     options.MaxFunEvals = 400;
     options.MaxIter = 200;
     options.TolX = 1e-6;
   else
-    if (! isstruct (options) || ! isfield (options, "Display") ||
-        ! isfield (options, "MaxFunEvals") || ! isfield (options, "MaxIter")
-                                           || ! isfield (options, "TolX"))
+    if (! isstruct (options) || ! isfield (options, 'Display') ||
+        ! isfield (options, 'MaxFunEvals') || ! isfield (options, 'MaxIter')
+                                           || ! isfield (options, 'TolX'))
       error (strcat ("ricefit: 'options' 5th argument must be a", ...
                      " structure with 'Display', 'MaxFunEvals',", ...
                      " 'MaxIter', and 'TolX' fields present."));
@@ -195,23 +195,23 @@ endfunction
 
 %!demo
 %! ## Sample 3 populations from different Gamma distributions
-%! randg ("seed", 5);    # for reproducibility
-%! randp ("seed", 6);
+%! randg ('seed', 5);    # for reproducibility
+%! randp ('seed', 6);
 %! r1 = ricernd (1, 2, 3000, 1);
-%! randg ("seed", 2);    # for reproducibility
-%! randp ("seed", 8);
+%! randg ('seed', 2);    # for reproducibility
+%! randp ('seed', 8);
 %! r2 = ricernd (2, 4, 3000, 1);
-%! randg ("seed", 7);    # for reproducibility
-%! randp ("seed", 9);
+%! randg ('seed', 7);    # for reproducibility
+%! randp ('seed', 9);
 %! r3 = ricernd (7.5, 1, 3000, 1);
 %! r = [r1, r2, r3];
 %!
 %! ## Plot them normalized and fix their colors
 %! hist (r, 75, 4);
-%! h = findobj (gca, "Type", "patch");
-%! set (h(1), "facecolor", "c");
-%! set (h(2), "facecolor", "g");
-%! set (h(3), "facecolor", "r");
+%! h = findobj (gca, 'Type', 'patch');
+%! set (h(1), 'facecolor', 'c');
+%! set (h(2), 'facecolor', 'g');
+%! set (h(3), 'facecolor', 'r');
 %! ylim ([0, 0.7]);
 %! xlim ([0, 12]);
 %! hold on
@@ -224,61 +224,61 @@ endfunction
 %! ## Plot their estimated PDFs
 %! x = [0.01,0.1:0.2:18];
 %! y = ricepdf (x, s_sigmaA(1), s_sigmaA(2));
-%! plot (x, y, "-pr");
+%! plot (x, y, '-pr');
 %! y = ricepdf (x, s_sigmaB(1), s_sigmaB(2));
-%! plot (x, y, "-sg");
+%! plot (x, y, '-sg');
 %! y = ricepdf (x, s_sigmaC(1), s_sigmaC(2));
-%! plot (x, y, "-^c");
+%! plot (x, y, '-^c');
 %! hold off
-%! legend ({"Normalized HIST of sample 1 with s=1 and σ=2", ...
-%!          "Normalized HIST of sample 2 with s=2 and σ=4", ...
-%!          "Normalized HIST of sample 3 with s=7.5 and σ=1", ...
+%! legend ({'Normalized HIST of sample 1 with s=1 and σ=2', ...
+%!          'Normalized HIST of sample 2 with s=2 and σ=4', ...
+%!          'Normalized HIST of sample 3 with s=7.5 and σ=1', ...
 %!          sprintf("PDF for sample 1 with estimated s=%0.2f and σ=%0.2f", ...
 %!                  s_sigmaA(1), s_sigmaA(2)), ...
 %!          sprintf("PDF for sample 2 with estimated s=%0.2f and σ=%0.2f", ...
 %!                  s_sigmaB(1), s_sigmaB(2)), ...
 %!          sprintf("PDF for sample 3 with estimated s=%0.2f and σ=%0.2f", ...
 %!                  s_sigmaC(1), s_sigmaC(2))})
-%! title ("Three population samples from different Rician distributions")
+%! title ('Three population samples from different Rician distributions')
 %! hold off
 
 ## Test output
 %!test
 %! [paramhat, paramci] = ricefit ([1:50]);
-%! assert (paramhat, [15.3057, 17.6668], 1e-4);
-%! assert (paramci, [9.5468, 11.7802; 24.5383, 26.4952], 1e-4);
+%! assert_equal (paramhat, [15.3057, 17.6668], 1e-4);
+%! assert_equal (paramci, [9.5468, 11.7802; 24.5383, 26.4952], 1e-4);
 %!test
 %! [paramhat, paramci] = ricefit ([1:50], 0.01);
-%! assert (paramhat, [15.3057, 17.6668], 1e-4);
-%! assert (paramci, [8.2309, 10.3717; 28.4615, 30.0934], 1e-4);
+%! assert_equal (paramhat, [15.3057, 17.6668], 1e-4);
+%! assert_equal (paramci, [8.2309, 10.3717; 28.4615, 30.0934], 1e-4);
 %!test
 %! [paramhat, paramci] = ricefit ([1:5]);
-%! assert (paramhat, [2.3123, 1.6812], 1e-4);
-%! assert (paramci, [1.0819, 0.6376; 4.9424, 4.4331], 1e-4);
+%! assert_equal (paramhat, [2.3123, 1.6812], 1e-4);
+%! assert_equal (paramci, [1.0819, 0.6376; 4.9424, 4.4331], 1e-4);
 %!test
 %! [paramhat, paramci] = ricefit ([1:5], 0.01);
-%! assert (paramhat, [2.3123, 1.6812], 1e-4);
-%! assert (paramci, [0.8521, 0.4702; 6.2747, 6.0120], 1e-4);
+%! assert_equal (paramhat, [2.3123, 1.6812], 1e-4);
+%! assert_equal (paramci, [0.8521, 0.4702; 6.2747, 6.0120], 1e-4);
 %!test
 %! freq = [1 1 1 1 5];
 %! [paramhat, paramci] = ricefit ([1:5], [], [], freq);
-%! assert (paramhat, [3.5181, 1.5565], 1e-4);
-%! assert (paramci, [2.5893, 0.9049; 4.7801, 2.6772], 1e-4);
+%! assert_equal (paramhat, [3.5181, 1.5565], 1e-4);
+%! assert_equal (paramci, [2.5893, 0.9049; 4.7801, 2.6772], 1e-4);
 %!test
 %! censor = [1 0 0 0 0];
 %! [paramhat, paramci] = ricefit ([1:5], [], censor);
-%! assert (paramhat, [3.2978, 1.1527], 1e-4);
-%! assert (paramci, [2.3192, 0.5476; 4.6895, 2.4261], 1e-4);
+%! assert_equal (paramhat, [3.2978, 1.1527], 1e-4);
+%! assert_equal (paramci, [2.3192, 0.5476; 4.6895, 2.4261], 1e-4);
 
 ## Test class of input preserved
-%!assert (class (ricefit (single ([1:50]))), "single")
+%!assert_equal (class (ricefit (single ([1:50]))), "single")
 
 ## Test input validation
 %!error<ricefit: X must be a vector.> ricefit (ones (2))
 %!error<ricefit: wrong value for ALPHA.> ricefit ([1:50], 1)
 %!error<ricefit: wrong value for ALPHA.> ricefit ([1:50], -1)
 %!error<ricefit: wrong value for ALPHA.> ricefit ([1:50], {0.05})
-%!error<ricefit: wrong value for ALPHA.> ricefit ([1:50], "k")
+%!error<ricefit: wrong value for ALPHA.> ricefit ([1:50], 'k')
 %!error<ricefit: wrong value for ALPHA.> ricefit ([1:50], i)
 %!error<ricefit: wrong value for ALPHA.> ricefit ([1:50], [0.01 0.02])
 %!error<ricefit: X and CENSOR vectors mismatch.> ricefit ([1:50], [], [1 1])

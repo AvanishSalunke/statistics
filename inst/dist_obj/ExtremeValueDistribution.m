@@ -56,7 +56,7 @@ classdef ExtremeValueDistribution
   ## evlike, evstat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {ExtremeValueDistribution} {property} mu
     ##
@@ -82,7 +82,7 @@ classdef ExtremeValueDistribution
     sigma
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {ExtremeValueDistribution} {property} DistributionName
     ##
@@ -92,7 +92,7 @@ classdef ExtremeValueDistribution
     ## object. This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "ExtremeValueDistribution";
+    DistributionName = 'ExtremeValueDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {ExtremeValueDistribution} {property} NumParameters
@@ -110,39 +110,39 @@ classdef ExtremeValueDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter. This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"mu", "sigma"};
+    ParameterNames = {'mu', 'sigma'};
 
     ## -*- texinfo -*-
     ## @deftp {ExtremeValueDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter. This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Location", "Scale"};
+    ParameterDescription = {'Location', 'Scale'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = true;
-    DistributionCode = "ev";
+    DistributionCode = 'ev';
     ParameterRange = [-Inf, realmin; Inf, Inf];
     ParameterLogCI = [true, true];
   endproperties
 
-  properties (GetAccess = public , SetAccess = protected)
+  properties(GetAccess = public , SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {ExtremeValueDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{2x1} numeric vector containing the values of the distribution
+    ## A @math{2*1} numeric vector containing the values of the distribution
     ## parameters. This property is read-only. You can change the distribution
     ## parameters by assigning new values to the @qcode{mu} and @qcode{sigma}
     ## properties.
@@ -155,7 +155,7 @@ classdef ExtremeValueDistribution
     ##
     ## Covariance matrix of the parameter estimates
     ##
-    ## A @math{2x2} numeric matrix containing the variance-covariance of the
+    ## A @math{2*2} numeric matrix containing the variance-covariance of the
     ## parameter estimates. Diagonal elements contain the variance of each
     ## estimated parameter, and non-diagonal elements contain the covariance
     ## between the parameter estimates. The covariance matrix is only meaningful
@@ -172,7 +172,7 @@ classdef ExtremeValueDistribution
     ##
     ## Flag for fixed parameters
     ##
-    ## A @math{1x2} logical vector specifying which parameters are fixed and
+    ## A @math{1*2} logical vector specifying which parameters are fixed and
     ## which are estimated. @qcode{true} values correspond to fixed parameters,
     ## @qcode{false} values correspond to parameter estimates. This property is
     ## read-only.
@@ -185,7 +185,7 @@ classdef ExtremeValueDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution. First element contains the lower boundary,
     ## second element contains the upper boundary. This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -228,11 +228,11 @@ classdef ExtremeValueDistribution
     InputData
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected, Hidden)
+  properties(GetAccess = public, SetAccess = protected, Hidden)
     ParameterCI
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = ExtremeValueDistribution (mu, sigma)
       if (nargin == 0)
@@ -248,12 +248,12 @@ classdef ExtremeValueDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "extreme value distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'extreme value distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "extreme value distribution");
+      __disp__ (this, 'extreme value distribution');
     endfunction
 
     function this = set.mu (this, mu)
@@ -282,11 +282,11 @@ classdef ExtremeValueDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {ExtremeValueDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {ExtremeValueDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {ExtremeValueDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -294,7 +294,7 @@ classdef ExtremeValueDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -304,9 +304,9 @@ classdef ExtremeValueDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -449,18 +449,19 @@ classdef ExtremeValueDistribution
     ## boundaries of the 95% confidence interval for each parameter of the
     ## probability distribution object, @var{pd}.
     ##
-    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes the
+    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes
+    ## the
     ## confidence intervals with additional options specified by
     ## @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Alpha"} @tab @tab A scalar value in the range @math{(0,1)}
+    ## @item @qcode{'Alpha'} @tab A scalar value in the range @math{(0,1)}
     ## specifying the significance level for the confidence interval.  The
     ## default value 0.05 corresponds to a 95% confidence interval.
     ##
-    ## @item @qcode{"Parameter"} @tab @tab A character vector or a cell array of
+    ## @item @qcode{'Parameter'} @tab A character vector or a cell array of
     ## character vectors specifying the parameter names for which to compute
     ## confidence intervals.  By default, @code{paramci} computes confidence
     ## intervals for all distribution parameters.
@@ -521,26 +522,26 @@ classdef ExtremeValueDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -561,9 +562,9 @@ classdef ExtremeValueDistribution
 
     ## -*- texinfo -*-
     ## @deftypefn  {ExtremeValueDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum})
-    ## @deftypefnx {ExtremeValueDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {ExtremeValueDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{'Display'}, @var{display})
     ## @deftypefnx {ExtremeValueDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam})
-    ## @deftypefnx {ExtremeValueDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {ExtremeValueDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{'Display'}, @var{display})
     ##
     ## Profile likelihood function for a probability distribution object.
     ##
@@ -576,14 +577,14 @@ classdef ExtremeValueDistribution
     ## fitted to data.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @qcode{"Display"}, @qcode{"on"})} also plots the profile likelihood
+    ## @qcode{'Display'}, @qcode{'on'})} also plots the profile likelihood
     ## against the default range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
     ## @var{setparam})} defines a user-defined range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @var{setparam}, @qcode{"Display"}, @qcode{"on"})} also plots the profile
+    ## @var{setparam}, @qcode{'Display'}, @qcode{'on'})} also plots the profile
     ## likelihood against the user-defined range of the selected parameter.
     ##
     ## For the extreme value distribution, @qcode{@var{pnum} = 1} selects the
@@ -674,7 +675,8 @@ classdef ExtremeValueDistribution
     ##
     ## @code{@var{t} = truncate (@var{pd}, @var{lower}, @var{upper})} returns a
     ## probability distribution @var{t}, which is the probability distribution
-    ## @var{pd} truncated to the specified interval with lower limit, @var{lower},
+    ## @var{pd} truncated to the specified interval with lower limit,
+    ## @var{lower},
     ## and upper limit, @var{upper}.  If @var{pd} is fitted to data with
     ## @code{fitdist}, the returned probability distribution @var{t} is not
     ## fitted, does not contain any data or estimated values, and it is as it
@@ -723,7 +725,7 @@ classdef ExtremeValueDistribution
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function pd = fit (x, varargin)
       ## Check input arguments
@@ -743,7 +745,7 @@ classdef ExtremeValueDistribution
         freq = varargin{3};
       endif
       if (nargin < 5)
-        options.Display = "off";
+        options.Display = 'off';
         options.MaxFunEvals = 400;
         options.MaxIter = 200;
         options.TolX = 1e-6;
@@ -765,7 +767,7 @@ classdef ExtremeValueDistribution
       pd.ParameterCI = pci;
       pd.ParameterIsFixed = [false, false];
       pd.ParameterCovariance = acov;
-      pd.InputData = struct ("data", x, "cens", censor, "freq", freq);
+      pd.InputData = struct ('data', x, 'cens', censor, 'freq', freq);
     endfunction
 
   endmethods
@@ -786,126 +788,126 @@ endfunction
 %!shared pd, t
 %! pd = ExtremeValueDistribution (0, 1);
 %! t = truncate (pd, 2, 4);
-%!assert (cdf (pd, [0:5]), [0.6321, 0.9340, 0.9994, 1, 1, 1], 1e-4);
-%!assert (cdf (t, [0:5]), [0, 0, 0, 1, 1, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4]), [0.9887, 0.9994, 1, 1], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4]), [0, 0, 1, 1], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [-Inf, -1.4999, -0.6717, -0.0874, 0.4759, Inf], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [2, 2.0298, 2.0668, 2.1169, 2.1971, 4], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, -0.6717, -0.0874, 0.4759, Inf, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.0668, 2.1169, 2.1971, 4, NaN], 1e-4);
-%!assert (iqr (pd), 1.5725, 1e-4);
-%!assert (iqr (t), 0.1338, 1e-4);
-%!assert (mean (pd), -0.5772, 1e-4);
-%!assert (mean (t), 2.1206, 1e-4);
-%!assert (median (pd), -0.3665, 1e-4);
-%!assert (median (t), 2.0897, 1e-4);
-%!assert (pdf (pd, [0:5]), [0.3679, 0.1794, 0.0046, 0, 0, 0], 1e-4);
-%!assert (pdf (t, [0:5]), [0, 0, 7.3891, 0.0001, 0, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1:4, NaN]), [0.2546, 0.1794, 0.0046, 0, 0, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1:4, NaN]), [0, 0, 7.3891, 0.0001, 0, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 2), false);
-%!assert (any (random (t, 1000, 1) > 4), false);
-%!assert (std (pd), 1.2825, 1e-4);
-%!assert (std (t), 0.1091, 1e-4);
-%!assert (var (pd), 1.6449, 1e-4);
-%!assert (var (t), 0.0119, 1e-4);
+%!assert_equal (cdf (pd, [0:5]), [0.6321, 0.9340, 0.9994, 1, 1, 1], 1e-4);
+%!assert_equal (cdf (t, [0:5]), [0, 0, 0, 1, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4]), [0.9887, 0.9994, 1, 1], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4]), [0, 0, 1, 1], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [-Inf, -1.4999, -0.6717, -0.0874, 0.4759, Inf], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [2, 2.0298, 2.0668, 2.1169, 2.1971, 4], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, -0.6717, -0.0874, 0.4759, Inf, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.0668, 2.1169, 2.1971, 4, NaN], 1e-4);
+%!assert_equal (iqr (pd), 1.5725, 1e-4);
+%!assert_equal (iqr (t), 0.1338, 1e-4);
+%!assert_equal (mean (pd), -0.5772, 1e-4);
+%!assert_equal (mean (t), 2.1206, 1e-4);
+%!assert_equal (median (pd), -0.3665, 1e-4);
+%!assert_equal (median (t), 2.0897, 1e-4);
+%!assert_equal (pdf (pd, [0:5]), [0.3679, 0.1794, 0.0046, 0, 0, 0], 1e-4);
+%!assert_equal (pdf (t, [0:5]), [0, 0, 7.3891, 0.0001, 0, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1:4, NaN]), [0.2546, 0.1794, 0.0046, 0, 0, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1:4, NaN]), [0, 0, 7.3891, 0.0001, 0, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 2), false);
+%!assert_equal (any (random (t, 1000, 1) > 4), false);
+%!assert_equal (std (pd), 1.2825, 1e-4);
+%!assert_equal (std (t), 0.1091, 1e-4);
+%!assert_equal (var (pd), 1.6449, 1e-4);
+%!assert_equal (var (t), 0.0119, 1e-4);
 
 ## Test input validation
 ## 'ExtremeValueDistribution' constructor
 %!error <ExtremeValueDistribution: MU must be a real scalar.> ...
-%! ExtremeValueDistribution(Inf, 1)
+%! ExtremeValueDistribution (Inf, 1)
 %!error <ExtremeValueDistribution: MU must be a real scalar.> ...
-%! ExtremeValueDistribution(i, 1)
+%! ExtremeValueDistribution (i, 1)
 %!error <ExtremeValueDistribution: MU must be a real scalar.> ...
-%! ExtremeValueDistribution("a", 1)
+%! ExtremeValueDistribution ('a', 1)
 %!error <ExtremeValueDistribution: MU must be a real scalar.> ...
-%! ExtremeValueDistribution([1, 2], 1)
+%! ExtremeValueDistribution ([1, 2], 1)
 %!error <ExtremeValueDistribution: MU must be a real scalar.> ...
-%! ExtremeValueDistribution(NaN, 1)
+%! ExtremeValueDistribution (NaN, 1)
 %!error <ExtremeValueDistribution: SIGMA must be a positive real scalar.> ...
-%! ExtremeValueDistribution(1, 0)
+%! ExtremeValueDistribution (1, 0)
 %!error <ExtremeValueDistribution: SIGMA must be a positive real scalar.> ...
-%! ExtremeValueDistribution(1, -1)
+%! ExtremeValueDistribution (1, -1)
 %!error <ExtremeValueDistribution: SIGMA must be a positive real scalar.> ...
-%! ExtremeValueDistribution(1, Inf)
+%! ExtremeValueDistribution (1, Inf)
 %!error <ExtremeValueDistribution: SIGMA must be a positive real scalar.> ...
-%! ExtremeValueDistribution(1, i)
+%! ExtremeValueDistribution (1, i)
 %!error <ExtremeValueDistribution: SIGMA must be a positive real scalar.> ...
-%! ExtremeValueDistribution(1, "a")
+%! ExtremeValueDistribution (1, 'a')
 %!error <ExtremeValueDistribution: SIGMA must be a positive real scalar.> ...
-%! ExtremeValueDistribution(1, [1, 2])
+%! ExtremeValueDistribution (1, [1, 2])
 %!error <ExtremeValueDistribution: SIGMA must be a positive real scalar.> ...
-%! ExtremeValueDistribution(1, NaN)
+%! ExtremeValueDistribution (1, NaN)
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (ExtremeValueDistribution, 2, "uper")
+%! cdf (ExtremeValueDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (ExtremeValueDistribution, 2, 3)
 
 ## 'paramci' method
 %!shared x
-%! rand ("seed", 1);
+%! rand ('seed', 1);
 %! x = evrnd (1, 1, [1000, 1]);
 %!error <paramci: optional arguments must be in NAME-VALUE pairs.> ...
-%! paramci (ExtremeValueDistribution.fit (x), "alpha")
+%! paramci (ExtremeValueDistribution.fit (x), 'alpha')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (ExtremeValueDistribution.fit (x), "alpha", 0)
+%! paramci (ExtremeValueDistribution.fit (x), 'alpha', 0)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (ExtremeValueDistribution.fit (x), "alpha", 1)
+%! paramci (ExtremeValueDistribution.fit (x), 'alpha', 1)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (ExtremeValueDistribution.fit (x), "alpha", [0.5 2])
+%! paramci (ExtremeValueDistribution.fit (x), 'alpha', [0.5 2])
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (ExtremeValueDistribution.fit (x), "alpha", "")
+%! paramci (ExtremeValueDistribution.fit (x), 'alpha', '')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (ExtremeValueDistribution.fit (x), "alpha", {0.05})
+%! paramci (ExtremeValueDistribution.fit (x), 'alpha', {0.05})
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
 %! paramci (ExtremeValueDistribution.fit (x), ...
-%!          "parameter", "mu", "alpha", {0.05})
+%!          'parameter', 'mu', 'alpha', {0.05})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
 %! paramci (ExtremeValueDistribution.fit (x), ...
-%!          "parameter", {"mu", "sigma", "param"})
+%!          'parameter', {'mu', 'sigma', 'param'})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (ExtremeValueDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", {"mu", "sigma", "param"})
+%! paramci (ExtremeValueDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', {'mu', 'sigma', 'param'})
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (ExtremeValueDistribution.fit (x), "parameter", "param")
+%! paramci (ExtremeValueDistribution.fit (x), 'parameter', 'param')
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (ExtremeValueDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", "param")
+%! paramci (ExtremeValueDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', 'param')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (ExtremeValueDistribution.fit (x), "NAME", "value")
+%! paramci (ExtremeValueDistribution.fit (x), 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (ExtremeValueDistribution.fit (x), "alpha", 0.01, "NAME", "value")
+%! paramci (ExtremeValueDistribution.fit (x), 'alpha', 0.01, 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (ExtremeValueDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", "mu", "NAME", "value")
+%! paramci (ExtremeValueDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', 'mu', 'NAME', 'value')
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (ExtremeValueDistribution, "Parent")
+%! plot (ExtremeValueDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (ExtremeValueDistribution, "PlotType", 12)
+%! plot (ExtremeValueDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (ExtremeValueDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (ExtremeValueDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (ExtremeValueDistribution, "PlotType", "pdfcdf")
+%! plot (ExtremeValueDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (ExtremeValueDistribution, "Discrete", "pdfcdf")
+%! plot (ExtremeValueDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (ExtremeValueDistribution, "Discrete", [1, 0])
+%! plot (ExtremeValueDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (ExtremeValueDistribution, "Discrete", {true})
+%! plot (ExtremeValueDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (ExtremeValueDistribution, "Parent", 12)
+%! plot (ExtremeValueDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (ExtremeValueDistribution, "Parent", "hax")
+%! plot (ExtremeValueDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (ExtremeValueDistribution, "invalidNAME", "pdf")
+%! plot (ExtremeValueDistribution, 'invalidNAME', 'pdf')
 %!error <plot: no fitted DATA to plot a probability plot.> ...
-%! plot (ExtremeValueDistribution, "PlotType", "probability")
+%! plot (ExtremeValueDistribution, 'PlotType', 'probability')
 
 ## 'proflik' method
 %!error <proflik: no fitted data available.> ...
@@ -919,23 +921,23 @@ endfunction
 %!error <proflik: SETPARAM must be a numeric vector.> ...
 %! proflik (ExtremeValueDistribution.fit (x), 1, ones (2))
 %!error <proflik: missing VALUE for 'Display' argument.> ...
-%! proflik (ExtremeValueDistribution.fit (x), 1, "Display")
+%! proflik (ExtremeValueDistribution.fit (x), 1, 'Display')
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (ExtremeValueDistribution.fit (x), 1, "Display", 1)
+%! proflik (ExtremeValueDistribution.fit (x), 1, 'Display', 1)
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (ExtremeValueDistribution.fit (x), 1, "Display", {1})
+%! proflik (ExtremeValueDistribution.fit (x), 1, 'Display', {1})
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (ExtremeValueDistribution.fit (x), 1, "Display", {"on"})
+%! proflik (ExtremeValueDistribution.fit (x), 1, 'Display', {'on'})
 %!error <proflik: invalid VALUE size for 'Display' argument.> ...
-%! proflik (ExtremeValueDistribution.fit (x), 1, "Display", ["on"; "on"])
+%! proflik (ExtremeValueDistribution.fit (x), 1, 'Display', ['on'; 'on'])
 %!error <proflik: invalid VALUE for 'Display' argument.> ...
-%! proflik (ExtremeValueDistribution.fit (x), 1, "Display", "onnn")
+%! proflik (ExtremeValueDistribution.fit (x), 1, 'Display', 'onnn')
 %!error <proflik: invalid NAME for optional arguments.> ...
-%! proflik (ExtremeValueDistribution.fit (x), 1, "NAME", "on")
+%! proflik (ExtremeValueDistribution.fit (x), 1, 'NAME', 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (ExtremeValueDistribution.fit (x), 1, {"NAME"}, "on")
+%! proflik (ExtremeValueDistribution.fit (x), 1, {'NAME'}, 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (ExtremeValueDistribution.fit (x), 1, {[1 2 3 4]}, "Display", "on")
+%! proflik (ExtremeValueDistribution.fit (x), 1, {[1 2 3 4]}, 'Display', 'on')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...
@@ -947,8 +949,8 @@ endfunction
 
 ## Catch errors when using array of probability objects with available methods
 %!shared pd
-%! pd = ExtremeValueDistribution(1, 1);
-%! pd(2) = ExtremeValueDistribution(1, 3);
+%! pd = ExtremeValueDistribution (1, 1);
+%! pd(2) = ExtremeValueDistribution (1, 3);
 %!error <cdf: requires a scalar probability distribution.> cdf (pd, 1)
 %!error <icdf: requires a scalar probability distribution.> icdf (pd, 0.5)
 %!error <iqr: requires a scalar probability distribution.> iqr (pd)

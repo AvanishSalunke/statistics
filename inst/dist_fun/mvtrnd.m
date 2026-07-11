@@ -99,7 +99,7 @@ function r = mvtrnd (rho, df, n)
     error ("mvtrnd: SIGMA must be a positive definite matrix.");
   endif
 
-  if (!isvector (df) || any (df <= 0))
+  if (! isvector (df) || any (df <= 0))
     error ("mvtrnd: DF must be a positive scalar or vector.");
   endif
   df = df(:);
@@ -137,11 +137,11 @@ endfunction
 %! df = 3;
 %! n = 10;
 %! r = mvtrnd (rho, df, n);
-%! assert (size (r), [10, 2]);
+%! assert_equal (size (r), [10, 2]);
 
 %!test
 %! rho = [1, 0.5; 0.5, 1];
 %! df = [2; 3];
 %! n = 2;
 %! r = mvtrnd (rho, df, 2);
-%! assert (size (r), [2, 2]);
+%! assert_equal (size (r), [2, 2]);

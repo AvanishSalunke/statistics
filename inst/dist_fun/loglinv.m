@@ -55,7 +55,7 @@ function x = loglinv (p, mu, sigma)
   endif
 
   ## Check for common size of P, MU, and SIGMA
-  if (! isscalar (p) || ! isscalar (mu) || ! isscalar(sigma))
+  if (! isscalar (p) || ! isscalar (mu) || ! isscalar (sigma))
     [retval, p, mu, sigma] = common_size (p, mu, sigma);
     if (retval > 0)
       error ("loglinv: P, MU, and SIGMA must be of common size or scalars.");
@@ -68,8 +68,8 @@ function x = loglinv (p, mu, sigma)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (mu, "single") || isa (sigma, "single"));
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (mu, 'single') || isa (sigma, 'single'));
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -90,29 +90,29 @@ endfunction
 %! x3 = loglinv (p, log (1), 1/2);
 %! x4 = loglinv (p, log (1), 1/4);
 %! x5 = loglinv (p, log (1), 1/8);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-c", p, x5, "-m")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-c', p, x5, '-m')
 %! ylim ([0, 20])
 %! grid on
-%! legend ({"σ = 2 (β = 0.5)", "σ = 1 (β = 1)", "σ = 0.5 (β = 2)", ...
-%!          "σ = 0.25 (β = 4)", "σ = 0.125 (β = 8)"}, "location", "northwest")
-%! title ("Log-logistic iCDF")
-%! xlabel ("probability")
-%! ylabel ("x")
-%! text (0.03, 12.5, "μ = 0 (α = 1), values of σ (β) as shown in legend")
+%! legend ({'σ = 2 (β = 0.5)', 'σ = 1 (β = 1)', 'σ = 0.5 (β = 2)', ...
+%!          'σ = 0.25 (β = 4)', 'σ = 0.125 (β = 8)'}, 'location', 'northwest')
+%! title ('Log-logistic iCDF')
+%! xlabel ('probability')
+%! ylabel ('x')
+%! text (0.03, 12.5, 'μ = 0 (α = 1), values of σ (β) as shown in legend')
 
 ## Test output
 %!shared p, out1, out2
 %! p = [-1, 0, 0.2, 0.5, 0.8, 0.95, 1, 2];
 %! out1 = [NaN, 0, 0.25, 1, 4, 19, Inf, NaN];
 %! out2 = [NaN, 0, 0.0424732, 2.718282, 173.970037, 18644.695061, Inf, NaN];
-%!assert (loglinv (p, 0, 1), out1, 1e-8)
-%!assert (loglinv (p, 0, 1), out1, 1e-8)
-%!assert (loglinv (p, 1, 3), out2, 1e-6)
+%!assert_equal (loglinv (p, 0, 1), out1, 1e-8)
+%!assert_equal (loglinv (p, 0, 1), out1, 1e-8)
+%!assert_equal (loglinv (p, 1, 3), out2, 1e-6)
 
 ## Test class of input preserved
-%!assert (class (loglinv (single (1), 2, 3)), "single")
-%!assert (class (loglinv (1, single (2), 3)), "single")
-%!assert (class (loglinv (1, 2, single (3))), "single")
+%!assert_equal (class (loglinv (single (1), 2, 3)), "single")
+%!assert_equal (class (loglinv (1, single (2), 3)), "single")
+%!assert_equal (class (loglinv (1, 2, single (3))), "single")
 
 ## Test input validation
 %!error<loglinv: function called with too few input arguments.> loglinv (1)

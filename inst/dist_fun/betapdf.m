@@ -55,13 +55,13 @@ function y = betapdf (x, a, b)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (a, "single") || isa (b, "single"));
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (a, 'single') || isa (b, 'single'));
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
 
-  k = !(a > 0) | !(b > 0) | isnan (x);
+  k = ! (a > 0) | ! (b > 0) | isnan (x);
   y(k) = NaN;
 
   k = (x > 0) & (x < 1) & (a > 0) & (b > 0) & ((a != 1) | (b != 1));
@@ -110,39 +110,39 @@ endfunction
 %! y3 = betapdf (x, 1, 3);
 %! y4 = betapdf (x, 2, 2);
 %! y5 = betapdf (x, 2, 5);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-c", x, y5, "-m")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-c', x, y5, '-m')
 %! grid on
 %! ylim ([0, 2.5])
-%! legend ({"α = β = 0.5", "α = 5, β = 1", "α = 1, β = 3", ...
-%!          "α = 2, β = 2", "α = 2, β = 5"}, "location", "north")
-%! title ("Beta PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'α = β = 0.5', 'α = 5, β = 1', 'α = 1, β = 3', ...
+%!          'α = 2, β = 2', 'α = 2, β = 5'}, 'location', 'north')
+%! title ('Beta PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-1 0 0.5 1 2];
 %! y = [0 2 1 0 0];
-%!assert (betapdf (x, ones (1, 5), 2 * ones (1, 5)), y)
-%!assert (betapdf (x, 1, 2 * ones (1, 5)), y)
-%!assert (betapdf (x, ones (1, 5), 2), y)
-%!assert (betapdf (x, [0 NaN 1 1 1], 2), [NaN NaN y(3:5)])
-%!assert (betapdf (x, 1, 2 * [0 NaN 1 1 1]), [NaN NaN y(3:5)])
-%!assert (betapdf ([x, NaN], 1, 2), [y, NaN])
+%!assert_equal (betapdf (x, ones (1, 5), 2 * ones (1, 5)), y)
+%!assert_equal (betapdf (x, 1, 2 * ones (1, 5)), y)
+%!assert_equal (betapdf (x, ones (1, 5), 2), y)
+%!assert_equal (betapdf (x, [0 NaN 1 1 1], 2), [NaN NaN y(3:5)])
+%!assert_equal (betapdf (x, 1, 2 * [0 NaN 1 1 1]), [NaN NaN y(3:5)])
+%!assert_equal (betapdf ([x, NaN], 1, 2), [y, NaN])
 
 ## Test class of input preserved
-%!assert (betapdf (single ([x, NaN]), 1, 2), single ([y, NaN]))
-%!assert (betapdf ([x, NaN], single (1), 2), single ([y, NaN]))
-%!assert (betapdf ([x, NaN], 1, single (2)), single ([y, NaN]))
+%!assert_equal (betapdf (single ([x, NaN]), 1, 2), single ([y, NaN]))
+%!assert_equal (betapdf ([x, NaN], single (1), 2), single ([y, NaN]))
+%!assert_equal (betapdf ([x, NaN], 1, single (2)), single ([y, NaN]))
 
 ## Beta (1/2,1/2) == arcsine distribution
 %!test
 %! x = rand (10,1);
 %! y = 1 ./ (pi * sqrt (x .* (1 - x)));
-%! assert (betapdf (x, 1/2, 1/2), y, 1e-12);
+%! assert_equal (betapdf (x, 1/2, 1/2), y, 1e-12);
 
 ## Test large input values to betapdf
-%!assert (betapdf (0.5, 1000, 1000), 35.678, 1e-3)
+%!assert_equal (betapdf (0.5, 1000, 1000), 35.678, 1e-3)
 
 ## Test input validation
 %!error<betapdf: function called with too few input arguments.> betapdf ()

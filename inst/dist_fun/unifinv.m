@@ -56,8 +56,8 @@ function x = unifinv (p, a, b)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (a, "single") || isa (b, "single"))
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (a, 'single') || isa (b, 'single'))
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -73,31 +73,31 @@ endfunction
 %! p = 0.001:0.001:0.999;
 %! x1 = unifinv (p, 2, 5);
 %! x2 = unifinv (p, 3, 9);
-%! plot (p, x1, "-b", p, x2, "-g")
+%! plot (p, x1, '-b', p, x2, '-g')
 %! grid on
 %! xlim ([0, 1])
 %! ylim ([0, 10])
-%! legend ({"a = 2, b = 5", "a = 3, b = 9"}, "location", "northwest")
-%! title ("Continuous uniform iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'a = 2, b = 5', 'a = 3, b = 9'}, 'location', 'northwest')
+%! title ('Continuous uniform iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.5 1 2];
-%!assert (unifinv (p, ones (1,5), 2*ones (1,5)), [NaN 1 1.5 2 NaN])
-%!assert (unifinv (p, 0, 1), [NaN 1 1.5 2 NaN] - 1)
-%!assert (unifinv (p, 1, 2*ones (1,5)), [NaN 1 1.5 2 NaN])
-%!assert (unifinv (p, ones (1,5), 2), [NaN 1 1.5 2 NaN])
-%!assert (unifinv (p, [1 2 NaN 1 1], 2), [NaN NaN NaN 2 NaN])
-%!assert (unifinv (p, 1, 2*[1 0 NaN 1 1]), [NaN NaN NaN 2 NaN])
-%!assert (unifinv ([p(1:2) NaN p(4:5)], 1, 2), [NaN 1 NaN 2 NaN])
+%!assert_equal (unifinv (p, ones (1,5), 2*ones (1,5)), [NaN 1 1.5 2 NaN])
+%!assert_equal (unifinv (p, 0, 1), [NaN 1 1.5 2 NaN] - 1)
+%!assert_equal (unifinv (p, 1, 2*ones (1,5)), [NaN 1 1.5 2 NaN])
+%!assert_equal (unifinv (p, ones (1,5), 2), [NaN 1 1.5 2 NaN])
+%!assert_equal (unifinv (p, [1 2 NaN 1 1], 2), [NaN NaN NaN 2 NaN])
+%!assert_equal (unifinv (p, 1, 2*[1 0 NaN 1 1]), [NaN NaN NaN 2 NaN])
+%!assert_equal (unifinv ([p(1:2) NaN p(4:5)], 1, 2), [NaN 1 NaN 2 NaN])
 
 ## Test class of input preserved
-%!assert (unifinv ([p, NaN], 1, 2), [NaN 1 1.5 2 NaN NaN])
-%!assert (unifinv (single ([p, NaN]), 1, 2), single ([NaN 1 1.5 2 NaN NaN]))
-%!assert (unifinv ([p, NaN], single (1), 2), single ([NaN 1 1.5 2 NaN NaN]))
-%!assert (unifinv ([p, NaN], 1, single (2)), single ([NaN 1 1.5 2 NaN NaN]))
+%!assert_equal (unifinv ([p, NaN], 1, 2), [NaN 1 1.5 2 NaN NaN])
+%!assert_equal (unifinv (single ([p, NaN]), 1, 2), single ([NaN 1 1.5 2 NaN NaN]))
+%!assert_equal (unifinv ([p, NaN], single (1), 2), single ([NaN 1 1.5 2 NaN NaN]))
+%!assert_equal (unifinv ([p, NaN], 1, single (2)), single ([NaN 1 1.5 2 NaN NaN]))
 
 ## Test input validation
 %!error<unifinv: function called with too few input arguments.> unifinv ()

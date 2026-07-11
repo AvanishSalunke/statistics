@@ -51,14 +51,15 @@ classdef GeneralizedParetoDistribution
   ## functions to create probability distribution objects, instead of the class
   ## constructor or the aforementioned static method.
   ##
-  ## Further information about the Generalized Pareto distribution can be found at
+  ## Further information about the Generalized Pareto distribution can be found
+  ## at
   ## @url{https://en.wikipedia.org/wiki/Generalized_Pareto_distribution}
   ##
   ## @seealso{fitdist, makedist, gpcdf, gpinv, gppdf, gprnd, gpfit,
   ## gplike, gpstat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {GeneralizedParetoDistribution} {property} k
     ##
@@ -76,9 +77,9 @@ classdef GeneralizedParetoDistribution
     ##
     ## Scale parameter
     ##
-    ## A positive scalar value characterizing the scale of the Generalized Pareto
-    ## distribution. You can access the @qcode{sigma} property using dot name
-    ## assignment.
+    ## A positive scalar value characterizing the scale of the Generalized
+    ## Pareto distribution. You can access the @qcode{sigma} property using dot
+    ## name assignment.
     ##
     ## @end deftp
     sigma
@@ -96,7 +97,7 @@ classdef GeneralizedParetoDistribution
     theta
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {GeneralizedParetoDistribution} {property} DistributionName
     ##
@@ -106,7 +107,7 @@ classdef GeneralizedParetoDistribution
     ## object. This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "GeneralizedParetoDistribution";
+    DistributionName = 'GeneralizedParetoDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {GeneralizedParetoDistribution} {property} NumParameters
@@ -124,39 +125,39 @@ classdef GeneralizedParetoDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{3x1} cell array of character vectors with each element containing
+    ## A @math{3*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter. This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"k", "sigma", "theta"};
+    ParameterNames = {'k', 'sigma', 'theta'};
 
     ## -*- texinfo -*-
     ## @deftp {GeneralizedParetoDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{3x1} cell array of character vectors with each element containing
+    ## A @math{3*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter. This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Shape", "Scale", "Location"};
+    ParameterDescription = {'Shape', 'Scale', 'Location'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = false;
-    DistributionCode = "gp";
+    DistributionCode = 'gp';
     ParameterRange = [-Inf, realmin, -Inf; Inf, Inf, Inf];
     ParameterLogCI = [false, true, false];
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected)
+  properties(GetAccess = public, SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {GeneralizedParetoDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{3x1} numeric vector containing the values of the distribution
+    ## A @math{3*1} numeric vector containing the values of the distribution
     ## parameters. This property is read-only. You can change the distribution
     ## parameters by assigning new values to the @qcode{k}, @qcode{sigma}, and
     ## @qcode{theta} properties.
@@ -169,7 +170,7 @@ classdef GeneralizedParetoDistribution
     ##
     ## Covariance matrix of the parameter estimates
     ##
-    ## A @math{3x3} numeric matrix containing the variance-covariance of the
+    ## A @math{3*3} numeric matrix containing the variance-covariance of the
     ## parameter estimates. Diagonal elements contain the variance of each
     ## estimated parameter, and non-diagonal elements contain the covariance
     ## between the parameter estimates. The covariance matrix is only meaningful
@@ -186,7 +187,7 @@ classdef GeneralizedParetoDistribution
     ##
     ## Flag for fixed parameters
     ##
-    ## A @math{1x3} logical vector specifying which parameters are fixed and
+    ## A @math{1*3} logical vector specifying which parameters are fixed and
     ## which are estimated. @qcode{true} values correspond to fixed parameters,
     ## @qcode{false} values correspond to parameter estimates. This property is
     ## read-only.
@@ -199,7 +200,7 @@ classdef GeneralizedParetoDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution. First element contains the lower boundary,
     ## second element contains the upper boundary. This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -242,11 +243,11 @@ classdef GeneralizedParetoDistribution
     InputData
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected, Hidden)
+  properties(GetAccess = public, SetAccess = protected, Hidden)
     ParameterCI
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = GeneralizedParetoDistribution (k, sigma, theta)
       if (nargin == 0)
@@ -263,12 +264,12 @@ classdef GeneralizedParetoDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "Generalized Pareto distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'Generalized Pareto distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "Generalized Pareto distribution");
+      __disp__ (this, 'Generalized Pareto distribution');
     endfunction
 
     function this = set.k (this, k)
@@ -309,11 +310,11 @@ classdef GeneralizedParetoDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {GeneralizedParetoDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {GeneralizedParetoDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {GeneralizedParetoDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -321,7 +322,7 @@ classdef GeneralizedParetoDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -331,9 +332,9 @@ classdef GeneralizedParetoDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -476,18 +477,19 @@ classdef GeneralizedParetoDistribution
     ## boundaries of the 95% confidence interval for each parameter of the
     ## probability distribution object, @var{pd}.
     ##
-    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes the
+    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes
+    ## the
     ## confidence intervals with additional options specified by
     ## @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Alpha"} @tab @tab A scalar value in the range @math{(0,1)}
+    ## @item @qcode{'Alpha'} @tab A scalar value in the range @math{(0,1)}
     ## specifying the significance level for the confidence interval.  The
     ## default value 0.05 corresponds to a 95% confidence interval.
     ##
-    ## @item @qcode{"Parameter"} @tab @tab A character vector or a cell array of
+    ## @item @qcode{'Parameter'} @tab A character vector or a cell array of
     ## character vectors specifying the parameter names for which to compute
     ## confidence intervals.  By default, @code{paramci} computes confidence
     ## intervals for all distribution parameters.
@@ -548,26 +550,26 @@ classdef GeneralizedParetoDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -588,9 +590,9 @@ classdef GeneralizedParetoDistribution
 
     ## -*- texinfo -*-
     ## @deftypefn  {GeneralizedParetoDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum})
-    ## @deftypefnx {GeneralizedParetoDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {GeneralizedParetoDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{'Display'}, @var{display})
     ## @deftypefnx {GeneralizedParetoDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam})
-    ## @deftypefnx {GeneralizedParetoDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {GeneralizedParetoDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{'Display'}, @var{display})
     ##
     ## Profile likelihood function for a probability distribution object.
     ##
@@ -603,14 +605,14 @@ classdef GeneralizedParetoDistribution
     ## fitted to data.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @qcode{"Display"}, @qcode{"on"})} also plots the profile likelihood
+    ## @qcode{'Display'}, @qcode{'on'})} also plots the profile likelihood
     ## against the default range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
     ## @var{setparam})} defines a user-defined range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @var{setparam}, @qcode{"Display"}, @qcode{"on"})} also plots the profile
+    ## @var{setparam}, @qcode{'Display'}, @qcode{'on'})} also plots the profile
     ## likelihood against the user-defined range of the selected parameter.
     ##
     ## For the Generalized Pareto distribution, @qcode{@var{pnum} = 1} selects
@@ -702,7 +704,8 @@ classdef GeneralizedParetoDistribution
     ##
     ## @code{@var{t} = truncate (@var{pd}, @var{lower}, @var{upper})} returns a
     ## probability distribution @var{t}, which is the probability distribution
-    ## @var{pd} truncated to the specified interval with lower limit, @var{lower},
+    ## @var{pd} truncated to the specified interval with lower limit,
+    ## @var{lower},
     ## and upper limit, @var{upper}.  If @var{pd} is fitted to data with
     ## @code{fitdist}, the returned probability distribution @var{t} is not
     ## fitted, does not contain any data or estimated values, and it is as it
@@ -751,7 +754,7 @@ classdef GeneralizedParetoDistribution
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function pd = fit (x, theta, varargin)
       ## Check input arguments
@@ -766,7 +769,7 @@ classdef GeneralizedParetoDistribution
         freq = varargin{2};
       endif
       if (nargin < 5)
-        options.Display = "off";
+        options.Display = 'off';
         options.MaxFunEvals = 400;
         options.MaxIter = 200;
         options.TolX = 1e-6;
@@ -788,7 +791,7 @@ classdef GeneralizedParetoDistribution
       pd.ParameterCI = pci;
       pd.ParameterIsFixed = [false, false, true];
       pd.ParameterCovariance = acov;
-      pd.InputData = struct ("data", x, "cens", [], "freq", freq);
+      pd.InputData = struct ('data', x, 'cens', [], 'freq', freq);
     endfunction
 
   endmethods
@@ -813,72 +816,72 @@ endfunction
 %!shared pd, t
 %! pd = GeneralizedParetoDistribution (1, 1, 1);
 %! t = truncate (pd, 2, 4);
-%!assert (cdf (pd, [0:5]), [0, 0, 0.5, 0.6667, 0.75, 0.8], 1e-4);
-%!assert (cdf (t, [0:5]), [0, 0, 0, 0.6667, 1, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4]), [0.3333, 0.5, 0.6667, 0.75], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4]), [0, 0, 0.6667, 1], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [1, 1.25, 1.6667, 2.5, 5, Inf], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [2, 2.2222, 2.5, 2.8571, 3.3333, 4], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 1.6667, 2.5, 5, Inf, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.5, 2.8571, 3.3333, 4, NaN], 1e-4);
-%!assert (iqr (pd), 2.6667, 1e-4);
-%!assert (iqr (t), 0.9143, 1e-4);
-%!assert (mean (pd), Inf);
-%!assert (mean (t), 2.7726, 1e-4);
-%!assert (median (pd), 2);
-%!assert (median (t), 2.6667, 1e-4);
-%!assert (pdf (pd, [0:5]), [0, 1, 0.25, 0.1111, 0.0625, 0.04], 1e-4);
-%!assert (pdf (t, [0:5]), [0, 0, 1, 0.4444, 0.25, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1:4, NaN]), [0, 1, 0.25, 0.1111, 0.0625, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1:4, NaN]), [0, 0, 1, 0.4444, 0.25, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 2), false);
-%!assert (any (random (t, 1000, 1) > 4), false);
-%!assert (std (pd), Inf);
-%!assert (std (t), 0.5592, 1e-4);
-%!assert (var (pd), Inf);
-%!assert (var (t), 0.3128, 1e-4);
+%!assert_equal (cdf (pd, [0:5]), [0, 0, 0.5, 0.6667, 0.75, 0.8], 1e-4);
+%!assert_equal (cdf (t, [0:5]), [0, 0, 0, 0.6667, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4]), [0.3333, 0.5, 0.6667, 0.75], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4]), [0, 0, 0.6667, 1], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [1, 1.25, 1.6667, 2.5, 5, Inf], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [2, 2.2222, 2.5, 2.8571, 3.3333, 4], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 1.6667, 2.5, 5, Inf, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.5, 2.8571, 3.3333, 4, NaN], 1e-4);
+%!assert_equal (iqr (pd), 2.6667, 1e-4);
+%!assert_equal (iqr (t), 0.9143, 1e-4);
+%!assert_equal (mean (pd), Inf);
+%!assert_equal (mean (t), 2.7726, 1e-4);
+%!assert_equal (median (pd), 2);
+%!assert_equal (median (t), 2.6667, 1e-4);
+%!assert_equal (pdf (pd, [0:5]), [0, 1, 0.25, 0.1111, 0.0625, 0.04], 1e-4);
+%!assert_equal (pdf (t, [0:5]), [0, 0, 1, 0.4444, 0.25, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1:4, NaN]), [0, 1, 0.25, 0.1111, 0.0625, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1:4, NaN]), [0, 0, 1, 0.4444, 0.25, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 2), false);
+%!assert_equal (any (random (t, 1000, 1) > 4), false);
+%!assert_equal (std (pd), Inf);
+%!assert_equal (std (t), 0.5592, 1e-4);
+%!assert_equal (var (pd), Inf);
+%!assert_equal (var (t), 0.3128, 1e-4);
 
 ## Test input validation
 ## 'GeneralizedParetoDistribution' constructor
 %!error <GeneralizedParetoDistribution: K must be a real scalar.> ...
-%! GeneralizedParetoDistribution(Inf, 1, 1)
+%! GeneralizedParetoDistribution (Inf, 1, 1)
 %!error <GeneralizedParetoDistribution: K must be a real scalar.> ...
-%! GeneralizedParetoDistribution(i, 1, 1)
+%! GeneralizedParetoDistribution (i, 1, 1)
 %!error <GeneralizedParetoDistribution: K must be a real scalar.> ...
-%! GeneralizedParetoDistribution("a", 1, 1)
+%! GeneralizedParetoDistribution ('a', 1, 1)
 %!error <GeneralizedParetoDistribution: K must be a real scalar.> ...
-%! GeneralizedParetoDistribution([1, 2], 1, 1)
+%! GeneralizedParetoDistribution ([1, 2], 1, 1)
 %!error <GeneralizedParetoDistribution: K must be a real scalar.> ...
-%! GeneralizedParetoDistribution(NaN, 1, 1)
+%! GeneralizedParetoDistribution (NaN, 1, 1)
 %!error <GeneralizedParetoDistribution: SIGMA must be a positive real scalar.> ...
-%! GeneralizedParetoDistribution(1, 0, 1)
+%! GeneralizedParetoDistribution (1, 0, 1)
 %!error <GeneralizedParetoDistribution: SIGMA must be a positive real scalar.> ...
-%! GeneralizedParetoDistribution(1, -1, 1)
+%! GeneralizedParetoDistribution (1, -1, 1)
 %!error <GeneralizedParetoDistribution: SIGMA must be a positive real scalar.> ...
-%! GeneralizedParetoDistribution(1, Inf, 1)
+%! GeneralizedParetoDistribution (1, Inf, 1)
 %!error <GeneralizedParetoDistribution: SIGMA must be a positive real scalar.> ...
-%! GeneralizedParetoDistribution(1, i, 1)
+%! GeneralizedParetoDistribution (1, i, 1)
 %!error <GeneralizedParetoDistribution: SIGMA must be a positive real scalar.> ...
-%! GeneralizedParetoDistribution(1, "a", 1)
+%! GeneralizedParetoDistribution (1, 'a', 1)
 %!error <GeneralizedParetoDistribution: SIGMA must be a positive real scalar.> ...
-%! GeneralizedParetoDistribution(1, [1, 2], 1)
+%! GeneralizedParetoDistribution (1, [1, 2], 1)
 %!error <GeneralizedParetoDistribution: SIGMA must be a positive real scalar.> ...
-%! GeneralizedParetoDistribution(1, NaN, 1)
+%! GeneralizedParetoDistribution (1, NaN, 1)
 %!error <GeneralizedParetoDistribution: THETA must be a real scalar.> ...
-%! GeneralizedParetoDistribution(1, 1, Inf)
+%! GeneralizedParetoDistribution (1, 1, Inf)
 %!error <GeneralizedParetoDistribution: THETA must be a real scalar.> ...
-%! GeneralizedParetoDistribution(1, 1, i)
+%! GeneralizedParetoDistribution (1, 1, i)
 %!error <GeneralizedParetoDistribution: THETA must be a real scalar.> ...
-%! GeneralizedParetoDistribution(1, 1, "a")
+%! GeneralizedParetoDistribution (1, 1, 'a')
 %!error <GeneralizedParetoDistribution: THETA must be a real scalar.> ...
-%! GeneralizedParetoDistribution(1, 1, [1, 2])
+%! GeneralizedParetoDistribution (1, 1, [1, 2])
 %!error <GeneralizedParetoDistribution: THETA must be a real scalar.> ...
-%! GeneralizedParetoDistribution(1, 1, NaN)
+%! GeneralizedParetoDistribution (1, 1, NaN)
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (GeneralizedParetoDistribution, 2, "uper")
+%! cdf (GeneralizedParetoDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (GeneralizedParetoDistribution, 2, 3)
 
@@ -886,63 +889,63 @@ endfunction
 %!shared x
 %! x = gprnd (1, 1, 1, [1, 100]);
 %!error <paramci: optional arguments must be in NAME-VALUE pairs.> ...
-%! paramci (GeneralizedParetoDistribution.fit (x, 1), "alpha")
+%! paramci (GeneralizedParetoDistribution.fit (x, 1), 'alpha')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (GeneralizedParetoDistribution.fit (x, 1), "alpha", 0)
+%! paramci (GeneralizedParetoDistribution.fit (x, 1), 'alpha', 0)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (GeneralizedParetoDistribution.fit (x, 1), "alpha", 1)
+%! paramci (GeneralizedParetoDistribution.fit (x, 1), 'alpha', 1)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (GeneralizedParetoDistribution.fit (x, 1), "alpha", [0.5 2])
+%! paramci (GeneralizedParetoDistribution.fit (x, 1), 'alpha', [0.5 2])
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (GeneralizedParetoDistribution.fit (x, 1), "alpha", "")
+%! paramci (GeneralizedParetoDistribution.fit (x, 1), 'alpha', '')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (GeneralizedParetoDistribution.fit (x, 1), "alpha", {0.05})
+%! paramci (GeneralizedParetoDistribution.fit (x, 1), 'alpha', {0.05})
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
 %! paramci (GeneralizedParetoDistribution.fit (x, 1), ...
-%!          "parameter", "sigma", "alpha", {0.05})
+%!          'parameter', 'sigma', 'alpha', {0.05})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
 %! paramci (GeneralizedParetoDistribution.fit (x, 1), ...
-%!          "parameter", {"k", "sigma", "param"})
+%!          'parameter', {'k', 'sigma', 'param'})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (GeneralizedParetoDistribution.fit (x, 1), "alpha", 0.01, ...
-%!          "parameter", {"k", "sigma", "param"})
+%! paramci (GeneralizedParetoDistribution.fit (x, 1), 'alpha', 0.01, ...
+%!          'parameter', {'k', 'sigma', 'param'})
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (GeneralizedParetoDistribution.fit (x, 1), "parameter", "param")
+%! paramci (GeneralizedParetoDistribution.fit (x, 1), 'parameter', 'param')
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (GeneralizedParetoDistribution.fit (x, 1), "alpha", 0.01, ...
-%!          "parameter", "param")
+%! paramci (GeneralizedParetoDistribution.fit (x, 1), 'alpha', 0.01, ...
+%!          'parameter', 'param')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (GeneralizedParetoDistribution.fit (x, 1), "NAME", "value")
+%! paramci (GeneralizedParetoDistribution.fit (x, 1), 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (GeneralizedParetoDistribution.fit (x, 1), "alpha", 0.01, ...
-%!          "NAME", "value")
+%! paramci (GeneralizedParetoDistribution.fit (x, 1), 'alpha', 0.01, ...
+%!          'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (GeneralizedParetoDistribution.fit (x, 1), "alpha", 0.01, ...
-%!          "parameter", "sigma", "NAME", "value")
+%! paramci (GeneralizedParetoDistribution.fit (x, 1), 'alpha', 0.01, ...
+%!          'parameter', 'sigma', 'NAME', 'value')
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (GeneralizedParetoDistribution, "Parent")
+%! plot (GeneralizedParetoDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (GeneralizedParetoDistribution, "PlotType", 12)
+%! plot (GeneralizedParetoDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (GeneralizedParetoDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (GeneralizedParetoDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (GeneralizedParetoDistribution, "PlotType", "pdfcdf")
+%! plot (GeneralizedParetoDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (GeneralizedParetoDistribution, "Discrete", "pdfcdf")
+%! plot (GeneralizedParetoDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (GeneralizedParetoDistribution, "Discrete", [1, 0])
+%! plot (GeneralizedParetoDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (GeneralizedParetoDistribution, "Discrete", {true})
+%! plot (GeneralizedParetoDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (GeneralizedParetoDistribution, "Parent", 12)
+%! plot (GeneralizedParetoDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (GeneralizedParetoDistribution, "Parent", "hax")
+%! plot (GeneralizedParetoDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (GeneralizedParetoDistribution, "invalidNAME", "pdf")
+%! plot (GeneralizedParetoDistribution, 'invalidNAME', 'pdf')
 %!error <plot: no fitted DATA to plot a probability plot.> ...
-%! plot (GeneralizedParetoDistribution, "PlotType", "probability")
+%! plot (GeneralizedParetoDistribution, 'PlotType', 'probability')
 
 ## 'proflik' method
 %!error <proflik: no fitted data available.> ...
@@ -956,25 +959,25 @@ endfunction
 %!error <proflik: SETPARAM must be a numeric vector.> ...
 %! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, ones (2))
 %!error <proflik: missing VALUE for 'Display' argument.> ...
-%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, "Display")
+%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, 'Display')
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, "Display", 1)
+%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, 'Display', 1)
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, "Display", {1})
+%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, 'Display', {1})
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, "Display", {"on"})
+%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, 'Display', {'on'})
 %!error <proflik: invalid VALUE size for 'Display' argument.> ...
 %! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, ...
-%!          "Display", ["on"; "on"])
+%!          'Display', ['on'; 'on'])
 %!error <proflik: invalid VALUE for 'Display' argument.> ...
-%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, "Display", "onnn")
+%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, 'Display', 'onnn')
 %!error <proflik: invalid NAME for optional arguments.> ...
-%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, "NAME", "on")
+%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, 'NAME', 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, {"NAME"}, "on")
+%! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, {'NAME'}, 'on')
 %!error <proflik: invalid optional argument.> ...
 %! proflik (GeneralizedParetoDistribution.fit (x, 1), 1, {[1 2 3 4]}, ...
-%!          "Display", "on")
+%!          'Display', 'on')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...
@@ -986,8 +989,8 @@ endfunction
 
 ## Catch errors when using array of probability objects with available methods
 %!shared pd
-%! pd = GeneralizedParetoDistribution(1, 1, 1);
-%! pd(2) = GeneralizedParetoDistribution(1, 3, 1);
+%! pd = GeneralizedParetoDistribution (1, 1, 1);
+%! pd(2) = GeneralizedParetoDistribution (1, 3, 1);
 %!error <cdf: requires a scalar probability distribution.> cdf (pd, 1)
 %!error <icdf: requires a scalar probability distribution.> icdf (pd, 0.5)
 %!error <iqr: requires a scalar probability distribution.> iqr (pd)

@@ -56,9 +56,9 @@ function y = burrpdf (x, lambda, c, k)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (lambda, "single") ...
-                        || isa (c, "single") || isa (k, "single"))
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (lambda, 'single') ...
+                        || isa (c, 'single') || isa (k, 'single'))
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
@@ -72,7 +72,7 @@ function y = burrpdf (x, lambda, c, k)
                & (0 < k) & (k < Inf);
 
   ## Compute Burr PDF
-  if (isscalar (lambda) && isscalar (c) && isscalar(k))
+  if (isscalar (lambda) && isscalar (c) && isscalar (k))
     y(j) = (c * k / lambda) .* (x(j) / lambda) .^ (c - 1) ./ ...
            (1 + (x(j) / lambda) .^ c) .^ (k + 1);
   else
@@ -91,34 +91,34 @@ endfunction
 %! y4 = burrpdf (x, 1, 2, 1);
 %! y5 = burrpdf (x, 1, 3, 1);
 %! y6 = burrpdf (x, 1, 0.5, 2);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", ...
-%!       x, y4, "-c", x, y5, "-m", x, y6, "-k")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', ...
+%!       x, y4, '-c', x, y5, '-m', x, y6, '-k')
 %! grid on
 %! ylim ([0, 2])
-%! legend ({"λ = 1, c = 1, k = 1", "λ = 1, c = 1, k = 2", ...
-%!          "λ = 1, c = 1, k = 3", "λ = 1, c = 2, k = 1", ...
-%!          "λ = 1, c = 3, k = 1", "λ = 1, c = 0.5, k = 2"}, ...
-%!         "location", "northeast")
-%! title ("Burr type XII PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'λ = 1, c = 1, k = 1', 'λ = 1, c = 1, k = 2', ...
+%!          'λ = 1, c = 1, k = 3', 'λ = 1, c = 2, k = 1', ...
+%!          'λ = 1, c = 3, k = 1', 'λ = 1, c = 0.5, k = 2'}, ...
+%!         'location', 'northeast')
+%! title ('Burr type XII PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-1, 0, 1, 2, Inf];
 %! y = [0, 1, 1/4, 1/9, 0];
-%!assert (burrpdf (x, ones(1,5), ones (1,5), ones (1,5)), y)
-%!assert (burrpdf (x, 1, 1, 1), y)
-%!assert (burrpdf (x, [1, 1, NaN, 1, 1], 1, 1), [y(1:2), NaN, y(4:5)])
-%!assert (burrpdf (x, 1, [1, 1, NaN, 1, 1], 1), [y(1:2), NaN, y(4:5)])
-%!assert (burrpdf (x, 1, 1, [1, 1, NaN, 1, 1]), [y(1:2), NaN, y(4:5)])
-%!assert (burrpdf ([x, NaN], 1, 1, 1), [y, NaN])
+%!assert_equal (burrpdf (x, ones (1,5), ones (1,5), ones (1,5)), y)
+%!assert_equal (burrpdf (x, 1, 1, 1), y)
+%!assert_equal (burrpdf (x, [1, 1, NaN, 1, 1], 1, 1), [y(1:2), NaN, y(4:5)])
+%!assert_equal (burrpdf (x, 1, [1, 1, NaN, 1, 1], 1), [y(1:2), NaN, y(4:5)])
+%!assert_equal (burrpdf (x, 1, 1, [1, 1, NaN, 1, 1]), [y(1:2), NaN, y(4:5)])
+%!assert_equal (burrpdf ([x, NaN], 1, 1, 1), [y, NaN])
 
 ## Test class of input preserved
-%!assert (burrpdf (single ([x, NaN]), 1, 1, 1), single ([y, NaN]))
-%!assert (burrpdf ([x, NaN], single (1), 1, 1), single ([y, NaN]))
-%!assert (burrpdf ([x, NaN], 1, single (1), 1), single ([y, NaN]))
-%!assert (burrpdf ([x, NaN], 1, 1, single (1)), single ([y, NaN]))
+%!assert_equal (burrpdf (single ([x, NaN]), 1, 1, 1), single ([y, NaN]))
+%!assert_equal (burrpdf ([x, NaN], single (1), 1, 1), single ([y, NaN]))
+%!assert_equal (burrpdf ([x, NaN], 1, single (1), 1), single ([y, NaN]))
+%!assert_equal (burrpdf ([x, NaN], 1, 1, single (1)), single ([y, NaN]))
 
 ## Test input validation
 %!error<burrpdf: function called with too few input arguments.> burrpdf ()
@@ -128,13 +128,13 @@ endfunction
 %!error<burrpdf: function called with too many inputs> ...
 %! burrpdf (1, 2, 3, 4, 5)
 %!error<burrpdf: X, LAMBDA, C, and K must be of common size or scalars.> ...
-%! burrpdf (ones (3), ones (2), ones(2), ones(2))
+%! burrpdf (ones (3), ones (2), ones (2), ones (2))
 %!error<burrpdf: X, LAMBDA, C, and K must be of common size or scalars.> ...
-%! burrpdf (ones (2), ones (3), ones(2), ones(2))
+%! burrpdf (ones (2), ones (3), ones (2), ones (2))
 %!error<burrpdf: X, LAMBDA, C, and K must be of common size or scalars.> ...
-%! burrpdf (ones (2), ones (2), ones(3), ones(2))
+%! burrpdf (ones (2), ones (2), ones (3), ones (2))
 %!error<burrpdf: X, LAMBDA, C, and K must be of common size or scalars.> ...
-%! burrpdf (ones (2), ones (2), ones(2), ones(3))
+%! burrpdf (ones (2), ones (2), ones (2), ones (3))
 %!error<burrpdf: X, LAMBDA, C, and K must not be complex.> burrpdf (i, 2, 3, 4)
 %!error<burrpdf: X, LAMBDA, C, and K must not be complex.> burrpdf (1, i, 3, 4)
 %!error<burrpdf: X, LAMBDA, C, and K must not be complex.> burrpdf (1, 2, i, 4)

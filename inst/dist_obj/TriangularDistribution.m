@@ -54,7 +54,7 @@ classdef TriangularDistribution
   ## @seealso{makedist, tricdf, triinv, tripdf, trirnd, tristat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {TriangularDistribution} {property} A
     ##
@@ -92,7 +92,7 @@ classdef TriangularDistribution
     C
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {TriangularDistribution} {property} DistributionName
     ##
@@ -102,7 +102,7 @@ classdef TriangularDistribution
     ## object.  This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "TriangularDistribution";
+    DistributionName = 'TriangularDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {TriangularDistribution} {property} NumParameters
@@ -120,37 +120,37 @@ classdef TriangularDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{3x1} cell array of character vectors with each element containing
+    ## A @math{3*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter.  This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"A", "B", "C"};
+    ParameterNames = {'A', 'B', 'C'};
 
     ## -*- texinfo -*-
     ## @deftp {TriangularDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{3x1} cell array of character vectors with each element containing
+    ## A @math{3*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter.  This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Lower limit", "Peak location", "Upper limit"};
+    ParameterDescription = {'Lower limit', 'Peak location', 'Upper limit'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = false;
-    DistributionCode = "tri";
+    DistributionCode = 'tri';
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected)
+  properties(GetAccess = public, SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {TriangularDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{3x1} numeric vector containing the values of the distribution
+    ## A @math{3*1} numeric vector containing the values of the distribution
     ## parameters.  This property is read-only.  You can change the distribution
     ## parameters by assigning new values to the @qcode{A}, @qcode{B}, and
     ## @qcode{C} properties.
@@ -163,7 +163,7 @@ classdef TriangularDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution.  First element contains the lower boundary,
     ## second element contains the upper boundary.  This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -184,7 +184,7 @@ classdef TriangularDistribution
     IsTruncated
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = TriangularDistribution (A, B, C)
       if (nargin == 0)
@@ -198,12 +198,12 @@ classdef TriangularDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "Triangular distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'Triangular distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "Triangular distribution");
+      __disp__ (this, 'Triangular distribution');
     endfunction
 
     function this = set.A (this, A)
@@ -235,11 +235,11 @@ classdef TriangularDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {TriangularDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {TriangularDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {TriangularDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -247,7 +247,7 @@ classdef TriangularDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -257,9 +257,9 @@ classdef TriangularDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -409,21 +409,22 @@ classdef TriangularDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).
-    ## @qcode{"cdf"} plots the cumulative density function (CDF).
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).
+    ## @qcode{'cdf'} plots the cumulative density function (CDF).
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, this option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for the plot.  If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for the plot.
+    ## If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -582,8 +583,8 @@ endfunction
 %! ## this data and plot a PDF of the fitted distribution superimposed on a
 %! ## histogram of the data.
 %!
-%! pd_fixed = makedist ("Triangular", "A", 0, "B", 1, "C", 2);
-%! rand ("seed", 2);
+%! pd_fixed = makedist ('Triangular', 'A', 0, 'B', 1, 'C', 2);
+%! rand ('seed', 2);
 %! data = random (pd_fixed, 5000, 1);
 %! A = min (data);
 %! C = mean (data);
@@ -609,31 +610,31 @@ endfunction
 %!shared pd, t
 %! pd = TriangularDistribution (0, 3, 5);
 %! t = truncate (pd, 2, 4);
-%!assert (cdf (pd, [0:5]), [0, 0.0667, 0.2667, 0.6000, 0.9000, 1], 1e-4);
-%!assert (cdf (t, [0:5]), [0, 0, 0, 0.5263, 1, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4, NaN]), [0.1500, 0.2667, 0.6, 0.9, NaN], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4, NaN]), [0, 0, 0.5263, 1, NaN], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [0, 1.7321, 2.4495, 3, 3.5858, 5], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [2, 2.4290, 2.7928, 3.1203, 3.4945, 4], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 2.4495, 3, 3.5858, 5, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.7928, 3.1203, 3.4945, 4, NaN], 1e-4);
-%!assert (iqr (pd), 1.4824, 1e-4);
-%!assert (iqr (t), 0.8678, 1e-4);
-%!assert (mean (pd), 2.6667, 1e-4);
-%!assert (mean (t), 2.9649, 1e-4);
-%!assert (median (pd), 2.7386, 1e-4);
-%!assert (median (t), 2.9580, 1e-4);
-%!assert (pdf (pd, [0:5]), [0, 0.1333, 0.2667, 0.4, 0.2, 0], 1e-4);
-%!assert (pdf (t, [0:5]), [0, 0, 0.4211, 0.6316, 0.3158, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1.5, NaN]), [0, 0.2, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 2), false);
-%!assert (any (random (t, 1000, 1) > 4), false);
-%!assert (std (pd), 1.0274, 1e-4);
-%!assert (std (t), 0.5369, 1e-4);
-%!assert (var (pd), 1.0556, 1e-4);
-%!assert (var (t), 0.2882, 1e-4);
+%!assert_equal (cdf (pd, [0:5]), [0, 0.0667, 0.2667, 0.6000, 0.9000, 1], 1e-4);
+%!assert_equal (cdf (t, [0:5]), [0, 0, 0, 0.5263, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4, NaN]), [0.1500, 0.2667, 0.6, 0.9, NaN], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4, NaN]), [0, 0, 0.5263, 1, NaN], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [0, 1.7321, 2.4495, 3, 3.5858, 5], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [2, 2.4290, 2.7928, 3.1203, 3.4945, 4], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 2.4495, 3, 3.5858, 5, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.7928, 3.1203, 3.4945, 4, NaN], 1e-4);
+%!assert_equal (iqr (pd), 1.4824, 1e-4);
+%!assert_equal (iqr (t), 0.8678, 1e-4);
+%!assert_equal (mean (pd), 2.6667, 1e-4);
+%!assert_equal (mean (t), 2.9649, 1e-4);
+%!assert_equal (median (pd), 2.7386, 1e-4);
+%!assert_equal (median (t), 2.9580, 1e-4);
+%!assert_equal (pdf (pd, [0:5]), [0, 0.1333, 0.2667, 0.4, 0.2, 0], 1e-4);
+%!assert_equal (pdf (t, [0:5]), [0, 0, 0.4211, 0.6316, 0.3158, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1.5, NaN]), [0, 0.2, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 2), false);
+%!assert_equal (any (random (t, 1000, 1) > 4), false);
+%!assert_equal (std (pd), 1.0274, 1e-4);
+%!assert_equal (std (t), 0.5369, 1e-4);
+%!assert_equal (var (pd), 1.0556, 1e-4);
+%!assert_equal (var (t), 0.2882, 1e-4);
 
 ## Test input validation
 ## 'TriangularDistribution' constructor
@@ -644,7 +645,7 @@ endfunction
 %!error <TriangularDistribution: lower limit A must be a real scalar.> ...
 %! TriangularDistribution ([1, 2], 1, 2)
 %!error <TriangularDistribution: lower limit A must be a real scalar.> ...
-%! TriangularDistribution ("a", 1, 2)
+%! TriangularDistribution ('a', 1, 2)
 %!error <TriangularDistribution: lower limit A must be a real scalar.> ...
 %! TriangularDistribution (NaN, 1, 2)
 %!error <TriangularDistribution: mode B must be a real scalar.> ...
@@ -654,7 +655,7 @@ endfunction
 %!error <TriangularDistribution: mode B must be a real scalar.> ...
 %! TriangularDistribution (1, [1, 2], 2)
 %!error <TriangularDistribution: mode B must be a real scalar.> ...
-%! TriangularDistribution (1, "a", 2)
+%! TriangularDistribution (1, 'a', 2)
 %!error <TriangularDistribution: mode B must be a real scalar.> ...
 %! TriangularDistribution (1, NaN, 2)
 %!error <TriangularDistribution: upper limit C must be a real scalar.> ...
@@ -664,7 +665,7 @@ endfunction
 %!error <TriangularDistribution: upper limit C must be a real scalar.> ...
 %! TriangularDistribution (1, 2, [1, 2])
 %!error <TriangularDistribution: upper limit C must be a real scalar.> ...
-%! TriangularDistribution (1, 2, "a")
+%! TriangularDistribution (1, 2, 'a')
 %!error <TriangularDistribution: upper limit C must be a real scalar.> ...
 %! TriangularDistribution (1, 2, NaN)
 %!error <TriangularDistribution: lower limit A must be less than upper limit C.> ...
@@ -674,33 +675,33 @@ endfunction
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (TriangularDistribution, 2, "uper")
+%! cdf (TriangularDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (TriangularDistribution, 2, 3)
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (TriangularDistribution, "Parent")
+%! plot (TriangularDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (TriangularDistribution, "PlotType", 12)
+%! plot (TriangularDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (TriangularDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (TriangularDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (TriangularDistribution, "PlotType", "pdfcdf")
+%! plot (TriangularDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (TriangularDistribution, "Discrete", "pdfcdf")
+%! plot (TriangularDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (TriangularDistribution, "Discrete", [1, 0])
+%! plot (TriangularDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (TriangularDistribution, "Discrete", {true})
+%! plot (TriangularDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (TriangularDistribution, "Parent", 12)
+%! plot (TriangularDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (TriangularDistribution, "Parent", "hax")
+%! plot (TriangularDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (TriangularDistribution, "invalidNAME", "pdf")
+%! plot (TriangularDistribution, 'invalidNAME', 'pdf')
 %!error <'probability' PlotType is not supported for 'TriangularDistribution'.> ...
-%! plot (TriangularDistribution, "PlotType", "probability")
+%! plot (TriangularDistribution, 'PlotType', 'probability')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...

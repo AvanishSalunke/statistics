@@ -63,7 +63,7 @@ function [m, v] = plstat (x, Fx)
   x_m = (x(1:end-1) + x(2:end)) / 2;
   dFx = diff (Fx);
   m = dot (dFx, x_m);
-  x_v = diff(x) .^ 2 / 12;
+  x_v = diff (x) .^ 2 / 12;
   v = dot (dFx, x_v + (x_m - m) .^ 2);
 
 endfunction
@@ -72,10 +72,10 @@ endfunction
 %!shared x, Fx
 %! x = [0, 1, 3, 4, 7, 10];
 %! Fx = [0, 0.2, 0.5, 0.6, 0.7, 1];
-%!assert (plstat (x, Fx), 4.15)
+%!assert_equal (plstat (x, Fx), 4.15)
 %!test
 %! [m, v] = plstat (x, Fx);
-%! assert (v, 10.3775, 1e-14)
+%! assert_equal (v, 10.3775, 1e-14)
 
 ## Test input validation
 %!error<plstat: function called with too few input arguments.> plstat ()

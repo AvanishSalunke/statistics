@@ -76,14 +76,14 @@ endfunction
 %! x3 = raylinv (p, 2);
 %! x4 = raylinv (p, 3);
 %! x5 = raylinv (p, 4);
-%! plot (p, x1, "-b", p, x2, "g", p, x3, "-r", p, x4, "-m", p, x5, "-k")
+%! plot (p, x1, '-b', p, x2, 'g', p, x3, '-r', p, x4, '-m', p, x5, '-k')
 %! grid on
 %! ylim ([0, 10])
-%! legend ({"σ = 0,5", "σ = 1", "σ = 2", ...
-%!          "σ = 3", "σ = 4"}, "location", "northwest")
-%! title ("Rayleigh iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'σ = 0,5', 'σ = 1', 'σ = 2', ...
+%!          'σ = 3', 'σ = 4'}, 'location', 'northwest')
+%! title ('Rayleigh iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!test
@@ -91,12 +91,12 @@ endfunction
 %! sigma = 1:6;
 %! x = raylinv (p, sigma);
 %! expected_x = [0.0000, 0.9181, 2.0041, 3.3784, 5.0538, 7.0645];
-%! assert (x, expected_x, 0.001);
+%! assert_equal (x, expected_x, 0.001);
 %!test
 %! p = 0:0.1:0.5;
 %! x = raylinv (p, 0.5);
 %! expected_x = [0.0000, 0.2295, 0.3340, 0.4223, 0.5054, 0.5887];
-%! assert (x, expected_x, 0.001);
+%! assert_equal (x, expected_x, 0.001);
 
 ## Test input validation
 %!error<raylinv: function called with too few input arguments.> raylinv ()

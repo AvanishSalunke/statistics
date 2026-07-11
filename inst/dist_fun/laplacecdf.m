@@ -19,7 +19,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {statistics} {@var{p} =} laplacecdf (@var{x}, @var{mu}, @var{beta})
-## @deftypefnx {statistics} {@var{p} =} laplacecdf (@var{x}, @var{mu}, @var{beta}, @qcode{"upper"})
+## @deftypefnx {statistics} {@var{p} =} laplacecdf (@var{x}, @var{mu}, @var{beta}, @qcode{'upper'})
 ##
 ## Laplace cumulative distribution function (CDF).
 ##
@@ -51,7 +51,7 @@ function p = laplacecdf (x, mu, beta, uflag)
 
   ## Check for valid "upper" flag
   if (nargin > 3)
-    if (! strcmpi (uflag, "upper"))
+    if (! strcmpi (uflag, 'upper'))
       error ("laplacecdf: invalid argument for upper tail.");
     else
       uflag = true;
@@ -61,7 +61,7 @@ function p = laplacecdf (x, mu, beta, uflag)
   endif
 
   ## Check for common size of X, MU, and BETA
-  if (! isscalar (x) || ! isscalar (mu) || ! isscalar(beta))
+  if (! isscalar (x) || ! isscalar (mu) || ! isscalar (beta))
     [retval, x, mu, beta] = common_size (x, mu, beta);
     if (retval > 0)
       error (strcat ("laplacecdf: X, MU, and BETA must be of", ...
@@ -75,8 +75,8 @@ function p = laplacecdf (x, mu, beta, uflag)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (mu, "single") || isa (beta, "single"));
-    p = NaN (size (x), "single");
+  if (isa (x, 'single') || isa (mu, 'single') || isa (beta, 'single'));
+    p = NaN (size (x), 'single');
   else
     p = NaN (size (x));
   endif
@@ -108,26 +108,26 @@ endfunction
 %! p2 = laplacecdf (x, 0, 2);
 %! p3 = laplacecdf (x, 0, 4);
 %! p4 = laplacecdf (x, -5, 4);
-%! plot (x, p1, "-b", x, p2, "-g", x, p3, "-r", x, p4, "-c")
+%! plot (x, p1, '-b', x, p2, '-g', x, p3, '-r', x, p4, '-c')
 %! grid on
 %! xlim ([-10, 10])
-%! legend ({"μ = 0, β = 1", "μ = 0, β = 2", ...
-%!          "μ = 0, β = 4", "μ = -5, β = 4"}, "location", "southeast")
-%! title ("Laplace CDF")
-%! xlabel ("values in x")
-%! ylabel ("probability")
+%! legend ({'μ = 0, β = 1', 'μ = 0, β = 2', ...
+%!          'μ = 0, β = 4', 'μ = -5, β = 4'}, 'location', 'southeast')
+%! title ('Laplace CDF')
+%! xlabel ('values in x')
+%! ylabel ('probability')
 
 ## Test output
 %!shared x, y
 %! x = [-Inf, -log(2), 0, log(2), Inf];
 %! y = [0, 1/4, 1/2, 3/4, 1];
-%!assert (laplacecdf ([x, NaN], 0, 1), [y, NaN])
-%!assert (laplacecdf (x, 0, [-2, -1, 0, 1, 2]), [nan(1, 3), 0.75, 1])
+%!assert_equal (laplacecdf ([x, NaN], 0, 1), [y, NaN])
+%!assert_equal (laplacecdf (x, 0, [-2, -1, 0, 1, 2]), [nan(1, 3), 0.75, 1])
 
 ## Test class of input preserved
-%!assert (laplacecdf (single ([x, NaN]), 0, 1), single ([y, NaN]), eps ("single"))
-%!assert (laplacecdf ([x, NaN], single (0), 1), single ([y, NaN]), eps ("single"))
-%!assert (laplacecdf ([x, NaN], 0, single (1)), single ([y, NaN]), eps ("single"))
+%!assert_equal (laplacecdf (single ([x, NaN]), 0, 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (laplacecdf ([x, NaN], single (0), 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (laplacecdf ([x, NaN], 0, single (1)), single ([y, NaN]), eps ('single'))
 
 ## Test input validation
 %!error<laplacecdf: function called with too few input arguments.> laplacecdf ()
@@ -136,7 +136,7 @@ endfunction
 %! laplacecdf (1, 2)
 %!error<laplacecdf: function called with too many inputs> ...
 %! laplacecdf (1, 2, 3, 4, 5)
-%!error<laplacecdf: invalid argument for upper tail.> laplacecdf (1, 2, 3, "tail")
+%!error<laplacecdf: invalid argument for upper tail.> laplacecdf (1, 2, 3, 'tail')
 %!error<laplacecdf: invalid argument for upper tail.> laplacecdf (1, 2, 3, 4)
 %!error<laplacecdf: X, MU, and BETA must be of common size or scalars.> ...
 %! laplacecdf (ones (3), ones (2), ones (2))

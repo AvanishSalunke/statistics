@@ -18,7 +18,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {statistics} {@var{p} =} gevcdf (@var{x}, @var{k}, @var{sigma}, @var{mu})
-## @deftypefnx {statistics} {@var{p} =} gevcdf (@var{x}, @var{k}, @var{sigma}, @var{mu}, @qcode{"upper"})
+## @deftypefnx {statistics} {@var{p} =} gevcdf (@var{x}, @var{k}, @var{sigma}, @var{mu}, @qcode{'upper'})
 ##
 ## Generalized extreme value (GEV) cumulative distribution function (CDF).
 ##
@@ -62,7 +62,7 @@ function p = gevcdf (x, k, sigma, mu, uflag)
 
   ## Check for valid "upper" flag
   if (nargin > 4)
-    if (! strcmpi (uflag, "upper"))
+    if (! strcmpi (uflag, 'upper'))
       error ("gevcdf: invalid argument for upper tail.");
     else
       uflag = true;
@@ -85,11 +85,11 @@ function p = gevcdf (x, k, sigma, mu, uflag)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (k, "single") ...
-                        || isa (sigma, "single") || isa (mu, "single"));
-    is_class = "single";
+  if (isa (x, 'single') || isa (k, 'single') ...
+                        || isa (sigma, 'single') || isa (mu, 'single'));
+    is_class = 'single';
   else
-    is_class = "double";
+    is_class = 'double';
   endif
 
   ## Prepare output
@@ -102,7 +102,7 @@ function p = gevcdf (x, k, sigma, mu, uflag)
   z = (x - mu) ./ sigma;
 
   ## Process k == 0
-  k_0 = (abs(k) < eps);
+  k_0 = (abs (k) < eps);
   if (uflag)
     p(k_0) = -expm1 (-exp (-z(k_0)));
   else
@@ -138,17 +138,17 @@ endfunction
 %! p4 = gevcdf (x, 1, 2, 5);
 %! p5 = gevcdf (x, 1, 5, 5);
 %! p6 = gevcdf (x, 1, 0.5, 5);
-%! plot (x, p1, "-b", x, p2, "-g", x, p3, "-r", ...
-%!       x, p4, "-c", x, p5, "-m", x, p6, "-k")
+%! plot (x, p1, '-b', x, p2, '-g', x, p3, '-r', ...
+%!       x, p4, '-c', x, p5, '-m', x, p6, '-k')
 %! grid on
 %! xlim ([-1, 10])
-%! legend ({"k = 1, σ = 1, μ = 1", "k = 0.5, σ = 1, μ = 1", ...
-%!          "k = 1, σ = 1, μ = 5", "k = 1, σ = 2, μ = 5", ...
-%!          "k = 1, σ = 5, μ = 5", "k = 1, σ = 0.5, μ = 5"}, ...
-%!         "location", "southeast")
-%! title ("Generalized extreme value CDF")
-%! xlabel ("values in x")
-%! ylabel ("probability")
+%! legend ({'k = 1, σ = 1, μ = 1', 'k = 0.5, σ = 1, μ = 1', ...
+%!          'k = 1, σ = 1, μ = 5', 'k = 1, σ = 2, μ = 5', ...
+%!          'k = 1, σ = 5, μ = 5', 'k = 1, σ = 0.5, μ = 5'}, ...
+%!         'location', 'southeast')
+%! title ('Generalized extreme value CDF')
+%! xlabel ('values in x')
+%! ylabel ('probability')
 
 ## Test output
 %!test
@@ -158,7 +158,7 @@ endfunction
 %! mu = 0;
 %! p = gevcdf (x, k, sigma, mu);
 %! expected_p = [0.36788, 0.44933, 0.47237, 0.48323, 0.48954, 0.49367];
-%! assert (p, expected_p, 0.001);
+%! assert_equal (p, expected_p, 0.001);
 %!test
 %! x = -0.5:0.5:2.5;
 %! sigma = 0.5;
@@ -166,7 +166,7 @@ endfunction
 %! mu = 0;
 %! p = gevcdf (x, k, sigma, mu);
 %! expected_p = [0, 0.36788, 0.60653, 0.71653, 0.77880, 0.81873, 0.84648];
-%! assert (p, expected_p, 0.001);
+%! assert_equal (p, expected_p, 0.001);
 %!test # check for continuity for k near 0
 %! x = 1;
 %! sigma = 0.5;
@@ -174,7 +174,7 @@ endfunction
 %! mu = 0;
 %! p = gevcdf (x, k, sigma, mu);
 %! expected_p = [0.88062, 0.87820, 0.87580, 0.87342, 0.87107, 0.86874, 0.86643];
-%! assert (p, expected_p, 0.001);
+%! assert_equal (p, expected_p, 0.001);
 
 ## Test input validation
 %!error<gevcdf: function called with too few input arguments.> gevcdf ()
@@ -183,16 +183,16 @@ endfunction
 %!error<gevcdf: function called with too few input arguments.> gevcdf (1, 2, 3)
 %!error<gevcdf: function called with too many inputs> ...
 %! gevcdf (1, 2, 3, 4, 5, 6)
-%!error<gevcdf: invalid argument for upper tail.> gevcdf (1, 2, 3, 4, "tail")
+%!error<gevcdf: invalid argument for upper tail.> gevcdf (1, 2, 3, 4, 'tail')
 %!error<gevcdf: invalid argument for upper tail.> gevcdf (1, 2, 3, 4, 5)
 %!error<gevcdf: X, K, SIGMA, and MU must be of common size or scalars.> ...
-%! gevcdf (ones (3), ones (2), ones(2), ones(2))
+%! gevcdf (ones (3), ones (2), ones (2), ones (2))
 %!error<gevcdf: X, K, SIGMA, and MU must be of common size or scalars.> ...
-%! gevcdf (ones (2), ones (3), ones(2), ones(2))
+%! gevcdf (ones (2), ones (3), ones (2), ones (2))
 %!error<gevcdf: X, K, SIGMA, and MU must be of common size or scalars.> ...
-%! gevcdf (ones (2), ones (2), ones(3), ones(2))
+%! gevcdf (ones (2), ones (2), ones (3), ones (2))
 %!error<gevcdf: X, K, SIGMA, and MU must be of common size or scalars.> ...
-%! gevcdf (ones (2), ones (2), ones(2), ones(3))
+%! gevcdf (ones (2), ones (2), ones (2), ones (3))
 %!error<gevcdf: X, K, SIGMA, and MU must not be complex.> gevcdf (i, 2, 3, 4)
 %!error<gevcdf: X, K, SIGMA, and MU must not be complex.> gevcdf (1, i, 3, 4)
 %!error<gevcdf: X, K, SIGMA, and MU must not be complex.> gevcdf (1, 2, i, 4)

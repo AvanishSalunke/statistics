@@ -183,7 +183,8 @@ function vpath = hmmviterbi (sequence, transprob, outprob, varargin)
     endfor
     if (! all (sequenceint))
       index = max ((sequenceint == 0) .* (1:len));
-      error (["hmmviterbi: sequence(" int2str (index) ") not in symbols"]);
+      error (strcat ("hmmviterbi: sequence(", int2str (index), ...
+                     ") not in symbols"));
     endif
     sequence = sequenceint;
   else
@@ -192,7 +193,8 @@ function vpath = hmmviterbi (sequence, transprob, outprob, varargin)
     endif
     if (! all (ismember (sequence, 1:noutput)))
       index = max ((ismember (sequence, 1:noutput) == 0) .* (1:len));
-      error (["hmmviterbi: sequence(" int2str (index) ") out of range"]);
+      error (strcat ("hmmviterbi: sequence(", int2str (index), ...
+                     ") out of range"));
     endif
   endif
 
@@ -246,18 +248,18 @@ endfunction
 %! vpath = hmmviterbi (sequence, transprob, outprob);
 %! expected = [1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, ...
 %!             1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1];
-%! assert (vpath, expected);
+%! assert_equal (vpath, expected);
 
 %!test
-%! sequence = {"A", "B", "A", "A", "A", "B", "B", "A", "B", "C", "C", "C", ...
-%!             "C", "B", "C", "A", "A", "A", "A", "C", "C", "B", "C", "A", "C"};
+%! sequence = {'A', 'B', 'A', 'A', 'A', 'B', 'B', 'A', 'B', 'C', 'C', 'C', ...
+%!             'C', 'B', 'C', 'A', 'A', 'A', 'A', 'C', 'C', 'B', 'C', 'A', 'C'};
 %! transprob = [0.8, 0.2; 0.4, 0.6];
 %! outprob = [0.2, 0.4, 0.4; 0.7, 0.2, 0.1];
-%! symbols = {"A", "B", "C"};
-%! statenames = {"One", "Two"};
-%! vpath = hmmviterbi (sequence, transprob, outprob, "symbols", symbols, ...
-%!                                                   "statenames", statenames);
-%! expected = {"One", "One", "Two", "Two", "Two", "One", "One", "One", ...
-%!             "One", "One", "One", "One", "One", "One", "One", "Two", ...
-%!             "Two", "Two", "Two", "One", "One", "One", "One", "One", "One"};
-%! assert (vpath, expected);
+%! symbols = {'A', 'B', 'C'};
+%! statenames = {'One', 'Two'};
+%! vpath = hmmviterbi (sequence, transprob, outprob, 'symbols', symbols, ...
+%!                                                   'statenames', statenames);
+%! expected = {'One', 'One', 'Two', 'Two', 'Two', 'One', 'One', 'One', ...
+%!             'One', 'One', 'One', 'One', 'One', 'One', 'One', 'Two', ...
+%!             'Two', 'Two', 'Two', 'One', 'One', 'One', 'One', 'One', 'One'};
+%! assert_equal (vpath, expected);

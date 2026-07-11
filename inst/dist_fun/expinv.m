@@ -106,15 +106,15 @@ function [varargout] = expinv (p, varargin)
   endif
 
   ## Check for appropriate class
-  if (isa (p, "single") || isa (mu, "single"));
-    is_class = "single";
+  if (isa (p, 'single') || isa (mu, 'single'));
+    is_class = 'single';
   else
-    is_class = "double";
+    is_class = 'double';
   endif
 
   ## Create output matrix
-  if (isa (p, "single") || isa (mu, "single"))
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (mu, 'single'))
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -163,26 +163,26 @@ endfunction
 %! x1 = expinv (p, 2/3);
 %! x2 = expinv (p, 1.0);
 %! x3 = expinv (p, 2.0);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r')
 %! grid on
 %! ylim ([0, 5])
-%! legend ({"μ = 2/3", "μ = 1", "μ = 2"}, "location", "northwest")
-%! title ("Exponential iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'μ = 2/3', 'μ = 1', 'μ = 2'}, 'location', 'northwest')
+%! title ('Exponential iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.3934693402873666 1 2];
-%!assert (expinv (p, 2*ones (1,5)), [NaN 0 1 Inf NaN], eps)
-%!assert (expinv (p, 2), [NaN 0 1 Inf NaN], eps)
-%!assert (expinv (p, 2*[1 0 NaN 1 1]), [NaN NaN NaN Inf NaN], eps)
-%!assert (expinv ([p(1:2) NaN p(4:5)], 2), [NaN 0 NaN Inf NaN], eps)
+%!assert_equal (expinv (p, 2*ones (1,5)), [NaN 0 1 Inf NaN], eps)
+%!assert_equal (expinv (p, 2), [NaN 0 1 Inf NaN], eps)
+%!assert_equal (expinv (p, 2*[1 0 NaN 1 1]), [NaN NaN NaN Inf NaN], eps)
+%!assert_equal (expinv ([p(1:2) NaN p(4:5)], 2), [NaN 0 NaN Inf NaN], eps)
 
 ## Test class of input preserved
-%!assert (expinv ([p, NaN], 2), [NaN 0 1 Inf NaN NaN], eps)
-%!assert (expinv (single ([p, NaN]), 2), single ([NaN 0 1 Inf NaN NaN]), eps)
-%!assert (expinv ([p, NaN], single (2)), single ([NaN 0 1 Inf NaN NaN]), eps)
+%!assert_equal (expinv ([p, NaN], 2), [NaN 0 1 Inf NaN NaN], eps)
+%!assert_equal (expinv (single ([p, NaN]), 2), single ([NaN 0 1 Inf NaN NaN]), eps)
+%!assert_equal (expinv ([p, NaN], single (2)), single ([NaN 0 1 Inf NaN NaN]), eps)
 
 ## Test input validation
 %!error<expinv: invalid number of input arguments.> expinv ()

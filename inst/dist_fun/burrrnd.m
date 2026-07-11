@@ -96,10 +96,10 @@ function r = burrrnd (lambda, c, k, varargin)
   endif
 
   ## Check for class type
-  if (isa (lambda, "single") || isa (c, "single") || isa (k, "single"))
-    cls = "single";
+  if (isa (lambda, 'single') || isa (c, 'single') || isa (k, 'single'))
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ## Generate random sample from Burr type XII distribution
@@ -111,27 +111,27 @@ function r = burrrnd (lambda, c, k, varargin)
 endfunction
 
 ## Test output
-%!assert (size (burrrnd (1, 1, 1)), [1 1])
-%!assert (size (burrrnd (ones (2,1), 1, 1)), [2, 1])
-%!assert (size (burrrnd (ones (2,2), 1, 1)), [2, 2])
-%!assert (size (burrrnd (1, ones (2,1), 1)), [2, 1])
-%!assert (size (burrrnd (1, ones (2,2), 1)), [2, 2])
-%!assert (size (burrrnd (1, 1, ones (2,1))), [2, 1])
-%!assert (size (burrrnd (1, 1, ones (2,2))), [2, 2])
-%!assert (size (burrrnd (1, 1, 1, 3)), [3, 3])
-%!assert (size (burrrnd (1, 1, 1, [4 1])), [4, 1])
-%!assert (size (burrrnd (1, 1, 1, 4, 1)), [4, 1])
-%!assert (size (burrrnd (1, 1, 1, [])), [0, 0])
-%!assert (size (burrrnd (1, 1, 1, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (burrrnd (1, 1, 1)), [1 1])
+%!assert_equal (size (burrrnd (ones (2,1), 1, 1)), [2, 1])
+%!assert_equal (size (burrrnd (ones (2,2), 1, 1)), [2, 2])
+%!assert_equal (size (burrrnd (1, ones (2,1), 1)), [2, 1])
+%!assert_equal (size (burrrnd (1, ones (2,2), 1)), [2, 2])
+%!assert_equal (size (burrrnd (1, 1, ones (2,1))), [2, 1])
+%!assert_equal (size (burrrnd (1, 1, ones (2,2))), [2, 2])
+%!assert_equal (size (burrrnd (1, 1, 1, 3)), [3, 3])
+%!assert_equal (size (burrrnd (1, 1, 1, [4 1])), [4, 1])
+%!assert_equal (size (burrrnd (1, 1, 1, 4, 1)), [4, 1])
+%!assert_equal (size (burrrnd (1, 1, 1, [])), [0, 0])
+%!assert_equal (size (burrrnd (1, 1, 1, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (burrrnd (1,1,1)), "double")
-%!assert (class (burrrnd (single (1),1,1)), "single")
-%!assert (class (burrrnd (single ([1 1]),1,1)), "single")
-%!assert (class (burrrnd (1,single (1),1)), "single")
-%!assert (class (burrrnd (1,single ([1 1]),1)), "single")
-%!assert (class (burrrnd (1,1,single (1))), "single")
-%!assert (class (burrrnd (1,1,single ([1 1]))), "single")
+%!assert_equal (class (burrrnd (1,1,1)), "double")
+%!assert_equal (class (burrrnd (single (1),1,1)), "single")
+%!assert_equal (class (burrrnd (single ([1 1]),1,1)), "single")
+%!assert_equal (class (burrrnd (1,single (1),1)), "single")
+%!assert_equal (class (burrrnd (1,single ([1 1]),1)), "single")
+%!assert_equal (class (burrrnd (1,1,single (1))), "single")
+%!assert_equal (class (burrrnd (1,1,single ([1 1]))), "single")
 
 ## Test input validation
 %!error<burrrnd: function called with too few input arguments.> burrrnd ()

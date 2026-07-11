@@ -35,7 +35,9 @@ classdef MultinomialDistribution
   ## @itemize
   ## @item Create a distribution with specified parameter values using the
   ## @code{makedist} function.
-  ## @item Use the constructor @qcode{MultinomialDistribution (@var{Probabilities})}
+  ## @item Use the constructor
+  ## @qcode{MultinomialDistribution
+  ## (@var{Probabilities})}
   ## to create a multinomial distribution with specified parameter values.
   ## @end itemize
   ##
@@ -48,7 +50,7 @@ classdef MultinomialDistribution
   ## @seealso{makedist, mnpdf, mnrnd}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {MultinomialDistribution} {property} Probabilities
     ##
@@ -61,7 +63,7 @@ classdef MultinomialDistribution
     Probabilities
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {MultinomialDistribution} {property} DistributionName
     ##
@@ -71,7 +73,7 @@ classdef MultinomialDistribution
     ## object.  This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "MultinomialDistribution";
+    DistributionName = 'MultinomialDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {MultinomialDistribution} {property} NumParameters
@@ -89,31 +91,31 @@ classdef MultinomialDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{1x1} cell array of character vectors with each element containing
+    ## A @math{1*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter.  This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"Probabilities"};
+    ParameterNames = {'Probabilities'};
 
     ## -*- texinfo -*-
     ## @deftp {MultinomialDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{1x1} cell array of character vectors with each element containing
+    ## A @math{1*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter.  This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Outcome probabilities"};
+    ParameterDescription = {'Outcome probabilities'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = false;
-    DistributionCode = "mn";
+    DistributionCode = 'mn';
   endproperties
 
-  properties (GetAccess = public , SetAccess = protected)
+  properties(GetAccess = public , SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {MultinomialDistribution} {property} ParameterValues
     ##
@@ -132,7 +134,7 @@ classdef MultinomialDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution.  First element contains the lower boundary,
     ## second element contains the upper boundary.  This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -153,7 +155,7 @@ classdef MultinomialDistribution
     IsTruncated
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = MultinomialDistribution (Probabilities)
       if (nargin == 0)
@@ -165,12 +167,12 @@ classdef MultinomialDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "multinomial distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'multinomial distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "multinomial distribution");
+      __disp__ (this, 'multinomial distribution');
     endfunction
 
     function this = set.Probabilities (this, Probabilities)
@@ -184,11 +186,11 @@ classdef MultinomialDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {MultinomialDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {MultinomialDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {MultinomialDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -196,7 +198,7 @@ classdef MultinomialDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -206,9 +208,9 @@ classdef MultinomialDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -263,10 +265,10 @@ classdef MultinomialDistribution
       endif
       probs = this.Probabilities;
       ## Do the computations
-      sz = size(p);
+      sz = size (p);
       p = p(:);
       x = zeros (numel (p), 1);
-      pc = cumsum(this.Probabilities);
+      pc = cumsum (this.Probabilities);
       pc = [0 pc(1:(end-1))];
       is_one = p == 0;
       is_nan = isnan (p) | p > 1 | p < 0;
@@ -406,23 +408,23 @@ classdef MultinomialDistribution
     ## @multitable @columnfractions 0.18 0.02 0.8
     ## @headitem @tab @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -569,8 +571,7 @@ function checkparams (Probabilities)
   if (! (isvector (Probabilities) && isnumeric (Probabilities) &&
          isreal (Probabilities) && isfinite (Probabilities) &&
          abs (sum (Probabilities) - 1) < eps * 100))
-    error (["MultinomialDistribution: PROBABILITIES must be a vector", ...
-            " of positive real scalars that sum up to 1."])
+    error (strcat ("MultinomialDistribution: PROBABILITIES must be a vector", " of positive real scalars that sum up to 1."))
   endif
 endfunction
 
@@ -580,76 +581,76 @@ endfunction
 %! ## the distribution and plot the PDF superimposed on a histogram of the data.
 %!
 %! probs = [0.1, 0.2, 0.3, 0.2, 0.1, 0.1];
-%! pd = makedist ("Multinomial", "Probabilities", probs);
-%! rand ("seed", 2);
+%! pd = makedist ('Multinomial', 'Probabilities', probs);
+%! rand ('seed', 2);
 %! data = random (pd, 5000, 1);
 %! hist (data, length (probs));
 %! hold on
 %! x = 1:length (probs);
 %! y = pdf (pd, x) * 5000;
-%! stem (x, y, "r", "LineWidth", 2);
+%! stem (x, y, 'r', 'LineWidth', 2);
 %! hold off
-%! msg = "Multinomial distribution with Probabilities = [%s]";
-%! probs_str = num2str (probs, "%0.1f ");
+%! msg = 'Multinomial distribution with Probabilities = [%s]';
+%! probs_str = num2str (probs, '%0.1f ');
 %! title (sprintf (msg, probs_str))
 
 ## Test output
 %!shared pd, t
 %! pd = MultinomialDistribution ([0.1, 0.2, 0.3, 0.2, 0.1, 0.1]);
 %! t = truncate (pd, 2, 4);
-%!assert (cdf (pd, [2, 3, 4]), [0.3, 0.6, 0.8], eps);
-%!assert (cdf (t, [2, 3, 4]), [0.2857, 0.7143, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4]), [0.1, 0.3, 0.6, 0.8], eps);
-%!assert (cdf (pd, [1.5, 2-eps, 3, 4]), [0.1, 0.1, 0.6, 0.8], eps);
-%!assert (cdf (t, [1.5, 2, 3, 4]), [0, 0.2857, 0.7143, 1], 1e-4);
-%!assert (cdf (t, [1.5, 2-eps, 3, 4]), [0, 0, 0.7143, 1], 1e-4);
-%!assert (cdf (pd, [1, 2.5, 4, 6]), [0.1, 0.3, 0.8, 1], eps);
-%!assert (icdf (pd, [0, 0.2857, 0.7143, 1]), [1, 2, 4, 6]);
-%!assert (icdf (t, [0, 0.2857, 0.7143, 1]), [2, 2, 4, 4]);
-%!assert (icdf (t, [0, 0.35, 0.7143, 1]), [2, 3, 4, 4]);
-%!assert (icdf (t, [0, 0.35, 0.7143, 1, NaN]), [2, 3, 4, 4, NaN]);
-%!assert (icdf (t, [-0.5, 0, 0.35, 0.7143, 1, NaN]), [NaN, 2, 3, 4, 4, NaN]);
-%!assert (icdf (pd, [-0.5, 0, 0.35, 0.7143, 1, NaN]), [NaN, 1, 3, 4, 6, NaN]);
-%!assert (iqr (pd), 2);
-%!assert (iqr (t), 2);
-%!assert (mean (pd), 3.3, 1e-14);
-%!assert (mean (t), 3, eps);
-%!assert (median (pd), 3);
-%!assert (median (t), 3);
-%!assert (pdf (pd, [-5, 1, 2.5, 4, 6, NaN, 9]), [0, 0.1, 0, 0.2, 0.1, NaN, 0]);
-%!assert (pdf (pd, [-5, 1, 2, 3, 4, 6, NaN, 9]), ...
+%!assert_equal (cdf (pd, [2, 3, 4]), [0.3, 0.6, 0.8], eps);
+%!assert_equal (cdf (t, [2, 3, 4]), [0.2857, 0.7143, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4]), [0.1, 0.3, 0.6, 0.8], eps);
+%!assert_equal (cdf (pd, [1.5, 2-eps, 3, 4]), [0.1, 0.1, 0.6, 0.8], eps);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4]), [0, 0.2857, 0.7143, 1], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2-eps, 3, 4]), [0, 0, 0.7143, 1], 1e-4);
+%!assert_equal (cdf (pd, [1, 2.5, 4, 6]), [0.1, 0.3, 0.8, 1], eps);
+%!assert_equal (icdf (pd, [0, 0.2857, 0.7143, 1]), [1, 2, 4, 6]);
+%!assert_equal (icdf (t, [0, 0.2857, 0.7143, 1]), [2, 2, 4, 4]);
+%!assert_equal (icdf (t, [0, 0.35, 0.7143, 1]), [2, 3, 4, 4]);
+%!assert_equal (icdf (t, [0, 0.35, 0.7143, 1, NaN]), [2, 3, 4, 4, NaN]);
+%!assert_equal (icdf (t, [-0.5, 0, 0.35, 0.7143, 1, NaN]), [NaN, 2, 3, 4, 4, NaN]);
+%!assert_equal (icdf (pd, [-0.5, 0, 0.35, 0.7143, 1, NaN]), [NaN, 1, 3, 4, 6, NaN]);
+%!assert_equal (iqr (pd), 2);
+%!assert_equal (iqr (t), 2);
+%!assert_equal (mean (pd), 3.3, 1e-14);
+%!assert_equal (mean (t), 3, eps);
+%!assert_equal (median (pd), 3);
+%!assert_equal (median (t), 3);
+%!assert_equal (pdf (pd, [-5, 1, 2.5, 4, 6, NaN, 9]), [0, 0.1, 0, 0.2, 0.1, NaN, 0]);
+%!assert_equal (pdf (pd, [-5, 1, 2, 3, 4, 6, NaN, 9]), ...
 %! [0, 0.1, 0.2, 0.3, 0.2, 0.1, NaN, 0]);
-%!assert (pdf (t, [-5, 1, 2, 3, 4, 6, NaN, 0]), ...
+%!assert_equal (pdf (t, [-5, 1, 2, 3, 4, 6, NaN, 0]), ...
 %! [0, 0, 0.2857, 0.4286, 0.2857, 0, NaN, 0], 1e-4);
-%!assert (pdf (t, [-5, 1, 2, 4, 6, NaN, 0]), ...
+%!assert_equal (pdf (t, [-5, 1, 2, 4, 6, NaN, 0]), ...
 %! [0, 0, 0.2857, 0.2857, 0, NaN, 0], 1e-4);
-%!assert (unique (random (pd, 1000, 5)), [1, 2, 3, 4, 5, 6]');
-%!assert (unique (random (t, 1000, 5)), [2, 3, 4]');
-%!assert (std (pd), 1.4177, 1e-4);
-%!assert (std (t), 0.7559, 1e-4);
-%!assert (var (pd), 2.0100, 1e-4);
-%!assert (var (t), 0.5714, 1e-4);
+%!assert_equal (unique (random (pd, 1000, 5)), [1, 2, 3, 4, 5, 6]');
+%!assert_equal (unique (random (t, 1000, 5)), [2, 3, 4]');
+%!assert_equal (std (pd), 1.4177, 1e-4);
+%!assert_equal (std (t), 0.7559, 1e-4);
+%!assert_equal (var (pd), 2.0100, 1e-4);
+%!assert_equal (var (t), 0.5714, 1e-4);
 
 ## Test input validation
 ## 'MultinomialDistribution' constructor
 %!error <MultinomialDistribution: PROBABILITIES must be a vector of positive real scalars that sum up to 1.> ...
-%! MultinomialDistribution(0)
+%! MultinomialDistribution (0)
 %!error <MultinomialDistribution: PROBABILITIES must be a vector of positive real scalars that sum up to 1.> ...
-%! MultinomialDistribution(-1)
+%! MultinomialDistribution (-1)
 %!error <MultinomialDistribution: PROBABILITIES must be a vector of positive real scalars that sum up to 1.> ...
-%! MultinomialDistribution(Inf)
+%! MultinomialDistribution (Inf)
 %!error <MultinomialDistribution: PROBABILITIES must be a vector of positive real scalars that sum up to 1.> ...
-%! MultinomialDistribution(i)
+%! MultinomialDistribution (i)
 %!error <MultinomialDistribution: PROBABILITIES must be a vector of positive real scalars that sum up to 1.> ...
-%! MultinomialDistribution("a")
+%! MultinomialDistribution ('a')
 %!error <MultinomialDistribution: PROBABILITIES must be a vector of positive real scalars that sum up to 1.> ...
-%! MultinomialDistribution([1, 2])
+%! MultinomialDistribution ([1, 2])
 %!error <MultinomialDistribution: PROBABILITIES must be a vector of positive real scalars that sum up to 1.> ...
-%! MultinomialDistribution(NaN)
+%! MultinomialDistribution (NaN)
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (MultinomialDistribution, 2, "uper")
+%! cdf (MultinomialDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (MultinomialDistribution, 2, 3)
 %!error <cdf: X must be real.> ...
@@ -657,27 +658,27 @@ endfunction
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (MultinomialDistribution, "Parent")
+%! plot (MultinomialDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (MultinomialDistribution, "PlotType", 12)
+%! plot (MultinomialDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (MultinomialDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (MultinomialDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (MultinomialDistribution, "PlotType", "pdfcdf")
+%! plot (MultinomialDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (MultinomialDistribution, "Discrete", "pdfcdf")
+%! plot (MultinomialDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (MultinomialDistribution, "Discrete", [1, 0])
+%! plot (MultinomialDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (MultinomialDistribution, "Discrete", {true})
+%! plot (MultinomialDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (MultinomialDistribution, "Parent", 12)
+%! plot (MultinomialDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (MultinomialDistribution, "Parent", "hax")
+%! plot (MultinomialDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (MultinomialDistribution, "invalidNAME", "pdf")
+%! plot (MultinomialDistribution, 'invalidNAME', 'pdf')
 %!error <plot: 'probability' PlotType is not supported for 'MultinomialDistribution'.> ...
-%! plot (MultinomialDistribution, "PlotType", "probability")
+%! plot (MultinomialDistribution, 'PlotType', 'probability')
 
 ## 'truncate' method
 %!error <truncate: is_nan input argument.> ...
@@ -689,8 +690,8 @@ endfunction
 
 ## Catch errors when using array of probability objects with available methods
 %!shared pd
-%! pd = MultinomialDistribution([0.1, 0.2, 0.3, 0.4]);
-%! pd(2) = MultinomialDistribution([0.1, 0.2, 0.3, 0.4]);
+%! pd = MultinomialDistribution ([0.1, 0.2, 0.3, 0.4]);
+%! pd(2) = MultinomialDistribution ([0.1, 0.2, 0.3, 0.4]);
 %!error <cdf: requires a scalar probability distribution.> cdf (pd, 1)
 %!error <icdf: requires a scalar probability distribution.> icdf (pd, 0.5)
 %!error <iqr: requires a scalar probability distribution.> iqr (pd)

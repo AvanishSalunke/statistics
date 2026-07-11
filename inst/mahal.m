@@ -27,7 +27,8 @@
 ## Specifically, it uses a Cholesky decomposition to set
 ##
 ## @example
-##  answer(i) = (@var{y}(i,:) - mean (@var{x})) * inv (A) * (@var{y}(i,:)-mean (@var{x}))'
+##  answer(i) = (@var{y}(i,:) - mean (@var{x})) * inv (A) *
+##              (@var{y}(i,:)-mean (@var{x}))'
 ## @end example
 ##
 ## where A is the covariance of @var{x}.
@@ -78,15 +79,15 @@ endfunction
 ## Test input validation
 %!error mahal ()
 %!error mahal (1, 2, 3)
-%!error mahal ("A", "B")
-%!error <must be numeric> mahal ([1, 2], ["A", "B"])
+%!error mahal ('A', 'B')
+%!error <must be numeric> mahal ([1, 2], ['A', 'B'])
 %!error mahal (ones (2, 2, 2))
 %!error <must be 2-D matrices> mahal (ones (2, 2), ones (2, 2, 2))
 %!error <same number of columns> mahal (ones (2, 2), ones (2, 3))
 
 %!test
 %! X = [1 0; 0 1; 1 1; 0 0];
-%! assert (mahal (X, X), [1.5; 1.5; 1.5; 1.5], 10*eps)
-%! assert (mahal (X, X+1), [7.5; 7.5; 1.5; 13.5], 10*eps)
+%! assert_equal (mahal (X, X), [1.5; 1.5; 1.5; 1.5], 10*eps)
+%! assert_equal (mahal (X, X+1), [7.5; 7.5; 1.5; 13.5], 10*eps)
 
-%!assert (mahal ([true; true], [false; true]), [0.5; 0.5], eps)
+%!assert_equal (mahal ([true; true], [false; true]), [0.5; 0.5], eps)

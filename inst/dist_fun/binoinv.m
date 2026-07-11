@@ -56,8 +56,8 @@ function x = binoinv (p, n, ps)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (n, "single") || isa (ps, "single"));
-    x = zeros (size (p), "single");
+  if (isa (p, 'single') || isa (n, 'single') || isa (ps, 'single'));
+    x = zeros (size (p), 'single');
   else
     x = zeros (size (p));
   endif
@@ -119,7 +119,7 @@ endfunction
 ## Calculates CDF by summing PDF, which is faster than calls to binocdf.
 function [m, k] = vector_binoinv (p, n, ps)
 
-  k = 1:length(p);
+  k = 1:length (p);
   m = zeros (size (p));
   prev_limit = 0;
   limit = 10;
@@ -164,7 +164,7 @@ function m = bin_search_binoinv (p, n, ps)
   k = find (lower != limit/2);       # elements for which above loop finished
   for i = 1:ceil (log2 (max (lower)))
     mid = (upper + lower)/2;
-    cdf = binocdf (floor(mid(:)), n, ps);
+    cdf = binocdf (floor (mid(:)), n, ps);
     r = (p <= cdf);
     upper(r)  = mid(r);
     lower(! r) = mid(! r);
@@ -180,37 +180,37 @@ endfunction
 %! x1 = binoinv (p, 20, 0.5);
 %! x2 = binoinv (p, 20, 0.7);
 %! x3 = binoinv (p, 40, 0.5);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r')
 %! grid on
-%! legend ({"n = 20, ps = 0.5", "n = 20, ps = 0.7", ...
-%!          "n = 40, ps = 0.5"}, "location", "southeast")
-%! title ("Binomial iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x (number of successes)")
+%! legend ({'n = 20, ps = 0.5', 'n = 20, ps = 0.7', ...
+%!          'n = 40, ps = 0.5'}, 'location', 'southeast')
+%! title ('Binomial iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x (number of successes)')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.5 1 2];
-%!assert (binoinv (p, 2*ones (1,5), 0.5*ones (1,5)), [NaN 0 1 2 NaN])
-%!assert (binoinv (p, 2, 0.5*ones (1,5)), [NaN 0 1 2 NaN])
-%!assert (binoinv (p, 2*ones (1,5), 0.5), [NaN 0 1 2 NaN])
-%!assert (binoinv (p, 2*[0 -1 NaN 1.1 1], 0.5), [NaN NaN NaN NaN NaN])
-%!assert (binoinv (p, 2, 0.5*[0 -1 NaN 3 1]), [NaN NaN NaN NaN NaN])
-%!assert (binoinv ([p(1:2) NaN p(4:5)], 2, 0.5), [NaN 0 NaN 2 NaN])
+%!assert_equal (binoinv (p, 2*ones (1,5), 0.5*ones (1,5)), [NaN 0 1 2 NaN])
+%!assert_equal (binoinv (p, 2, 0.5*ones (1,5)), [NaN 0 1 2 NaN])
+%!assert_equal (binoinv (p, 2*ones (1,5), 0.5), [NaN 0 1 2 NaN])
+%!assert_equal (binoinv (p, 2*[0 -1 NaN 1.1 1], 0.5), [NaN NaN NaN NaN NaN])
+%!assert_equal (binoinv (p, 2, 0.5*[0 -1 NaN 3 1]), [NaN NaN NaN NaN NaN])
+%!assert_equal (binoinv ([p(1:2) NaN p(4:5)], 2, 0.5), [NaN 0 NaN 2 NaN])
 
 ## Test class of input preserved
-%!assert (binoinv ([p, NaN], 2, 0.5), [NaN 0 1 2 NaN NaN])
-%!assert (binoinv (single ([p, NaN]), 2, 0.5), single ([NaN 0 1 2 NaN NaN]))
-%!assert (binoinv ([p, NaN], single (2), 0.5), single ([NaN 0 1 2 NaN NaN]))
-%!assert (binoinv ([p, NaN], 2, single (0.5)), single ([NaN 0 1 2 NaN NaN]))
+%!assert_equal (binoinv ([p, NaN], 2, 0.5), [NaN 0 1 2 NaN NaN])
+%!assert_equal (binoinv (single ([p, NaN]), 2, 0.5), single ([NaN 0 1 2 NaN NaN]))
+%!assert_equal (binoinv ([p, NaN], single (2), 0.5), single ([NaN 0 1 2 NaN NaN]))
+%!assert_equal (binoinv ([p, NaN], 2, single (0.5)), single ([NaN 0 1 2 NaN NaN]))
 
 ## Test accuracy, to within +/- 1 since it is a discrete distribution
 %!shared x, tol
 %! x = magic (3) + 1;
 %! tol = 1;
-%!assert (binoinv (binocdf (1:10, 11, 0.1), 11, 0.1), 1:10, tol)
-%!assert (binoinv (binocdf (1:10, 2*(1:10), 0.1), 2*(1:10), 0.1), 1:10, tol)
-%!assert (binoinv (binocdf (x, 2*x, 1./x), 2*x, 1./x), x, tol)
+%!assert_equal (binoinv (binocdf (1:10, 11, 0.1), 11, 0.1), 1:10, tol)
+%!assert_equal (binoinv (binocdf (1:10, 2*(1:10), 0.1), 2*(1:10), 0.1), 1:10, tol)
+%!assert_equal (binoinv (binocdf (x, 2*x, 1./x), 2*x, 1./x), x, tol)
 
 ## Test input validation
 %!error<binoinv: function called with too few input arguments.> binoinv ()

@@ -23,22 +23,21 @@
 ##
 ## Calculates 2*@var{n}+1 sigma points in @var{n} dimensions.
 ##
-## Sigma points are used in the unscented transform to estimate
-## the result of applying a given nonlinear transformation to a probability
-## distribution that is characterized only in terms of a finite set of statistics.
+## Sigma points are used in the unscented transform to estimate the result of
+## applying a given nonlinear transformation to a probability distribution that
+## is characterized only in terms of a finite set of statistics.
 ##
 ## If only the dimension @var{n} is given the resulting points have zero mean
-## and identity covariance matrix.
-## If the mean @var{m} or the covariance matrix @var{K} are given, then the resulting points
-## will have those statistics.
-## The factor @var{l} scales the points away from the mean. It is useful to tune
-## the accuracy of the unscented transform.
+## and identity covariance matrix. If the mean @var{m} or the covariance matrix
+## @var{K} are given, then the resulting points will have those statistics. The
+## factor @var{l} scales the points away from the mean. It is useful to tune the
+## accuracy of the unscented transform.
 ##
-## There is no unique way of computing sigma points, this function implements the
-## algorithm described in section 2.6 "The New Filter" pages 40-41 of
+## There is no unique way of computing sigma points, this function implements
+## the algorithm described in section 2.6 "The New Filter" pages 40-41 of
 ##
-## Uhlmann, Jeffrey (1995). "Dynamic Map Building and Localization: New Theoretical Foundations".
-## Ph.D. thesis. University of Oxford.
+## Uhlmann, Jeffrey (1995). "Dynamic Map Building and Localization: New
+## Theoretical Foundations". Ph.D. thesis. University of Oxford.
 ##
 ## @end deftypefn
 
@@ -51,10 +50,10 @@ function pts = sigma_pts (n, m = [], K = [], l = 0)
     m = zeros (1, n);
   endif
 
-  if (n ~= length (m))
+  if (n != length (m))
     error ("Dimension and size of mean vector don't match.")
   endif
-  if any(n ~= size (K))
+  if any (n != size (K))
     error ("Dimension and size of covariance matrix don't match.")
   endif
 
@@ -82,7 +81,7 @@ endfunction
 %! xe      = v(1,1) * cos (t) + v(2,1) * sin (t);
 %! ye      = v(1,2) * cos (t) + v(2,2) * sin (t);
 %!
-%! figure(1); clf; hold on
+%! figure (1); clf; hold on
 %! # Plot ellipse and axes
 %! line ([0 0; v(:,1).'],[0 0; v(:,2).'])
 %! plot (xe,ye,'-r');
@@ -97,28 +96,28 @@ endfunction
 %! endfor
 %! hold off
 %! axis image
-%! legend (h, arrayfun (@(x) sprintf ("l:%.2g", x), l, "unif", 0));
+%! legend (h, arrayfun (@(x) sprintf ("l:%.2g", x), l, 'unif', 0));
 
 
 %!test
 %! p = sigma_pts (5);
-%! assert (mean (p), zeros(1,5), sqrt(eps));
-%! assert (cov (p), eye(5), sqrt(eps));
+%! assert_equal (mean (p), zeros (1,5), sqrt (eps));
+%! assert_equal (cov (p), eye (5), sqrt (eps));
 
 %!test
-%! m = randn(1, 5);
+%! m = randn (1, 5);
 %! p = sigma_pts (5, m);
-%! assert (mean (p), m, sqrt(eps));
-%! assert (cov (p), eye(5), sqrt(eps));
+%! assert_equal (mean (p), m, sqrt (eps));
+%! assert_equal (cov (p), eye (5), sqrt (eps));
 
 %!test
 %! x = linspace (0,1,5);
 %! K = exp (- (x.' - x).^2/ 0.5);
 %! p = sigma_pts (5, [], K);
-%! assert (mean (p), zeros(1,5), sqrt(eps));
-%! assert (cov (p), K, sqrt(eps));
+%! assert_equal (mean (p), zeros (1,5), sqrt (eps));
+%! assert_equal (cov (p), K, sqrt (eps));
 
-%!error sigma_pts(2,1);
-%!error sigma_pts(2,[],1);
-%!error sigma_pts(2,1,1);
-%!error sigma_pts(2,[0.5 0.5],[-1 0; 0 0]);
+%!error sigma_pts (2,1);
+%!error sigma_pts (2,[],1);
+%!error sigma_pts (2,1,1);
+%!error sigma_pts (2,[0.5 0.5],[-1 0; 0 0]);

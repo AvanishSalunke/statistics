@@ -55,9 +55,9 @@ function x = burrinv (p, lambda, c, k)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (lambda, "single") || isa (c, "single") ...
-                        || isa (k, "single"))
-    x = zeros (size (p), "single");
+  if (isa (p, 'single') || isa (lambda, 'single') || isa (c, 'single') ...
+                        || isa (k, 'single'))
+    x = zeros (size (p), 'single');
   else
     x = zeros (size (p));
   endif
@@ -74,7 +74,7 @@ function x = burrinv (p, lambda, c, k)
   ## Handle all other valid cases
   j = (0 < p) & (p < 1) & (0 < lambda) & (lambda < Inf) & (0 < c) & (c < Inf) ...
       & (0 < k) & (k < Inf);
-  if (isscalar (lambda) && isscalar(c) && isscalar(k))
+  if (isscalar (lambda) && isscalar (c) && isscalar (k))
     x(j) = ((1 - p(j) / lambda).^(-1 / k) - 1).^(1 / c) ;
   else
     x(j) = ((1 - p(j) ./ lambda(j)).^(-1 ./ k(j)) - 1).^(1 ./ c(j)) ;
@@ -91,34 +91,34 @@ endfunction
 %! x4 = burrinv (p, 1, 2, 1);
 %! x5 = burrinv (p, 1, 3, 1);
 %! x6 = burrinv (p, 1, 0.5, 2);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", ...
-%!       p, x4, "-c", p, x5, "-m", p, x6, "-k")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', ...
+%!       p, x4, '-c', p, x5, '-m', p, x6, '-k')
 %! grid on
 %! ylim ([0, 5])
-%! legend ({"λ = 1, c = 1, k = 1", "λ = 1, c = 1, k = 2", ...
-%!          "λ = 1, c = 1, k = 3", "λ = 1, c = 2, k = 1", ...
-%!          "λ = 1, c = 3, k = 1", "λ = 1, c = 0.5, k = 2"}, ...
-%!         "location", "northwest")
-%! title ("Burr type XII iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'λ = 1, c = 1, k = 1', 'λ = 1, c = 1, k = 2', ...
+%!          'λ = 1, c = 1, k = 3', 'λ = 1, c = 2, k = 1', ...
+%!          'λ = 1, c = 3, k = 1', 'λ = 1, c = 0.5, k = 2'}, ...
+%!         'location', 'northwest')
+%! title ('Burr type XII iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p, y
 %! p = [-Inf, -1, 0, 1/2, 1, 2, Inf];
 %! y = [NaN, NaN, 0, 1 , Inf, NaN, NaN];
-%!assert (burrinv (p, ones (1,7), ones (1,7), ones(1,7)), y, eps)
-%!assert (burrinv (p, 1, 1, 1), y, eps)
-%!assert (burrinv (p, [1, 1, 1, NaN, 1, 1, 1], 1, 1), [y(1:3), NaN, y(5:7)], eps)
-%!assert (burrinv (p, 1, [1, 1, 1, NaN, 1, 1, 1], 1), [y(1:3), NaN, y(5:7)], eps)
-%!assert (burrinv (p, 1, 1, [1, 1, 1, NaN, 1, 1, 1]), [y(1:3), NaN, y(5:7)], eps)
-%!assert (burrinv ([p, NaN], 1, 1, 1), [y, NaN], eps)
+%!assert_equal (burrinv (p, ones (1,7), ones (1,7), ones (1,7)), y, eps)
+%!assert_equal (burrinv (p, 1, 1, 1), y, eps)
+%!assert_equal (burrinv (p, [1, 1, 1, NaN, 1, 1, 1], 1, 1), [y(1:3), NaN, y(5:7)], eps)
+%!assert_equal (burrinv (p, 1, [1, 1, 1, NaN, 1, 1, 1], 1), [y(1:3), NaN, y(5:7)], eps)
+%!assert_equal (burrinv (p, 1, 1, [1, 1, 1, NaN, 1, 1, 1]), [y(1:3), NaN, y(5:7)], eps)
+%!assert_equal (burrinv ([p, NaN], 1, 1, 1), [y, NaN], eps)
 
 ## Test class of input preserved
-%!assert (burrinv (single ([p, NaN]), 1, 1, 1), single ([y, NaN]), eps("single"))
-%!assert (burrinv ([p, NaN], single (1), 1, 1), single ([y, NaN]), eps("single"))
-%!assert (burrinv ([p, NaN], 1, single (1), 1), single ([y, NaN]), eps("single"))
-%!assert (burrinv ([p, NaN], 1, 1, single (1)), single ([y, NaN]), eps("single"))
+%!assert_equal (burrinv (single ([p, NaN]), 1, 1, 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (burrinv ([p, NaN], single (1), 1, 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (burrinv ([p, NaN], 1, single (1), 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (burrinv ([p, NaN], 1, 1, single (1)), single ([y, NaN]), eps ('single'))
 
 ## Test input validation
 %!error<burrinv: function called with too few input arguments.> burrinv ()
@@ -128,13 +128,13 @@ endfunction
 %!error<burrinv: function called with too many inputs> ...
 %! burrinv (1, 2, 3, 4, 5)
 %!error<burrinv: P, LAMBDA, C, and K must be of common size or scalars.> ...
-%! burrinv (ones (3), ones (2), ones(2), ones(2))
+%! burrinv (ones (3), ones (2), ones (2), ones (2))
 %!error<burrinv: P, LAMBDA, C, and K must be of common size or scalars.> ...
-%! burrinv (ones (2), ones (3), ones(2), ones(2))
+%! burrinv (ones (2), ones (3), ones (2), ones (2))
 %!error<burrinv: P, LAMBDA, C, and K must be of common size or scalars.> ...
-%! burrinv (ones (2), ones (2), ones(3), ones(2))
+%! burrinv (ones (2), ones (2), ones (3), ones (2))
 %!error<burrinv: P, LAMBDA, C, and K must be of common size or scalars.> ...
-%! burrinv (ones (2), ones (2), ones(2), ones(3))
+%! burrinv (ones (2), ones (2), ones (2), ones (3))
 %!error<burrinv: P, LAMBDA, C, and K must not be complex.> burrinv (i, 2, 3, 4)
 %!error<burrinv: P, LAMBDA, C, and K must not be complex.> burrinv (1, i, 3, 4)
 %!error<burrinv: P, LAMBDA, C, and K must not be complex.> burrinv (1, 2, i, 4)

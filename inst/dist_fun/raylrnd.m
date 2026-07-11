@@ -95,33 +95,33 @@ function r = raylrnd (sigma, varargin)
   endif
 
   ## Cast into appropriate class
-  if (isa (sigma, "single"))
-    r = cast (r, "single");
+  if (isa (sigma, 'single'))
+    r = cast (r, 'single');
   endif
 
 endfunction
 
 ## Test output
-%!assert (size (raylrnd (2)), [1, 1])
-%!assert (size (raylrnd (ones (2, 1))), [2, 1])
-%!assert (size (raylrnd (ones (2, 2))), [2, 2])
-%!assert (size (raylrnd (1, 3)), [3, 3])
-%!assert (size (raylrnd (1, [4, 1])), [4, 1])
-%!assert (size (raylrnd (1, 4, 1)), [4, 1])
-%!assert (size (raylrnd (1, 4, 1)), [4, 1])
-%!assert (size (raylrnd (1, 4, 1, 5)), [4, 1, 5])
-%!assert (size (raylrnd (1, 0, 1)), [0, 1])
-%!assert (size (raylrnd (1, 1, 0)), [1, 0])
-%!assert (size (raylrnd (1, 1, 2, 0, 5)), [1, 2, 0, 5])
-%!assert (size (raylrnd (1, [])), [0, 0])
-%!assert (size (raylrnd (1, [2, 0, 2, 1])), [2, 0, 2])
-%!assert (raylrnd (0, 1, 1), NaN)
-%!assert (raylrnd ([0, 0, 0], [1, 3]), [NaN, NaN, NaN])
+%!assert_equal (size (raylrnd (2)), [1, 1])
+%!assert_equal (size (raylrnd (ones (2, 1))), [2, 1])
+%!assert_equal (size (raylrnd (ones (2, 2))), [2, 2])
+%!assert_equal (size (raylrnd (1, 3)), [3, 3])
+%!assert_equal (size (raylrnd (1, [4, 1])), [4, 1])
+%!assert_equal (size (raylrnd (1, 4, 1)), [4, 1])
+%!assert_equal (size (raylrnd (1, 4, 1)), [4, 1])
+%!assert_equal (size (raylrnd (1, 4, 1, 5)), [4, 1, 5])
+%!assert_equal (size (raylrnd (1, 0, 1)), [0, 1])
+%!assert_equal (size (raylrnd (1, 1, 0)), [1, 0])
+%!assert_equal (size (raylrnd (1, 1, 2, 0, 5)), [1, 2, 0, 5])
+%!assert_equal (size (raylrnd (1, [])), [0, 0])
+%!assert_equal (size (raylrnd (1, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (raylrnd (0, 1, 1), NaN)
+%!assert_equal (raylrnd ([0, 0, 0], [1, 3]), [NaN, NaN, NaN])
 
 ## Test class of input preserved
-%!assert (class (raylrnd (2)), "double")
-%!assert (class (raylrnd (single (2))), "single")
-%!assert (class (raylrnd (single ([2, 2]))), "single")
+%!assert_equal (class (raylrnd (2)), "double")
+%!assert_equal (class (raylrnd (single (2))), "single")
+%!assert_equal (class (raylrnd (single ([2, 2]))), "single")
 
 ## Test input validation
 %!error<raylrnd: function called with too few input arguments.> raylrnd ()

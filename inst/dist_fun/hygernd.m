@@ -99,10 +99,10 @@ function r = hygernd (m, k, n, varargin)
   endif
 
   ## Check for class type
-  if (isa (m, "single") || isa (k, "single") || isa (n, "single"))
-    cls = "single";
+  if (isa (m, 'single') || isa (k, 'single') || isa (n, 'single'))
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ok = ((m >= 0) & (k >= 0) & (n > 0) & (k <= m) & (n <= m) &
@@ -115,7 +115,7 @@ function r = hygernd (m, k, n, varargin)
       p = hygepdf (v, m, k, n);
       r = v(lookup (cumsum (p(1:end-1)) / sum (p), rand (sz)) + 1);
       r = reshape (r, sz);
-      if (strcmp (cls, "single"))
+      if (strcmp (cls, 'single'))
         r = single (r);
       endif
     else
@@ -126,7 +126,7 @@ function r = hygernd (m, k, n, varargin)
     n = n(ok);
     num_n = numel (n);
     v = 0 : max (n(:));
-    p = cumsum (hygepdf (v, m(ok), k(ok), n, "vectorexpand"), 2);
+    p = cumsum (hygepdf (v, m(ok), k(ok), n, 'vectorexpand'), 2);
 
     ## Manual row-wise vectorization of lookup, which returns index of element
     ## less than or equal to test value, zero if test value is less than lowest
@@ -136,34 +136,34 @@ function r = hygernd (m, k, n, varargin)
     p = (p ./ p(end_locs)) - rand (num_n, 1);
     p(p>=0) = NaN;  # NaN values ignored by max
     [p_match, p_match_idx] = max (p, [], 2);
-    p_match_idx(isnan(p_match)) = 0; # rand < min(p) gives NaN, reset to 0
+    p_match_idx(isnan (p_match)) = 0; # rand < min(p) gives NaN, reset to 0
     r(ok) = v(p_match_idx + 1);
   endif
 
 endfunction
 
 ## Test output
-%!assert (size (hygernd (4, 2, 2)), [1, 1])
-%!assert (size (hygernd (4 * ones (2, 1), 2,2)), [2, 1])
-%!assert (size (hygernd (4 * ones (2, 2), 2,2)), [2, 2])
-%!assert (size (hygernd (4, 2 * ones (2, 1), 2)), [2, 1])
-%!assert (size (hygernd (4, 2 * ones (2, 2), 2)), [2, 2])
-%!assert (size (hygernd (4, 2, 2 * ones (2, 1))), [2, 1])
-%!assert (size (hygernd (4, 2, 2 * ones (2, 2))), [2, 2])
-%!assert (size (hygernd (4, 2, 2, 3)), [3, 3])
-%!assert (size (hygernd (4, 2, 2, [4, 1])), [4, 1])
-%!assert (size (hygernd (4, 2, 2, 4, 1)), [4, 1])
-%!assert (size (hygernd (4, 2, 2, [])), [0, 0])
-%!assert (size (hygernd (4, 2, 2, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (hygernd (4, 2, 2)), [1, 1])
+%!assert_equal (size (hygernd (4 * ones (2, 1), 2,2)), [2, 1])
+%!assert_equal (size (hygernd (4 * ones (2, 2), 2,2)), [2, 2])
+%!assert_equal (size (hygernd (4, 2 * ones (2, 1), 2)), [2, 1])
+%!assert_equal (size (hygernd (4, 2 * ones (2, 2), 2)), [2, 2])
+%!assert_equal (size (hygernd (4, 2, 2 * ones (2, 1))), [2, 1])
+%!assert_equal (size (hygernd (4, 2, 2 * ones (2, 2))), [2, 2])
+%!assert_equal (size (hygernd (4, 2, 2, 3)), [3, 3])
+%!assert_equal (size (hygernd (4, 2, 2, [4, 1])), [4, 1])
+%!assert_equal (size (hygernd (4, 2, 2, 4, 1)), [4, 1])
+%!assert_equal (size (hygernd (4, 2, 2, [])), [0, 0])
+%!assert_equal (size (hygernd (4, 2, 2, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (hygernd (4, 2, 2)), "double")
-%!assert (class (hygernd (single (4), 2, 2)), "single")
-%!assert (class (hygernd (single ([4, 4]), 2, 2)), "single")
-%!assert (class (hygernd (4, single (2), 2)), "single")
-%!assert (class (hygernd (4, single ([2, 2]),2)), "single")
-%!assert (class (hygernd (4, 2, single (2))), "single")
-%!assert (class (hygernd (4, 2, single ([2, 2]))), "single")
+%!assert_equal (class (hygernd (4, 2, 2)), "double")
+%!assert_equal (class (hygernd (single (4), 2, 2)), "single")
+%!assert_equal (class (hygernd (single ([4, 4]), 2, 2)), "single")
+%!assert_equal (class (hygernd (4, single (2), 2)), "single")
+%!assert_equal (class (hygernd (4, single ([2, 2]),2)), "single")
+%!assert_equal (class (hygernd (4, 2, single (2))), "single")
+%!assert_equal (class (hygernd (4, 2, single ([2, 2]))), "single")
 
 ## Test input validation
 %!error<hygernd: function called with too few input arguments.> hygernd ()

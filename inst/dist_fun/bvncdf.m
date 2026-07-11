@@ -26,12 +26,12 @@
 ## parameter @var{mu} and a scale parameter @var{sigma}.
 ##
 ## @itemize
-## @item @var{x} must be an @math{Nx2} matrix with each variable as a column
+## @item @var{x} must be an @math{N*2} matrix with each variable as a column
 ## vector.
 ## @item @var{mu} can be either a scalar (common mean) or a two-element row
 ## vector (each element corresponds to a variable).  If empty, a zero mean is
 ## assumed.
-## @item @var{sigma} can be a scalar (common variance) or a @math{2x2}
+## @item @var{sigma} can be a scalar (common variance) or a @math{2*2}
 ## covariance matrix, which must be positive definite.
 ## @end itemize
 ##
@@ -117,7 +117,7 @@ function p = calculate_bvncdf (dh,dk,r)
   bvn = dim1 * 0;
   phi_dh =  0.5 * erfc (dh / sqrt (2));
   phi_dk =  0.5 * erfc (dk / sqrt (2));
-  if (abs(r) < 0.925)
+  if (abs (r) < 0.925)
     hs = (dh .* dh + dk .* dk) / 2;
     asr = asin (r);
     sn1 = sin (asr * (1 - x) / 2);
@@ -133,7 +133,7 @@ function p = calculate_bvncdf (dh,dk,r)
       dk = -dk;
       hk = -hk;
     endif
-    if abs(r) < 1
+    if abs (r) < 1
       as = (1 - r) * (1 + r);
       a = sqrt (as);
       bs = (dh - dk) .^ 2;
@@ -168,7 +168,7 @@ function p = calculate_bvncdf (dh,dk,r)
     endif
     if (r > 0)
       tmp = max (dh, dk);
-      bvn =  bvn + 0.5 * erfc (tmp / sqrt(2));
+      bvn =  bvn + 0.5 * erfc (tmp / sqrt (2));
     elseif (r < 0)
       phi_dh =  0.5 * erfc (dh / sqrt (2));
       phi_dk =  0.5 * erfc (dk / sqrt (2));
@@ -186,9 +186,9 @@ endfunction
 %! p = bvncdf (x, mu, sigma);
 %! Z = reshape (p, 25, 25);
 %! surf (X1, X2, Z);
-%! title ("Bivariate Normal Distribution");
-%! ylabel "X1"
-%! xlabel "X2"
+%! title ('Bivariate Normal Distribution');
+%! ylabel 'X1'
+%! xlabel 'X2'
 
 ## Test output
 %!test
@@ -202,7 +202,7 @@ endfunction
 %!          0.00378235566873474, 0.00638175749734415, ...
 %!          0.00943764224329656, 0.01239164888125426, ...
 %!          0.01472750274376648, 0.01623228313374828]';
-%! assert (p([1:10]), p_out, 1e-16);
+%! assert_equal (p([1:10]), p_out, 1e-16);
 %!test
 %! mu = [1, -1];
 %! sigma = [0.9, 0.4; 0.4, 0.3];
@@ -214,16 +214,16 @@ endfunction
 %!          0.9722897881414742, 0.9788150170059926, ...
 %!          0.9813597788804785, 0.9821977956568989, ...
 %!          0.9824283794464095, 0.9824809345614861]';
-%! assert (p([616:625]), p_out, 3e-16);
+%! assert_equal (p([616:625]), p_out, 3e-16);
 %!test
 %! ## Test infinite limits
 %! mu = [0, 0];
 %! sigma = [1 0.5; 0.5 1];
-%! assert (bvncdf ([Inf, Inf], mu, sigma), 1);
-%! assert (bvncdf ([-Inf, 2], mu, sigma), 0);
-%! assert (bvncdf ([1, -Inf], mu, sigma), 0);
-%! assert (bvncdf ([0.5, Inf], mu, sigma), normcdf (0.5), eps);
-%! assert (bvncdf ([Inf, 0.5], mu, sigma), normcdf (0.5), eps);
+%! assert_equal (bvncdf ([Inf, Inf], mu, sigma), 1);
+%! assert_equal (bvncdf ([-Inf, 2], mu, sigma), 0);
+%! assert_equal (bvncdf ([1, -Inf], mu, sigma), 0);
+%! assert_equal (bvncdf ([0.5, Inf], mu, sigma), normcdf (0.5), eps);
+%! assert_equal (bvncdf ([Inf, 0.5], mu, sigma), normcdf (0.5), eps);
 %!error bvncdf (randn (25,3), [], [1, 1; 1, 1]);
 %!error bvncdf (randn (25,2), [], [1, 1; 1, 1]);
 %!error bvncdf (randn (25,2), [], ones (3, 2));

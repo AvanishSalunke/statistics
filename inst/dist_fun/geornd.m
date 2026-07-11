@@ -88,10 +88,10 @@ function r = geornd (ps, varargin)
   endif
 
   ## Check for class type
-  if (isa (ps, "single"))
-    cls = "single";
+  if (isa (ps, 'single'))
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ## Generate random sample from geometric distribution
@@ -118,21 +118,21 @@ function r = geornd (ps, varargin)
 endfunction
 
 ## Test output
-%!assert (size (geornd (0.5)), [1, 1])
-%!assert (size (geornd (0.5*ones (2,1))), [2, 1])
-%!assert (size (geornd (0.5*ones (2,2))), [2, 2])
-%!assert (size (geornd (0.5, 3)), [3, 3])
-%!assert (size (geornd (0.5, [4 1])), [4, 1])
-%!assert (size (geornd (0.5, 4, 1)), [4, 1])
-%!assert (size (geornd (0.5, [])), [0, 0])
-%!assert (size (geornd (0.5, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (geornd (0.5)), [1, 1])
+%!assert_equal (size (geornd (0.5*ones (2,1))), [2, 1])
+%!assert_equal (size (geornd (0.5*ones (2,2))), [2, 2])
+%!assert_equal (size (geornd (0.5, 3)), [3, 3])
+%!assert_equal (size (geornd (0.5, [4 1])), [4, 1])
+%!assert_equal (size (geornd (0.5, 4, 1)), [4, 1])
+%!assert_equal (size (geornd (0.5, [])), [0, 0])
+%!assert_equal (size (geornd (0.5, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (geornd (0.5)), "double")
-%!assert (class (geornd (single (0.5))), "single")
-%!assert (class (geornd (single ([0.5 0.5]))), "single")
-%!assert (class (geornd (single (0))), "single")
-%!assert (class (geornd (single (1))), "single")
+%!assert_equal (class (geornd (0.5)), "double")
+%!assert_equal (class (geornd (single (0.5))), "single")
+%!assert_equal (class (geornd (single ([0.5 0.5]))), "single")
+%!assert_equal (class (geornd (single (0))), "single")
+%!assert_equal (class (geornd (single (1))), "single")
 
 ## Test input validation
 %!error<geornd: function called with too few input arguments.> geornd ()

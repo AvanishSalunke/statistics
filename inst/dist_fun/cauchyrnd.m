@@ -95,10 +95,10 @@ function r = cauchyrnd (x0, gamma, varargin)
   endif
 
   ## Check for class type
-  if (isa (x0, "single") || isa (gamma, "single"))
-    cls = "single";
+  if (isa (x0, 'single') || isa (gamma, 'single'))
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ## Generate random sample from Cauchy distribution
@@ -118,27 +118,27 @@ function r = cauchyrnd (x0, gamma, varargin)
 endfunction
 
 ## Test output
-%!assert (size (cauchyrnd (1, 1)), [1 1])
-%!assert (size (cauchyrnd (1, ones (2,1))), [2, 1])
-%!assert (size (cauchyrnd (1, ones (2,2))), [2, 2])
-%!assert (size (cauchyrnd (ones (2,1), 1)), [2, 1])
-%!assert (size (cauchyrnd (ones (2,2), 1)), [2, 2])
-%!assert (size (cauchyrnd (1, 1, 3)), [3, 3])
-%!assert (size (cauchyrnd (1, 1, [4, 1])), [4, 1])
-%!assert (size (cauchyrnd (1, 1, 4, 1)), [4, 1])
-%!assert (size (cauchyrnd (1, 1, 4, 1, 5)), [4, 1, 5])
-%!assert (size (cauchyrnd (1, 1, 0, 1)), [0, 1])
-%!assert (size (cauchyrnd (1, 1, 1, 0)), [1, 0])
-%!assert (size (cauchyrnd (1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
-%!assert (size (cauchyrnd (1, 1, [])), [0, 0])
-%!assert (size (cauchyrnd (1, 1, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (cauchyrnd (1, 1)), [1 1])
+%!assert_equal (size (cauchyrnd (1, ones (2,1))), [2, 1])
+%!assert_equal (size (cauchyrnd (1, ones (2,2))), [2, 2])
+%!assert_equal (size (cauchyrnd (ones (2,1), 1)), [2, 1])
+%!assert_equal (size (cauchyrnd (ones (2,2), 1)), [2, 2])
+%!assert_equal (size (cauchyrnd (1, 1, 3)), [3, 3])
+%!assert_equal (size (cauchyrnd (1, 1, [4, 1])), [4, 1])
+%!assert_equal (size (cauchyrnd (1, 1, 4, 1)), [4, 1])
+%!assert_equal (size (cauchyrnd (1, 1, 4, 1, 5)), [4, 1, 5])
+%!assert_equal (size (cauchyrnd (1, 1, 0, 1)), [0, 1])
+%!assert_equal (size (cauchyrnd (1, 1, 1, 0)), [1, 0])
+%!assert_equal (size (cauchyrnd (1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
+%!assert_equal (size (cauchyrnd (1, 1, [])), [0, 0])
+%!assert_equal (size (cauchyrnd (1, 1, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (cauchyrnd (1, 1)), "double")
-%!assert (class (cauchyrnd (1, single (1))), "single")
-%!assert (class (cauchyrnd (1, single ([1, 1]))), "single")
-%!assert (class (cauchyrnd (single (1), 1)), "single")
-%!assert (class (cauchyrnd (single ([1, 1]), 1)), "single")
+%!assert_equal (class (cauchyrnd (1, 1)), "double")
+%!assert_equal (class (cauchyrnd (1, single (1))), "single")
+%!assert_equal (class (cauchyrnd (1, single ([1, 1]))), "single")
+%!assert_equal (class (cauchyrnd (single (1), 1)), "single")
+%!assert_equal (class (cauchyrnd (single ([1, 1]), 1)), "single")
 
 ## Test input validation
 %!error<cauchyrnd: function called with too few input arguments.> cauchyrnd ()

@@ -146,64 +146,64 @@ function [smpl, accept] = mhsample (start, nsamples, varargin)
 
   for k = 1:2:length (varargin)
     if (ischar (varargin{k}))
-      switch lower(varargin{k})
-        case "pdf"
-          if (isa (varargin{k+1}, "function_handle"))
+      switch lower (varargin{k})
+        case 'pdf'
+          if (isa (varargin{k+1}, 'function_handle'))
             pdf = varargin{k+1};
           else
             error ("mhsample: pdf must be a function handle");
           endif
 
-        case "proppdf"
-          if (isa (varargin{k+1}, "function_handle"))
+        case 'proppdf'
+          if (isa (varargin{k+1}, 'function_handle'))
             proppdf = varargin{k+1};
           else
             error ("mhsample: proppdf must be a function handle");
           endif
 
-        case "logpdf"
-          if (isa (varargin{k+1}, "function_handle"))
+        case 'logpdf'
+          if (isa (varargin{k+1}, 'function_handle'))
             pdf = varargin{k+1};
           else
             error ("mhsample: logpdf must be a function handle");
           endif
 
-        case "logproppdf"
-          if (isa (varargin{k+1}, "function_handle"))
+        case 'logproppdf'
+          if (isa (varargin{k+1}, 'function_handle'))
             proppdf = varargin{k+1};
           else
             error ("mhsample: logproppdf must be a function handle");
           endif
 
-        case "proprnd"
-          if (isa (varargin{k+1}, "function_handle"))
+        case 'proprnd'
+          if (isa (varargin{k+1}, 'function_handle'))
             proprnd = varargin{k+1};
           else
             error ("mhsample: proprnd must be a function handle");
           endif
 
-        case "symmetric"
-          if (isa (varargin{k+1}, "logical"))
+        case 'symmetric'
+          if (isa (varargin{k+1}, 'logical'))
             sym = varargin{k+1};
           else
             error ("mhsample: sym must be true or false");
           endif
 
-        case "burnin"
+        case 'burnin'
           if (varargin{k+1}>=0)
             K = varargin{k+1};
           else
             error ("mhsample: K must be greater than or equal to 0");
           endif
 
-        case "thin"
+        case 'thin'
           if (varargin{k+1} >= 1)
             m = varargin{k+1};
           else
             error ("mhsample: m must be greater than or equal to 1");
           endif
 
-        case "nchain"
+        case 'nchain'
           if (varargin{k+1} >= 1)
             nchain = varargin{k+1};
           else
@@ -211,10 +211,10 @@ function [smpl, accept] = mhsample (start, nsamples, varargin)
           endif
 
         otherwise
-          warning (["mhsample: Ignoring unknown option " varargin{k}]);
+          warning ("mhsample: Ignoring unknown option %s", varargin{k});
       endswitch
     else
-      error (["mhsample: " varargin{k} " is not a valid property."]);
+      error ("mhsample: %s is not a valid property.", varargin{k});
     endif
   endfor
 
@@ -224,16 +224,16 @@ function [smpl, accept] = mhsample (start, nsamples, varargin)
     error ("mhsample: pdf or logpdf must be input.");
   endif
   if (! isempty (proppdf) && isempty (logproppdf))
-    logproppdf = @(x, y) rloge (proppdf (x, y));
+    logproppdf = @(x, y) rloge (proppdf(x, y));
   elseif (isempty (proppdf) && isempty (logproppdf) && ! sym)
     error ("mhsample: proppdf or logproppdf must be input unless 'symmetrical' is true.");
   endif
-  if (! isa (proprnd, "function_handle"))
+  if (! isa (proprnd, 'function_handle'))
     error ("mhsample: proprnd must be a function handle.");
   endif
   if (length (sizestart) == 2)
     sizestart = [sizestart 0];
-  end
+  endif
   smpl = zeros (nsamples, sizestart(2), nchain);
 
   if (all (sizestart([1 3]) == [1 nchain]))
@@ -254,18 +254,18 @@ function [smpl, accept] = mhsample (start, nsamples, varargin)
   rnd = log (rand (nchain, nsamples*m+K));
   for k = 1:nsamples*m+K
     canacc = rem (k-K, m) == 0;
-    px = proprnd (cx);
+    px = proprnd(cx);
     if (sym)
-      A = logpdf (px) - logpdf(cx);
+      A = logpdf(px) - logpdf(cx);
     else
-      A = (logpdf (px) + logproppdf (cx, px)) - (logpdf (cx) + logproppdf (px, cx));
+      A = (logpdf(px) + logproppdf(cx, px)) - (logpdf(cx) + logproppdf(px, cx));
     endif
     ac = rnd(:, k) < min (A, 0);
     cx(ac, :) = px(ac, :);
     accept(ac)++;
     if (canacc)
       smpl(i, :, :) = permute (cx, [3, 2, 1]);
-    end
+    endif
     if (k > K && canacc)
       i++;
     endif
@@ -287,52 +287,52 @@ endfunction
 %! ## Define function to sample
 %! d = 2;
 %! mu = [-1; 2];
-%! rand ("seed", 5)  # for reproducibility
+%! rand ('seed', 5)  # for reproducibility
 %! Sigma = rand (d);
 %! Sigma = (Sigma + Sigma');
-%! Sigma += eye (d) * abs (eigs (Sigma, 1, "sa")) * 1.1;
-%! pdf = @(x)(2*pi)^(-d/2)*det(Sigma)^-.5*exp(-.5*sum((x.'-mu).*(Sigma\(x.'-mu)),1));
+%! Sigma += eye (d) * abs (eigs (Sigma, 1, 'sa')) * 1.1;
+%! pdf = @(x)(2*pi)^(-d/2)*det (Sigma)^-.5*exp (-.5*sum ((x.'-mu).*(Sigma\(x.'-mu)),1));
 %! ## Inputs
 %! start = ones (1, 2);
 %! nsamples = 500;
 %! sym = true;
 %! K = 500;
 %! m = 10;
-%! rand ("seed", 8)  # for reproducibility
+%! rand ('seed', 8)  # for reproducibility
 %! proprnd = @(x) (rand (size (x)) - .5) * 3 + x;
-%! [smpl, accept] = mhsample (start, nsamples, "pdf", pdf, "proprnd", proprnd, ...
-%!                            "symmetric", sym, "burnin", K, "thin", m);
+%! [smpl, accept] = mhsample (start, nsamples, 'pdf', pdf, 'proprnd', proprnd, ...
+%!                            'symmetric', sym, 'burnin', K, 'thin', m);
 %! figure;
 %! hold on;
 %! plot (smpl(:, 1), smpl(:, 2), 'x');
-%! [x, y] = meshgrid (linspace (-6, 4), linspace(-3, 7));
-%! z = reshape (pdf ([x(:), y(:)]), size(x));
-%! mesh (x, y, z, "facecolor", "None");
+%! [x, y] = meshgrid (linspace (-6, 4), linspace (-3, 7));
+%! z = reshape (pdf ([x(:), y(:)]), size (x));
+%! mesh (x, y, z, 'facecolor', 'None');
 %! ## Using sample points to find the volume of half a sphere with radius of .5
 %! f = @(x) ((.25-(x(:,1)+1).^2-(x(:,2)-2).^2).^.5.*(((x(:,1)+1).^2+(x(:,2)-2).^2)<.25)).';
-%! int = mean (f (smpl) ./ pdf (smpl));
-%! errest = std (f (smpl) ./ pdf (smpl)) / nsamples ^ .5;
+%! int = mean (f(smpl) ./ pdf (smpl));
+%! errest = std (f(smpl) ./ pdf (smpl)) / nsamples ^ .5;
 %! trueerr = abs (2 / 3 * pi * .25 ^ (3 / 2) - int);
 %! printf ("Monte Carlo integral estimate int f(x) dx = %f\n", int);
 %! printf ("Monte Carlo integral error estimate %f\n", errest);
 %! printf ("The actual error %f\n", trueerr);
-%! mesh (x, y, reshape (f([x(:), y(:)]), size(x)), "facecolor", "None");
+%! mesh (x, y, reshape (f([x(:), y(:)]), size (x)), 'facecolor', 'None');
 
 %!demo
 %! ## Integrate truncated normal distribution to find normalization constant
 %! pdf = @(x) exp (-.5*x.^2)/(pi^.5*2^.5);
 %! nsamples = 1e3;
-%! rand ("seed", 5)  # for reproducibility
+%! rand ('seed', 5)  # for reproducibility
 %! proprnd = @(x) (rand (size (x)) - .5) * 3 + x;
-%! [smpl, accept] = mhsample (1, nsamples, "pdf", pdf, "proprnd", proprnd, ...
-%!                            "symmetric", true, "thin", 4);
-%! f = @(x) exp(-.5 * x .^ 2) .* (x >= -2 & x <= 2);
+%! [smpl, accept] = mhsample (1, nsamples, 'pdf', pdf, 'proprnd', proprnd, ...
+%!                            'symmetric', true, 'thin', 4);
+%! f = @(x) exp (-.5 * x .^ 2) .* (x >= -2 & x <= 2);
 %! x = linspace (-3, 3, 1000);
-%! area(x, f(x));
+%! area (x, f(x));
 %! xlabel ('x');
 %! ylabel ('f(x)');
-%! int = mean (f (smpl) ./ pdf (smpl));
-%! errest = std (f (smpl) ./ pdf (smpl)) / nsamples^ .5;
+%! int = mean (f(smpl) ./ pdf (smpl));
+%! errest = std (f(smpl) ./ pdf (smpl)) / nsamples^ .5;
 %! trueerr = abs (erf (2 ^ .5) * 2 ^ .5 * pi ^ .5 - int);
 %! printf ("Monte Carlo integral estimate int f(x) dx = %f\n", int);
 %! printf ("Monte Carlo integral error estimate %f\n", errest);
@@ -346,16 +346,16 @@ endfunction
 %! pdf = @(x) exp (-.5*(x-1).^2)/(2*pi)^.5;
 %! proppdf = @(x, y) 1/3;
 %! proprnd = @(x) 3 * (rand (size (x)) - .5) + x;
-%! [smpl, accept] = mhsample (start, nsamples, "pdf", pdf, "proppdf", proppdf, ...
-%!                            "proprnd", proprnd, "thin", 2, "nchain", nchain, ...
-%!                            "burnin", 0);
-%! assert (mean (mean (smpl, 1), 3), 1, .01);
-%! assert (mean (var (smpl, 1), 3), 1, .01)
+%! [smpl, accept] = mhsample (start, nsamples, 'pdf', pdf, 'proppdf', proppdf, ...
+%!                            'proprnd', proprnd, 'thin', 2, 'nchain', nchain, ...
+%!                            'burnin', 0);
+%! assert_equal (mean (mean (smpl, 1), 3), 1, .01);
+%! assert_equal (mean (var (smpl, 1), 3), 1, .01)
 
 ## Test input validation
 %!error mhsample ();
 %!error mhsample (1);
 %!error mhsample (1, 1);
-%!error mhsample (1, 1, "pdf", @(x)x);
-%!error mhsample (1, 1, "pdf", @(x)x, "proprnd", @(x)x+rand(size(x)));
+%!error mhsample (1, 1, 'pdf', @(x)x);
+%!error mhsample (1, 1, 'pdf', @(x)x, 'proprnd', @(x)x+rand (size (x)));
 

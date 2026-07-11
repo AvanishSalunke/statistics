@@ -54,7 +54,7 @@ classdef ExponentialDistribution
   ## explike, expstat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {ExponentialDistribution} {property} mu
     ##
@@ -68,7 +68,7 @@ classdef ExponentialDistribution
     mu
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {ExponentialDistribution} {property} DistributionName
     ##
@@ -78,7 +78,7 @@ classdef ExponentialDistribution
     ## object. This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "ExponentialDistribution";
+    DistributionName = 'ExponentialDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {ExponentialDistribution} {property} NumParameters
@@ -96,39 +96,39 @@ classdef ExponentialDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{1x1} cell array of character vectors with each element containing
+    ## A @math{1*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter. This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"mu"};
+    ParameterNames = {'mu'};
 
     ## -*- texinfo -*-
     ## @deftp {ExponentialDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{1x1} cell array of character vectors with each element containing
+    ## A @math{1*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter. This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Mean"};
+    ParameterDescription = {'Mean'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = true;
-    DistributionCode = "exp";
+    DistributionCode = 'exp';
     ParameterRange = [realmin; Inf];
     ParameterLogCI = true;
   endproperties
 
-  properties (GetAccess = public , SetAccess = protected)
+  properties(GetAccess = public , SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {ExponentialDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{1x1} numeric vector containing the value of the distribution
+    ## A @math{1*1} numeric vector containing the value of the distribution
     ## parameter. This property is read-only. You can change the distribution
     ## parameter by assigning a new value to the @qcode{mu}
     ## property.
@@ -156,7 +156,7 @@ classdef ExponentialDistribution
     ##
     ## Flag for fixed parameters
     ##
-    ## A @math{1x1} logical vector specifying whether the parameter is fixed or
+    ## A @math{1*1} logical vector specifying whether the parameter is fixed or
     ## estimated. @qcode{true} value corresponds to fixed parameter,
     ## @qcode{false} value corresponds to parameter estimate. This property is
     ## read-only.
@@ -169,7 +169,7 @@ classdef ExponentialDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution. First element contains the lower boundary,
     ## second element contains the upper boundary. This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -212,11 +212,11 @@ classdef ExponentialDistribution
     InputData
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected, Hidden)
+  properties(GetAccess = public, SetAccess = protected, Hidden)
     ParameterCI
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = ExponentialDistribution (mu)
       if (nargin == 0)
@@ -231,12 +231,12 @@ classdef ExponentialDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "exponential distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'exponential distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "exponential distribution");
+      __disp__ (this, 'exponential distribution');
     endfunction
 
     function this = set.mu (this, mu)
@@ -253,11 +253,11 @@ classdef ExponentialDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {ExponentialDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {ExponentialDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {ExponentialDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -265,7 +265,7 @@ classdef ExponentialDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -275,9 +275,9 @@ classdef ExponentialDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -420,18 +420,19 @@ classdef ExponentialDistribution
     ## boundaries of the 95% confidence interval for each parameter of the
     ## probability distribution object, @var{pd}.
     ##
-    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes the
+    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes
+    ## the
     ## confidence intervals with additional options specified by
     ## @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Alpha"} @tab @tab A scalar value in the range @math{(0,1)}
+    ## @item @qcode{'Alpha'} @tab A scalar value in the range @math{(0,1)}
     ## specifying the significance level for the confidence interval.  The
     ## default value 0.05 corresponds to a 95% confidence interval.
     ##
-    ## @item @qcode{"Parameter"} @tab @tab A character vector or a cell array of
+    ## @item @qcode{'Parameter'} @tab A character vector or a cell array of
     ## character vectors specifying the parameter names for which to compute
     ## confidence intervals.  By default, @code{paramci} computes confidence
     ## intervals for all distribution parameters.
@@ -492,26 +493,26 @@ classdef ExponentialDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -532,9 +533,9 @@ classdef ExponentialDistribution
 
     ## -*- texinfo -*-
     ## @deftypefn  {ExponentialDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum})
-    ## @deftypefnx {ExponentialDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {ExponentialDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{'Display'}, @var{display})
     ## @deftypefnx {ExponentialDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam})
-    ## @deftypefnx {ExponentialDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {ExponentialDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{'Display'}, @var{display})
     ##
     ## Profile likelihood function for a probability distribution object.
     ##
@@ -547,14 +548,14 @@ classdef ExponentialDistribution
     ## fitted to data.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @qcode{"Display"}, @qcode{"on"})} also plots the profile likelihood
+    ## @qcode{'Display'}, @qcode{'on'})} also plots the profile likelihood
     ## against the default range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
     ## @var{setparam})} defines a user-defined range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @var{setparam}, @qcode{"Display"}, @qcode{"on"})} also plots the profile
+    ## @var{setparam}, @qcode{'Display'}, @qcode{'on'})} also plots the profile
     ## likelihood against the user-defined range of the selected parameter.
     ##
     ## For the exponential distribution, @qcode{@var{pnum} = 1} selects the
@@ -644,7 +645,8 @@ classdef ExponentialDistribution
     ##
     ## @code{@var{t} = truncate (@var{pd}, @var{lower}, @var{upper})} returns a
     ## probability distribution @var{t}, which is the probability distribution
-    ## @var{pd} truncated to the specified interval with lower limit, @var{lower},
+    ## @var{pd} truncated to the specified interval with lower limit,
+    ## @var{lower},
     ## and upper limit, @var{upper}.  If @var{pd} is fitted to data with
     ## @code{fitdist}, the returned probability distribution @var{t} is not
     ## fitted, does not contain any data or estimated values, and it is as it
@@ -695,7 +697,7 @@ classdef ExponentialDistribution
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function pd = fit (x, varargin)
       ## Check input arguments
@@ -728,7 +730,7 @@ classdef ExponentialDistribution
       pd.ParameterCI = pci;
       pd.ParameterIsFixed = false;
       pd.ParameterCovariance = acov;
-      pd.InputData = struct ("data", x, "cens", censor, "freq", freq);
+      pd.InputData = struct ('data', x, 'cens', censor, 'freq', freq);
     endfunction
 
   endmethods
@@ -746,52 +748,52 @@ endfunction
 %!shared pd, t
 %! pd = ExponentialDistribution (1);
 %! t = truncate (pd, 2, 4);
-%!assert (cdf (pd, [0:5]), [0, 0.6321, 0.8647, 0.9502, 0.9817, 0.9933], 1e-4);
-%!assert (cdf (t, [0:5]), [0, 0, 0, 0.7311, 1, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4]), [0.7769, 0.8647, 0.9502, 0.9817], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4]), [0, 0, 0.7311, 1], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [0, 0.2231, 0.5108, 0.9163, 1.6094, Inf], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [2, 2.1899, 2.4244, 2.7315, 3.1768, 4], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 0.5108, 0.9163, 1.6094, Inf, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.4244, 2.7315, 3.1768, 4, NaN], 1e-4);
-%!assert (iqr (pd), 1.0986, 1e-4);
-%!assert (iqr (t), 0.8020, 1e-4);
-%!assert (mean (pd), 1);
-%!assert (mean (t), 2.6870, 1e-4);
-%!assert (median (pd), 0.6931, 1e-4);
-%!assert (median (t), 2.5662, 1e-4);
-%!assert (pdf (pd, [0:5]), [1, 0.3679, 0.1353, 0.0498, 0.0183, 0.0067], 1e-4);
-%!assert (pdf (t, [0:5]), [0, 0, 1.1565, 0.4255, 0.1565, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1:4, NaN]), [0, 0.3679, 0.1353, 0.0498, 0.0183, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1:4, NaN]), [0, 0, 1.1565, 0.4255, 0.1565, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 2), false);
-%!assert (any (random (t, 1000, 1) > 4), false);
-%!assert (std (pd), 1);
-%!assert (std (t), 0.5253, 1e-4);
-%!assert (var (pd), 1);
-%!assert (var (t), 0.2759, 1e-4);
+%!assert_equal (cdf (pd, [0:5]), [0, 0.6321, 0.8647, 0.9502, 0.9817, 0.9933], 1e-4);
+%!assert_equal (cdf (t, [0:5]), [0, 0, 0, 0.7311, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4]), [0.7769, 0.8647, 0.9502, 0.9817], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4]), [0, 0, 0.7311, 1], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [0, 0.2231, 0.5108, 0.9163, 1.6094, Inf], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [2, 2.1899, 2.4244, 2.7315, 3.1768, 4], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 0.5108, 0.9163, 1.6094, Inf, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.4244, 2.7315, 3.1768, 4, NaN], 1e-4);
+%!assert_equal (iqr (pd), 1.0986, 1e-4);
+%!assert_equal (iqr (t), 0.8020, 1e-4);
+%!assert_equal (mean (pd), 1);
+%!assert_equal (mean (t), 2.6870, 1e-4);
+%!assert_equal (median (pd), 0.6931, 1e-4);
+%!assert_equal (median (t), 2.5662, 1e-4);
+%!assert_equal (pdf (pd, [0:5]), [1, 0.3679, 0.1353, 0.0498, 0.0183, 0.0067], 1e-4);
+%!assert_equal (pdf (t, [0:5]), [0, 0, 1.1565, 0.4255, 0.1565, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1:4, NaN]), [0, 0.3679, 0.1353, 0.0498, 0.0183, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1:4, NaN]), [0, 0, 1.1565, 0.4255, 0.1565, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 2), false);
+%!assert_equal (any (random (t, 1000, 1) > 4), false);
+%!assert_equal (std (pd), 1);
+%!assert_equal (std (t), 0.5253, 1e-4);
+%!assert_equal (var (pd), 1);
+%!assert_equal (var (t), 0.2759, 1e-4);
 
 ## Test input validation
 ## 'ExponentialDistribution' constructor
 %!error <ExponentialDistribution: MU must be a positive real scalar.> ...
-%! ExponentialDistribution(0)
+%! ExponentialDistribution (0)
 %!error <ExponentialDistribution: MU must be a positive real scalar.> ...
-%! ExponentialDistribution(-1)
+%! ExponentialDistribution (-1)
 %!error <ExponentialDistribution: MU must be a positive real scalar.> ...
-%! ExponentialDistribution(Inf)
+%! ExponentialDistribution (Inf)
 %!error <ExponentialDistribution: MU must be a positive real scalar.> ...
-%! ExponentialDistribution(i)
+%! ExponentialDistribution (i)
 %!error <ExponentialDistribution: MU must be a positive real scalar.> ...
-%! ExponentialDistribution("a")
+%! ExponentialDistribution ('a')
 %!error <ExponentialDistribution: MU must be a positive real scalar.> ...
-%! ExponentialDistribution([1, 2])
+%! ExponentialDistribution ([1, 2])
 %!error <ExponentialDistribution: MU must be a positive real scalar.> ...
-%! ExponentialDistribution(NaN)
+%! ExponentialDistribution (NaN)
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (ExponentialDistribution, 2, "uper")
+%! cdf (ExponentialDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (ExponentialDistribution, 2, 3)
 
@@ -799,60 +801,60 @@ endfunction
 %!shared x
 %! x = exprnd (1, [100, 1]);
 %!error <paramci: optional arguments must be in NAME-VALUE pairs.> ...
-%! paramci (ExponentialDistribution.fit (x), "alpha")
+%! paramci (ExponentialDistribution.fit (x), 'alpha')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (ExponentialDistribution.fit (x), "alpha", 0)
+%! paramci (ExponentialDistribution.fit (x), 'alpha', 0)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (ExponentialDistribution.fit (x), "alpha", 1)
+%! paramci (ExponentialDistribution.fit (x), 'alpha', 1)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (ExponentialDistribution.fit (x), "alpha", [0.5 2])
+%! paramci (ExponentialDistribution.fit (x), 'alpha', [0.5 2])
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (ExponentialDistribution.fit (x), "alpha", "")
+%! paramci (ExponentialDistribution.fit (x), 'alpha', '')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (ExponentialDistribution.fit (x), "alpha", {0.05})
+%! paramci (ExponentialDistribution.fit (x), 'alpha', {0.05})
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (ExponentialDistribution.fit (x), "parameter", "mu", ...
-%!          "alpha", {0.05})
+%! paramci (ExponentialDistribution.fit (x), 'parameter', 'mu', ...
+%!          'alpha', {0.05})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (ExponentialDistribution.fit (x), "parameter", {"mu", "param"})
+%! paramci (ExponentialDistribution.fit (x), 'parameter', {'mu', 'param'})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (ExponentialDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", {"mu", "param"})
+%! paramci (ExponentialDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', {'mu', 'param'})
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (ExponentialDistribution.fit (x), "parameter", "param")
+%! paramci (ExponentialDistribution.fit (x), 'parameter', 'param')
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (ExponentialDistribution.fit (x), "alpha", 0.01, "parameter", "parm")
+%! paramci (ExponentialDistribution.fit (x), 'alpha', 0.01, 'parameter', 'parm')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (ExponentialDistribution.fit (x), "NAME", "value")
+%! paramci (ExponentialDistribution.fit (x), 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (ExponentialDistribution.fit (x), "alpha", 0.01, "NAME", "value")
+%! paramci (ExponentialDistribution.fit (x), 'alpha', 0.01, 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (ExponentialDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", "mu", "NAME", "value")
+%! paramci (ExponentialDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', 'mu', 'NAME', 'value')
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (ExponentialDistribution, "Parent")
+%! plot (ExponentialDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (ExponentialDistribution, "PlotType", 12)
+%! plot (ExponentialDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (ExponentialDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (ExponentialDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (ExponentialDistribution, "PlotType", "pdfcdf")
+%! plot (ExponentialDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (ExponentialDistribution, "Discrete", "pdfcdf")
+%! plot (ExponentialDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (ExponentialDistribution, "Discrete", [1, 0])
+%! plot (ExponentialDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (ExponentialDistribution, "Discrete", {true})
+%! plot (ExponentialDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (ExponentialDistribution, "Parent", 12)
+%! plot (ExponentialDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (ExponentialDistribution, "Parent", "hax")
+%! plot (ExponentialDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (ExponentialDistribution, "invalidNAME", "pdf")
+%! plot (ExponentialDistribution, 'invalidNAME', 'pdf')
 %!error <plot: no fitted DATA to plot a probability plot.> ...
-%! plot (ExponentialDistribution, "PlotType", "probability")
+%! plot (ExponentialDistribution, 'PlotType', 'probability')
 
 ## 'proflik' method
 %!error <proflik: no fitted data available.> ...
@@ -866,23 +868,23 @@ endfunction
 %!error <proflik: SETPARAM must be a numeric vector.> ...
 %! proflik (ExponentialDistribution.fit (x), 1, ones (2))
 %!error <proflik: missing VALUE for 'Display' argument.> ...
-%! proflik (ExponentialDistribution.fit (x), 1, "Display")
+%! proflik (ExponentialDistribution.fit (x), 1, 'Display')
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (ExponentialDistribution.fit (x), 1, "Display", 1)
+%! proflik (ExponentialDistribution.fit (x), 1, 'Display', 1)
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (ExponentialDistribution.fit (x), 1, "Display", {1})
+%! proflik (ExponentialDistribution.fit (x), 1, 'Display', {1})
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (ExponentialDistribution.fit (x), 1, "Display", {"on"})
+%! proflik (ExponentialDistribution.fit (x), 1, 'Display', {'on'})
 %!error <proflik: invalid VALUE size for 'Display' argument.> ...
-%! proflik (ExponentialDistribution.fit (x), 1, "Display", ["on"; "on"])
+%! proflik (ExponentialDistribution.fit (x), 1, 'Display', ['on'; 'on'])
 %!error <proflik: invalid VALUE for 'Display' argument.> ...
-%! proflik (ExponentialDistribution.fit (x), 1, "Display", "onnn")
+%! proflik (ExponentialDistribution.fit (x), 1, 'Display', 'onnn')
 %!error <proflik: invalid NAME for optional arguments.> ...
-%! proflik (ExponentialDistribution.fit (x), 1, "NAME", "on")
+%! proflik (ExponentialDistribution.fit (x), 1, 'NAME', 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (ExponentialDistribution.fit (x), 1, {"NAME"}, "on")
+%! proflik (ExponentialDistribution.fit (x), 1, {'NAME'}, 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (ExponentialDistribution.fit (x), 1, {[1 2 3 4]}, "Display", "on")
+%! proflik (ExponentialDistribution.fit (x), 1, {[1 2 3 4]}, 'Display', 'on')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...
@@ -894,8 +896,8 @@ endfunction
 
 ## Catch errors when using array of probability objects with available methods
 %!shared pd
-%! pd = ExponentialDistribution(1);
-%! pd(2) = ExponentialDistribution(3);
+%! pd = ExponentialDistribution (1);
+%! pd(2) = ExponentialDistribution (3);
 %!error <cdf: requires a scalar probability distribution.> cdf (pd, 1)
 %!error <icdf: requires a scalar probability distribution.> icdf (pd, 0.5)
 %!error <iqr: requires a scalar probability distribution.> iqr (pd)

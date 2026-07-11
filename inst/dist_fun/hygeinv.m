@@ -24,8 +24,9 @@
 ## Inverse of the hypergeometric cumulative distribution function (iCDF).
 ##
 ## For each element of @var{p}, compute the quantile (the inverse of the CDF) of
-## the hypergeometric distribution with parameters @var{m}, @var{k}, and @var{n}.
-## The size of @var{x} is the common size of @var{p}, @var{m}, @var{k}, and
+## the hypergeometric distribution with parameters @var{m}, @var{k}, and
+## @var{n}. The size of @var{x} is the common size of @var{p}, @var{m}, @var{k},
+## and
 ## @var{n}.  A scalar input functions as a constant matrix of the same size as
 ## the other inputs.
 ##
@@ -62,9 +63,9 @@ function x = hygeinv (p, m, k, n)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (m, "single")
-                        || isa (k, "single") || isa (n, "single"))
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (m, 'single')
+                        || isa (k, 'single') || isa (n, 'single'))
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -79,9 +80,9 @@ function x = hygeinv (p, m, k, n)
     endif
   else
     p_0 = (p == 0);
-    x (ok & p_0) = 0; # set any p=0 to 0 if not already set to output NaN
+    x(ok & p_0) = 0; # set any p=0 to 0 if not already set to output NaN
     p_0 = (p == 1);
-    x (ok & p_0) = n(ok & p_0);
+    x(ok & p_0) = n(ok & p_0);
     ok &= (p>0 & p<1); # remove 0's and p's outside (0,1), leave unfilled as NaN
 
     if (any (ok(:)))
@@ -89,7 +90,7 @@ function x = hygeinv (p, m, k, n)
       v = 0 : max (n(:));
 
       ## Manually perform discrete_inv to enable vectorizing with array input
-      p_tmp = cumsum (hygepdf (v, m(ok), k(ok), n, "vectorexpand"), 2);
+      p_tmp = cumsum (hygepdf (v, m(ok), k(ok), n, 'vectorexpand'), 2);
       sz_p = size (p_tmp);
       end_locs = sub2ind (sz_p, [1 : numel(n)]', n(:) + 1);
 
@@ -100,7 +101,7 @@ function x = hygeinv (p, m, k, n)
       p_tmp = (p_tmp ./ p_tmp(end_locs))(:, end:-1:1) - p(ok)(:);
       p_tmp(p_tmp>=0) = NaN;
       [p_match, p_match_idx] = max (p_tmp, [], 2);
-      p_match_idx(isnan(p_match)) = v(end) + 2;
+      p_match_idx(isnan (p_match)) = v(end) + 2;
 
       x(ok) = v(v(end) - p_match_idx + 3);
     endif
@@ -114,35 +115,35 @@ endfunction
 %! x1 = hygeinv (p, 500, 50, 100);
 %! x2 = hygeinv (p, 500, 60, 200);
 %! x3 = hygeinv (p, 500, 70, 300);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r')
 %! grid on
 %! ylim ([0, 60])
-%! legend ({"m = 500, k = 50, n = 100", "m = 500, k = 60, n = 200", ...
-%!          "m = 500, k = 70, n = 300"}, "location", "northwest")
-%! title ("Hypergeometric iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in p (number of successes)")
+%! legend ({'m = 500, k = 50, n = 100', 'm = 500, k = 60, n = 200', ...
+%!          'm = 500, k = 70, n = 300'}, 'location', 'northwest')
+%! title ('Hypergeometric iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in p (number of successes)')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.5 1 2];
-%!assert (hygeinv (p, 4*ones (1,5), 2*ones (1,5), 2*ones (1,5)), [NaN 0 1 2 NaN])
-%!assert (hygeinv (p, 4*ones (1,5), 2, 2), [NaN 0 1 2 NaN])
-%!assert (hygeinv (p, 4, 2*ones (1,5), 2), [NaN 0 1 2 NaN])
-%!assert (hygeinv (p, 4, 2, 2*ones (1,5)), [NaN 0 1 2 NaN])
-%!assert (hygeinv (p, 4*[1 -1 NaN 1.1 1], 2, 2), [NaN NaN NaN NaN NaN])
-%!assert (hygeinv (p, 4, 2*[1 -1 NaN 1.1 1], 2), [NaN NaN NaN NaN NaN])
-%!assert (hygeinv (p, 4, 5, 2), [NaN NaN NaN NaN NaN])
-%!assert (hygeinv (p, 4, 2, 2*[1 -1 NaN 1.1 1]), [NaN NaN NaN NaN NaN])
-%!assert (hygeinv (p, 4, 2, 5), [NaN NaN NaN NaN NaN])
-%!assert (hygeinv ([p(1:2) NaN p(4:5)], 4, 2, 2), [NaN 0 NaN 2 NaN])
+%!assert_equal (hygeinv (p, 4*ones (1,5), 2*ones (1,5), 2*ones (1,5)), [NaN 0 1 2 NaN])
+%!assert_equal (hygeinv (p, 4*ones (1,5), 2, 2), [NaN 0 1 2 NaN])
+%!assert_equal (hygeinv (p, 4, 2*ones (1,5), 2), [NaN 0 1 2 NaN])
+%!assert_equal (hygeinv (p, 4, 2, 2*ones (1,5)), [NaN 0 1 2 NaN])
+%!assert_equal (hygeinv (p, 4*[1 -1 NaN 1.1 1], 2, 2), [NaN NaN NaN NaN NaN])
+%!assert_equal (hygeinv (p, 4, 2*[1 -1 NaN 1.1 1], 2), [NaN NaN NaN NaN NaN])
+%!assert_equal (hygeinv (p, 4, 5, 2), [NaN NaN NaN NaN NaN])
+%!assert_equal (hygeinv (p, 4, 2, 2*[1 -1 NaN 1.1 1]), [NaN NaN NaN NaN NaN])
+%!assert_equal (hygeinv (p, 4, 2, 5), [NaN NaN NaN NaN NaN])
+%!assert_equal (hygeinv ([p(1:2) NaN p(4:5)], 4, 2, 2), [NaN 0 NaN 2 NaN])
 
 ## Test class of input preserved
-%!assert (hygeinv ([p, NaN], 4, 2, 2), [NaN 0 1 2 NaN NaN])
-%!assert (hygeinv (single ([p, NaN]), 4, 2, 2), single ([NaN 0 1 2 NaN NaN]))
-%!assert (hygeinv ([p, NaN], single (4), 2, 2), single ([NaN 0 1 2 NaN NaN]))
-%!assert (hygeinv ([p, NaN], 4, single (2), 2), single ([NaN 0 1 2 NaN NaN]))
-%!assert (hygeinv ([p, NaN], 4, 2, single (2)), single ([NaN 0 1 2 NaN NaN]))
+%!assert_equal (hygeinv ([p, NaN], 4, 2, 2), [NaN 0 1 2 NaN NaN])
+%!assert_equal (hygeinv (single ([p, NaN]), 4, 2, 2), single ([NaN 0 1 2 NaN NaN]))
+%!assert_equal (hygeinv ([p, NaN], single (4), 2, 2), single ([NaN 0 1 2 NaN NaN]))
+%!assert_equal (hygeinv ([p, NaN], 4, single (2), 2), single ([NaN 0 1 2 NaN NaN]))
+%!assert_equal (hygeinv ([p, NaN], 4, 2, single (2)), single ([NaN 0 1 2 NaN NaN]))
 
 ## Test input validation
 %!error<hygeinv: function called with too few input arguments.> hygeinv ()

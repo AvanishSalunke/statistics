@@ -43,7 +43,8 @@
 ## also be specified with a row vector of dimensions, @var{sz}.
 ##
 ## Further information about the location-scale Student's T distribution can be
-## found at @url{https://en.wikipedia.org/wiki/Student%27s_t-distribution#Location-scale_t_distribution}
+## found at
+## @url{https://en.wikipedia.org/wiki/Student%27s_t-distribution#Location-scale_t_distribution}
 ##
 ## @seealso{tlscdf, tlsinv, tlspdf, tlsfit, tlslike, tlsstat}
 ## @end deftypefn
@@ -100,10 +101,10 @@ function r = tlsrnd (mu, sigma, nu, varargin)
   endif
 
   ## Check for class type
-  if (isa (mu, "single") || isa (sigma, "single") || isa (nu, "single"))
-    cls = "single";
+  if (isa (mu, 'single') || isa (sigma, 'single') || isa (nu, 'single'))
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ## Call trnd to do the work
@@ -115,30 +116,30 @@ function r = tlsrnd (mu, sigma, nu, varargin)
 endfunction
 
 ## Test output
-%!assert (size (tlsrnd (1, 2, 3)), [1, 1])
-%!assert (size (tlsrnd (ones (2, 1), 2, 3)), [2, 1])
-%!assert (size (tlsrnd (ones (2, 2), 2, 3)), [2, 2])
-%!assert (size (tlsrnd (1, 2, 3, 3)), [3, 3])
-%!assert (size (tlsrnd (1, 2, 3, [4, 1])), [4, 1])
-%!assert (size (tlsrnd (1, 2, 3, 4, 1)), [4, 1])
-%!assert (size (tlsrnd (1, 2, 3, 4, 1)), [4, 1])
-%!assert (size (tlsrnd (1, 2, 3, 4, 1, 5)), [4, 1, 5])
-%!assert (size (tlsrnd (1, 2, 3, 0, 1)), [0, 1])
-%!assert (size (tlsrnd (1, 2, 3, 1, 0)), [1, 0])
-%!assert (size (tlsrnd (1, 2, 3, 1, 2, 0, 5)), [1, 2, 0, 5])
-%!assert (size (tlsrnd (1, 2, 3, [])), [0, 0])
-%!assert (size (tlsrnd (1, 2, 3, [2, 0, 2, 1])), [2, 0, 2])
-%!assert (tlsrnd (1, 2, 0, 1, 1), NaN)
-%!assert (tlsrnd (1, 2, [0, 0, 0], [1, 3]), [NaN, NaN, NaN])
+%!assert_equal (size (tlsrnd (1, 2, 3)), [1, 1])
+%!assert_equal (size (tlsrnd (ones (2, 1), 2, 3)), [2, 1])
+%!assert_equal (size (tlsrnd (ones (2, 2), 2, 3)), [2, 2])
+%!assert_equal (size (tlsrnd (1, 2, 3, 3)), [3, 3])
+%!assert_equal (size (tlsrnd (1, 2, 3, [4, 1])), [4, 1])
+%!assert_equal (size (tlsrnd (1, 2, 3, 4, 1)), [4, 1])
+%!assert_equal (size (tlsrnd (1, 2, 3, 4, 1)), [4, 1])
+%!assert_equal (size (tlsrnd (1, 2, 3, 4, 1, 5)), [4, 1, 5])
+%!assert_equal (size (tlsrnd (1, 2, 3, 0, 1)), [0, 1])
+%!assert_equal (size (tlsrnd (1, 2, 3, 1, 0)), [1, 0])
+%!assert_equal (size (tlsrnd (1, 2, 3, 1, 2, 0, 5)), [1, 2, 0, 5])
+%!assert_equal (size (tlsrnd (1, 2, 3, [])), [0, 0])
+%!assert_equal (size (tlsrnd (1, 2, 3, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (tlsrnd (1, 2, 0, 1, 1), NaN)
+%!assert_equal (tlsrnd (1, 2, [0, 0, 0], [1, 3]), [NaN, NaN, NaN])
 
 ## Test class of input preserved
-%!assert (class (tlsrnd (1, 2, 3)), "double")
-%!assert (class (tlsrnd (single (1), 2, 3)), "single")
-%!assert (class (tlsrnd (single ([1, 1]), 2, 3)), "single")
-%!assert (class (tlsrnd (1, single (2), 3)), "single")
-%!assert (class (tlsrnd (1, single ([2, 2]), 3)), "single")
-%!assert (class (tlsrnd (1, 2, single (3))), "single")
-%!assert (class (tlsrnd (1, 2, single ([3, 3]))), "single")
+%!assert_equal (class (tlsrnd (1, 2, 3)), "double")
+%!assert_equal (class (tlsrnd (single (1), 2, 3)), "single")
+%!assert_equal (class (tlsrnd (single ([1, 1]), 2, 3)), "single")
+%!assert_equal (class (tlsrnd (1, single (2), 3)), "single")
+%!assert_equal (class (tlsrnd (1, single ([2, 2]), 3)), "single")
+%!assert_equal (class (tlsrnd (1, 2, single (3))), "single")
+%!assert_equal (class (tlsrnd (1, 2, single ([3, 3]))), "single")
 
 ## Test input validation
 %!error<tlsrnd: function called with too few input arguments.> tlsrnd ()

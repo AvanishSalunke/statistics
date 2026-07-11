@@ -77,9 +77,9 @@ function [handle, param] = wblplot (data, censor = [], freq = [], ...
     [mmf nnf] = size (freq);
     if ((mmf == mm && nnf == 1) || (mmf == 1 && nnf == mm))
       freq = freq(:);
-      N = sum (freq);	## Total number of samples
+      N = sum (freq);  ## Total number of samples
       if (any (freq <= 0))
-	      error ("wblplot: frequency vector must be positive non zero integers")
+        error ("wblplot: frequency vector must be positive non zero integers")
       endif
     else
       error ("wblplot: frequency must be vector of same length as data")
@@ -87,9 +87,9 @@ function [handle, param] = wblplot (data, censor = [], freq = [], ...
   endif
 
   if (isempty (censor))
-      censor = zeros(mm,1);
+      censor = zeros (mm,1);
   else
-    [mmc, nnc] = size(censor);
+    [mmc, nnc] = size (censor);
     if ((mmc == mm && nnc == 1) || (mmc == 1 && nnc == mm))
       censor = censor(:);
     else
@@ -135,7 +135,7 @@ function [handle, param] = wblplot (data, censor = [], freq = [], ...
   endfor
   ## Compute median rank
   a = wbdat(:, 3) ./ (N - wbdat(:, 3) + 1);
-  f = finv(0.5, 2 * (N - wbdat(:, 3) + 1), 2 * wbdat(:, 3));
+  f = finv (0.5, 2 * (N - wbdat(:, 3) + 1), 2 * wbdat(:, 3));
 
   wbdat(:, 2) = a ./ (f+a);
 
@@ -177,13 +177,13 @@ function [handle, param] = wblplot (data, censor = [], freq = [], ...
   x = [0;0];
   y = [0;0];
 
-  label = char('0.10', '1.00', '10.00', '99.00');
+  label = char ('0.10', '1.00', '10.00', '99.00');
   prob = [0.001 0.01 0.1 0.99];
   tick  = log (log (1 ./ (1 - prob)));
   xbf = [xmin; xmax];
   ybf = polyval (poly, log (xbf));
 
-  newplot();
+  newplot ();
   x(1, 1) = xmin;
   x(2, 1) = xmax;
   if (fancygrid == 1)
@@ -296,11 +296,11 @@ function [handle, param] = wblplot (data, censor = [], freq = [], ...
     if (! isempty (confint))
       s2 = sprintf ('CB_H=%.2f', cb_high);
       s3 = sprintf ('CB_L=%.2f', cb_low);
-      legend ([h; h2; h3], "Data", s1, s2, s3, "location", "northeastoutside");
+      legend ([h; h2; h3], 'Data', s1, s2, s3, 'location', 'northeastoutside');
     else
-      legend ([h; h2], "Data", s1, "location", "northeastoutside");
+      legend ([h; h2], 'Data', s1, 'location', 'northeastoutside');
     endif
-    legend ("boxoff");
+    legend ('boxoff');
   endif
   axis ([xmin, xmax, ymin, (log (log (1 / (1 - 0.99))))]);
   hold off
@@ -360,14 +360,14 @@ endfunction
 
 ## Test plotting
 %!test
-%! hf = figure ("visible", "off");
+%! hf = figure ('visible', 'off');
 %! unwind_protect
 %!   x = [16, 34, 53, 75, 93, 120, 150, 191, 240 ,339];
 %!   [h, p] = wblplot (x, [], [], 0.05);
-%!   assert (numel (h), 4)
-%!   assert (p(1), 146.2545, 1E-4)
-%!   assert (p(2), 1.1973, 1E-4)
-%!   assert (p(3), 0.9999, 5E-5)
+%!   assert_equal (numel (h), 4)
+%!   assert_equal (p(1), 146.2545, 1E-4)
+%!   assert_equal (p(2), 1.1973, 1E-4)
+%!   assert_equal (p(3), 0.9999, 5E-5)
 %! unwind_protect_cleanup
 %!   close (hf);
 %! end_unwind_protect

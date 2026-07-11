@@ -49,7 +49,8 @@
 ## @qcode{@var{freq} = ones (size (@var{x}))}.
 ##
 ## Further information about the location-scale Student's T distribution can be
-## found at @url{https://en.wikipedia.org/wiki/Student%27s_t-distribution#Location-scale_t_distribution}
+## found at
+## @url{https://en.wikipedia.org/wiki/Student%27s_t-distribution#Location-scale_t_distribution}
 ##
 ## @seealso{tlscdf, tlsinv, tlspdf, tlsrnd, tlsfit, tlsstat}
 ## @end deftypefn
@@ -159,9 +160,9 @@ function nlogL = tlsnll (x, params, censor, freq)
       S_censored = betainc (nu ./ w(censored), 0.5 .* nu, 0.5) ./ 2;
       S_censored(z(censored) < 0) = 1 - S_censored(z(censored) < 0);
     else            # Use a normal approximation
-      S_censored = log(0.5 * erfc(z(censored) ./ sqrt(2)));
+      S_censored = log (0.5 * erfc (z(censored) ./ sqrt (2)));
     endif
-    L(censored) = log(S_censored);
+    L(censored) = log (S_censored);
   endif
   nlogL = - sum (freq .* L);
 
@@ -174,8 +175,8 @@ endfunction
 %! acov_out = [0.2525, 0.0670, 0.0288; ...
 %!             0.0670, 0.5724, 0.1786; ...
 %!             0.0288, 0.1786, 0.1789];
-%! assert (nlogL, 17.9979636579, 1e-10);
-%! assert (acov, acov_out, 1e-4);
+%! assert_equal (nlogL, 17.9979636579, 1e-10);
+%! assert_equal (acov, acov_out, 1e-4);
 
 ## Test input validation
 %!error<tlslike: too few input arguments.> tlslike ([12, 15, 1]);

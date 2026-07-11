@@ -107,10 +107,10 @@ function r = trirnd (a, b, c, varargin)
   endif
 
   ## Check for class type
-  if (isa (a, "single") || isa (b, "single") || isa (c, "single"))
-    cls = "single";
+  if (isa (a, 'single') || isa (b, 'single') || isa (c, 'single'))
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ## Generate random sample from triangular distribution
@@ -124,7 +124,7 @@ function r = trirnd (a, b, c, varargin)
       r = rand (sz, cls);
       idx = r < left_area;
       r(idx) = a + (r(idx) * w * left_width).^0.5;
-      r(~idx) = c - ((1-r(~idx)) * w * right_width).^0.5;
+      r(! idx) = c - ((1-r(! idx)) * w * right_width).^0.5;
     else
       r = NaN (sz, cls);
     endif
@@ -137,7 +137,7 @@ function r = trirnd (a, b, c, varargin)
     r = rand (sz, cls);
     k = r < left_area;
     r(k) = a(k) + (r(k) .* w(k) .* left_width(k)).^0.5;
-    r(~k) = c(~k) - ((1-r(~k)) .* w(~k) .* right_width(~k)).^0.5;
+    r(! k) = c(! k) - ((1-r(! k)) .* w(! k) .* right_width(! k)).^0.5;
 
     k = ! (-Inf < a) | ! (a < c) | ! (a <= b) | ! (b <= c) | ! (c < Inf);
     r(k) = NaN;
@@ -146,27 +146,27 @@ function r = trirnd (a, b, c, varargin)
 endfunction
 
 ## Test results
-%!assert (size (trirnd (1, 1.5, 2)), [1, 1])
-%!assert (size (trirnd (1 * ones (2, 1), 1.5, 2)), [2, 1])
-%!assert (size (trirnd (1 * ones (2, 2), 1.5, 2)), [2, 2])
-%!assert (size (trirnd (1, 1.5 * ones (2, 1), 2)), [2, 1])
-%!assert (size (trirnd (1, 1.5 * ones (2, 2), 2)), [2, 2])
-%!assert (size (trirnd (1, 1.5, 2 * ones (2, 1))), [2, 1])
-%!assert (size (trirnd (1, 1.5, 2 * ones (2, 2))), [2, 2])
-%!assert (size (trirnd (1, 1.5, 2, 3)), [3, 3])
-%!assert (size (trirnd (1, 1.5, 2, [4, 1])), [4, 1])
-%!assert (size (trirnd (1, 1.5, 2, 4, 1)), [4, 1])
-%!assert (size (trirnd (1, 1.5, 2, [])), [0, 0])
-%!assert (size (trirnd (1, 1.5, 2, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (trirnd (1, 1.5, 2)), [1, 1])
+%!assert_equal (size (trirnd (1 * ones (2, 1), 1.5, 2)), [2, 1])
+%!assert_equal (size (trirnd (1 * ones (2, 2), 1.5, 2)), [2, 2])
+%!assert_equal (size (trirnd (1, 1.5 * ones (2, 1), 2)), [2, 1])
+%!assert_equal (size (trirnd (1, 1.5 * ones (2, 2), 2)), [2, 2])
+%!assert_equal (size (trirnd (1, 1.5, 2 * ones (2, 1))), [2, 1])
+%!assert_equal (size (trirnd (1, 1.5, 2 * ones (2, 2))), [2, 2])
+%!assert_equal (size (trirnd (1, 1.5, 2, 3)), [3, 3])
+%!assert_equal (size (trirnd (1, 1.5, 2, [4, 1])), [4, 1])
+%!assert_equal (size (trirnd (1, 1.5, 2, 4, 1)), [4, 1])
+%!assert_equal (size (trirnd (1, 1.5, 2, [])), [0, 0])
+%!assert_equal (size (trirnd (1, 1.5, 2, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (trirnd (1, 1.5, 2)), "double")
-%!assert (class (trirnd (single (1), 1.5, 2)), "single")
-%!assert (class (trirnd (single ([1, 1]), 1.5, 2)), "single")
-%!assert (class (trirnd (1, single (1.5), 2)), "single")
-%!assert (class (trirnd (1, single ([1.5, 1.5]), 2)), "single")
-%!assert (class (trirnd (1, 1.5, single (1.5))), "single")
-%!assert (class (trirnd (1, 1.5, single ([2, 2]))), "single")
+%!assert_equal (class (trirnd (1, 1.5, 2)), "double")
+%!assert_equal (class (trirnd (single (1), 1.5, 2)), "single")
+%!assert_equal (class (trirnd (single ([1, 1]), 1.5, 2)), "single")
+%!assert_equal (class (trirnd (1, single (1.5), 2)), "single")
+%!assert_equal (class (trirnd (1, single ([1.5, 1.5]), 2)), "single")
+%!assert_equal (class (trirnd (1, 1.5, single (1.5))), "single")
+%!assert_equal (class (trirnd (1, 1.5, single ([2, 2]))), "single")
 
 ## Test input validation
 %!error<trirnd: function called with too few input arguments.> trirnd ()

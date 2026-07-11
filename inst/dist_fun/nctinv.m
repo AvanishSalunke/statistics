@@ -53,12 +53,12 @@ function x = nctinv (p, df, mu)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (df, "single") || isa (mu, "single"))
-    x = NaN (size (p), "single");
-    crit = sqrt (eps ("single"));
+  if (isa (p, 'single') || isa (df, 'single') || isa (mu, 'single'))
+    x = NaN (size (p), 'single');
+    crit = sqrt (eps ('single'));
   else
-    x = NaN (size (p), "double");
-    crit = sqrt (eps ("double"));
+    x = NaN (size (p), 'double');
+    crit = sqrt (eps ('double'));
   endif
 
   ## For mu == 0, call chi2inv
@@ -97,7 +97,7 @@ function x = nctinv (p, df, mu)
     count = count + 1;
     h_k = (F - p_k) ./ nctpdf (x_k, df_k, mu_k);
     ## Prevent Infs - NaNs
-    infnan = isinf(h_k) | isnan(h_k);
+    infnan = isinf (h_k) | isnan (h_k);
     if (any (infnan(:)))
       h_k(infnan) = x_k(infnan) / 10;
     endif
@@ -134,14 +134,14 @@ endfunction
 %! x2 = nctinv (p, 4, 0);
 %! x3 = nctinv (p, 1, 2);
 %! x4 = nctinv (p, 4, 2);
-%! plot (p, x1, "-r", p, x2, "-g", p, x3, "-k", p, x4, "-m")
+%! plot (p, x1, '-r', p, x2, '-g', p, x3, '-k', p, x4, '-m')
 %! grid on
 %! ylim ([-5, 5])
-%! legend ({"df = 1, μ = 0", "df = 4, μ = 0", ...
-%!          "df = 1, μ = 2", "df = 4, μ = 2"}, "location", "northwest")
-%! title ("Noncentral T iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'df = 1, μ = 0', 'df = 4, μ = 0', ...
+%!          'df = 1, μ = 2', 'df = 4, μ = 2'}, 'location', 'northwest')
+%! title ('Noncentral T iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 %!demo
 %! ## Compare the noncentral T iCDF with MU = 1 to the T iCDF
@@ -150,35 +150,35 @@ endfunction
 %! p = 0.001:0.001:0.999;
 %! x1 = nctinv (p, 10, 1);
 %! x2 = tinv (p, 10);
-%! plot (p, x1, "-", p, x2, "-");
+%! plot (p, x1, '-', p, x2, '-');
 %! grid on
 %! ylim ([-5, 5])
-%! legend ({"Noncentral T(10,1)", "T(10)"}, "location", "northwest")
-%! title ("Noncentral T vs T quantile functions")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'Noncentral T(10,1)', 'T(10)'}, 'location', 'northwest')
+%! title ('Noncentral T vs T quantile functions')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!test
 %! x = [-Inf,-0.3347,0.1756,0.5209,0.8279,1.1424,1.5021,1.9633,2.6571,4.0845,Inf];
-%! assert (nctinv ([0:0.1:1], 2, 1), x, 1e-4);
+%! assert_equal (nctinv ([0:0.1:1], 2, 1), x, 1e-4);
 %!test
 %! x = [-Inf,1.5756,2.0827,2.5343,3.0043,3.5406,4.2050,5.1128,6.5510,9.6442,Inf];
-%! assert (nctinv ([0:0.1:1], 2, 3), x, 1e-4);
+%! assert_equal (nctinv ([0:0.1:1], 2, 3), x, 1e-4);
 %!test
 %! x = [-Inf,2.2167,2.9567,3.7276,4.6464,5.8455,7.5619,10.3327,15.7569,31.8159,Inf];
-%! assert (nctinv ([0:0.1:1], 1, 4), x, 1e-4);
+%! assert_equal (nctinv ([0:0.1:1], 1, 4), x, 1e-4);
 %!test
 %! x = [1.7791   1.9368   2.0239   2.0801   2.1195   2.1489];
-%! assert (nctinv (0.05, [1, 2, 3, 4, 5, 6], 4), x, 1e-4);
+%! assert_equal (nctinv (0.05, [1, 2, 3, 4, 5, 6], 4), x, 1e-4);
 %!test
 %! x = [-0.7755, 0.3670, 1.2554, 2.0239, 2.7348, 3.4154];
-%! assert (nctinv (0.05, 3, [1, 2, 3, 4, 5, 6]), x, 1e-4);
+%! assert_equal (nctinv (0.05, 3, [1, 2, 3, 4, 5, 6]), x, 1e-4);
 %!test
 %! x = [-0.7183, 0.3624, 1.2878, 2.1195, -3.5413, 3.6430];
-%! assert (nctinv (0.05, 5, [1, 2, 3, 4, -1, 6]), x, 1e-4);
+%! assert_equal (nctinv (0.05, 5, [1, 2, 3, 4, -1, 6]), x, 1e-4);
 %!test
-%! assert (nctinv (0.996, 5, 8), 30.02610554063658, 2e-11);
+%! assert_equal (nctinv (0.996, 5, 8), 30.02610554063658, 2e-11);
 
 ## Test input validation
 %!error<nctinv: function called with too few input arguments.> nctinv ()

@@ -36,7 +36,8 @@
 ## standard normal distribution.
 ##
 ## The size of @var{h}, @var{pval}, and @var{zvalue} is the common size of
-## @var{x1}, @var{n1}, @var{x2}, and @var{n2}, which must be scalars or of common
+## @var{x1}, @var{n1}, @var{x2}, and @var{n2}, which must be scalars or of
+## common
 ## size.  A scalar input functions as a constant matrix of the same size as the
 ## other inputs.
 ##
@@ -50,18 +51,18 @@
 ## @code{[@dots{}] = ztest2 (@dots{}, @var{Name}, @var{Value}, @dots{})}
 ## specifies one or more of the following @var{Name}/@var{Value} pairs:
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @headitem @tab @var{Name} @tab @var{Value}
-## @item @tab @qcode{"alpha"} @tab the significance level. Default is 0.05.
+## @multitable @columnfractions 0.2 0.75
+## @headitem @var{Name} @tab @var{Value}
+## @item @qcode{'alpha'} @tab the significance level. Default is 0.05.
 ##
-## @item @tab @qcode{"tail"} @tab a string specifying the alternative hypothesis
+## @item @qcode{'tail'} @tab a string specifying the alternative hypothesis
 ## @end multitable
-## @multitable @columnfractions 0.1 0.25 0.65
-## @item @tab @qcode{"both"} @tab @math{p1} is not @math{p2}
+## @multitable @columnfractions 0.25 0.65
+## @item @qcode{'both'} @tab @math{p1} is not @math{p2}
 ## (two-tailed, default)
-## @item @tab @qcode{"left"} @tab @math{p1} is less than @math{p2}
+## @item @qcode{'left'} @tab @math{p1} is less than @math{p2}
 ## (left-tailed)
-## @item @tab @qcode{"right"} @tab @math{p1} is greater than @math{p2}
+## @item @qcode{'right'} @tab @math{p1} is greater than @math{p2}
 ## (right-tailed)
 ## @end multitable
 ##
@@ -81,17 +82,17 @@ function [h, pval, zvalue] = ztest2 (x1, n1, x2, n2, varargin)
     endif
   endif
 
-  if (iscomplex (x1) || iscomplex (n1) || iscomplex (x2) || iscomplex(n2))
+  if (iscomplex (x1) || iscomplex (n1) || iscomplex (x2) || iscomplex (n2))
     error ("ztest2: X1, N1, X2, and N2 must not be complex.");
   endif
   
-  if (any(x1(:) > n1(:)) || any(x2(:) > n2(:)))
+  if (any (x1(:) > n1(:)) || any (x2(:) > n2(:)))
     error ("ztest2: X1 must be <= N1 and X2 must be <= N2.");
   endif
 
   ## Add defaults and parse optional arguments
   alpha = 0.05;
-  tail = "both";
+  tail = 'both';
   if (nargin > 4)
     params = numel (varargin);
     if ((params / 2) != fix (params / 2))
@@ -101,15 +102,15 @@ function [h, pval, zvalue] = ztest2 (x1, n1, x2, n2, varargin)
       name = varargin{idx};
       value = varargin{idx+1};
       switch (lower (name))
-        case "alpha"
+        case 'alpha'
           alpha = value;
           if (! isscalar (alpha) || ! isnumeric (alpha) || ...
                 alpha <= 0 || alpha >= 1)
             error ("ztest2: invalid VALUE for alpha.");
           endif
-        case "tail"
+        case 'tail'
           tail = value;
-          if (! any (strcmpi (tail, {"both", "left", "right"})))
+          if (! any (strcmpi (tail, {'both', 'left', 'right'})))
             error ("ztest2: invalid VALUE for tail.");
           endif
         otherwise
@@ -126,11 +127,11 @@ function [h, pval, zvalue] = ztest2 (x1, n1, x2, n2, varargin)
 
   cdf = normcdf (zvalue);
 
-  if (strcmpi (tail, "both"))
+  if (strcmpi (tail, 'both'))
     pval = 2 * min (cdf, 1 - cdf);
-  elseif (strcmpi (tail, "right"))
+  elseif (strcmpi (tail, 'right'))
     pval = 1 - cdf;
-  elseif (strcmpi (tail, "left"))
+  elseif (strcmpi (tail, 'left'))
     pval = cdf;
   endif
 
@@ -147,16 +148,16 @@ endfunction
 %!error ztest2 (1, 2, 3);
 %!error ztest2 (1, 2, 3, 2);
 %!error<ztest2: optional arguments must be in NAME-VALUE pairs.> ...
-%! ztest2 (1, 2, 3, 4, "alpha")
+%! ztest2 (1, 2, 3, 4, 'alpha')
 %!error<ztest2: invalid VALUE for alpha.> ...
-%! ztest2 (1, 2, 3, 4, "alpha", 0);
+%! ztest2 (1, 2, 3, 4, 'alpha', 0);
 %!error<ztest2: invalid VALUE for alpha.> ...
-%! ztest2 (1, 2, 3, 4, "alpha", 1.2);
+%! ztest2 (1, 2, 3, 4, 'alpha', 1.2);
 %!error<ztest2: invalid VALUE for alpha.> ...
-%! ztest2 (1, 2, 3, 4, "alpha", "val");
+%! ztest2 (1, 2, 3, 4, 'alpha', 'val');
 %!error<ztest2: invalid VALUE for tail.>  ...
-%! ztest2 (1, 2, 3, 4, "tail", "val");
+%! ztest2 (1, 2, 3, 4, 'tail', 'val');
 %!error<ztest2: invalid VALUE for tail.>  ...
-%! ztest2 (1, 2, 3, 4, "alpha", 0.01, "tail", "val");
+%! ztest2 (1, 2, 3, 4, 'alpha', 0.01, 'tail', 'val');
 %!error<ztest2: invalid NAME for optional arguments.> ...
-%! ztest2 (1, 2, 3, 4, "alpha", 0.01, "tail", "both", "badoption", 3);
+%! ztest2 (1, 2, 3, 4, 'alpha', 0.01, 'tail', 'both', 'badoption', 3);

@@ -20,7 +20,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {statistics} {@var{p} =} hygecdf (@var{x}, @var{m}, @var{k}, @var{n})
-## @deftypefnx {statistics} {@var{p} =} hygecdf (@var{x}, @var{m}, @var{k}, @var{n}, @qcode{"upper"})
+## @deftypefnx {statistics} {@var{p} =} hygecdf (@var{x}, @var{m}, @var{k}, @var{n}, @qcode{'upper'})
 ##
 ## Hypergeometric cumulative distribution function (CDF).
 ##
@@ -67,18 +67,18 @@ function p = hygecdf (x, m, k, n, uflag)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (m, "single")
-                        || isa (k, "single") || isa (n, "single"))
-    p = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (m, 'single')
+                        || isa (k, 'single') || isa (n, 'single'))
+    p = zeros (size (x), 'single');
   else
     p = zeros (size (x));
   endif
 
   ## Check for "upper" flag
-  if (nargin > 4 && strcmpi (uflag, "upper"))
-    x = n - floor(x) - 1;
+  if (nargin > 4 && strcmpi (uflag, 'upper'))
+    x = n - floor (x) - 1;
     k = m - k;
-  elseif (nargin > 4 && ! strcmpi (uflag, "upper"))
+  elseif (nargin > 4 && ! strcmpi (uflag, 'upper'))
     error ("hygecdf: invalid argument for upper tail.");
   endif
 
@@ -121,19 +121,19 @@ function p = localPDF (x, m, k, n)
   ## Compute hygecdf(x,m,k,n)/hygepdf(x,m,k,n) with a series
   ## whose terms can be computed recursively, backwards.
   xmax = max (x(:));
-  ybig = repmat((0:xmax)', 1, length (x));
-  xbig = repmat(x(:)', xmax + 1, 1);
-  mbig = repmat(m(:)', xmax + 1, 1);
-  kbig = repmat(k(:)', xmax + 1, 1);
-  nbig = repmat(n(:)', xmax + 1, 1);
+  ybig = repmat ((0:xmax)', 1, length (x));
+  xbig = repmat (x(:)', xmax + 1, 1);
+  mbig = repmat (m(:)', xmax + 1, 1);
+  kbig = repmat (k(:)', xmax + 1, 1);
+  nbig = repmat (n(:)', xmax + 1, 1);
 
   terms = ((ybig+1) .* (mbig-kbig-nbig+ybig+1)) ./ ((nbig-ybig) .* (kbig-ybig));
   terms(ybig >= xbig) = 1;
   terms = flip (cumprod (flip (terms)));
 
   terms(ybig > xbig) = 0;
-  ratio = sum(terms,1);
-  ratio = reshape(ratio,size(x));
+  ratio = sum (terms,1);
+  ratio = reshape (ratio,size (x));
   p = ratio.*HPDF;
   ## Correct round-off errors
   p(p > 1) = 1;
@@ -145,51 +145,51 @@ endfunction
 %! p1 = hygecdf (x, 500, 50, 100);
 %! p2 = hygecdf (x, 500, 60, 200);
 %! p3 = hygecdf (x, 500, 70, 300);
-%! plot (x, p1, "*b", x, p2, "*g", x, p3, "*r")
+%! plot (x, p1, '*b', x, p2, '*g', x, p3, '*r')
 %! grid on
 %! xlim ([0, 60])
-%! legend ({"m = 500, k = 50, n = 100", "m = 500, k = 60, n = 200", ...
-%!          "m = 500, k = 70, n = 300"}, "location", "southeast")
-%! title ("Hypergeometric CDF")
-%! xlabel ("values in x (number of successes)")
-%! ylabel ("probability")
+%! legend ({'m = 500, k = 50, n = 100', 'm = 500, k = 60, n = 200', ...
+%!          'm = 500, k = 70, n = 300'}, 'location', 'southeast')
+%! title ('Hypergeometric CDF')
+%! xlabel ('values in x (number of successes)')
+%! ylabel ('probability')
 
 ## Test output
 %!shared x, y
 %! x = [-1 0 1 2 3];
 %! y = [0 1/6 5/6 1 1];
-%!assert (hygecdf (x, 4*ones (1,5), 2, 2), y, 5*eps)
-%!assert (hygecdf (x, 4, 2*ones (1,5), 2), y, 5*eps)
-%!assert (hygecdf (x, 4, 2, 2*ones (1,5)), y, 5*eps)
-%!assert (hygecdf (x, 4*[1 -1 NaN 1.1 1], 2, 2), [y(1) NaN NaN NaN y(5)], 5*eps)
-%!assert (hygecdf (x, 4*[1 -1 NaN 1.1 1], 2, 2, "upper"), ...
+%!assert_equal (hygecdf (x, 4*ones (1,5), 2, 2), y, 5*eps)
+%!assert_equal (hygecdf (x, 4, 2*ones (1,5), 2), y, 5*eps)
+%!assert_equal (hygecdf (x, 4, 2, 2*ones (1,5)), y, 5*eps)
+%!assert_equal (hygecdf (x, 4*[1 -1 NaN 1.1 1], 2, 2), [y(1) NaN NaN NaN y(5)], 5*eps)
+%!assert_equal (hygecdf (x, 4*[1 -1 NaN 1.1 1], 2, 2, 'upper'), ...
 %! [y(5) NaN NaN NaN y(1)], 5*eps)
-%!assert (hygecdf (x, 4, 2*[1 -1 NaN 1.1 1], 2), [y(1) NaN NaN NaN y(5)], 5*eps)
-%!assert (hygecdf (x, 4, 2*[1 -1 NaN 1.1 1], 2, "upper"), ...
+%!assert_equal (hygecdf (x, 4, 2*[1 -1 NaN 1.1 1], 2), [y(1) NaN NaN NaN y(5)], 5*eps)
+%!assert_equal (hygecdf (x, 4, 2*[1 -1 NaN 1.1 1], 2, 'upper'), ...
 %! [y(5) NaN NaN NaN y(1)], 5*eps)
-%!assert (hygecdf (x, 4, 5, 2), [NaN NaN NaN NaN NaN])
-%!assert (hygecdf (x, 4, 2, 2*[1 -1 NaN 1.1 1]), [y(1) NaN NaN NaN y(5)], 5*eps)
-%!assert (hygecdf (x, 4, 2, 2*[1 -1 NaN 1.1 1], "upper"), ...
+%!assert_equal (hygecdf (x, 4, 5, 2), [NaN NaN NaN NaN NaN])
+%!assert_equal (hygecdf (x, 4, 2, 2*[1 -1 NaN 1.1 1]), [y(1) NaN NaN NaN y(5)], 5*eps)
+%!assert_equal (hygecdf (x, 4, 2, 2*[1 -1 NaN 1.1 1], 'upper'), ...
 %! [y(5) NaN NaN NaN y(1)], 5*eps)
-%!assert (hygecdf (x, 4, 2, 5), [NaN NaN NaN NaN NaN])
-%!assert (hygecdf ([x(1:2) NaN x(4:5)], 4, 2, 2), [y(1:2) NaN y(4:5)], 5*eps)
+%!assert_equal (hygecdf (x, 4, 2, 5), [NaN NaN NaN NaN NaN])
+%!assert_equal (hygecdf ([x(1:2) NaN x(4:5)], 4, 2, 2), [y(1:2) NaN y(4:5)], 5*eps)
 %!test
-%! p = hygecdf (x, 10, [1 2 3 4 5], 2, "upper");
-%! assert (p, [1, 34/90, 2/30, 0, 0], 10*eps);
+%! p = hygecdf (x, 10, [1 2 3 4 5], 2, 'upper');
+%! assert_equal (p, [1, 34/90, 2/30, 0, 0], 10*eps);
 %!test
-%! p = hygecdf (2*x, 10, [1 2 3 4 5], 2, "upper");
-%! assert (p, [1, 34/90, 0, 0, 0], 10*eps);
+%! p = hygecdf (2*x, 10, [1 2 3 4 5], 2, 'upper');
+%! assert_equal (p, [1, 34/90, 0, 0, 0], 10*eps);
 
 ## Test class of input preserved
-%!assert (hygecdf ([x, NaN], 4, 2, 2), [y, NaN], 5*eps)
-%!assert (hygecdf (single ([x, NaN]), 4, 2, 2), single ([y, NaN]), ...
-%! eps ("single"))
-%!assert (hygecdf ([x, NaN], single (4), 2, 2), single ([y, NaN]), ...
-%! eps ("single"))
-%!assert (hygecdf ([x, NaN], 4, single (2), 2), single ([y, NaN]), ...
-%! eps ("single"))
-%!assert (hygecdf ([x, NaN], 4, 2, single (2)), single ([y, NaN]), ...
-%! eps ("single"))
+%!assert_equal (hygecdf ([x, NaN], 4, 2, 2), [y, NaN], 5*eps)
+%!assert_equal (hygecdf (single ([x, NaN]), 4, 2, 2), single ([y, NaN]), ...
+%! eps ('single'))
+%!assert_equal (hygecdf ([x, NaN], single (4), 2, 2), single ([y, NaN]), ...
+%! eps ('single'))
+%!assert_equal (hygecdf ([x, NaN], 4, single (2), 2), single ([y, NaN]), ...
+%! eps ('single'))
+%!assert_equal (hygecdf ([x, NaN], 4, 2, single (2)), single ([y, NaN]), ...
+%! eps ('single'))
 
 ## Test input validation
 %!error<hygecdf: function called with too few input arguments.> hygecdf ()
@@ -197,7 +197,7 @@ endfunction
 %!error<hygecdf: function called with too few input arguments.> hygecdf (1,2)
 %!error<hygecdf: function called with too few input arguments.> hygecdf (1,2,3)
 %!error<hygecdf: invalid argument for upper tail.> hygecdf (1,2,3,4,5)
-%!error<hygecdf: invalid argument for upper tail.> hygecdf (1,2,3,4,"uper")
+%!error<hygecdf: invalid argument for upper tail.> hygecdf (1,2,3,4,'uper')
 %!error<hygecdf: X, T, k, and N must be of common size or scalars.> ...
 %! hygecdf (ones (2), ones (3), 1, 1)
 %!error<hygecdf: X, T, k, and N must be of common size or scalars.> ...

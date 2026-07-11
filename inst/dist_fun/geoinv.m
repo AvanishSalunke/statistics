@@ -57,8 +57,8 @@ function x = geoinv (p, ps)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (ps, "single"))
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (ps, 'single'))
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -85,26 +85,26 @@ endfunction
 %! x1 = geoinv (p, 0.2);
 %! x2 = geoinv (p, 0.5);
 %! x3 = geoinv (p, 0.7);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r')
 %! grid on
 %! ylim ([0, 10])
-%! legend ({"ps = 0.2", "ps = 0.5", "ps = 0.7"}, "location", "northwest")
-%! title ("Geometric iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x (number of failures)")
+%! legend ({'ps = 0.2', 'ps = 0.5', 'ps = 0.7'}, 'location', 'northwest')
+%! title ('Geometric iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x (number of failures)')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.75 1 2];
-%!assert (geoinv (p, 0.5*ones (1,5)), [NaN 0 1 Inf NaN])
-%!assert (geoinv (p, 0.5), [NaN 0 1 Inf NaN])
-%!assert (geoinv (p, 0.5*[1 -1 NaN 4 1]), [NaN NaN NaN NaN NaN])
-%!assert (geoinv ([p(1:2) NaN p(4:5)], 0.5), [NaN 0 NaN Inf NaN])
+%!assert_equal (geoinv (p, 0.5*ones (1,5)), [NaN 0 1 Inf NaN])
+%!assert_equal (geoinv (p, 0.5), [NaN 0 1 Inf NaN])
+%!assert_equal (geoinv (p, 0.5*[1 -1 NaN 4 1]), [NaN NaN NaN NaN NaN])
+%!assert_equal (geoinv ([p(1:2) NaN p(4:5)], 0.5), [NaN 0 NaN Inf NaN])
 
 ## Test class of input preserved
-%!assert (geoinv ([p, NaN], 0.5), [NaN 0 1 Inf NaN NaN])
-%!assert (geoinv (single ([p, NaN]), 0.5), single ([NaN 0 1 Inf NaN NaN]))
-%!assert (geoinv ([p, NaN], single (0.5)), single ([NaN 0 1 Inf NaN NaN]))
+%!assert_equal (geoinv ([p, NaN], 0.5), [NaN 0 1 Inf NaN NaN])
+%!assert_equal (geoinv (single ([p, NaN]), 0.5), single ([NaN 0 1 Inf NaN NaN]))
+%!assert_equal (geoinv ([p, NaN], single (0.5)), single ([NaN 0 1 Inf NaN NaN]))
 
 ## Test input validation
 %!error<geoinv: function called with too few input arguments.> geoinv ()

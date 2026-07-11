@@ -89,23 +89,23 @@ endfunction
 %! y2 = evpdf (x, 1.0, 2);
 %! y3 = evpdf (x, 1.5, 3);
 %! y4 = evpdf (x, 3.0, 4);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-c")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-c')
 %! grid on
 %! ylim ([0, 0.2])
-%! legend ({"μ = 0.5, σ = 2", "μ = 1.0, σ = 2", ...
-%!          "μ = 1.5, σ = 3", "μ = 3.0, σ = 4"}, "location", "northeast")
-%! title ("Extreme value PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'μ = 0.5, σ = 2', 'μ = 1.0, σ = 2', ...
+%!          'μ = 1.5, σ = 3', 'μ = 3.0, σ = 4'}, 'location', 'northeast')
+%! title ('Extreme value PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y0, y1
 %! x = [-5, 0, 1, 2, 3];
 %! y0 = [0.0067, 0.3679, 0.1794, 0.0046, 0];
 %! y1 = [0.0025, 0.2546, 0.3679, 0.1794, 0.0046];
-%!assert (evpdf (x), y0, 1e-4)
-%!assert (evpdf (x, zeros (1,5), ones (1,5)), y0, 1e-4)
-%!assert (evpdf (x, ones (1,5), ones (1,5)), y1, 1e-4)
+%!assert_equal (evpdf (x), y0, 1e-4)
+%!assert_equal (evpdf (x, zeros (1,5), ones (1,5)), y0, 1e-4)
+%!assert_equal (evpdf (x, ones (1,5), ones (1,5)), y1, 1e-4)
 
 ## Test input validation
 %!error<evpdf: function called with too few input arguments.> evpdf ()

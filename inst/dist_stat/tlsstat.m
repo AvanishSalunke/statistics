@@ -30,7 +30,8 @@
 ## same size as the other inputs.
 ##
 ## Further information about the location-scale Student's T distribution can be
-## found at @url{https://en.wikipedia.org/wiki/Student%27s_t-distribution#Location-scale_t_distribution}
+## found at
+## @url{https://en.wikipedia.org/wiki/Student%27s_t-distribution#Location-scale_t_distribution}
 ##
 ## @seealso{tlscdf, tlsinv, tlspdf, tlsrnd, tlsfit, tlslike}
 ## @end deftypefn
@@ -82,8 +83,8 @@ endfunction
 %!error<tlsstat: function called with too few input arguments.> tlsstat (1)
 %!error<tlsstat: function called with too few input arguments.> tlsstat (1, 2)
 %!error<tlsstat: MU, SIGMA, and NU must be numeric.> tlsstat ({}, 2, 3)
-%!error<tlsstat: MU, SIGMA, and NU must be numeric.> tlsstat (1, "", 3)
-%!error<tlsstat: MU, SIGMA, and NU must be numeric.> tlsstat (1, 2, ["d"])
+%!error<tlsstat: MU, SIGMA, and NU must be numeric.> tlsstat (1, '', 3)
+%!error<tlsstat: MU, SIGMA, and NU must be numeric.> tlsstat (1, 2, ['d'])
 %!error<tlsstat: MU, SIGMA, and NU must not be complex.> tlsstat (i, 2, 3)
 %!error<tlsstat: MU, SIGMA, and NU must not be complex.> tlsstat (1, i, 3)
 %!error<tlsstat: MU, SIGMA, and NU must not be complex.> tlsstat (1, 2, i)
@@ -97,65 +98,65 @@ endfunction
 ## Output validation tests
 %!test
 %! [m, v] = tlsstat (0, 1, 0);
-%! assert (m, NaN);
-%! assert (v, NaN);
+%! assert_equal (m, NaN);
+%! assert_equal (v, NaN);
 %!test
 %! [m, v] = tlsstat (0, 1, 1);
-%! assert (m, NaN);
-%! assert (v, NaN);
+%! assert_equal (m, NaN);
+%! assert_equal (v, NaN);
 %!test
 %! [m, v] = tlsstat (2, 1, 1);
-%! assert (m, NaN);
-%! assert (v, NaN);
+%! assert_equal (m, NaN);
+%! assert_equal (v, NaN);
 %!test
 %! [m, v] = tlsstat (-2, 1, 1);
-%! assert (m, NaN);
-%! assert (v, NaN);
+%! assert_equal (m, NaN);
+%! assert_equal (v, NaN);
 %!test
 %! [m, v] = tlsstat (0, 1, 2);
-%! assert (m, 0);
-%! assert (v, NaN);
+%! assert_equal (m, 0);
+%! assert_equal (v, NaN);
 %!test
 %! [m, v] = tlsstat (2, 1, 2);
-%! assert (m, 2);
-%! assert (v, NaN);
+%! assert_equal (m, 2);
+%! assert_equal (v, NaN);
 %!test
 %! [m, v] = tlsstat (-2, 1, 2);
-%! assert (m, -2);
-%! assert (v, NaN);
+%! assert_equal (m, -2);
+%! assert_equal (v, NaN);
 %!test
 %! [m, v] = tlsstat (0, 2, 2);
-%! assert (m, 0);
-%! assert (v, NaN);
+%! assert_equal (m, 0);
+%! assert_equal (v, NaN);
 %!test
 %! [m, v] = tlsstat (2, 2, 2);
-%! assert (m, 2);
-%! assert (v, NaN);
+%! assert_equal (m, 2);
+%! assert_equal (v, NaN);
 %!test
 %! [m, v] = tlsstat (-2, 2, 2);
-%! assert (m, -2);
-%! assert (v, NaN);
+%! assert_equal (m, -2);
+%! assert_equal (v, NaN);
 %!test
 %! [m, v] = tlsstat (0, 1, 3);
-%! assert (m, 0);
-%! assert (v, 3);
+%! assert_equal (m, 0);
+%! assert_equal (v, 3);
 %!test
 %! [m, v] = tlsstat (0, 2, 3);
-%! assert (m, 0);
-%! assert (v, 6);
+%! assert_equal (m, 0);
+%! assert_equal (v, 6);
 %!test
 %! [m, v] = tlsstat (2, 1, 3);
-%! assert (m, 2);
-%! assert (v, 3);
+%! assert_equal (m, 2);
+%! assert_equal (v, 3);
 %!test
 %! [m, v] = tlsstat (2, 2, 3);
-%! assert (m, 2);
-%! assert (v, 6);
+%! assert_equal (m, 2);
+%! assert_equal (v, 6);
 %!test
 %! [m, v] = tlsstat (-2, 1, 3);
-%! assert (m, -2);
-%! assert (v, 3);
+%! assert_equal (m, -2);
+%! assert_equal (v, 3);
 %!test
 %! [m, v] = tlsstat (-2, 2, 3);
-%! assert (m, -2);
-%! assert (v, 6);
+%! assert_equal (m, -2);
+%! assert_equal (v, 6);

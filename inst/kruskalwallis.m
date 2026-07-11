@@ -94,11 +94,11 @@ function [p, tbl, stats] = kruskalwallis (x, group, displayopt)
   if (nargin < 3)
     displayopt = 'on';
   endif
-  plotdata = ~(strcmp (displayopt, 'off'));
+  plotdata = ! (strcmp (displayopt, 'off'));
 
   ## Convert group to cell array from character array, make it a column
   if (! isempty (group) && ischar (group))
-    group = cellstr(group);
+    group = cellstr (group);
   endif
   if (size (group, 1) == 1)
     group = group';
@@ -115,13 +115,13 @@ function [p, tbl, stats] = kruskalwallis (x, group, displayopt)
     elseif (size (group, 1) == m)     ## group names exist and match columns
       group = group(gi,:);
     else
-      error("X columns and GROUP length do not match.");
+      error ("X columns and GROUP length do not match.");
     endif
   endif
 
   ## Identify NaN values (if any) and remove them from X along with
   ## their corresponding values from group vector
-  nonan = ~isnan (x);
+  nonan = ! isnan (x);
   x = x(nonan);
   group = group(nonan, :);
 
@@ -165,15 +165,15 @@ function [p, tbl, stats] = kruskalwallis (x, group, displayopt)
   ChiSq = (12 * SSM) / (lx * (lx + 1));
   if (tieadj > 0)
     ChiSq = ChiSq / (1 - 2 * tieadj / (lx ^ 3 - lx));
-  end
+  endif
   p = 1 - chi2cdf (ChiSq, dfm);
 
   ## Create results table (if requested)
   if (nargout > 1)
-    tbl = {"Source", "SS", "df", "MS", "Chi-sq", "Prob>Chi-sq"; ...
-           "Groups", SSM, dfm, MSM, ChiSq, p; ...
-           "Error", SSE, dfe, MSE, "", ""; ...
-           "Total", SST, dfm + dfe, "", "", ""};
+    tbl = {'Source', 'SS', 'df', 'MS', 'Chi-sq', 'Prob>Chi-sq'; ...
+           'Groups', SSM, dfm, MSM, ChiSq, p; ...
+           'Error', SSE, dfe, MSE, '', ''; ...
+           'Total', SST, dfm + dfe, '', '', ''};
   endif
   ## Create stats structure (if requested) for MULTCOMPARE
   if (nargout > 2)
@@ -181,7 +181,7 @@ function [p, tbl, stats] = kruskalwallis (x, group, displayopt)
         stats.gnames = group_names;
     else
         stats.gnames = strjust (num2str ((1:length (xm))'), 'left');
-    end
+    endif
     stats.n = xs;
     stats.source = 'kruskalwallis';
     stats.meanranks = xm;
@@ -189,17 +189,17 @@ function [p, tbl, stats] = kruskalwallis (x, group, displayopt)
   endif
   ## Print results table on screen if no output argument was requested
   if (nargout == 0 || plotdata)
-    printf("              Kruskal-Wallis ANOVA Table\n");
-    printf("Source        SS      df      MS      Chi-sq  Prob>Chi-sq\n");
-    printf("---------------------------------------------------------\n");
-    printf("Columns %10.2f %5.0f %10.2f %8.2f  %11.5e\n", ...
+    printf ("              Kruskal-Wallis ANOVA Table\n");
+    printf ("Source        SS      df      MS      Chi-sq  Prob>Chi-sq\n");
+    printf ("---------------------------------------------------------\n");
+    printf ("Columns %10.2f %5.0f %10.2f %8.2f  %11.5e\n", ...
            SSM, dfm, MSM, ChiSq, p);
-    printf("Error   %10.2f %5.0f %10.2f\n", SSE, dfe, MSE);
-    printf("Total   %10.2f %5.0f\n", SST, dfm + dfe);
+    printf ("Error   %10.2f %5.0f %10.2f\n", SSE, dfe, MSE);
+    printf ("Total   %10.2f %5.0f\n", SST, dfm + dfe);
   endif
   ## Plot data using BOXPLOT (unless opted out)
   if (plotdata)
-    boxplot (x, group_id, 'Notch', "on", 'Labels', group_names);
+    boxplot (x, group_id, 'Notch', 'on', 'Labels', group_names);
   endif
 endfunction
 
@@ -248,12 +248,12 @@ endfunction
 %!demo
 %! x = meshgrid (1:6);
 %! x = x + normrnd (0, 1, 6, 6);
-%! [p, atab] = kruskalwallis(x);
+%! [p, atab] = kruskalwallis (x);
 
 %!demo
 %! x = ones (30, 4) .* [-2, 0, 1, 5];
 %! x = x + normrnd (0, 2, 30, 4);
-%! group = {"A", "B", "C", "D"};
+%! group = {'A', 'B', 'C', 'D'};
 %! kruskalwallis (x, group);
 
 ## testing results against SPSS and R on the GEAR.DAT data file available from
@@ -271,19 +271,19 @@ endfunction
 %!         0.991, 0.995, 0.984, 0.994, 0.997, 0.997, 0.991, 0.998, 1.004, 0.997];
 %! group = [1:10] .* ones (10,10);
 %! group = group(:);
-%! [p, tbl] = kruskalwallis (data, group, "off");
-%! assert (p, 0.048229, 1e-6);
-%! assert (tbl{2,5}, 17.03124, 1e-5);
-%! assert (tbl{2,3}, 9, 0);
-%! assert (tbl{4,2}, 82655.5, 1e-16);
+%! [p, tbl] = kruskalwallis (data, group, 'off');
+%! assert_equal (p, 0.048229, 1e-6);
+%! assert_equal (tbl{2,5}, 17.03124, 1e-5);
+%! assert_equal (tbl{2,3}, 9, 0);
+%! assert_equal (tbl{4,2}, 82655.5, 1e-16);
 %! data = reshape (data, 10, 10);
-%! [p, tbl, stats] = kruskalwallis (data, [], "off");
-%! assert (p, 0.048229, 1e-6);
-%! assert (tbl{2,5}, 17.03124, 1e-5);
-%! assert (tbl{2,3}, 9, 0);
-%! assert (tbl{4,2}, 82655.5, 1e-16);
+%! [p, tbl, stats] = kruskalwallis (data, [], 'off');
+%! assert_equal (p, 0.048229, 1e-6);
+%! assert_equal (tbl{2,5}, 17.03124, 1e-5);
+%! assert_equal (tbl{2,3}, 9, 0);
+%! assert_equal (tbl{4,2}, 82655.5, 1e-16);
 %! means = [51.85, 60.45, 37.6, 51.1, 29.5, 54.25, 64.55, 66.7, 53.65, 35.35];
 %! N = 10 * ones (1, 10);
-%! assert (stats.meanranks, means, 1e-6);
-%! assert (length (stats.gnames), 10, 0);
-%! assert (stats.n, N, 0);
+%! assert_equal (stats.meanranks, means, 1e-6);
+%! assert_equal (length (stats.gnames), 10, 0);
+%! assert_equal (stats.n, N, 0);

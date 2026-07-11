@@ -26,129 +26,129 @@
 ## @deftypefnx {statistics} {[@var{idx}, @var{centers}, @var{sumd}] =} kmeans (@var{data}, @var{k})
 ## @deftypefnx {statistics} {[@var{idx}, @var{centers}, @var{sumd}, @var{dist}] =} kmeans (@var{data}, @var{k})
 ## @deftypefnx {statistics} {[@dots{}] =} kmeans (@var{data}, @var{k}, @var{param1}, @var{value1}, @dots{})
-## @deftypefnx {statistics} {[@dots{}] =} kmeans (@var{data}, [], @qcode{"start"}, @var{start}, @dots{})
+## @deftypefnx {statistics} {[@dots{}] =} kmeans (@var{data}, [], @qcode{'start'}, @var{start}, @dots{})
 ##
-## Perform a @var{k}-means clustering of the @math{NxD} matrix @var{data}.
+## Perform a @var{k}-means clustering of the @math{N*D} matrix @var{data}.
 ##
-## If parameter @qcode{"start"} is specified, then @var{k} may be empty
+## If parameter @qcode{'start'} is specified, then @var{k} may be empty
 ## in which case @var{k} is set to the number of rows of @var{start}.
 ##
 ## The outputs are:
 ##
-## @multitable @columnfractions 0.15 0.05 0.8
-## @item @var{idx} @tab @tab An @math{Nx1} vector whose @math{i}-th element is
+## @multitable @columnfractions 0.15 0.8
+## @item @var{idx} @tab An @math{N*1} vector whose @math{i}-th element is
 ## the class to which row @math{i} of @var{data} is assigned.
 ##
-## @item @var{centers} @tab @tab A @math{KxD} array whose @math{i}-th row is the
+## @item @var{centers} @tab A @math{K*D} array whose @math{i}-th row is the
 ## centroid of cluster @math{i}.
 ##
-## @item @var{sumd} @tab @tab A @math{kx1} vector whose @math{i}-th entry is the
+## @item @var{sumd} @tab A @math{k*1} vector whose @math{i}-th entry is the
 ## sum of the distances from samples in cluster @math{i} to centroid @math{i}.
 ##
-## @item @var{dist} @tab @tab An @math{Nxk} matrix whose @math{i}@math{j}-th
+## @item @var{dist} @tab An @math{N*k} matrix whose @math{i}@math{j}-th
 ## element is the distance from sample @math{i} to centroid @math{j}.
 ## @end multitable
 ##
 ## The following parameters may be placed in any order.  Each parameter
 ## must be followed by its value, as in Name-Value pairs.
 ##
-## @multitable @columnfractions 0.15 0.02 0.83
-## @headitem Name @tab @tab Description
-## @item @qcode{"Start"} @tab @tab The initialization method for the centroids.
+## @multitable @columnfractions 0.15 0.83
+## @headitem Name @tab Description
+## @item @qcode{'Start'} @tab The initialization method for the centroids.
 ## @end multitable
 ##
-## @multitable @columnfractions 0.04 0.19 0.02 0.75
-## @headitem @tab Value @tab @tab Description
-## @item @tab @qcode{"plus"} @tab @tab The k-means++ algorithm.  (Default)
-## @item @tab @qcode{"sample"} @tab @tab A subset of @math{k} rows from
+## @multitable @columnfractions 0.19 0.75
+## @headitem Value @tab Description
+## @item @qcode{'plus'} @tab The k-means++ algorithm.  (Default)
+## @item @qcode{'sample'} @tab A subset of @math{k} rows from
 ## @var{data}, sampled uniformly without replacement.
-## @item @tab @qcode{"cluster"} @tab @tab Perform a pilot clustering on 10% of
+## @item @qcode{'cluster'} @tab Perform a pilot clustering on 10% of
 ## the rows of @var{data}.
-## @item @tab @qcode{"uniform"} @tab @tab Each component of each centroid is
+## @item @qcode{'uniform'} @tab Each component of each centroid is
 ## drawn uniformly from the interval between the maximum and minimum values of
 ## that component within @var{data}.  This performs poorly and is implemented
 ## only for Matlab compatibility.
-## @item @tab @var{numeric matrix} @tab @tab A @math{kxD} matrix of centroid
+## @item @var{numeric matrix} @tab A @math{k*D} matrix of centroid
 ## starting locations.  The rows correspond to seeds.
-## @item @tab @var{numeric array} @tab @tab A @math{kxDxr} array of centroid
+## @item @var{numeric array} @tab A @math{k*D*r} array of centroid
 ## starting locations.  The third dimension invokes replication of the
 ## clustering routine.  Page @math{r} contains the set of seeds for replicate
 ## @math{r}.  @qcode{kmeans} infers the number of replicates (specified by the
-## @qcode{"Replicates"} Name-Value pair argument) from the size of the third
+## @qcode{'Replicates'} Name-Value pair argument) from the size of the third
 ## dimension.
 ## @end multitable
 ##
-## @multitable @columnfractions 0.15 0.02 0.838
-## @headitem Name @tab @tab Description
-## @item @qcode{"Distance"} @tab @tab The distance measure used for partitioning
+## @multitable @columnfractions 0.15 0.838
+## @headitem Name @tab Description
+## @item @qcode{'Distance'} @tab The distance measure used for partitioning
 ## and calculating centroids.
 ## @end multitable
 ##
-## @multitable @columnfractions 0.04 0.19 0.02 0.75
-## @headitem @tab Value @tab @tab Description
-## @item @tab @qcode{"sqeuclidean"} @tab @tab The squared Euclidean distance.
+## @multitable @columnfractions 0.19 0.75
+## @headitem Value @tab Description
+## @item @qcode{'sqeuclidean'} @tab The squared Euclidean distance.
 ## i.e. the sum of the squares of the differences between corresponding
 ## components.  In this case, the centroid is the arithmetic mean of all samples
 ## in its cluster.  This is the only distance for which this algorithm is truly
 ## "k-means".
-## @item @tab @qcode{"cityblock"} @tab @tab The sum metric, or L1 distance,
+## @item @qcode{'cityblock'} @tab The sum metric, or L1 distance,
 ## i.e. the sum of the absolute differences between corresponding components.
 ## In this case, the centroid is the median of all samples in its cluster.
 ## This gives the k-medians algorithm.
-## @item @tab @qcode{"cosine"} @tab @tab One minus the cosine of the included
+## @item @qcode{'cosine'} @tab One minus the cosine of the included
 ## angle between points (treated as vectors). Each centroid is the mean of the
 ## points in that cluster, after normalizing those points to unit Euclidean
 ## length.
-## @item @tab @qcode{"correlation"} @tab @tab One minus the sample correlation
+## @item @qcode{'correlation'} @tab One minus the sample correlation
 ## between points (treated as sequences of values).  Each centroid is the
 ## component-wise mean of the points in that cluster, after centering and
 ## normalizing those points to zero mean and unit standard deviation.
-## @item @tab @qcode{"hamming"} @tab @tab The number of components in which the
+## @item @qcode{'hamming'} @tab The number of components in which the
 ## sample and the centroid differ.  In this case, the centroid is the median of
 ## all samples in its cluster.  Unlike Matlab, Octave allows non-logical
 ## @var{data}.
 ## @end multitable
 ##
-## @multitable @columnfractions 0.15 0.02 0.838
-## @headitem Name @tab @tab Description
-## @item @qcode{"EmptyAction"} @tab @tab What to do when a centroid is not the
+## @multitable @columnfractions 0.15 0.838
+## @headitem Name @tab Description
+## @item @qcode{'EmptyAction'} @tab What to do when a centroid is not the
 ## closest to any data sample.
 ## @end multitable
 ##
-## @multitable @columnfractions 0.04 0.19 0.02 0.75
-## @headitem @tab Value @tab @tab Description
-## @item @tab @qcode{"error"} @tab @tab Throw an error.
-## @item @tab @qcode{"singleton"} @tab @tab (Default) Select the row of
+## @multitable @columnfractions 0.19 0.75
+## @headitem Value @tab Description
+## @item @qcode{'error'} @tab Throw an error.
+## @item @qcode{'singleton'} @tab (Default) Select the row of
 ## @var{data} that has the highest error and use that as the new centroid.
-## @item @tab @qcode{"drop"} @tab @tab Remove the centroid, and continue
+## @item @qcode{'drop'} @tab Remove the centroid, and continue
 ## computation with one fewer centroid.  The dimensions of the outputs
 ## @var{centroids} and @var{d} are unchanged, with values for omitted centroids
 ## replaced by NaN.
 ## @end multitable
 ##
-## @multitable @columnfractions 0.15 0.02 0.838
-## @headitem Name @tab @tab Description
-## @item @qcode{"Display"} @tab @tab Display a text summary.
+## @multitable @columnfractions 0.15 0.838
+## @headitem Name @tab Description
+## @item @qcode{'Display'} @tab Display a text summary.
 ## @end multitable
 ##
-## @multitable @columnfractions 0.04 0.19 0.02 0.75
-## @headitem @tab Value @tab @tab Description
-## @item @tab @qcode{"off"} @tab @tab (Default) Display no summary.
-## @item @tab @qcode{"final"} @tab @tab Display a summary for each clustering
+## @multitable @columnfractions 0.19 0.75
+## @headitem Value @tab Description
+## @item @qcode{'off'} @tab (Default) Display no summary.
+## @item @qcode{'final'} @tab Display a summary for each clustering
 ## operation.
-## @item @tab @qcode{"iter"} @tab @tab Display a summary for each iteration of a
+## @item @qcode{'iter'} @tab Display a summary for each iteration of a
 ## clustering operation.
 ## @end multitable
 ##
-## @multitable @columnfractions 0.15 0.02 0.838
-## @headitem Name @tab @tab Value
-## @item @qcode{"Replicates"} @tab @tab A positive integer specifying the number
+## @multitable @columnfractions 0.15 0.838
+## @headitem Name @tab Value
+## @item @qcode{'Replicates'} @tab A positive integer specifying the number
 ## of independent clusterings to perform.  The output values are the values for
 ## the best clustering, i.e., the one with the smallest value of @var{sumd}.
 ## If @var{Start} is numeric, then @var{Replicates} defaults to
 ## (and must equal) the size of the third dimension of @var{Start}.
 ## Otherwise it defaults to 1.
-## @item @qcode{"MaxIter"} @tab @tab The maximum number of iterations to perform
+## @item @qcode{'MaxIter'} @tab The maximum number of iterations to perform
 ## for each replicate.  If the maximum change of any centroid is less than
 ## 0.001, then the replicate terminates even if @var{MaxIter} iterations have no
 ## occurred.  The default is 100.
@@ -165,12 +165,12 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
   [reg, prop] = parseparams (varargin);
 
   ## defaults for options
-  emptyaction = "singleton";
-  start       = "plus";
+  emptyaction = 'singleton';
+  start       = 'plus';
   replicates  = 1;
   max_iter    = 100;
-  distance    = "sqeuclidean";
-  display     = "off";
+  distance    = 'sqeuclidean';
+  display     = 'off';
 
   replicates_set_explicitly = false;
 
@@ -198,20 +198,20 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
       error ("kmeans: Option '%s' has no argument", prop{1});
     endif
     switch (lower (prop{1}))
-      case "emptyaction"
+      case 'emptyaction'
         emptyaction = prop{2};
-      case "start"
+      case 'start'
         start = prop{2};
-      case "maxiter"
+      case 'maxiter'
         max_iter = prop{2};
-      case "distance"
+      case 'distance'
         distance = prop{2};
-      case "replicates"
+      case 'replicates'
         replicates = prop{2};
         replicates_set_explicitly = true;
-      case "display"
+      case 'display'
         display = prop{2};
-      case {"onlinephase", "options"}
+      case {'onlinephase', 'options'}
         warning ("kmeans: Ignoring unimplemented option '%s'", prop{1});
       otherwise
         error ("kmeans: Unknown option %s", prop{1});
@@ -223,12 +223,12 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
 
   ## check for the 'emptyaction' property
   switch (emptyaction)
-    case {"singleton", "error", "drop"}
+    case {'singleton', 'error', 'drop'}
       ;
     otherwise
-      d = [", " disp(emptyaction)] (1:end-1);  # strip trailing \n
+      d = [', ' disp(emptyaction)] (1:end-1);  # strip trailing \n
       if (length (d) > 20)
-        d = "";
+        d = '';
       endif
       error ("kmeans: unsupported empty cluster action parameter%s", d);
   endswitch
@@ -236,9 +236,9 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
   ## check for the 'replicates' property
   if (! isnumeric (replicates) || ! isscalar (replicates)
      || ! isreal (replicates) || replicates < 1)
-    d = [", " disp(replicates)] (1:end-1);     # strip trailing \n
+    d = [', ' disp(replicates)] (1:end-1);     # strip trailing \n
     if (length (d) > 20)
-      d = "";
+      d = '';
     endif
     error ("kmeans: invalid number of replicates%s", d);
   endif
@@ -246,39 +246,37 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
   ## check for the 'MaxIter' property
   if (! isnumeric (max_iter) || ! isscalar (max_iter)
      || ! isreal (max_iter) || max_iter < 1)
-    d = [", " disp(max_iter)] (1:end-1);       # strip trailing \n
+    d = [', ' disp(max_iter)] (1:end-1);       # strip trailing \n
     if (length (d) > 20)
-      d = "";
+      d = '';
     endif
     error ("kmeans: invalid MaxIter%s", d);
   endif
 
   ## check for the 'start' property
   switch (lower (start))
-    case {"sample", "plus", "cluster"}
+    case {'sample', 'plus', 'cluster'}
       start = lower (start);
-    case {"uniform"}
-      start = "uniform";
+    case {'uniform'}
+      start = 'uniform';
       min_data = min (data);
       range = max (data) - min_data;
     otherwise
       if (! isnumeric (start))
-        d = [", " disp(start)] (1:end-1);       # strip trailing \n
+        d = [', ' disp(start)] (1:end-1);       # strip trailing \n
         if (length (d) > 20)
-          d = "";
+          d = '';
         endif
         error ("kmeans: invalid start parameter%s", d);
       endif
       if (isempty (k))
         k = rows (start);
       elseif (rows (start) != k)
-        error (["kmeans: Number of initializers (%d) " ...
-                "should match number of centroids (%d)"], rows (start), k);
+        error (strcat ("kmeans: Number of initializers (%d)", " should match number of centroids (%d)"), rows (start), k);
       endif
       if (replicates_set_explicitly)
         if (replicates != size (start, 3))
-           error (["kmeans: The third dimension of the initializer (%d) " ...
-                   "should match the number of replicates (%d)"], ...
+           error (strcat ("kmeans: The third dimension of the initializer (%d)", " should match the number of replicates (%d)"), ...
                    size (start, 3), replicates);
         endif
       else
@@ -289,13 +287,13 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
   ## check for the 'distance' property
   ## dist  returns the distance btwn each row of matrix x and a row vector c
   switch (lower (distance))
-    case "sqeuclidean"
+    case 'sqeuclidean'
       dist     = @(x, c) sumsq (bsxfun (@minus, x, c), 2);
       centroid = @(x) mean (x, 1);
-    case "cityblock"
+    case 'cityblock'
       dist     = @(x, c) sum (abs (bsxfun (@minus, x, c)), 2);
       centroid = @(x) median (x, 1);
-    case "cosine"
+    case 'cosine'
         ## Pre-normalize all data.
         ## (when Octave implements normr, will use  data = normr (data) )
       for i = 1:rows (data)
@@ -303,7 +301,7 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
       endfor
       dist     = @(x, c) 1 - (x * c') ./ sqrt (sumsq (c));
       centroid = @(x) mean (x, 1);   ## already normalized
-    case "correlation"
+    case 'correlation'
       ## Pre-normalize all data.
       data = data - mean (data, 2);
       ## (when Octave implements normr, will use  data = normr (data) )
@@ -313,7 +311,7 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
       dist     = @(x, c) 1 - (x * (c - mean (c))') ...
                           ./ sqrt (sumsq (c - mean (c)));
       centroid = @(x) mean (x, 1);   ## already normalized
-    case "hamming"
+    case 'hamming'
       dist     = @(x, c) sum (bsxfun (@ne, x, c), 2);
       centroid = @(x) median (x, 1);
     otherwise
@@ -321,12 +319,12 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
   endswitch
 
   ## check for the 'display' property
-  if (! strcmp (display, "off"))
+  if (! strcmp (display, 'off'))
     display = lower (display);
     switch (display)
-      case {"off", "final"} ;
-      case "iter"
-        printf ("%6s\t%6s\t%8s\t%12s\n", "iter", "phase", "num", "sum");
+      case {'off', 'final'} ;
+      case 'iter'
+        printf ("%6s\t%6s\t%8s\t%12s\n", 'iter', 'phase', 'num', 'sum');
       otherwise
         error ("kmeans: invalid display parameter %s", display);
     endswitch
@@ -353,21 +351,21 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
 
     ## check for the 'start' property
     switch (lower (start))
-      case "sample"
+      case 'sample'
         idx     = randperm (n_rows, k);
         centers = data(idx, :);
-      case "plus"                  # k-means++, by Arthur and Vassilios(?)
+      case 'plus'                  # k-means++, by Arthur and Vassilios(?)
         centers(1,:) = data(randi (n_rows),:);
         d            = inf (n_rows, 1);    # Distance to nearest centroid so far
         for i = 2:k
-          d            = min (d, dist (data, centers(i - 1, :)));
+          d            = min (d, dist(data, centers(i - 1, :)));
           centers(i,:) = data(find (cumsum (d) > rand * sum (d), 1), :);
         endfor
-      case "cluster"
+      case 'cluster'
         idx          = randperm (n_rows, max (k, ceil (n_rows / 10)));
-        [~, centers] = kmeans (data(idx,:), k, "start", "sample", ...
-                               "distance", distance);
-      case "uniform"
+        [~, centers] = kmeans (data(idx,:), k, 'start', 'sample', ...
+                               'distance', distance);
+      case 'uniform'
         # vectorised 'min_data + range .* rand'
         centers = bsxfun (@plus, min_data,
                           bsxfun (@times, range, rand (k, columns (data))));
@@ -417,7 +415,7 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
 
         ## update the centroids
         if (any (membership))      ## if we didn't "drop" the cluster
-          centers(i, :) = centroid (data(membership, :));
+          centers(i, :) = centroid(data(membership, :));
         endif
       endfor
 
@@ -432,7 +430,7 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
       old_classes = classes;
 
       ## display iteration status
-      if (strcmp (display, "iter"))
+      if (strcmp (display, 'iter'))
         printf ("%6d\t%6d\t%8d\t%12.3f\n", (iter), 1, ...
           n_changes, sum (sumd));
       endif
@@ -449,7 +447,7 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
     endif
 
     ## display final results
-    if (strcmp (display, "final"))
+    if (strcmp (display, 'final'))
       printf ("Replicate %d, %d iterations, total sum of distances = %.3f.\n", ...
         rep, iter, sum (sumd));
     endif
@@ -459,7 +457,7 @@ function [classes, centers, sumd, D] = kmeans (data, k, varargin)
   [D, classes, sumd] = update_dist (data, centers, D, k, dist);
 
   ## display final results
-  if (strcmp (display, "final") || strcmp (display, "iter"))
+  if (strcmp (display, 'final') || strcmp (display, 'iter'))
     printf ("Best total sum of distances = %.3f\n", sum (sumd));
   endif
 
@@ -475,7 +473,7 @@ endfunction
 ## Update distances, classes and sums
 function [D, classes, sumd] = update_dist (data, centers, D, k, dist)
     for i = 1:k
-      D (:, i) = dist (data, centers(i, :));
+      D(:, i) = dist(data, centers(i, :));
     endfor
     [~, classes] = min (D, [], 2);
     ## calculate the sum of within-class distances
@@ -487,23 +485,23 @@ endfunction
 
 %!demo
 %! ## Generate a two-cluster problem
-%! randn ("seed", 31)  # for reproducibility
+%! randn ('seed', 31)  # for reproducibility
 %! C1 = randn (100, 2) + 1;
-%! randn ("seed", 32)  # for reproducibility
+%! randn ('seed', 32)  # for reproducibility
 %! C2 = randn (100, 2) - 1;
 %! data = [C1; C2];
 %!
 %! ## Perform clustering
-%! rand ("seed", 1)  # for reproducibility
+%! rand ('seed', 1)  # for reproducibility
 %! [idx, centers] = kmeans (data, 2);
 %!
 %! ## Plot the result
 %! figure;
-%! plot (data (idx==1, 1), data (idx==1, 2), "ro");
+%! plot (data(idx==1, 1), data(idx==1, 2), 'ro');
 %! hold on;
-%! plot (data (idx==2, 1), data (idx==2, 2), "bs");
-%! plot (centers (:, 1), centers (:, 2), "kv", "markersize", 10);
-%! title ("A simple two-clusters example");
+%! plot (data(idx==2, 1), data(idx==2, 2), 'bs');
+%! plot (centers(:, 1), centers(:, 2), 'kv', 'markersize', 10);
+%! title ('A simple two-clusters example');
 %! hold off;
 
 %!demo
@@ -514,169 +512,169 @@ endfunction
 %! load fisheriris
 %! X = meas(:,3:4);
 %!
-%! plot (X(:,1), X(:,2), "k*", "MarkerSize", 5);
-%! title ("Fisher's Iris Data");
-%! xlabel ("Petal Lengths (cm)");
-%! ylabel ("Petal Widths (cm)");
+%! plot (X(:,1), X(:,2), 'k*', 'MarkerSize', 5);
+%! title ('Fisher''s Iris Data');
+%! xlabel ('Petal Lengths (cm)');
+%! ylabel ('Petal Widths (cm)');
 %!
 %! ## Cluster the data. Specify k = 3 clusters
-%! rand ("seed", 1)  # for reproducibility
+%! rand ('seed', 1)  # for reproducibility
 %! [idx, C] = kmeans (X, 3);
 %! x1 = min (X(:,1)):0.01:max (X(:,1));
 %! x2 = min (X(:,2)):0.01:max (X(:,2));
 %! [x1G, x2G] = meshgrid (x1, x2);
 %! XGrid = [x1G(:), x2G(:)];
 %!
-%! idx2Region = kmeans (XGrid, 3, "MaxIter", 10, "Start", C);
+%! idx2Region = kmeans (XGrid, 3, 'MaxIter', 10, 'Start', C);
 %! figure;
 %! gscatter (XGrid(:,1), XGrid(:,2), idx2Region, ...
-%!           [0, 0.75, 0.75; 0.75, 0, 0.75; 0.75, 0.75, 0], "..");
+%!           [0, 0.75, 0.75; 0.75, 0, 0.75; 0.75, 0.75, 0], '..');
 %! hold on;
-%! plot (X(:,1), X(:,2), "k*", "MarkerSize", 5);
-%! title ("Fisher's Iris Data");
-%! xlabel ("Petal Lengths (cm)");
-%! ylabel ("Petal Widths (cm)");
-%! legend ("Region 1", "Region 2", "Region 3", "Data", "Location", "SouthEast");
+%! plot (X(:,1), X(:,2), 'k*', 'MarkerSize', 5);
+%! title ('Fisher''s Iris Data');
+%! xlabel ('Petal Lengths (cm)');
+%! ylabel ('Petal Widths (cm)');
+%! legend ('Region 1', 'Region 2', 'Region 3', 'Data', 'Location', 'SouthEast');
 %! hold off
 
 %!demo
 %! ## Partition Data into Two Clusters
 %!
-%! randn ("seed", 1)  # for reproducibility
+%! randn ('seed', 1)  # for reproducibility
 %! r1 = randn (100, 2) * 0.75 + ones (100, 2);
-%! randn ("seed", 2)  # for reproducibility
+%! randn ('seed', 2)  # for reproducibility
 %! r2 = randn (100, 2) * 0.5 - ones (100, 2);
 %! X = [r1; r2];
 %!
-%! plot (X(:,1), X(:,2), ".");
-%! title ("Randomly Generated Data");
-%! rand ("seed", 1)  # for reproducibility
-%! [idx, C] = kmeans (X, 2, "Distance", "cityblock", ...
-%!                          "Replicates", 5, "Display", "final");
+%! plot (X(:,1), X(:,2), '.');
+%! title ('Randomly Generated Data');
+%! rand ('seed', 1)  # for reproducibility
+%! [idx, C] = kmeans (X, 2, 'Distance', 'cityblock', ...
+%!                          'Replicates', 5, 'Display', 'final');
 %! figure;
-%! plot (X(idx==1,1), X(idx==1,2), "r.", "MarkerSize", 12);
+%! plot (X(idx==1,1), X(idx==1,2), 'r.', 'MarkerSize', 12);
 %! hold on
-%! plot(X(idx==2,1), X(idx==2,2), "b.", "MarkerSize", 12);
-%! plot (C(:,1), C(:,2), "kx", "MarkerSize", 15, "LineWidth", 3);
-%! legend ("Cluster 1", "Cluster 2", "Centroids", "Location", "NorthWest");
-%! title ("Cluster Assignments and Centroids");
+%! plot (X(idx==2,1), X(idx==2,2), 'b.', 'MarkerSize', 12);
+%! plot (C(:,1), C(:,2), 'kx', 'MarkerSize', 15, 'LineWidth', 3);
+%! legend ('Cluster 1', 'Cluster 2', 'Centroids', 'Location', 'NorthWest');
+%! title ('Cluster Assignments and Centroids');
 %! hold off
 
 %!demo
 %! ## Assign New Data to Existing Clusters
 %!
 %! ## Generate a training data set using three distributions
-%! randn ("seed", 5)  # for reproducibility
+%! randn ('seed', 5)  # for reproducibility
 %! r1 = randn (100, 2) * 0.75 + ones (100, 2);
-%! randn ("seed", 7)  # for reproducibility
+%! randn ('seed', 7)  # for reproducibility
 %! r2 = randn (100, 2) * 0.5 - ones (100, 2);
-%! randn ("seed", 9)  # for reproducibility
+%! randn ('seed', 9)  # for reproducibility
 %! r3 = randn (100, 2) * 0.75;
 %! X = [r1; r2; r3];
 %!
 %! ## Partition the training data into three clusters by using kmeans
 %!
-%! rand ("seed", 1)  # for reproducibility
+%! rand ('seed', 1)  # for reproducibility
 %! [idx, C] = kmeans (X, 3);
 %!
 %! ## Plot the clusters and the cluster centroids
 %!
-%! gscatter (X(:,1), X(:,2), idx, "bgm", "***");
+%! gscatter (X(:,1), X(:,2), idx, 'bgm', '***');
 %! hold on
-%! plot (C(:,1), C(:,2), "kx");
-%! legend ("Cluster 1", "Cluster 2", "Cluster 3", "Cluster Centroid")
+%! plot (C(:,1), C(:,2), 'kx');
+%! legend ('Cluster 1', 'Cluster 2', 'Cluster 3', 'Cluster Centroid')
 %!
 %! ## Generate a test data set
-%! randn ("seed", 25)  # for reproducibility
+%! randn ('seed', 25)  # for reproducibility
 %! r1 = randn (100, 2) * 0.75 + ones (100, 2);
-%! randn ("seed", 27)  # for reproducibility
+%! randn ('seed', 27)  # for reproducibility
 %! r2 = randn (100, 2) * 0.5 - ones (100, 2);
-%! randn ("seed", 29)  # for reproducibility
+%! randn ('seed', 29)  # for reproducibility
 %! r3 = randn (100, 2) * 0.75;
 %! Xtest = [r1; r2; r3];
 %!
 %! ## Classify the test data set using the existing clusters
 %! ## Find the nearest centroid from each test data point by using pdist2
 %!
-%! D = pdist2 (C, Xtest, "euclidean");
+%! D = pdist2 (C, Xtest, 'euclidean');
 %! [group, ~] = find (D == min (D));
 %!
 %! ## Plot the test data and label the test data using idx_test with gscatter
 %!
-%! gscatter (Xtest(:,1), Xtest(:,2), group, "bgm", "ooo");
+%! gscatter (Xtest(:,1), Xtest(:,2), group, 'bgm', 'ooo');
 %! box on;
-%! legend ("Cluster 1", "Cluster 2", "Cluster 3", "Cluster Centroid", ...
-%!         "Data classified to Cluster 1", "Data classified to Cluster 2", ...
-%!         "Data classified to Cluster 3", "Location", "NorthWest");
-%! title ("Assign New Data to Existing Clusters");
+%! legend ('Cluster 1', 'Cluster 2', 'Cluster 3', 'Cluster Centroid', ...
+%!         'Data classified to Cluster 1', 'Data classified to Cluster 2', ...
+%!         'Data classified to Cluster 3', 'Location', 'NorthWest');
+%! title ('Assign New Data to Existing Clusters');
 
 ## Test output
 %!test
 %! samples = 4;
 %! dims = 3;
 %! k = 2;
-%! [cls, c, d, z] = kmeans (rand (samples,dims), k, "start", rand (k,dims, 5),
-%!                          "emptyAction", "singleton");
-%! assert (size (cls), [samples, 1]);
-%! assert (size (c), [k, dims]);
-%! assert (size (d), [k, 1]);
-%! assert (size (z), [samples, k]);
+%! [cls, c, d, z] = kmeans (rand (samples,dims), k, 'start', rand (k,dims, 5),
+%!                          'emptyAction', 'singleton');
+%! assert_equal (size (cls), [samples, 1]);
+%! assert_equal (size (c), [k, dims]);
+%! assert_equal (size (d), [k, 1]);
+%! assert_equal (size (z), [samples, k]);
 
 %!test
 %! samples = 4;
 %! dims = 3;
 %! k = 2;
-%! [cls, c, d, z] = kmeans (rand (samples,dims), [], "start", rand (k,dims, 5),
-%!                          "emptyAction", "singleton");
-%! assert (size (cls), [samples, 1]);
-%! assert (size (c), [k, dims]);
-%! assert (size (d), [k, 1]);
-%! assert (size (z), [samples, k]);
+%! [cls, c, d, z] = kmeans (rand (samples,dims), [], 'start', rand (k,dims, 5),
+%!                          'emptyAction', 'singleton');
+%! assert_equal (size (cls), [samples, 1]);
+%! assert_equal (size (c), [k, dims]);
+%! assert_equal (size (d), [k, 1]);
+%! assert_equal (size (z), [samples, k]);
 
 %!test
-%! [cls, c] = kmeans ([1 0; 2 0], 2, "start", [8,0;0,8], "emptyaction", "drop");
-%! assert (cls, [1; 1]);
-%! assert (c, [1.5, 0; NA, NA]);
+%! [cls, c] = kmeans ([1 0; 2 0], 2, 'start', [8,0;0,8], 'emptyaction', 'drop');
+%! assert_equal (cls, [1; 1]);
+%! assert_equal (c, [1.5, 0; NA, NA]);
 
 %!test
-%! kmeans (rand (4,3), 2, "start", rand (2,3, 5), "replicates", 5,
-%!         "emptyAction", "singleton");
+%! kmeans (rand (4,3), 2, 'start', rand (2,3, 5), 'replicates', 5,
+%!         'emptyAction', 'singleton');
 %!test
-%! kmeans (rand (3,4), 2, "start", "sample", "emptyAction", "singleton");
+%! kmeans (rand (3,4), 2, 'start', 'sample', 'emptyAction', 'singleton');
 %!test
-%! kmeans (rand (3,4), 2, "start", "plus", "emptyAction", "singleton");
+%! kmeans (rand (3,4), 2, 'start', 'plus', 'emptyAction', 'singleton');
 %!test
-%! kmeans (rand (3,4), 2, "start", "cluster", "emptyAction", "singleton");
+%! kmeans (rand (3,4), 2, 'start', 'cluster', 'emptyAction', 'singleton');
 %!test
-%! kmeans (rand (3,4), 2, "start", "uniform", "emptyAction", "singleton");
+%! kmeans (rand (3,4), 2, 'start', 'uniform', 'emptyAction', 'singleton');
 %!test
-%! kmeans (rand (4,3), 2, "distance", "sqeuclidean", "emptyAction", "singleton");
+%! kmeans (rand (4,3), 2, 'distance', 'sqeuclidean', 'emptyAction', 'singleton');
 %!test
-%! kmeans (rand (4,3), 2, "distance", "cityblock", "emptyAction", "singleton");
+%! kmeans (rand (4,3), 2, 'distance', 'cityblock', 'emptyAction', 'singleton');
 %!test
-%! kmeans (rand (4,3), 2, "distance", "cosine", "emptyAction", "singleton");
+%! kmeans (rand (4,3), 2, 'distance', 'cosine', 'emptyAction', 'singleton');
 %!test
-%! kmeans (rand (4,3), 2, "distance", "correlation", "emptyAction", "singleton");
+%! kmeans (rand (4,3), 2, 'distance', 'correlation', 'emptyAction', 'singleton');
 %!test
-%! kmeans (rand (4,3), 2, "distance", "hamming", "emptyAction", "singleton");
+%! kmeans (rand (4,3), 2, 'distance', 'hamming', 'emptyAction', 'singleton');
 %!test
-%! kmeans ([1 0; 1.1 0], 2, "start", eye(2), "emptyaction", "singleton");
+%! kmeans ([1 0; 1.1 0], 2, 'start', eye (2), 'emptyaction', 'singleton');
 
 ## Test input validation
 %!error kmeans (rand (3,2), 4);
-%!error kmeans ([1 0; 1.1 0], 2, "start", eye(2), "emptyaction", "panic");
-%!error kmeans (rand (4,3), 2, "start", rand (2,3, 5), "replicates", 1);
-%!error kmeans (rand (4,3), 2, "start", rand (2,2));
-%!error kmeans (rand (4,3), 2, "distance", "manhattan");
-%!error kmeans (rand (3,4), 2, "start", "normal");
-%!error kmeans (rand (4,3), 2, "replicates", i);
-%!error kmeans (rand (4,3), 2, "replicates", -1);
-%!error kmeans (rand (4,3), 2, "replicates", []);
-%!error kmeans (rand (4,3), 2, "replicates", [1 2]);
-%!error kmeans (rand (4,3), 2, "replicates", "one");
-%!error kmeans (rand (4,3), 2, "MAXITER", i);
-%!error kmeans (rand (4,3), 2, "MaxIter", -1);
-%!error kmeans (rand (4,3), 2, "maxiter", []);
-%!error kmeans (rand (4,3), 2, "maxiter", [1 2]);
-%!error kmeans (rand (4,3), 2, "maxiter", "one");
-%!error <empty cluster created> kmeans ([1 0; 1.1 0], 2, "start", eye(2), "emptyaction", "error");
+%!error kmeans ([1 0; 1.1 0], 2, 'start', eye (2), 'emptyaction', 'panic');
+%!error kmeans (rand (4,3), 2, 'start', rand (2,3, 5), 'replicates', 1);
+%!error kmeans (rand (4,3), 2, 'start', rand (2,2));
+%!error kmeans (rand (4,3), 2, 'distance', 'manhattan');
+%!error kmeans (rand (3,4), 2, 'start', 'normal');
+%!error kmeans (rand (4,3), 2, 'replicates', i);
+%!error kmeans (rand (4,3), 2, 'replicates', -1);
+%!error kmeans (rand (4,3), 2, 'replicates', []);
+%!error kmeans (rand (4,3), 2, 'replicates', [1 2]);
+%!error kmeans (rand (4,3), 2, 'replicates', 'one');
+%!error kmeans (rand (4,3), 2, 'MAXITER', i);
+%!error kmeans (rand (4,3), 2, 'MaxIter', -1);
+%!error kmeans (rand (4,3), 2, 'maxiter', []);
+%!error kmeans (rand (4,3), 2, 'maxiter', [1 2]);
+%!error kmeans (rand (4,3), 2, 'maxiter', 'one');
+%!error <empty cluster created> kmeans ([1 0; 1.1 0], 2, 'start', eye (2), 'emptyaction', 'error');

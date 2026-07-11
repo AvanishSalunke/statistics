@@ -89,7 +89,7 @@ function [paramhat, paramci] = gevfit (x, alpha, varargin)
 
   ## Get X type and convert to double for computation
   is_type = class (x);
-  if (strcmpi (is_type, "single"))
+  if (strcmpi (is_type, 'single'))
     x = double (x);
   endif
 
@@ -122,7 +122,7 @@ function [paramhat, paramci] = gevfit (x, alpha, varargin)
 
   ## Add defaults
   freq = [];
-  options.Display = "off";
+  options.Display = 'off';
   options.MaxFunEvals = 400;
   options.MaxIter = 200;
   options.TolX = 1e-6;
@@ -149,9 +149,9 @@ function [paramhat, paramci] = gevfit (x, alpha, varargin)
       error ("gevfit: FREQ must contain integer values.");
     endif
     ## Check for valid options structure
-    if (! isstruct (options) || ! isfield (options, "Display") ||
-        ! isfield (options, "MaxFunEvals") || ! isfield (options, "MaxIter")
-                                           || ! isfield (options, "TolX"))
+    if (! isstruct (options) || ! isfield (options, 'Display') ||
+        ! isfield (options, 'MaxFunEvals') || ! isfield (options, 'MaxIter')
+                                           || ! isfield (options, 'TolX'))
       error (strcat ("gevfit: 'options' argument must be a", ...
                      " structure with 'Display', 'MaxFunEvals',", ...
                      " 'MaxIter', and 'TolX' fields present."));
@@ -204,11 +204,12 @@ function [paramhat, paramci] = gevfit (x, alpha, varargin)
 
   ## Check for second output argument
   if (nargout > 1)
-  	[~, acov] = gevlike (paramhat, x);
-  	param_se = sqrt (diag (acov))';
+    [~, acov] = gevlike (paramhat, x);
+    param_se = sqrt (diag (acov))';
     if (any (iscomplex (param_se)))
-      warning (["gevfit: Fisher information matrix not positive definite;", ...
-                " parameter optimization likely did not converge"]);
+      warning (strcat ("gevfit: Fisher information matrix not positive", ...
+                       " definite; parameter optimization likely did not", ...
+                       " converge"));
       paramci = NaN (2, 3, is_type);
     else
       p_vals = [alpha/2; 1-alpha/2];
@@ -228,9 +229,9 @@ function out = nll (parms, x)
   mu = parms(3);
   n = numel (x);
   z = (x - mu) ./ sigma;
-  if abs(k_0) > eps
+  if abs (k_0) > eps
       u = 1 + k_0.*z;
-      if min(u) > 0
+      if min (u) > 0
           lnu = log1p (k_0 .* z);
           out = n * log_sigma + sum (exp ((-1 / k_0) * lnu)) + ...
                                 (1 + 1 / k_0) * sum (lnu);
@@ -244,17 +245,17 @@ endfunction
 
 %!demo
 %! ## Sample 2 populations from 2 different exponential distributions
-%! rand ("seed", 1);   # for reproducibility
+%! rand ('seed', 1);   # for reproducibility
 %! r1 = gevrnd (-0.5, 1, 2, 5000, 1);
-%! rand ("seed", 2);   # for reproducibility
+%! rand ('seed', 2);   # for reproducibility
 %! r2 = gevrnd (0, 1, -4, 5000, 1);
 %! r = [r1, r2];
 %!
 %! ## Plot them normalized and fix their colors
 %! hist (r, 50, 5);
-%! h = findobj (gca, "Type", "patch");
-%! set (h(1), "facecolor", "c");
-%! set (h(2), "facecolor", "g");
+%! h = findobj (gca, 'Type', 'patch');
+%! set (h(1), 'facecolor', 'c');
+%! set (h(2), 'facecolor', 'g');
 %! hold on
 %!
 %! ## Estimate their k, sigma, and mu parameters
@@ -264,18 +265,18 @@ endfunction
 %! ## Plot their estimated PDFs
 %! x = [-10:0.5:20];
 %! y = gevpdf (x, k_sigma_muA(1), k_sigma_muA(2), k_sigma_muA(3));
-%! plot (x, y, "-pr");
+%! plot (x, y, '-pr');
 %! y = gevpdf (x, k_sigma_muB(1), k_sigma_muB(2), k_sigma_muB(3));
-%! plot (x, y, "-sg");
+%! plot (x, y, '-sg');
 %! ylim ([0, 0.7])
 %! xlim ([-7, 5])
-%! legend ({"Normalized HIST of sample 1 with k=-0.5, σ=1, μ=2", ...
-%!          "Normalized HIST of sample 2 with k=0, σ=1, μ=-4",
+%! legend ({'Normalized HIST of sample 1 with k=-0.5, σ=1, μ=2', ...
+%!          'Normalized HIST of sample 2 with k=0, σ=1, μ=-4',
 %!     sprintf("PDF for sample 1 with estimated k=%0.2f, σ=%0.2f, μ=%0.2f", ...
 %!                 k_sigma_muA(1), k_sigma_muA(2), k_sigma_muA(3)), ...
 %!     sprintf("PDF for sample 3 with estimated k=%0.2f, σ=%0.2f, μ=%0.2f", ...
 %!                 k_sigma_muB(1), k_sigma_muB(2), k_sigma_muB(3))})
-%! title ("Two population samples from different exponential distributions")
+%! title ('Two population samples from different exponential distributions')
 %! hold off
 
 ## Test output
@@ -284,21 +285,21 @@ endfunction
 %! [pfit, pci] = gevfit (x);
 %! pfit_out = [-0.4407, 15.1923, 21.5309];
 %! pci_out = [-0.7532, 11.5878, 16.5686; -0.1282, 19.9183, 26.4926];
-%! assert (pfit, pfit_out, 1e-3);
-%! assert (pci, pci_out, 1e-3);
+%! assert_equal (pfit, pfit_out, 1e-3);
+%! assert_equal (pci, pci_out, 1e-3);
 %!test
 %! x = 1:2:50;
 %! [pfit, pci] = gevfit (x);
 %! pfit_out = [-0.4434, 15.2024, 21.0532];
 %! pci_out = [-0.8904, 10.3439, 14.0168; 0.0035, 22.3429, 28.0896];
-%! assert (pfit, pfit_out, 1e-3);
-%! assert (pci, pci_out, 1e-3);
+%! assert_equal (pfit, pfit_out, 1e-3);
+%! assert_equal (pci, pci_out, 1e-3);
 
 ## Test input validation
 %!error<gevfit: X must be a vector.> gevfit (ones (2,5));
 %!error<gevfit: wrong value for ALPHA.> gevfit ([1, 2, 3, 4, 5], 1.2);
 %!error<gevfit: wrong value for ALPHA.> gevfit ([1, 2, 3, 4, 5], 0);
-%!error<gevfit: wrong value for ALPHA.> gevfit ([1, 2, 3, 4, 5], "alpha");
+%!error<gevfit: wrong value for ALPHA.> gevfit ([1, 2, 3, 4, 5], 'alpha');
 %!error<gevfit: X and FREQ vectors mismatch.> ...
 %! gevfit ([1, 2, 3, 4, 5], 0.05, [1, 2, 3, 2]);
 %!error<gevfit: FREQ must not contain negative values.> ...
@@ -306,6 +307,6 @@ endfunction
 %!error<gevfit: FREQ must contain integer values.> ...
 %! gevfit ([1, 2, 3, 4, 5], 0.05, [1, 2, 3, 2, 1.5]);
 %!error<gevfit: 'options' argument must be a structure> ...
-%! gevfit ([1, 2, 3, 4, 5], 0.05, struct ("option", 234));
+%! gevfit ([1, 2, 3, 4, 5], 0.05, struct ('option', 234));
 %!error<gevfit: 'options' argument must be a structure> ...
-%! gevfit ([1, 2, 3, 4, 5], 0.05, ones (1,5), struct ("option", 234));
+%! gevfit ([1, 2, 3, 4, 5], 0.05, ones (1,5), struct ('option', 234));

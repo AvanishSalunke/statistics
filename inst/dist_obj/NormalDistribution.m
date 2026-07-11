@@ -36,7 +36,9 @@ classdef NormalDistribution
   ## @item Fit a distribution to data using the @code{fitdist} function.
   ## @item Create a distribution with fixed parameter values using the
   ## @code{makedist} function.
-  ## @item Use the constructor @qcode{NormalDistribution (@var{mu}, @var{sigma})}
+  ## @item Use the constructor
+  ## @qcode{NormalDistribution (@var{mu},
+  ## @var{sigma})}
   ## to create a normal distribution with fixed parameter values @var{mu} and
   ## @var{sigma}.
   ## @item Use the static method @qcode{NormalDistribution.fit (@var{x},
@@ -55,7 +57,7 @@ classdef NormalDistribution
   ## normlike, normstat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {NormalDistribution} {property} mu
     ##
@@ -80,7 +82,7 @@ classdef NormalDistribution
     sigma
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {NormalDistribution} {property} DistributionName
     ##
@@ -90,7 +92,7 @@ classdef NormalDistribution
     ## object. This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "NormalDistribution";
+    DistributionName = 'NormalDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {NormalDistribution} {property} NumParameters
@@ -108,39 +110,39 @@ classdef NormalDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter. This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"mu", "sigma"};
+    ParameterNames = {'mu', 'sigma'};
 
     ## -*- texinfo -*-
     ## @deftp {NormalDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter. This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Mean", "Standard Deviation"};
+    ParameterDescription = {'Mean', 'Standard Deviation'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = true;
-    DistributionCode = "norm";
+    DistributionCode = 'norm';
     ParameterRange = [-Inf, realmin; Inf, Inf];
     ParameterLogCI = [true, true];
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected)
+  properties(GetAccess = public, SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {NormalDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{2x1} numeric vector containing the values of the distribution
+    ## A @math{2*1} numeric vector containing the values of the distribution
     ## parameters. This property is read-only. You can change the distribution
     ## parameters by assigning new values to the @qcode{mu} and @qcode{sigma}
     ## properties.
@@ -153,7 +155,7 @@ classdef NormalDistribution
     ##
     ## Covariance matrix of the parameter estimates
     ##
-    ## A @math{2x2} numeric matrix containing the variance-covariance of the
+    ## A @math{2*2} numeric matrix containing the variance-covariance of the
     ## parameter estimates. Diagonal elements contain the variance of each
     ## estimated parameter, and non-diagonal elements contain the covariance
     ## between the parameter estimates. The covariance matrix is only meaningful
@@ -170,7 +172,7 @@ classdef NormalDistribution
     ##
     ## Flag for fixed parameters
     ##
-    ## A @math{1x2} logical vector specifying which parameters are fixed and
+    ## A @math{1*2} logical vector specifying which parameters are fixed and
     ## which are estimated. @qcode{true} values correspond to fixed parameters,
     ## @qcode{false} values correspond to parameter estimates. This property is
     ## read-only.
@@ -183,7 +185,7 @@ classdef NormalDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution. First element contains the lower boundary,
     ## second element contains the upper boundary. This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -226,11 +228,11 @@ classdef NormalDistribution
     InputData
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected, Hidden)
+  properties(GetAccess = public, SetAccess = protected, Hidden)
     ParameterCI
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = NormalDistribution (mu, sigma)
       if (nargin == 0)
@@ -246,12 +248,12 @@ classdef NormalDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "normal distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'normal distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "normal distribution");
+      __disp__ (this, 'normal distribution');
     endfunction
 
     function this = set.mu (this, mu)
@@ -280,11 +282,11 @@ classdef NormalDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {NormalDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {NormalDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {NormalDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -292,7 +294,7 @@ classdef NormalDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -302,9 +304,9 @@ classdef NormalDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -451,14 +453,14 @@ classdef NormalDistribution
     ## the confidence intervals with additional options specified by
     ## @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Alpha"} @tab @tab A scalar value in the range @math{(0,1)}
+    ## @item @qcode{'Alpha'} @tab A scalar value in the range @math{(0,1)}
     ## specifying the significance level for the confidence interval. The
     ## default value 0.05 corresponds to a 95% confidence interval.
     ##
-    ## @item @qcode{"Parameter"} @tab @tab A character vector or a cell array of
+    ## @item @qcode{'Parameter'} @tab A character vector or a cell array of
     ## character vectors specifying the parameter names for which to compute
     ## confidence intervals. By default, @code{paramci} computes confidence
     ## intervals for all distribution parameters.
@@ -519,26 +521,26 @@ classdef NormalDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type. @qcode{"pdf"} plots the probability density function (PDF). When
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type. @qcode{'pdf'} plots the probability density function (PDF). When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data. @qcode{"cdf"} plots the cumulative density function (CDF). When
+    ## data. @qcode{'cdf'} plots the cumulative density function (CDF). When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution. This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively. By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions. When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot. If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for plot. If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -559,9 +561,9 @@ classdef NormalDistribution
 
     ## -*- texinfo -*-
     ## @deftypefn  {NormalDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum})
-    ## @deftypefnx {NormalDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {NormalDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{'Display'}, @var{display})
     ## @deftypefnx {NormalDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam})
-    ## @deftypefnx {NormalDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {NormalDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{'Display'}, @var{display})
     ##
     ## Profile likelihood function for a probability distribution object.
     ##
@@ -574,14 +576,14 @@ classdef NormalDistribution
     ## fitted to data.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @qcode{"Display"}, @qcode{"on"})} also plots the profile likelihood
+    ## @qcode{'Display'}, @qcode{'on'})} also plots the profile likelihood
     ## against the default range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
     ## @var{setparam})} defines a user-defined range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @var{setparam}, @qcode{"Display"}, @qcode{"on"})} also plots the profile
+    ## @var{setparam}, @qcode{'Display'}, @qcode{'on'})} also plots the profile
     ## likelihood against the user-defined range of the selected parameter.
     ##
     ## For the normal distribution, @qcode{@var{pnum} = 1} selects the
@@ -711,7 +713,7 @@ classdef NormalDistribution
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function pd = fit (x, varargin)
       ## Check input arguments
@@ -731,7 +733,7 @@ classdef NormalDistribution
         freq = varargin{3};
       endif
       if (nargin < 5)
-        options.Display = "off";
+        options.Display = 'off';
         options.MaxFunEvals = 400;
         options.MaxIter = 200;
         options.TolX = 1e-6;
@@ -756,7 +758,7 @@ classdef NormalDistribution
       pd.ParameterCI = pci;
       pd.ParameterIsFixed = [false, false];
       pd.ParameterCovariance = acov;
-      pd.InputData = struct ("data", x, "cens", censor, "freq", freq);
+      pd.InputData = struct ('data', x, 'cens', censor, 'freq', freq);
     endfunction
 
   endmethods
@@ -778,74 +780,74 @@ endfunction
 %! ## parameters mu = 0 and sigma = 1.  Fit a Normal distribution to this data and plot
 %! ## a PDF of the fitted distribution superimposed on a histogram of the data.
 %!
-%! pd_fixed = makedist ("Normal", "mu", 0, "sigma", 1)
-%! randn ("seed", 2);
+%! pd_fixed = makedist ('Normal', 'mu', 0, 'sigma', 1)
+%! randn ('seed', 2);
 %! data = random (pd_fixed, 5000, 1);
-%! pd_fitted = fitdist (data, "Normal")
+%! pd_fitted = fitdist (data, 'Normal')
 %! plot (pd_fitted)
-%! msg = "Fitted Normal distribution with mu = %0.2f and sigma = %0.2f";
+%! msg = 'Fitted Normal distribution with mu = %0.2f and sigma = %0.2f';
 %! title (sprintf (msg, pd_fitted.mu, pd_fitted.sigma))
 
 ## Test output
 %!shared pd, t
 %! pd = NormalDistribution;
 %! t = truncate (pd, -2, 2);
-%!assert (cdf (pd, [0:5]), [0.5, 0.8413, 0.9772, 0.9987, 1, 1], 1e-4);
-%!assert (cdf (t, [0:5]), [0.5, 0.8576, 1, 1, 1, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4]), [0.9332, 0.9772, 0.9987, 1], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4]), [0.9538, 1, 1, 1], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [-Inf, -0.8416, -0.2533, 0.2533, 0.8416, Inf], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [-2, -0.7938, -0.2416, 0.2416, 0.7938, 2], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, -0.2533, 0.2533, 0.8416, Inf, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, -0.2416, 0.2416, 0.7938, 2, NaN], 1e-4);
-%!assert (iqr (pd), 1.3490, 1e-4);
-%!assert (iqr (t), 1.2782, 1e-4);
-%!assert (mean (pd), 0);
-%!assert (mean (t), 0, 3e-16);
-%!assert (median (pd), 0);
-%!assert (median (t), 0, 3e-16);
-%!assert (pdf (pd, [0:5]), [0.3989, 0.2420, 0.0540, 0.0044, 0.0001, 0], 1e-4);
-%!assert (pdf (t, [0:5]), [0.4180, 0.2535, 0.0566, 0, 0, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1:4, NaN]), [0.2420, 0.2420, 0.0540, 0.0044, 0.0001, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1:4, NaN]), [0.2535, 0.2535, 0.0566, 0, 0, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < -2), false);
-%!assert (any (random (t, 1000, 1) > 2), false);
-%!assert (std (pd), 1);
-%!assert (std (t), 0.8796, 1e-4);
-%!assert (var (pd), 1);
-%!assert (var (t), 0.7737, 1e-4);
+%!assert_equal (cdf (pd, [0:5]), [0.5, 0.8413, 0.9772, 0.9987, 1, 1], 1e-4);
+%!assert_equal (cdf (t, [0:5]), [0.5, 0.8576, 1, 1, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4]), [0.9332, 0.9772, 0.9987, 1], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4]), [0.9538, 1, 1, 1], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [-Inf, -0.8416, -0.2533, 0.2533, 0.8416, Inf], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [-2, -0.7938, -0.2416, 0.2416, 0.7938, 2], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, -0.2533, 0.2533, 0.8416, Inf, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, -0.2416, 0.2416, 0.7938, 2, NaN], 1e-4);
+%!assert_equal (iqr (pd), 1.3490, 1e-4);
+%!assert_equal (iqr (t), 1.2782, 1e-4);
+%!assert_equal (mean (pd), 0);
+%!assert_equal (mean (t), 0, 3e-16);
+%!assert_equal (median (pd), 0);
+%!assert_equal (median (t), 0, 3e-16);
+%!assert_equal (pdf (pd, [0:5]), [0.3989, 0.2420, 0.0540, 0.0044, 0.0001, 0], 1e-4);
+%!assert_equal (pdf (t, [0:5]), [0.4180, 0.2535, 0.0566, 0, 0, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1:4, NaN]), [0.2420, 0.2420, 0.0540, 0.0044, 0.0001, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1:4, NaN]), [0.2535, 0.2535, 0.0566, 0, 0, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < -2), false);
+%!assert_equal (any (random (t, 1000, 1) > 2), false);
+%!assert_equal (std (pd), 1);
+%!assert_equal (std (t), 0.8796, 1e-4);
+%!assert_equal (var (pd), 1);
+%!assert_equal (var (t), 0.7737, 1e-4);
 
 ## Test input validation
 ## 'NormalDistribution' constructor
 %!error <NormalDistribution: MU must be a real scalar.> ...
-%! NormalDistribution(Inf, 1)
+%! NormalDistribution (Inf, 1)
 %!error <NormalDistribution: MU must be a real scalar.> ...
-%! NormalDistribution(i, 1)
+%! NormalDistribution (i, 1)
 %!error <NormalDistribution: MU must be a real scalar.> ...
-%! NormalDistribution("a", 1)
+%! NormalDistribution ('a', 1)
 %!error <NormalDistribution: MU must be a real scalar.> ...
-%! NormalDistribution([1, 2], 1)
+%! NormalDistribution ([1, 2], 1)
 %!error <NormalDistribution: MU must be a real scalar.> ...
-%! NormalDistribution(NaN, 1)
+%! NormalDistribution (NaN, 1)
 %!error <NormalDistribution: SIGMA must be a positive real scalar.> ...
-%! NormalDistribution(1, 0)
+%! NormalDistribution (1, 0)
 %!error <NormalDistribution: SIGMA must be a positive real scalar.> ...
-%! NormalDistribution(1, -1)
+%! NormalDistribution (1, -1)
 %!error <NormalDistribution: SIGMA must be a positive real scalar.> ...
-%! NormalDistribution(1, Inf)
+%! NormalDistribution (1, Inf)
 %!error <NormalDistribution: SIGMA must be a positive real scalar.> ...
-%! NormalDistribution(1, i)
+%! NormalDistribution (1, i)
 %!error <NormalDistribution: SIGMA must be a positive real scalar.> ...
-%! NormalDistribution(1, "a")
+%! NormalDistribution (1, 'a')
 %!error <NormalDistribution: SIGMA must be a positive real scalar.> ...
-%! NormalDistribution(1, [1, 2])
+%! NormalDistribution (1, [1, 2])
 %!error <NormalDistribution: SIGMA must be a positive real scalar.> ...
-%! NormalDistribution(1, NaN)
+%! NormalDistribution (1, NaN)
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (NormalDistribution, 2, "uper")
+%! cdf (NormalDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (NormalDistribution, 2, 3)
 
@@ -853,59 +855,59 @@ endfunction
 %!shared x
 %! x = normrnd (1, 1, [1, 100]);
 %!error <paramci: optional arguments must be in NAME-VALUE pairs.> ...
-%! paramci (NormalDistribution.fit (x), "alpha")
+%! paramci (NormalDistribution.fit (x), 'alpha')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (NormalDistribution.fit (x), "alpha", 0)
+%! paramci (NormalDistribution.fit (x), 'alpha', 0)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (NormalDistribution.fit (x), "alpha", 1)
+%! paramci (NormalDistribution.fit (x), 'alpha', 1)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (NormalDistribution.fit (x), "alpha", [0.5 2])
+%! paramci (NormalDistribution.fit (x), 'alpha', [0.5 2])
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (NormalDistribution.fit (x), "alpha", "")
+%! paramci (NormalDistribution.fit (x), 'alpha', '')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (NormalDistribution.fit (x), "alpha", {0.05})
+%! paramci (NormalDistribution.fit (x), 'alpha', {0.05})
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (NormalDistribution.fit (x), "parameter", "mu", "alpha", {0.05})
+%! paramci (NormalDistribution.fit (x), 'parameter', 'mu', 'alpha', {0.05})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (NormalDistribution.fit (x), "parameter", {"mu", "sigma", "param"})
+%! paramci (NormalDistribution.fit (x), 'parameter', {'mu', 'sigma', 'param'})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (NormalDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", {"mu", "sigma", "param"})
+%! paramci (NormalDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', {'mu', 'sigma', 'param'})
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (NormalDistribution.fit (x), "parameter", "param")
+%! paramci (NormalDistribution.fit (x), 'parameter', 'param')
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (NormalDistribution.fit (x), "alpha", 0.01, "parameter", "param")
+%! paramci (NormalDistribution.fit (x), 'alpha', 0.01, 'parameter', 'param')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (NormalDistribution.fit (x), "NAME", "value")
+%! paramci (NormalDistribution.fit (x), 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (NormalDistribution.fit (x), "alpha", 0.01, "NAME", "value")
+%! paramci (NormalDistribution.fit (x), 'alpha', 0.01, 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (NormalDistribution.fit (x), "alpha", 0.01, "parameter", "mu", ...
-%!          "NAME", "value")
+%! paramci (NormalDistribution.fit (x), 'alpha', 0.01, 'parameter', 'mu', ...
+%!          'NAME', 'value')
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (NormalDistribution, "Parent")
+%! plot (NormalDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (NormalDistribution, "PlotType", 12)
+%! plot (NormalDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (NormalDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (NormalDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (NormalDistribution, "PlotType", "pdfcdf")
+%! plot (NormalDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (NormalDistribution, "Discrete", "pdfcdf")
+%! plot (NormalDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (NormalDistribution, "Discrete", [1, 0])
+%! plot (NormalDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (NormalDistribution, "Discrete", {true})
+%! plot (NormalDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (NormalDistribution, "Parent", 12)
+%! plot (NormalDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (NormalDistribution, "Parent", "hax")
+%! plot (NormalDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (NormalDistribution, "invalidNAME", "pdf")
+%! plot (NormalDistribution, 'invalidNAME', 'pdf')
 %!error <plot: no fitted DATA to plot a probability plot.> ...
-%! plot (NormalDistribution, "PlotType", "probability")
+%! plot (NormalDistribution, 'PlotType', 'probability')
 
 ## 'proflik' method
 %!error <proflik: no fitted data available.> ...
@@ -919,23 +921,23 @@ endfunction
 %!error <proflik: SETPARAM must be a numeric vector.> ...
 %! proflik (NormalDistribution.fit (x), 1, ones (2))
 %!error <proflik: missing VALUE for 'Display' argument.> ...
-%! proflik (NormalDistribution.fit (x), 1, "Display")
+%! proflik (NormalDistribution.fit (x), 1, 'Display')
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (NormalDistribution.fit (x), 1, "Display", 1)
+%! proflik (NormalDistribution.fit (x), 1, 'Display', 1)
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (NormalDistribution.fit (x), 1, "Display", {1})
+%! proflik (NormalDistribution.fit (x), 1, 'Display', {1})
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (NormalDistribution.fit (x), 1, "Display", {"on"})
+%! proflik (NormalDistribution.fit (x), 1, 'Display', {'on'})
 %!error <proflik: invalid VALUE size for 'Display' argument.> ...
-%! proflik (NormalDistribution.fit (x), 1, "Display", ["on"; "on"])
+%! proflik (NormalDistribution.fit (x), 1, 'Display', ['on'; 'on'])
 %!error <proflik: invalid VALUE for 'Display' argument.> ...
-%! proflik (NormalDistribution.fit (x), 1, "Display", "onnn")
+%! proflik (NormalDistribution.fit (x), 1, 'Display', 'onnn')
 %!error <proflik: invalid NAME for optional arguments.> ...
-%! proflik (NormalDistribution.fit (x), 1, "NAME", "on")
+%! proflik (NormalDistribution.fit (x), 1, 'NAME', 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (NormalDistribution.fit (x), 1, {"NAME"}, "on")
+%! proflik (NormalDistribution.fit (x), 1, {'NAME'}, 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (NormalDistribution.fit (x), 1, {[1 2 3 4]}, "Display", "on")
+%! proflik (NormalDistribution.fit (x), 1, {[1 2 3 4]}, 'Display', 'on')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...
@@ -947,8 +949,8 @@ endfunction
 
 ## Catch errors when using array of probability objects with available methods
 %!shared pd
-%! pd = NormalDistribution(1, 1);
-%! pd(2) = NormalDistribution(1, 3);
+%! pd = NormalDistribution (1, 1);
+%! pd(2) = NormalDistribution (1, 3);
 %!error <cdf: requires a scalar probability distribution.> cdf (pd, 1)
 %!error <icdf: requires a scalar probability distribution.> icdf (pd, 0.5)
 %!error <iqr: requires a scalar probability distribution.> iqr (pd)

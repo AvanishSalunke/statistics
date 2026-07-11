@@ -36,7 +36,7 @@
 ## When called with three output arguments, i.e. @qcode{[@var{x}, @var{xlo},
 ## @var{xup}]}, @code{evinv} computes the confidence bounds for @var{x} when the
 ## input parameters @var{mu} and @var{sigma} are estimates.  In such case,
-## @var{pcov}, a @math{2x2} matrix containing the covariance matrix of the
+## @var{pcov}, a @math{2*2} matrix containing the covariance matrix of the
 ## estimated parameters, is necessary.  Optionally, @var{alpha}, which has a
 ## default value of 0.05, specifies the @qcode{100 * (1 - @var{alpha})} percent
 ## confidence bounds.  @var{xlo} and @var{xup} are arrays of the same size as
@@ -101,10 +101,10 @@ function [x, xlo, xup] = evinv (p, mu, sigma, pcov, alpha)
   endif
 
   ## Check for appropriate class
-  if (isa (p, "single") || isa (mu, "single") || isa (sigma, "single"));
-    is_class = "single";
+  if (isa (p, 'single') || isa (mu, 'single') || isa (sigma, 'single'));
+    is_class = 'single';
   else
-    is_class = "double";
+    is_class = 'double';
   endif
 
   ## Compute inverse of type 1 extreme value cdf
@@ -146,32 +146,32 @@ endfunction
 %! x2 = evinv (p, 1.0, 2);
 %! x3 = evinv (p, 1.5, 3);
 %! x4 = evinv (p, 3.0, 4);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-c")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-c')
 %! grid on
 %! ylim ([-10, 10])
-%! legend ({"μ = 0.5, σ = 2", "μ = 1.0, σ = 2", ...
-%!          "μ = 1.5, σ = 3", "μ = 3.0, σ = 4"}, "location", "northwest")
-%! title ("Extreme value iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'μ = 0.5, σ = 2', 'μ = 1.0, σ = 2', ...
+%!          'μ = 1.5, σ = 3', 'μ = 3.0, σ = 4'}, 'location', 'northwest')
+%! title ('Extreme value iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p, x
 %! p = [0, 0.05, 0.5 0.95];
 %! x = [-Inf, -2.9702, -0.3665, 1.0972];
-%!assert (evinv (p), x, 1e-4)
-%!assert (evinv (p, zeros (1,4), ones (1,4)), x, 1e-4)
-%!assert (evinv (p, 0, ones (1,4)), x, 1e-4)
-%!assert (evinv (p, zeros (1,4), 1), x, 1e-4)
-%!assert (evinv (p, [0, -Inf, NaN, Inf], 1), [-Inf, -Inf, NaN, Inf], 1e-4)
-%!assert (evinv (p, 0, [Inf, NaN, -1, 0]), [-Inf, NaN, NaN, NaN], 1e-4)
-%!assert (evinv ([p(1:2), NaN, p(4)], 0, 1), [x(1:2), NaN, x(4)], 1e-4)
+%!assert_equal (evinv (p), x, 1e-4)
+%!assert_equal (evinv (p, zeros (1,4), ones (1,4)), x, 1e-4)
+%!assert_equal (evinv (p, 0, ones (1,4)), x, 1e-4)
+%!assert_equal (evinv (p, zeros (1,4), 1), x, 1e-4)
+%!assert_equal (evinv (p, [0, -Inf, NaN, Inf], 1), [-Inf, -Inf, NaN, Inf], 1e-4)
+%!assert_equal (evinv (p, 0, [Inf, NaN, -1, 0]), [-Inf, NaN, NaN, NaN], 1e-4)
+%!assert_equal (evinv ([p(1:2), NaN, p(4)], 0, 1), [x(1:2), NaN, x(4)], 1e-4)
 
 ## Test class of input preserved
-%!assert (evinv ([p, NaN], 0, 1), [x, NaN], 1e-4)
-%!assert (evinv (single ([p, NaN]), 0, 1), single ([x, NaN]), 1e-4)
-%!assert (evinv ([p, NaN], single (0), 1), single ([x, NaN]), 1e-4)
-%!assert (evinv ([p, NaN], 0, single (1)), single ([x, NaN]), 1e-4)
+%!assert_equal (evinv ([p, NaN], 0, 1), [x, NaN], 1e-4)
+%!assert_equal (evinv (single ([p, NaN]), 0, 1), single ([x, NaN]), 1e-4)
+%!assert_equal (evinv ([p, NaN], single (0), 1), single ([x, NaN]), 1e-4)
+%!assert_equal (evinv ([p, NaN], 0, single (1)), single ([x, NaN]), 1e-4)
 
 ## Test input validation
 %!error<evinv: invalid number of input arguments.> evinv ()

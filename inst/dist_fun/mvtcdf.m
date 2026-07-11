@@ -27,12 +27,12 @@
 ## @code{@var{p} = mvtcdf (@var{x}, @var{rho}, @var{df})} returns the cumulative
 ## probability of the multivariate student's t distribution with correlation
 ## parameters @var{rho} and degrees of freedom @var{df}, evaluated at each row
-## of @var{x}.  The rows of the @math{NxD} matrix @var{x} correspond to sample
+## of @var{x}.  The rows of the @math{N*D} matrix @var{x} correspond to sample
 ## observations and its columns correspond to variables or coordinates.  The
 ## return argument @var{p} is a column vector with the same number of rows as in
 ## @var{x}.
 ##
-## @var{rho} is a symmetric, positive definite, @math{DxD} correlation matrix.
+## @var{rho} is a symmetric, positive definite, @math{D*D} correlation matrix.
 ## @var{dF} is a scalar or a vector with @math{N} elements.
 ##
 ## Note: @code{mvtcdf} computes the CDF for the standard multivariate Student's
@@ -61,16 +61,16 @@
 ## which controls specific parameters for the numerical integration used to
 ## compute @var{p}. The required fields are:
 ##
-## @multitable @columnfractions 0.2 0.05 0.75
-## @item @qcode{"TolFun"} @tab @tab Maximum absolute error tolerance.  Default
+## @multitable @columnfractions 0.2 0.75
+## @item @qcode{'TolFun'} @tab Maximum absolute error tolerance.  Default
 ## is 1e-8 for D < 4, or 1e-4 for D >= 4.
 ##
-## @item @qcode{"MaxFunEvals"} @tab @tab Maximum number of integrand evaluations
+## @item @qcode{'MaxFunEvals'} @tab Maximum number of integrand evaluations
 ## when @math{D >= 4}.  Default is 1e7.  Ignored when @math{D < 4}.
 ##
-## @item @qcode{"Display"} @tab @tab Display options.  Choices are @qcode{"off"}
-## (default), @qcode{"iter"}, which shows the probability and estimated error at
-## each repetition, and @qcode{"final"}, which shows the final probability and
+## @item @qcode{'Display'} @tab Display options.  Choices are @qcode{'off'}
+## (default), @qcode{'iter'}, which shows the probability and estimated error at
+## each repetition, and @qcode{'final'}, which shows the final probability and
 ## related error after the integrand has converged successfully.  Ignored when
 ## @math{D < 4}.
 ## @end multitable
@@ -85,7 +85,7 @@ function [p, err] = mvtcdf (varargin)
 
   ## Check for 'options' structure and parse parameters or add defaults
   if (isstruct (varargin{end}))
-    if (isfield (varargin{end}, "TolFun"))
+    if (isfield (varargin{end}, 'TolFun'))
       TolFun = varargin{end}.TolFun;
     else
       error ("mvtcdf: options structure missing 'TolFun' field.");
@@ -95,7 +95,7 @@ function [p, err] = mvtcdf (varargin)
     elseif (isempty (TolFun) && size (varargin{1}, 2) < 26)
       TolFun = 1e-4;
     endif
-    if (isfield (varargin{end}, "MaxFunEvals"))
+    if (isfield (varargin{end}, 'MaxFunEvals'))
       MaxFunEvals = varargin{end}.MaxFunEvals;
     else
       error ("mvtcdf: options structure missing 'MaxFunEvals' field.");
@@ -103,12 +103,12 @@ function [p, err] = mvtcdf (varargin)
     if (isempty (MaxFunEvals))
       MaxFunEvals = 1e7;
     endif
-    if (isfield (varargin{end}, "Display"))
+    if (isfield (varargin{end}, 'Display'))
       Display = varargin{end}.Display;
     else
       error ("mvtcdf: options structure missing 'Display' field.");
     endif
-    DispOptions = {"off", "final", "iter"};
+    DispOptions = {'off', 'final', 'iter'};
     if (sum (any (strcmpi (Display, DispOptions))) == 0)
       error ("mvtcdf: 'Display' field in 'options' has invalid value.");
     endif
@@ -120,7 +120,7 @@ function [p, err] = mvtcdf (varargin)
       TolFun = 1e-4;
     endif
     MaxFunEvals = 1e7;
-    Display = "off";
+    Display = 'off';
     rem_nargin = nargin;
   endif
 
@@ -136,7 +136,7 @@ function [p, err] = mvtcdf (varargin)
 
     ## Create x_lo according to data type of x_lo
     x_lo = - Inf (size (x_up));
-    if isa (x_up, "single")
+    if isa (x_up, 'single')
       x_lo = single (x_lo);
     endif
 
@@ -165,10 +165,10 @@ function [p, err] = mvtcdf (varargin)
   endif
 
   ## Check if data is single or double class
-  is_type = "double";
-  if (isa (x_up, "single") || isa (x_lo, "single") || ...
-      isa (rho, "single") || isa (df, "single"))
-    is_type = "single";
+  is_type = 'double';
+  if (isa (x_up, 'single') || isa (x_lo, 'single') || ...
+      isa (rho, 'single') || isa (df, 'single'))
+    is_type = 'single';
   endif
 
   ## Get size of data
@@ -185,7 +185,7 @@ function [p, err] = mvtcdf (varargin)
   endif
 
   ## Check rho
-  sz = size(rho);
+  sz = size (rho);
   if (sz(1) != sz(2))
     error ("mvtcdf: correlation matrix RHO is not square.");
   elseif (! isequal (sz, [d_x, d_x]))
@@ -316,9 +316,9 @@ function p = tvtcdf (x, rho, df, TolFun)
       x1 = x(i,1);
       x2 = x(i,2);
       x3 = x(i,3);
-      if (isfinite (x2) && isfinite (x3) && ~! isnan (x1))
+      if (isfinite (x2) && isfinite (x3) && isnan (x1))
         v = df(i);
-        p2(i) = quadgk (@tvtIntegr1, lo, hi, "AbsTol", TolFun / 4, "RelTol", 0);
+        p2(i) = quadgk (@tvtIntegr1, lo, hi, 'AbsTol', TolFun / 4, 'RelTol', 0);
       endif
     endfor
   else
@@ -337,7 +337,7 @@ function p = tvtcdf (x, rho, df, TolFun)
       xk = x(i,3);
       if (isfinite (x1) && isfinite (xj) && ! isnan (xk))
         v = df(i);
-        p3(i) = quadgk (@tvtIntegr2, lo, hi, "AbsTol", TolFun / 4, "RelTol", 0);
+        p3(i) = quadgk (@tvtIntegr2, lo, hi, 'AbsTol', TolFun / 4, 'RelTol', 0);
       endif
     endfor
   else
@@ -356,23 +356,23 @@ function p = tvtcdf (x, rho, df, TolFun)
       xk = x(i,2);
       if (isfinite (x1) && isfinite (xj) && ! isnan (xk))
         v = df(i);
-        p4(i) = quadgk (@tvtIntegr2, lo, hi, "AbsTol", TolFun / 4, "RelTol", 0);
+        p4(i) = quadgk (@tvtIntegr2, lo, hi, 'AbsTol', TolFun / 4, 'RelTol', 0);
       endif
     endfor
   else
     p4 = zeros (class (p1));
   endif
 
-  if (isa (x, "single") || isa (rho, "single") || isa (df, "single"))
-    p = cast (p1 + (-p2 + p3 + p4) ./ (2 .* pi), "single");
+  if (isa (x, 'single') || isa (rho, 'single') || isa (df, 'single'))
+    p = cast (p1 + (-p2 + p3 + p4) ./ (2 .* pi), 'single');
   else
-    p = cast (p1 + (-p2 + p3 + p4) ./ (2 .* pi), "double");
+    p = cast (p1 + (-p2 + p3 + p4) ./ (2 .* pi), 'double');
   endif
 
   ## Functions to compute the integrands
   function integrand = tvtIntegr1 (theta)
-    st = sin(theta);
-    c2t = cos(theta) .^ 2;
+    st = sin (theta);
+    c2t = cos (theta) .^ 2;
     w = sqrt (1 ./ (1 + ((x2 * st - x3) .^ 2 ./ c2t + x2 .^ 2) / v));
     integrand = w .^ v .* TCDF (x1 .* w, v);
   endfunction
@@ -397,7 +397,7 @@ endfunction
 
 ## CDF for Student's T
 function p = TCDF (x, df)
-  p = betainc(df ./ (df + x .^ 2), df / 2, 0.5) / 2;
+  p = betainc (df ./ (df + x .^ 2), df / 2, 0.5) / 2;
   reflect = (x > 0);
   p(reflect) = 1 - p(reflect);
 endfunction
@@ -412,7 +412,7 @@ endfunction
 %! X = [X1(:), X2(:)];
 %! p = mvtcdf (X, rho, df);
 %! surf (X1, X2, reshape (p, 25, 25));
-%! title ("Bivariate Student's t cumulative distribution function");
+%! title ('Bivariate Student''s t cumulative distribution function');
 
 ## Test output against MATLAB R2018
 %!test
@@ -420,19 +420,19 @@ endfunction
 %! rho = [1, 0.5; 0.5, 1];
 %! df = 4;
 %! a = [-1, 0];
-%! assert (mvtcdf(a, x, rho, df), 0.294196905339283, 1e-14);
+%! assert_equal (mvtcdf (a, x, rho, df), 0.294196905339283, 1e-14);
 %!test
 %! x = [1, 2;2, 4;1, 5];
 %! rho = [1, 0.5; 0.5, 1];
 %! df = 4;
 %! p =[0.790285178602166; 0.938703291727784; 0.81222737321336];
-%! assert (mvtcdf(x, rho, df), p, 1e-14);
+%! assert_equal (mvtcdf (x, rho, df), p, 1e-14);
 %!test
 %! x = [1, 2, 2, 4, 1, 5];
 %! rho = eye (6);
 %! rho(rho == 0) = 0.5;
 %! df = 4;
-%! assert (mvtcdf(x, rho, df), 0.6874, 1e-4);
+%! assert_equal (mvtcdf (x, rho, df), 0.6874, 1e-4);
 
 %!error mvtcdf (1)
 %!error mvtcdf (1, 2)

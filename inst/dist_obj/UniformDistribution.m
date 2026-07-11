@@ -52,7 +52,7 @@ classdef UniformDistribution
   ## unifstat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {UniformDistribution} {property} Lower
     ##
@@ -78,7 +78,7 @@ classdef UniformDistribution
     Upper
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {UniformDistribution} {property} DistributionName
     ##
@@ -88,7 +88,7 @@ classdef UniformDistribution
     ## object.  This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "UniformDistribution";
+    DistributionName = 'UniformDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {UniformDistribution} {property} NumParameters
@@ -106,37 +106,37 @@ classdef UniformDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter.  This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"Lower", "Upper"};
+    ParameterNames = {'Lower', 'Upper'};
 
     ## -*- texinfo -*-
     ## @deftp {UniformDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter.  This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Lower limit", "Upper limit"};
+    ParameterDescription = {'Lower limit', 'Upper limit'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = false;
-    DistributionCode = "unif";
+    DistributionCode = 'unif';
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected)
+  properties(GetAccess = public, SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {UniformDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{2x1} numeric vector containing the values of the distribution
+    ## A @math{2*1} numeric vector containing the values of the distribution
     ## parameters.  This property is read-only.  You can change the distribution
     ## parameters by assigning new values to the @qcode{Lower} and @qcode{Upper}
     ## properties.
@@ -149,7 +149,7 @@ classdef UniformDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution.  First element contains the lower boundary,
     ## second element contains the upper boundary.  This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -170,7 +170,7 @@ classdef UniformDistribution
     IsTruncated
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = UniformDistribution (Lower, Upper)
       if (nargin == 0)
@@ -183,12 +183,12 @@ classdef UniformDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "Uniform distribution (continuous)");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'Uniform distribution (continuous)');
     endfunction
 
     function disp (this)
-      __disp__ (this, "Uniform distribution (continuous)");
+      __disp__ (this, 'Uniform distribution (continuous)');
     endfunction
 
     function this = set.Lower (this, Lower)
@@ -211,11 +211,11 @@ classdef UniformDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {UniformDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {UniformDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {UniformDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -223,7 +223,7 @@ classdef UniformDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -233,9 +233,9 @@ classdef UniformDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -387,26 +387,26 @@ classdef UniformDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -549,8 +549,8 @@ endfunction
 %! ## parameters Lower = 0 and Upper = 10. Create a Uniform distribution with these
 %! ## parameters and plot its PDF superimposed on a histogram of the data.
 %!
-%! pd = makedist ("Uniform", "Lower", 0, "Upper", 10);
-%! rand ("seed", 21);
+%! pd = makedist ('Uniform', 'Lower', 0, 'Upper', 10);
+%! rand ('seed', 21);
 %! data = random (pd, 5000, 1);
 %! 
 %! x = linspace (pd.Lower - 1, pd.Upper + 1, 500);
@@ -563,9 +563,9 @@ endfunction
 %! normalized_counts = counts / (sum (counts) * bin_width);
 %! bar (centers, normalized_counts, 1);
 %! 
-%! msg = "Uniform distribution with Lower = %0.2f and Upper = %0.2f";
+%! msg = 'Uniform distribution with Lower = %0.2f and Upper = %0.2f';
 %! title (sprintf (msg, pd.Lower, pd.Upper));
-%! legend ("PDF", "Histogram", "location", "northeast");
+%! legend ('PDF', 'Histogram', 'location', 'northeast');
 %! 
 %! hold off;
 
@@ -573,31 +573,31 @@ endfunction
 %!shared pd, t
 %! pd = UniformDistribution (0, 5);
 %! t = truncate (pd, 2, 4);
-%!assert (cdf (pd, [0:5]), [0, 0.2, 0.4, 0.6, 0.8, 1], 1e-4);
-%!assert (cdf (t, [0:5]), [0, 0, 0, 0.5, 1, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4, NaN]), [0.3, 0.4, 0.6, 0.8, NaN], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4, NaN]), [0, 0, 0.5, 1, NaN], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [0, 1, 2, 3, 4, 5], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [2, 2.4, 2.8, 3.2, 3.6, 4], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 2, 3, 4, 5, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.8, 3.2, 3.6, 4, NaN], 1e-4);
-%!assert (iqr (pd), 2.5, 1e-14);
-%!assert (iqr (t), 1, 1e-14);
-%!assert (mean (pd), 2.5, 1e-14);
-%!assert (mean (t), 3, 1e-14);
-%!assert (median (pd), 2.5, 1e-14);
-%!assert (median (t), 3, 1e-14);
-%!assert (pdf (pd, [0:5]), [0.2, 0.2, 0.2, 0.2, 0.2, 0.2], 1e-4);
-%!assert (pdf (t, [0:5]), [0, 0, 0.5, 0.5, 0.5, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1.5, NaN]), [0, 0.2, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 2), false);
-%!assert (any (random (t, 1000, 1) > 4), false);
-%!assert (std (pd), 1.4434, 1e-4);
-%!assert (std (t), 0.5774, 1e-4);
-%!assert (var (pd), 2.0833, 1e-4);
-%!assert (var (t), 0.3333, 1e-4);
+%!assert_equal (cdf (pd, [0:5]), [0, 0.2, 0.4, 0.6, 0.8, 1], 1e-4);
+%!assert_equal (cdf (t, [0:5]), [0, 0, 0, 0.5, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4, NaN]), [0.3, 0.4, 0.6, 0.8, NaN], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4, NaN]), [0, 0, 0.5, 1, NaN], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [0, 1, 2, 3, 4, 5], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [2, 2.4, 2.8, 3.2, 3.6, 4], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 2, 3, 4, 5, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.8, 3.2, 3.6, 4, NaN], 1e-4);
+%!assert_equal (iqr (pd), 2.5, 1e-14);
+%!assert_equal (iqr (t), 1, 1e-14);
+%!assert_equal (mean (pd), 2.5, 1e-14);
+%!assert_equal (mean (t), 3, 1e-14);
+%!assert_equal (median (pd), 2.5, 1e-14);
+%!assert_equal (median (t), 3, 1e-14);
+%!assert_equal (pdf (pd, [0:5]), [0.2, 0.2, 0.2, 0.2, 0.2, 0.2], 1e-4);
+%!assert_equal (pdf (t, [0:5]), [0, 0, 0.5, 0.5, 0.5, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1.5, NaN]), [0, 0.2, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 2), false);
+%!assert_equal (any (random (t, 1000, 1) > 4), false);
+%!assert_equal (std (pd), 1.4434, 1e-4);
+%!assert_equal (std (t), 0.5774, 1e-4);
+%!assert_equal (var (pd), 2.0833, 1e-4);
+%!assert_equal (var (t), 0.3333, 1e-4);
 
 ## Test input validation
 ## 'UniformDistribution' constructor
@@ -608,7 +608,7 @@ endfunction
 %!error <UniformDistribution: LOWER must be a real scalar.> ...
 %! UniformDistribution ([1, 2], 1)
 %!error <UniformDistribution: LOWER must be a real scalar.> ...
-%! UniformDistribution ("a", 1)
+%! UniformDistribution ('a', 1)
 %!error <UniformDistribution: LOWER must be a real scalar.> ...
 %! UniformDistribution (NaN, 1)
 %!error <UniformDistribution: UPPER must be a real scalar.> ...
@@ -618,7 +618,7 @@ endfunction
 %!error <UniformDistribution: UPPER must be a real scalar.> ...
 %! UniformDistribution (1, [1, 2])
 %!error <UniformDistribution: UPPER must be a real scalar.> ...
-%! UniformDistribution (1, "a")
+%! UniformDistribution (1, 'a')
 %!error <UniformDistribution: UPPER must be a real scalar.> ...
 %! UniformDistribution (1, NaN)
 %!error <UniformDistribution: LOWER must be less than UPPER.> ...
@@ -626,33 +626,33 @@ endfunction
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (UniformDistribution, 2, "uper")
+%! cdf (UniformDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (UniformDistribution, 2, 3)
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (UniformDistribution, "Parent")
+%! plot (UniformDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (UniformDistribution, "PlotType", 12)
+%! plot (UniformDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (UniformDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (UniformDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (UniformDistribution, "PlotType", "pdfcdf")
+%! plot (UniformDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (UniformDistribution, "Discrete", "pdfcdf")
+%! plot (UniformDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (UniformDistribution, "Discrete", [1, 0])
+%! plot (UniformDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (UniformDistribution, "Discrete", {true})
+%! plot (UniformDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (UniformDistribution, "Parent", 12)
+%! plot (UniformDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (UniformDistribution, "Parent", "hax")
+%! plot (UniformDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (UniformDistribution, "invalidNAME", "pdf")
+%! plot (UniformDistribution, 'invalidNAME', 'pdf')
 %!error <plot: 'probability' PlotType is not supported for 'UniformDistribution'.> ...
-%! plot (UniformDistribution, "PlotType", "probability")
+%! plot (UniformDistribution, 'PlotType', 'probability')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...

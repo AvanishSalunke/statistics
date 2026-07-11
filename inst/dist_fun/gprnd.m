@@ -101,15 +101,15 @@ function r = gprnd (k, sigma, theta, varargin)
 
   ## Check that parameters match requested dimensions in size
   ## Use 'size (ones (sz))' to ignore any trailing singleton dimensions in SZ
-  if (!isscalar (k) && ! isequal (size (k), size (ones (sz))))
+  if (! isscalar (k) && ! isequal (size (k), size (ones (sz))))
     error ("gprnd: K, SIGMA, and THETA must be scalars or of size SZ.");
   endif
 
   ## Check for class type
-  if (isa (k, "single") || isa (sigma, "single") || isa (theta, "single"))
-    cls = "single";
+  if (isa (k, 'single') || isa (sigma, 'single') || isa (theta, 'single'))
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ## Generate random sample from generalized Pareto distribution
@@ -141,47 +141,47 @@ function r = gprnd (k, sigma, theta, varargin)
 endfunction
 
 ## Test output
-%!assert (size (gprnd (0, 1, 0)), [1, 1])
-%!assert (size (gprnd (0, 1, zeros (2,1))), [2, 1])
-%!assert (size (gprnd (0, 1, zeros (2,2))), [2, 2])
-%!assert (size (gprnd (0, ones (2,1), 0)), [2, 1])
-%!assert (size (gprnd (0, ones (2,2), 0)), [2, 2])
-%!assert (size (gprnd (zeros (2,1), 1, 0)), [2, 1])
-%!assert (size (gprnd (zeros (2,2), 1, 0)), [2, 2])
-%!assert (size (gprnd (0, 1, 0, 3)), [3, 3])
-%!assert (size (gprnd (0, 1, 0, [4 1])), [4, 1])
-%!assert (size (gprnd (0, 1, 0, 4, 1)), [4, 1])
-%!assert (size (gprnd (1,1,0)), [1, 1])
-%!assert (size (gprnd (1, 1, zeros (2,1))), [2, 1])
-%!assert (size (gprnd (1, 1, zeros (2,2))), [2, 2])
-%!assert (size (gprnd (1, ones (2,1), 0)), [2, 1])
-%!assert (size (gprnd (1, ones (2,2), 0)), [2, 2])
-%!assert (size (gprnd (ones (2,1), 1, 0)), [2, 1])
-%!assert (size (gprnd (ones (2,2), 1, 0)), [2, 2])
-%!assert (size (gprnd (1, 1, 0, 3)), [3, 3])
-%!assert (size (gprnd (1, 1, 0, [4 1])), [4, 1])
-%!assert (size (gprnd (1, 1, 0, 4, 1)), [4, 1])
-%!assert (size (gprnd (-1, 1, 0)), [1, 1])
-%!assert (size (gprnd (-1, 1, zeros (2,1))), [2, 1])
-%!assert (size (gprnd (1, -1, zeros (2,2))), [2, 2])
-%!assert (size (gprnd (-1, ones (2,1), 0)), [2, 1])
-%!assert (size (gprnd (-1, ones (2,2), 0)), [2, 2])
-%!assert (size (gprnd (-ones (2,1), 1, 0)), [2, 1])
-%!assert (size (gprnd (-ones (2,2), 1, 0)), [2, 2])
-%!assert (size (gprnd (-1, 1, 0, 3)), [3, 3])
-%!assert (size (gprnd (-1, 1, 0, [4, 1])), [4, 1])
-%!assert (size (gprnd (-1, 1, 0, 4, 1)), [4, 1])
-%!assert (size (gprnd (-1, 1, 0, [])), [0, 0])
-%!assert (size (gprnd (-1, 1, 0, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (gprnd (0, 1, 0)), [1, 1])
+%!assert_equal (size (gprnd (0, 1, zeros (2,1))), [2, 1])
+%!assert_equal (size (gprnd (0, 1, zeros (2,2))), [2, 2])
+%!assert_equal (size (gprnd (0, ones (2,1), 0)), [2, 1])
+%!assert_equal (size (gprnd (0, ones (2,2), 0)), [2, 2])
+%!assert_equal (size (gprnd (zeros (2,1), 1, 0)), [2, 1])
+%!assert_equal (size (gprnd (zeros (2,2), 1, 0)), [2, 2])
+%!assert_equal (size (gprnd (0, 1, 0, 3)), [3, 3])
+%!assert_equal (size (gprnd (0, 1, 0, [4 1])), [4, 1])
+%!assert_equal (size (gprnd (0, 1, 0, 4, 1)), [4, 1])
+%!assert_equal (size (gprnd (1,1,0)), [1, 1])
+%!assert_equal (size (gprnd (1, 1, zeros (2,1))), [2, 1])
+%!assert_equal (size (gprnd (1, 1, zeros (2,2))), [2, 2])
+%!assert_equal (size (gprnd (1, ones (2,1), 0)), [2, 1])
+%!assert_equal (size (gprnd (1, ones (2,2), 0)), [2, 2])
+%!assert_equal (size (gprnd (ones (2,1), 1, 0)), [2, 1])
+%!assert_equal (size (gprnd (ones (2,2), 1, 0)), [2, 2])
+%!assert_equal (size (gprnd (1, 1, 0, 3)), [3, 3])
+%!assert_equal (size (gprnd (1, 1, 0, [4 1])), [4, 1])
+%!assert_equal (size (gprnd (1, 1, 0, 4, 1)), [4, 1])
+%!assert_equal (size (gprnd (-1, 1, 0)), [1, 1])
+%!assert_equal (size (gprnd (-1, 1, zeros (2,1))), [2, 1])
+%!assert_equal (size (gprnd (1, -1, zeros (2,2))), [2, 2])
+%!assert_equal (size (gprnd (-1, ones (2,1), 0)), [2, 1])
+%!assert_equal (size (gprnd (-1, ones (2,2), 0)), [2, 2])
+%!assert_equal (size (gprnd (-ones (2,1), 1, 0)), [2, 1])
+%!assert_equal (size (gprnd (-ones (2,2), 1, 0)), [2, 2])
+%!assert_equal (size (gprnd (-1, 1, 0, 3)), [3, 3])
+%!assert_equal (size (gprnd (-1, 1, 0, [4, 1])), [4, 1])
+%!assert_equal (size (gprnd (-1, 1, 0, 4, 1)), [4, 1])
+%!assert_equal (size (gprnd (-1, 1, 0, [])), [0, 0])
+%!assert_equal (size (gprnd (-1, 1, 0, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (gprnd (0, 1, 0)), "double")
-%!assert (class (gprnd (0, 1, single (0))), "single")
-%!assert (class (gprnd (0, 1, single ([0, 0]))), "single")
-%!assert (class (gprnd (0, single (1),0)), "single")
-%!assert (class (gprnd (0, single ([1, 1]),0)), "single")
-%!assert (class (gprnd (single (0), 1, 0)), "single")
-%!assert (class (gprnd (single ([0, 0]), 1, 0)), "single")
+%!assert_equal (class (gprnd (0, 1, 0)), "double")
+%!assert_equal (class (gprnd (0, 1, single (0))), "single")
+%!assert_equal (class (gprnd (0, 1, single ([0, 0]))), "single")
+%!assert_equal (class (gprnd (0, single (1),0)), "single")
+%!assert_equal (class (gprnd (0, single ([1, 1]),0)), "single")
+%!assert_equal (class (gprnd (single (0), 1, 0)), "single")
+%!assert_equal (class (gprnd (single ([0, 0]), 1, 0)), "single")
 
 ## Test input validation
 %!error<gprnd: function called with too few input arguments.> gprnd ()

@@ -95,10 +95,10 @@ function r = vmrnd (mu, k, varargin)
   endif
 
   ## Check for class type
-  if (isa (mu, "single") || isa (k, "single"))
-    cls = "single";
+  if (isa (mu, 'single') || isa (k, 'single'))
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ## Handle zero size dimensions
@@ -129,17 +129,17 @@ function r = vmrnd (mu, k, varargin)
     endif
     notdone = true (N, 1);
     while (any (notdone))
-      u (:, notdone) = (rand (3, N))(:,notdone);
+      u(:, notdone) = (rand (3, N))(:,notdone);
 
-      z (notdone) = (cos (pi .* u (1, :)))(notdone);
-      f (notdone) = ((1 + r_tmp(notdone) .* z(notdone)) ./ (r_tmp(notdone) + z(notdone)));
-      c (notdone) = (k_tmp(notdone) .* (r_tmp(notdone) - f(notdone)));
+      z(notdone) = (cos (pi .* u(1, :)))(notdone);
+      f(notdone) = ((1 + r_tmp(notdone) .* z(notdone)) ./ (r_tmp(notdone) + z(notdone)));
+      c(notdone) = (k_tmp(notdone) .* (r_tmp(notdone) - f(notdone)));
 
-      notdone = (u (2, :) >= c .* (2 - c)) & (log (c) - log (u (2, :)) + 1 - c < 0);
+      notdone = (u(2, :) >= c .* (2 - c)) & (log (c) - log (u(2, :)) + 1 - c < 0);
       #N = sum (notdone);
     endwhile
 
-    r = mu_rs + sign (u (3, :) - 0.5) .* acos (f);
+    r = mu_rs + sign (u(3, :) - 0.5) .* acos (f);
     r = reshape (r, sz);
   endif
 
@@ -149,27 +149,27 @@ function r = vmrnd (mu, k, varargin)
 endfunction
 
 ## Test output
-%!assert (size (vmrnd (1, 1)), [1, 1])
-%!assert (size (vmrnd (1, ones (2, 1))), [2, 1])
-%!assert (size (vmrnd (1, ones (2, 2))), [2, 2])
-%!assert (size (vmrnd (ones (2, 1), 1)), [2, 1])
-%!assert (size (vmrnd (ones (2, 2), 1)), [2, 2])
-%!assert (size (vmrnd (1, 1, 3)), [3, 3])
-%!assert (size (vmrnd (1, 1, [4, 1])), [4, 1])
-%!assert (size (vmrnd (1, 1, 4, 1)), [4, 1])
-%!assert (size (vmrnd (1, 1, 4, 1, 5)), [4, 1, 5])
-%!assert (size (vmrnd (1, 1, 0, 1)), [0, 1])
-%!assert (size (vmrnd (1, 1, 1, 0)), [1, 0])
-%!assert (size (vmrnd (1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
-%!assert (size (vmrnd (1, 1, [])), [0, 0])
-%!assert (size (vmrnd (1, 1, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (vmrnd (1, 1)), [1, 1])
+%!assert_equal (size (vmrnd (1, ones (2, 1))), [2, 1])
+%!assert_equal (size (vmrnd (1, ones (2, 2))), [2, 2])
+%!assert_equal (size (vmrnd (ones (2, 1), 1)), [2, 1])
+%!assert_equal (size (vmrnd (ones (2, 2), 1)), [2, 2])
+%!assert_equal (size (vmrnd (1, 1, 3)), [3, 3])
+%!assert_equal (size (vmrnd (1, 1, [4, 1])), [4, 1])
+%!assert_equal (size (vmrnd (1, 1, 4, 1)), [4, 1])
+%!assert_equal (size (vmrnd (1, 1, 4, 1, 5)), [4, 1, 5])
+%!assert_equal (size (vmrnd (1, 1, 0, 1)), [0, 1])
+%!assert_equal (size (vmrnd (1, 1, 1, 0)), [1, 0])
+%!assert_equal (size (vmrnd (1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
+%!assert_equal (size (vmrnd (1, 1, [])), [0, 0])
+%!assert_equal (size (vmrnd (1, 1, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (vmrnd (1, 1)), "double")
-%!assert (class (vmrnd (1, single (1))), "single")
-%!assert (class (vmrnd (1, single ([1, 1]))), "single")
-%!assert (class (vmrnd (single (1), 1)), "single")
-%!assert (class (vmrnd (single ([1, 1]), 1)), "single")
+%!assert_equal (class (vmrnd (1, 1)), "double")
+%!assert_equal (class (vmrnd (1, single (1))), "single")
+%!assert_equal (class (vmrnd (1, single ([1, 1]))), "single")
+%!assert_equal (class (vmrnd (single (1), 1)), "single")
+%!assert_equal (class (vmrnd (single ([1, 1]), 1)), "single")
 
 ## Test input validation
 %!error<vmrnd: function called with too few input arguments.> vmrnd ()

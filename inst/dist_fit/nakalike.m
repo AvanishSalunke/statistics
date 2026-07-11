@@ -197,7 +197,7 @@ function [y, dy, d2y] = dgammainc (x, k)
   endif
 
   ## For x < k+1
-  is_lo = find(x < k + 1 & x != 0);
+  is_lo = find (x < k + 1 & x != 0);
   if (! isempty (is_lo))
     x_lo = x(is_lo);
     k_lo = k(is_lo);
@@ -208,7 +208,7 @@ function [y, dy, d2y] = dgammainc (x, k)
     stsum = step;
     d1sum = d1st;
     d2sum = d2st;
-    while norm (step, "inf") >= 100 * eps (norm (stsum, "inf"))
+    while norm (step, 'inf') >= 100 * eps (norm (stsum, 'inf'))
       k_1 += 1;
       step = step .* x_lo ./ k_1;
       d1st = (d1st .* x_lo - step) ./ k_1;
@@ -235,7 +235,7 @@ function [y, dy, d2y] = dgammainc (x, k)
   endif
 
   ## For x >= k+1
-  is_hi = find(x >= k+1);
+  is_hi = find (x >= k+1);
   if (! isempty (is_hi))
     x_hi = x(is_hi);
     k_hi = k(is_hi);
@@ -256,7 +256,7 @@ function [y, dy, d2y] = dgammainc (x, k)
     d1kx = 1 ./ x_hi;
     d2kx = 0;
     start = 1;
-    while norm (d2kx - start, "Inf") > 100 * eps (norm (d2kx, "Inf"))
+    while norm (d2kx - start, 'Inf') > 100 * eps (norm (d2kx, 'Inf'))
       rescale = 1 ./ x1;
       zc += 1;
       n_k = zc - k_hi;
@@ -316,16 +316,16 @@ endfunction
 ## Test output
 %!test
 %! nlogL = nakalike ([0.735504, 858.5], [1:50]);
-%! assert (nlogL, 202.8689, 1e-4);
+%! assert_equal (nlogL, 202.8689, 1e-4);
 %!test
 %! nlogL = nakalike ([1.17404, 11], [1:5]);
-%! assert (nlogL, 8.6976, 1e-4);
+%! assert_equal (nlogL, 8.6976, 1e-4);
 %!test
 %! nlogL = nakalike ([1.17404, 11], [1:5], [], [1, 1, 1, 1, 1]);
-%! assert (nlogL, 8.6976, 1e-4);
+%! assert_equal (nlogL, 8.6976, 1e-4);
 %!test
 %! nlogL = nakalike ([1.17404, 11], [1:6], [], [1, 1, 1, 1, 1, 0]);
-%! assert (nlogL, 8.6976, 1e-4);
+%! assert_equal (nlogL, 8.6976, 1e-4);
 
 ## Test input validation
 %!error<nakalike: function called with too few input arguments.> nakalike (3.25)

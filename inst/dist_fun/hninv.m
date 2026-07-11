@@ -40,7 +40,7 @@ function x = hninv (p, mu, sigma)
   endif
 
   ## Check for common size of P, MU, and SIGMA
-  if (! isscalar (p) || ! isscalar (mu) || ! isscalar(sigma))
+  if (! isscalar (p) || ! isscalar (mu) || ! isscalar (sigma))
     [retval, p, mu, sigma] = common_size (p, mu, sigma);
     if (retval > 0)
       error ("hninv: P, MU, and SIGMA must be of common size or scalars.");
@@ -53,8 +53,8 @@ function x = hninv (p, mu, sigma)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (mu, "single") || isa (sigma, "single"));
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (mu, 'single') || isa (sigma, 'single'));
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -66,7 +66,7 @@ function x = hninv (p, mu, sigma)
   p(p < 0 | 1 < p) = NaN;
 
   ## Calculate the quantile of half-normal distribution
-  x = sqrt(2) * sigma .* erfinv (p) + mu;
+  x = sqrt (2) * sigma .* erfinv (p) + mu;
 
 endfunction
 
@@ -77,28 +77,28 @@ endfunction
 %! x2 = hninv (p, 0, 2);
 %! x3 = hninv (p, 0, 3);
 %! x4 = hninv (p, 0, 5);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-c")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-c')
 %! grid on
 %! ylim ([0, 10])
-%! legend ({"μ = 0, σ = 1", "μ = 0, σ = 2", ...
-%!          "μ = 0, σ = 3", "μ = 0, σ = 5"}, "location", "northwest")
-%! title ("Half-normal iCDF")
-%! xlabel ("probability")
-%! ylabel ("x")
+%! legend ({'μ = 0, σ = 1', 'μ = 0, σ = 2', ...
+%!          'μ = 0, σ = 3', 'μ = 0, σ = 5'}, 'location', 'northwest')
+%! title ('Half-normal iCDF')
+%! xlabel ('probability')
+%! ylabel ('x')
 
 ## Test output
 %!shared p, x
 %! p = [0, 0.3829, 0.6827, 1];
 %! x = [0, 1/2, 1, Inf];
-%!assert (hninv (p, 0, 1), x, 1e-4);
-%!assert (hninv (p, 5, 1), x + 5, 1e-4);
-%!assert (hninv (p, 0, ones (1,4)), x, 1e-4);
-%!assert (hninv (p, 0, [-1, 0, 1, 1]), [NaN, NaN, x(3:4)], 1e-4)
+%!assert_equal (hninv (p, 0, 1), x, 1e-4);
+%!assert_equal (hninv (p, 5, 1), x + 5, 1e-4);
+%!assert_equal (hninv (p, 0, ones (1,4)), x, 1e-4);
+%!assert_equal (hninv (p, 0, [-1, 0, 1, 1]), [NaN, NaN, x(3:4)], 1e-4)
 
 ## Test class of input preserved
-%!assert (class (hninv (single ([p, NaN]), 0, 1)), "single")
-%!assert (class (hninv ([p, NaN], single (0), 1)), "single")
-%!assert (class (hninv ([p, NaN], 0, single (1))), "single")
+%!assert_equal (class (hninv (single ([p, NaN]), 0, 1)), "single")
+%!assert_equal (class (hninv ([p, NaN], single (0), 1)), "single")
+%!assert_equal (class (hninv ([p, NaN], 0, single (1))), "single")
 
 ## Test input validation
 %!error<hninv: function called with too few input arguments.> hninv (1)

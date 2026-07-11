@@ -62,6 +62,7 @@
 ## @end itemize
 ##
 ## @multitable @columnfractions 0.25 0.75
+## @headitem @var{Name} @tab @var{Value}
 ## @item "Alpha" @tab Significance level alpha for the test.  Any scalar
 ## numeric value between 0 and 1.  The default is 0.05 corresponding to the 5%
 ## significance level.
@@ -116,12 +117,12 @@ function [H, pVal, ADStat, CV] = adtest (x, varargin)
     print_usage;
   endif
   ## Ensure the sample data is a real vector.
-  if (! isvector (x) || ! isreal(x))
+  if (! isvector (x) || ! isreal (x))
     error ("adtest: X must be a vector of real numbers.");
   endif
 
   ## Add defaults
-  distribution = "norm";
+  distribution = 'norm';
   isCompositeTest = true;
   alpha = 0.05;
   MCTol = [];
@@ -131,14 +132,14 @@ function [H, pVal, ADStat, CV] = adtest (x, varargin)
   i = 1;
   while (i <= length (varargin))
     switch lower (varargin{i})
-      case "distribution"
+      case 'distribution'
         i = i + 1;
         distribution = varargin{i};
         ## Check for char string or cell array
         ## If distribution is a char string, then X is tested against a
         ## composite hypothesis for the specified distribution family and
         ## distribution parameters are estimated from the sample data.
-        valid_dists = {"norm", "exp", "ev", "logn", "weibull"};
+        valid_dists = {'norm', 'exp', 'ev', 'logn', 'weibull'};
         if (ischar (distribution))
           if (! any (strcmpi (distribution, valid_dists)))
             error ("adtest: invalid distribution family in char string.");
@@ -151,28 +152,28 @@ function [H, pVal, ADStat, CV] = adtest (x, varargin)
             error ("adtest: invalid distribution family in cell array.");
           endif
           ## Check for valid distribution parameter in cell array
-          err_msg = "adtest: invalid distribution parameters in cell array.";
-          if (strcmpi (distribution(1), "norm"))
+          err_msg = 'adtest: invalid distribution parameters in cell array.';
+          if (strcmpi (distribution(1), 'norm'))
             if (numel (distribution) != 3)
               error (err_msg);
             endif
             z = normcdf (x, distribution{2}, distribution{3});
-          elseif (strcmpi (distribution(1), "exp"))
+          elseif (strcmpi (distribution(1), 'exp'))
             if (numel (distribution) != 2)
               error (err_msg);
             endif
             z = expcdf (x, distribution{2});
-          elseif (strcmpi (distribution(1), "ev"))
+          elseif (strcmpi (distribution(1), 'ev'))
             if (numel (distribution) != 3)
               error (err_msg);
             endif
             z = evcdf (x, distribution{2}, distribution{3});
-          elseif (strcmpi (distribution(1), "logn"))
+          elseif (strcmpi (distribution(1), 'logn'))
             if (numel (distribution) != 3)
               error (err_msg);
             endif
             z = logncdf (x, distribution{2}, distribution{3});
-          elseif (strcmpi (distribution(1), "weibull"))
+          elseif (strcmpi (distribution(1), 'weibull'))
             if (numel (distribution) != 3)
               error (err_msg);
             endif
@@ -182,7 +183,7 @@ function [H, pVal, ADStat, CV] = adtest (x, varargin)
         else
           error ("adtest: invalid distribution option.");
         endif
-      case "alpha"
+      case 'alpha'
         i = i + 1;
         alpha = varargin{i};
         ## Check for valid alpha
@@ -190,14 +191,14 @@ function [H, pVal, ADStat, CV] = adtest (x, varargin)
                     alpha <= 0 || alpha >= 1)
           error ("adtest: invalid value for alpha.");
         endif
-      case "mctol"
+      case 'mctol'
         i = i + 1;
         MCTol = varargin{i};
         ## Check Monte Carlo tolerance is a numeric scalar greater than 0
         if (! isempty (MCTol) && (! isscalar (MCTol) || MCTol <= 0))
           error ("adtest: invalid Monte Carlo Tolerance.");
         endif
-      case "asymptotic"
+      case 'asymptotic'
         i = i + 1;
         asymptotic = varargin{i};
         ## Check that it is either true or false
@@ -232,19 +233,19 @@ function [H, pVal, ADStat, CV] = adtest (x, varargin)
     endif
 
     ## If data follow a lognormal distribution, log(x) is normally distributed
-    if (strcmpi (distribution, "logn"))
+    if (strcmpi (distribution, 'logn'))
       x = log (x);
-      distribution = "norm";
+      distribution = 'norm';
     ## If data follow a Weibull distribution, log(x) has a type I extreme-value
     ## distribution
-    elseif (strcmpi (distribution, "weibull"))
+    elseif (strcmpi (distribution, 'weibull'))
       x = log (x);
-      distribution = "ev";
+      distribution = 'ev';
     endif
 
     ## Compute ADStat
     switch distribution
-      case "norm"
+      case 'norm'
         ## Check for complex numbers due to log (x)
         if (any (! isreal (x)))
           ## Data is not compatible with logn distribution test
@@ -254,10 +255,10 @@ function [H, pVal, ADStat, CV] = adtest (x, varargin)
           z = normcdf (x, mean (x), std (x));
           ADStat = ComputeADStat (z, n);
         endif
-      case "exp"
+      case 'exp'
         z = expcdf (x, mean (x));
         ADStat = ComputeADStat (z, n);
-      case "ev"
+      case 'ev'
         ## Check for complex numbers due to log (x)
         if (any (! isreal (x)))
           ## Data is not compatible with Weibull distribution test
@@ -265,7 +266,7 @@ function [H, pVal, ADStat, CV] = adtest (x, varargin)
           ADStat = NaN;
         else
           params = evfit (x);
-          z = evcdf (x, params (1), params (2));
+          z = evcdf (x, params(1), params(2));
           ADStat = ComputeADStat (z, n);
         endif
     endswitch
@@ -277,11 +278,11 @@ function [H, pVal, ADStat, CV] = adtest (x, varargin)
                 0.4000, 0.4500, 0.5000, 0.5500, 0.6000, 0.6500, 0.7000, ...
                 0.7500, 0.8000, 0.8500, 0.9000, 0.9500, 0.9900];
       switch distribution
-        case "norm"
+        case 'norm'
           CVs = computeCriticalValues_norm (n);
-        case "exp"
+        case 'exp'
           CVs = computeCriticalValues_exp (n);
-        case "ev"
+        case 'ev'
           CVs = computeCriticalValues_ev (n);
       endswitch
 
@@ -315,8 +316,8 @@ function [H, pVal, ADStat, CV] = adtest (x, varargin)
         pVal = 0;
       else
         ## Find p-value by inverse interpolation
-        i = find (ADStat > CVs, 1, "first");
-        logPVal = fzero (@(x)ppval(pp,x) - ADStat, log(alphas([i-1,i])));
+        i = find (ADStat > CVs, 1, 'first');
+        logPVal = fzero (@(x)ppval (pp,x) - ADStat, log (alphas([i-1,i])));
         pVal = exp (logPVal);
       endif
 
@@ -362,9 +363,9 @@ function [H, pVal, ADStat, CV] = adtest (x, varargin)
           validateAlpha (alpha, alphas);
           ## Find critical values
           critVals = findAsymptoticDistributionCriticalValues;
-          i = find (alphas > alpha, 1, "first");
+          i = find (alphas > alpha, 1, 'first');
           startVal = critVals(i-1);
-          CV = fzero(@(ad)1-ADInf(ad)-alpha, startVal);
+          CV = fzero (@(ad)1-ADInf (ad)-alpha, startVal);
         endif
       else
         if (n == 1)
@@ -389,7 +390,7 @@ function [H, pVal, ADStat, CV] = adtest (x, varargin)
 
     ## Compute p-value and critical values with Monte Carlo simulation
     else
-      [CV, pVal] = adtestMC (ADStat, n, alpha, "unif", mctol);
+      [CV, pVal] = adtestMC (ADStat, n, alpha, 'unif', mctol);
     endif
 
     ## Calculate H
@@ -464,12 +465,12 @@ function ad = ADInf (z)
   endif
   n = 1:500;
   K = 1/z*[1, ((4*n + 1).*cumprod((1/2 - n)./n))];
-  ADTerms = arrayfun(@(j)ADf(z,j),0:500);
+  ADTerms = arrayfun (@(j)ADf (z,j),0:500);
   ad = ADTerms*K';
 endfunction
 
 ## Series expansion for f(z,j) called by ADInf
-function f = ADf(z,j)
+function f = ADf (z,j)
   ## Compute t=tj=(4j+1)^2*pi^2/(8z)
   t = (4 * j + 1) ^ 2 * 1.233700550136170 / z;
   ## First 2 terms in recursive series
@@ -522,7 +523,7 @@ function CVs = computeCriticalValues_exp (n)
 endfunction
 
 ## An improved version of the Petitt method for the composite extreme value case
-function CVs = computeCriticalValues_ev(n)
+function CVs = computeCriticalValues_ev (n)
   CVs = [1.6473,  1.5095,  1.4301,  1.3742,  1.1974,  1.0667,  0.8961, ...
          0.7683,  0.6416,  0.5680,  0.5156,  0.4744,  0.4405,  0.4115, ...
          0.3858,  0.3626,  0.3415,  0.3217,  0.3029,  0.2848,  0.2672, ...
@@ -646,11 +647,11 @@ function [crit, p] = adtestMC (ADStat, n, alpha, distribution, MCTol)
   ## Monte Carlo loop
   while true
     mcRepsOld = mcRepsTot;
-    mcReps = ceil(mcRepsMin - mcRepsOld);
-    ADstatMC = zeros(mcReps,1);
+    mcReps = ceil (mcRepsMin - mcRepsOld);
+    ADstatMC = zeros (mcReps,1);
     ## Switch to selected distribution
     switch distribution
-      case "norm"
+      case 'norm'
         mu0 = 0;
         sigma0 = 1;
         for rep = 1:length (ADstatMC)
@@ -661,7 +662,7 @@ function [crit, p] = adtestMC (ADStat, n, alpha, distribution, MCTol)
           ADstatMC(rep) = - w * (log (nullCDF) + ...
                                  log (1 - nullCDF(end:-1:1))) / n - n;
         endfor
-      case "exp"
+      case 'exp'
         beta0 = 1;
         for rep = 1:length (ADstatMC)
           x = exprnd (beta0, n, 1);
@@ -671,7 +672,7 @@ function [crit, p] = adtestMC (ADStat, n, alpha, distribution, MCTol)
           ADstatMC(rep) = - w * (log (nullCDF) + ...
                                  log (1 - nullCDF(end:-1:1))) / n - n;
         endfor
-      case "ev"
+      case 'ev'
         mu0 = 0;
         sigma0 = 1;
         for rep = 1:length (ADstatMC)
@@ -683,8 +684,8 @@ function [crit, p] = adtestMC (ADStat, n, alpha, distribution, MCTol)
           ADstatMC(rep) = - w * (log (nullCDF) + ...
                                  log (1 - nullCDF(end:-1:1))) / n - n;
         endfor
-      case "unif"
-        for rep = 1:length(ADstatMC)
+      case 'unif'
+        for rep = 1:length (ADstatMC)
           z = sort (rand (n, 1));
           w = 2 * (1:n) - 1 ;
           ADstatMC(rep) = - w * (log (z) + ...
@@ -715,70 +716,70 @@ endfunction
 %!error<adtest: X must be a vector of real numbers.> adtest (ones (20,2));
 %!error<adtest: X must be a vector of real numbers.> adtest ([1+i,0-3i]);
 %!error<adtest: invalid distribution family in char string.> ...
-%! adtest (ones (20,1), "Distribution", "normal");
+%! adtest (ones (20,1), 'Distribution', 'normal');
 %!error<adtest: invalid distribution family in cell array.> ...
-%! adtest (rand (20,1), "Distribution", {"normal", 5, 3});
+%! adtest (rand (20,1), 'Distribution', {'normal', 5, 3});
 %!error<adtest: invalid distribution parameters in cell array.> ...
-%! adtest (rand (20,1), "Distribution", {"norm", 5});
+%! adtest (rand (20,1), 'Distribution', {'norm', 5});
 %!error<adtest: invalid distribution parameters in cell array.> ...
-%! adtest (rand (20,1), "Distribution", {"exp", 5, 4});
+%! adtest (rand (20,1), 'Distribution', {'exp', 5, 4});
 %!error<adtest: invalid distribution parameters in cell array.> ...
-%! adtest (rand (20,1), "Distribution", {"ev", 5});
+%! adtest (rand (20,1), 'Distribution', {'ev', 5});
 %!error<adtest: invalid distribution parameters in cell array.> ...
-%! adtest (rand (20,1), "Distribution", {"logn", 5, 3, 2});
+%! adtest (rand (20,1), 'Distribution', {'logn', 5, 3, 2});
 %!error<adtest: invalid distribution parameters in cell array.> ...
-%! adtest (rand (20,1), "Distribution", {"Weibull", 5});
+%! adtest (rand (20,1), 'Distribution', {'Weibull', 5});
 %!error<adtest: invalid distribution option.> ...
-%! adtest (rand (20,1), "Distribution", 35);
+%! adtest (rand (20,1), 'Distribution', 35);
 %!error<adtest: invalid Name argument.> ...
-%! adtest (rand (20,1), "Name", "norm");
+%! adtest (rand (20,1), 'Name', 'norm');
 %!error<adtest: invalid Name argument.> ...
-%! adtest (rand (20,1), "Name", {"norm", 75, 10});
+%! adtest (rand (20,1), 'Name', {'norm', 75, 10});
 %!error<adtest: asymptotic option is not valid for the composite> ...
-%! adtest (rand (20,1), "Distribution", "norm", "Asymptotic", true);
+%! adtest (rand (20,1), 'Distribution', 'norm', 'Asymptotic', true);
 %!error<adtest: asymptotic option is not valid for the composite> ...
-%! adtest (rand (20,1), "MCTol", 0.001, "Asymptotic", true);
+%! adtest (rand (20,1), 'MCTol', 0.001, 'Asymptotic', true);
 %!error<adtest: asymptotic option is not valid for the Monte Carlo> ...
-%! adtest (rand (20,1), "Distribution", {"norm", 5, 3}, "MCTol", 0.001, ...
-%!         "Asymptotic", true);
+%! adtest (rand (20,1), 'Distribution', {'norm', 5, 3}, 'MCTol', 0.001, ...
+%!         'Asymptotic', true);
 %!error<adtest: out of range invalid alpha - lower limit: 0.0005 upper> ...
-%! [h, pval, ADstat, CV] = adtest (ones (20,1), "Distribution", {"norm",5,3},...
-%!                                 "Alpha", 0.000000001);
+%! [h, pval, ADstat, CV] = adtest (ones (20,1), 'Distribution', {'norm',5,3},...
+%!                                 'Alpha', 0.000000001);
 %!error<adtest: out of range invalid alpha - lower limit: 0.0005 upper> ...
-%! [h, pval, ADstat, CV] = adtest (ones (20,1), "Distribution", {"norm",5,3},...
-%!                                 "Alpha", 0.999999999);
+%! [h, pval, ADstat, CV] = adtest (ones (20,1), 'Distribution', {'norm',5,3},...
+%!                                 'Alpha', 0.999999999);
 %!error<adtest: not enough data for composite testing.> ...
 %! adtest (10);
 
 ## Test warnings
 %!warning<adtest: out of range min p-value:> ...
-%! randn ("seed", 34);
-%! adtest (ones (20,1), "Alpha", 0.000001);
+%! randn ('seed', 34);
+%! adtest (ones (20,1), 'Alpha', 0.000001);
 %!warning<adtest: alpha not within the lookup table.> ...
-%! randn ("seed", 34);
-%! adtest (normrnd(0,1,100,1), "Alpha", 0.99999);
+%! randn ('seed', 34);
+%! adtest (normrnd (0,1,100,1), 'Alpha', 0.99999);
 %!warning<adtest: alpha not within the lookup table.> ...
-%! randn ("seed", 34);
-%! adtest (normrnd(0,1,100,1), "Alpha", 0.00001);
+%! randn ('seed', 34);
+%! adtest (normrnd (0,1,100,1), 'Alpha', 0.00001);
 
 ## Test results
 %!test
 %! load examgrades
 %! x = grades(:,1);
 %! [h, pval, adstat, cv] = adtest (x);
-%! assert (h, false);
-%! assert (pval, 0.1854, 1e-4);
-%! assert (adstat, 0.5194, 1e-4);
-%! assert (cv, 0.7470, 1e-4);
+%! assert_equal (h, false);
+%! assert_equal (pval, 0.1854, 1e-4);
+%! assert_equal (adstat, 0.5194, 1e-4);
+%! assert_equal (cv, 0.7470, 1e-4);
 %!test
 %! load examgrades
 %! x = grades(:,1);
-%! [h, pval, adstat, cv] = adtest (x, "Distribution", "ev");
-%! assert (h, false);
-%! assert (pval, 0.071363, 1e-6);
+%! [h, pval, adstat, cv] = adtest (x, 'Distribution', 'ev');
+%! assert_equal (h, false);
+%! assert_equal (pval, 0.071363, 1e-6);
 %!test
 %! load examgrades
 %! x = grades(:,1);
-%! [h, pval, adstat, cv] = adtest (x, "Distribution", {"norm", 75, 10});
-%! assert (h, false);
-%! assert (pval, 0.4687, 1e-4);
+%! [h, pval, adstat, cv] = adtest (x, 'Distribution', {'norm', 75, 10});
+%! assert_equal (h, false);
+%! assert_equal (pval, 0.4687, 1e-4);

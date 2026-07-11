@@ -89,12 +89,12 @@
 ## @seealso{pdist,squareform}
 ## @end deftypefn
 
-function dgram = linkage (d, method = "single", distarg, savememory)
+function dgram = linkage (d, method = 'single', distarg, savememory)
 
   ## check the input
-  if (nargin == 4) && (strcmpi (savememory, "savememory"))
+  if (nargin == 4) && (strcmpi (savememory, 'savememory'))
     warning ("Octave:linkage_savemem", ...
-             "linkage: option 'savememory' not implemented");
+             'linkage: option ''savememory'' not implemented');
   elseif (nargin < 1) || (nargin > 3)
     print_usage ();
   endif
@@ -104,9 +104,9 @@ function dgram = linkage (d, method = "single", distarg, savememory)
   endif
 
   methods = struct ...
-  ("name", { "single"; "complete"; "average"; "weighted";
-            "centroid"; "median"; "ward" },
-   "distfunc", {(@(x) min(x))                                     # single
+  ('name', { 'single'; 'complete'; 'average'; 'weighted';
+            'centroid'; 'median'; 'ward' },
+   'distfunc', {(@(x) min(x))                                     # single
                 (@(x) max(x))                                     # complete
                 (@(x,i,j,w) sum(diag(w([i,j]))*x)/sum(w([i,j])))  # average
                 (@(x) mean(x))                                    # weighted
@@ -136,7 +136,7 @@ function dgram = linkage (d, method = "single", distarg, savememory)
     print_usage ();
   endif
 
-  d = squareform (d, "tomatrix");       # dissimilarity NxN matrix
+  d = squareform (d, 'tomatrix');       # dissimilarity NxN matrix
   n = rows (d);                         # the number of observations
   diagidx = sub2ind ([n,n], 1:n, 1:n);  # indices of diagonal elements
   d(diagidx) = Inf;                     # consider a cluster as far from itself
@@ -165,11 +165,11 @@ function dgram = linkage (d, method = "single", distarg, savememory)
     d_rc = d([r, c], :);                # cache row slice
     switch mcase
       case {1, 2, 4}                    # 1 arg
-        newd = dist (d_rc);
+        newd = dist(d_rc);
       case {3, 5, 7}                    # 4 args
-        newd = dist (d_rc, r, c, weight);
+        newd = dist(d_rc, r, c, weight);
       case 6                            # 2 args
-        newd = dist (d_rc, r);
+        newd = dist(d_rc, r);
       otherwise
     endswitch
     newd(r) = Inf;                      # Take care of the diagonal element
@@ -241,79 +241,79 @@ endfunction
 %! x = reshape (mod (magic (6),5), [], 3);
 %! t = 1e-6;
 
-%!assert (cond (linkage (pdist (x))),                   34.119045, t);
-%!assert (cond (linkage (pdist (x), "complete")),       21.793345, t);
-%!assert (cond (linkage (pdist (x), "average")),        27.045012, t);
-%!assert (cond (linkage (pdist (x), "weighted")),       27.412889, t);
+%!assert_equal (cond (linkage (pdist (x))),                   34.119045, t);
+%!assert_equal (cond (linkage (pdist (x), 'complete')),       21.793345, t);
+%!assert_equal (cond (linkage (pdist (x), 'average')),        27.045012, t);
+%!assert_equal (cond (linkage (pdist (x), 'weighted')),       27.412889, t);
 
-%! lastwarn(); # Clear last warning before the test
-%!warning <cluster distances> linkage (pdist (x), "centroid");
-
-%!test
-%! warning off Octave:clustering
-%! assert (cond (linkage (pdist (x), "centroid")),      27.457477, t);
-%! warning on Octave:clustering
-
-%!warning <cluster distances> linkage (pdist (x), "median");
+%! lastwarn (); # Clear last warning before the test
+%!warning <cluster distances> linkage (pdist (x), 'centroid');
 
 %!test
 %! warning off Octave:clustering
-%! assert (cond (linkage (pdist (x), "median")),        27.683325, t);
+%! assert_equal (cond (linkage (pdist (x), 'centroid')),      27.457477, t);
 %! warning on Octave:clustering
 
-%!assert (cond (linkage (pdist (x), "ward")),           17.195198, t);
-%!assert (cond (linkage (x, "ward", "euclidean")),      17.195198, t);
-%!assert (cond (linkage (x, "ward", {"euclidean"})),    17.195198, t);
-%!assert (cond (linkage (x, "ward", {"minkowski", 2})), 17.195198, t);
+%!warning <cluster distances> linkage (pdist (x), 'median');
+
+%!test
+%! warning off Octave:clustering
+%! assert_equal (cond (linkage (pdist (x), 'median')),        27.683325, t);
+%! warning on Octave:clustering
+
+%!assert_equal (cond (linkage (pdist (x), 'ward')),           17.195198, t);
+%!assert_equal (cond (linkage (x, 'ward', 'euclidean')),      17.195198, t);
+%!assert_equal (cond (linkage (x, 'ward', {'euclidean'})),    17.195198, t);
+%!assert_equal (cond (linkage (x, 'ward', {'minkowski', 2})), 17.195198, t);
 
 ## Additional tests for method/metric combinations
 %!test
 %! y = [1 2; 3 5; 4 6; 7 8; 9 11];
-%! L = linkage (y, "single", "cityblock");
-%! assert (size (L), [4, 3]);
-%! assert (L(:,3) >= 0);  # distances non-negative
+%! L = linkage (y, 'single', 'cityblock');
+%! assert_equal (size (L), [4, 3]);
+%! assert_equal (all ((L(:,3) >= 0)(:)), true);  # distances non-negative
 
 %!test
 %! y = [1 2; 3 5; 4 6; 7 8; 9 11];
-%! L = linkage (y, "complete", "cityblock");
-%! assert (size (L), [4, 3]);
-%! assert (all (diff (L(:,3)) >= -eps));  # monotonically increasing
+%! L = linkage (y, 'complete', 'cityblock');
+%! assert_equal (size (L), [4, 3]);
+%! assert_equal (all ((all (diff (L(:,3)) >= -eps))(:)), true);  # monotonically increasing
 
 %!test
 %! y = [1 2; 3 5; 4 6; 7 8; 9 11];
-%! L = linkage (y, "average", "chebychev");
-%! assert (size (L), [4, 3]);
-%! assert (L(:,3) >= 0);
+%! L = linkage (y, 'average', 'chebychev');
+%! assert_equal (size (L), [4, 3]);
+%! assert_equal (all ((L(:,3) >= 0)(:)), true);
 
 %!test
 %! y = [1 2 3; 4 5 6; 7 8 9; 10 11 12];
-%! L = linkage (y, "weighted", {"minkowski", 3});
-%! assert (size (L), [3, 3]);
-%! assert (L(:,3) >= 0);
+%! L = linkage (y, 'weighted', {'minkowski', 3});
+%! assert_equal (size (L), [3, 3]);
+%! assert_equal (all ((L(:,3) >= 0)(:)), true);
 
 %!test
 %! y = [1 0 1; 0 1 1; 1 1 0; 0 0 1];
-%! L = linkage (y, "single", "cosine");
-%! assert (size (L), [3, 3]);
-%! assert (L(:,3) >= 0);
+%! L = linkage (y, 'single', 'cosine');
+%! assert_equal (size (L), [3, 3]);
+%! assert_equal (all ((L(:,3) >= 0)(:)), true);
 
 %!test
 %! y = [1 2 3; 2 3 4; 5 6 7];
-%! L = linkage (y, "complete", "correlation");
-%! assert (size (L), [2, 3]);
-%! assert (L(:,3) >= 0);
+%! L = linkage (y, 'complete', 'correlation');
+%! assert_equal (size (L), [2, 3]);
+%! assert_equal (all ((L(:,3) >= 0)(:)), true);
 
 ## Test with 2 observations (minimal case)
 %!test
 %! y = [1 2; 3 4];
-%! L = linkage (y, "single", "euclidean");
-%! assert (size (L), [1, 3]);
-%! assert (L(1,1:2), [1, 2]);
+%! L = linkage (y, 'single', 'euclidean');
+%! assert_equal (size (L), [1, 3]);
+%! assert_equal (L(1,1:2), [1, 2]);
 
 ## Test output structure: cluster indices are valid
 %!test
 %! y = rand (6, 3);
-%! L = linkage (y, "average", "euclidean");
-%! assert (all (L(:,1) >= 1 & L(:,1) <= 11));  # valid cluster refs
-%! assert (all (L(:,2) >= 1 & L(:,2) <= 11));
-%! assert (all (L(:,1) < L(:,2)));  # sorted within rows
+%! L = linkage (y, 'average', 'euclidean');
+%! assert_equal (all ((all (L(:,1) >= 1 & L(:,1) <= 11))(:)), true);  # valid cluster refs
+%! assert_equal (all ((all (L(:,2) >= 1 & L(:,2) <= 11))(:)), true);
+%! assert_equal (all ((all (L(:,1) < L(:,2)))(:)), true);  # sorted within rows

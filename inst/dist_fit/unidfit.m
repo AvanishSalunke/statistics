@@ -22,7 +22,8 @@
 ## @deftypefnx {statistics} {[@var{Nhat}, @var{Nci}] =} unidfit (@var{x}, @var{alpha})
 ## @deftypefnx {statistics} {[@var{Nhat}, @var{Nci}] =} unidfit (@var{x}, @var{alpha}, @var{freq})
 ##
-## Estimate parameter and confidence intervals for the discrete uniform distribution.
+## Estimate parameter and confidence intervals for the discrete uniform
+## distribution.
 ##
 ## @code{@var{Nhat} = unidfit (@var{x})} returns the maximum likelihood estimate
 ## (MLE) of the maximum observable value for the discrete uniform distribution.
@@ -99,17 +100,17 @@ endfunction
 
 %!demo
 %! ## Sample 2 populations from different discrete uniform distributions
-%! rand ("seed", 1);    # for reproducibility
+%! rand ('seed', 1);    # for reproducibility
 %! r1 = unidrnd (5, 1000, 1);
-%! rand ("seed", 2);    # for reproducibility
+%! rand ('seed', 2);    # for reproducibility
 %! r2 = unidrnd (9, 1000, 1);
 %! r = [r1, r2];
 %!
 %! ## Plot them normalized and fix their colors
 %! hist (r, 0:0.5:20.5, 1);
-%! h = findobj (gca, "Type", "patch");
-%! set (h(1), "facecolor", "c");
-%! set (h(2), "facecolor", "g");
+%! h = findobj (gca, 'Type', 'patch');
+%! set (h(1), 'facecolor', 'c');
+%! set (h(2), 'facecolor', 'g');
 %! hold on
 %!
 %! ## Estimate their probability of success
@@ -119,30 +120,30 @@ endfunction
 %! ## Plot their estimated PDFs
 %! x = [0:10];
 %! y = unidpdf (x, NhatA);
-%! plot (x, y, "-pg");
+%! plot (x, y, '-pg');
 %! y = unidpdf (x, NhatB);
-%! plot (x, y, "-sc");
+%! plot (x, y, '-sc');
 %! xlim ([0, 10])
 %! ylim ([0, 0.4])
-%! legend ({"Normalized HIST of sample 1 with N=5", ...
-%!          "Normalized HIST of sample 2 with N=9", ...
+%! legend ({'Normalized HIST of sample 1 with N=5', ...
+%!          'Normalized HIST of sample 2 with N=9', ...
 %!          sprintf("PDF for sample 1 with estimated N=%0.2f", NhatA), ...
 %!          sprintf("PDF for sample 2 with estimated N=%0.2f", NhatB)})
-%! title ("Two population samples from different discrete uniform distributions")
+%! title ('Two population samples from different discrete uniform distributions')
 %! hold off
 
 ## Test output
 %!test
 %! x = 0:5;
 %! [Nhat, Nci] = unidfit (x);
-%! assert (Nhat, 5);
-%! assert (Nci, [5; 9]);
+%! assert_equal (Nhat, 5);
+%! assert_equal (Nci, [5; 9]);
 %!test
 %! x = 0:5;
 %! [Nhat, Nci] = unidfit (x, [], [1 1 1 1 1 1]);
-%! assert (Nhat, 5);
-%! assert (Nci, [5; 9]);
-%!assert (unidfit ([1 1 2 3]), unidfit ([1 2 3], [] ,[2 1 1]))
+%! assert_equal (Nhat, 5);
+%! assert_equal (Nci, [5; 9]);
+%!assert_equal (unidfit ([1 1 2 3]), unidfit ([1 2 3], [] ,[2 1 1]))
 
 ## Test input validation
 %!error<unidfit: function called with too few input arguments.> unidfit ()

@@ -67,32 +67,32 @@ endfunction
 %! y4 = chi2pdf (x, 4);
 %! y5 = chi2pdf (x, 6);
 %! y6 = chi2pdf (x, 9);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", ...
-%!       x, y4, "-c", x, y5, "-m", x, y6, "-y")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', ...
+%!       x, y4, '-c', x, y5, '-m', x, y6, '-y')
 %! grid on
 %! xlim ([0, 8])
 %! ylim ([0, 0.5])
-%! legend ({"df = 1", "df = 2", "df = 3", ...
-%!          "df = 4", "df = 6", "df = 9"}, "location", "northeast")
-%! title ("Chi-squared PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'df = 1', 'df = 2', 'df = 3', ...
+%!          'df = 4', 'df = 6', 'df = 9'}, 'location', 'northeast')
+%! title ('Chi-squared PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-1 0 0.5 1 Inf];
 %! y = [0, 1/2 * exp(-x(2:5)/2)];
-%!assert (chi2pdf (x, 2*ones (1,5)), y)
-%!assert (chi2pdf (x, 2), y)
-%!assert (chi2pdf (x, 2*[1 0 NaN 1 1]), [y(1) NaN NaN y(4:5)])
-%!assert (chi2pdf ([x, NaN], 2), [y, NaN])
+%!assert_equal (chi2pdf (x, 2*ones (1,5)), y)
+%!assert_equal (chi2pdf (x, 2), y)
+%!assert_equal (chi2pdf (x, 2*[1 0 NaN 1 1]), [y(1) NaN NaN y(4:5)])
+%!assert_equal (chi2pdf ([x, NaN], 2), [y, NaN])
 
 ## Test for issue #203 (Github)
-%!assert (chi2pdf (2, Inf), 0)
+%!assert_equal (chi2pdf (2, Inf), 0)
 
 ## Test class of input preserved
-%!assert (chi2pdf (single ([x, NaN]), 2), single ([y, NaN]))
-%!assert (chi2pdf ([x, NaN], single (2)), single ([y, NaN]))
+%!assert_equal (chi2pdf (single ([x, NaN]), 2), single ([y, NaN]))
+%!assert_equal (chi2pdf ([x, NaN], single (2)), single ([y, NaN]))
 
 ## Test input validation
 %!error<chi2pdf: function called with too few input arguments.> chi2pdf ()

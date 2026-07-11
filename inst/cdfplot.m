@@ -37,12 +37,12 @@
 ## @code{[@var{hCDF}, @var{stats}] = cdfplot (@var{x})} also returns a structure
 ## with the following fields as a statistical summary.
 ##
-## @multitable @columnfractions 0.05 0.3 0.65
-## @item @tab STATS.min @tab minimum value of @var{x}
-## @item @tab STATS.max @tab maximum value of @var{x}
-## @item @tab STATS.mean @tab sample mean of @var{x}
-## @item @tab STATS.median @tab sample median (50th percentile) of @var{x}
-## @item @tab STATS.std @tab sample standard deviation of @var{x}
+## @multitable @columnfractions 0.3 0.65
+## @item STATS.min @tab minimum value of @var{x}
+## @item STATS.max @tab maximum value of @var{x}
+## @item STATS.mean @tab sample mean of @var{x}
+## @item STATS.median @tab sample median (50th percentile) of @var{x}
+## @item STATS.std @tab sample standard deviation of @var{x}
 ## @end multitable
 ##
 ## @seealso{qqplot, cdfcalc}
@@ -54,10 +54,10 @@ function [hCDF, stats] = cdfplot (x)
   ## Calculate sample cdf
   [yy, xx, ~, ~, eid] = cdfcalc (x);
   ## Check for errors returned from cdfcalc
-  if (strcmpi (eid, "VectorRequired"))
+  if (strcmpi (eid, 'VectorRequired'))
     error ("cdfplot: vector required as input.");
-  elseif (strcmpi (eid, "NotEnoughData"))
-    error("cdfplot: not enough data.");
+  elseif (strcmpi (eid, 'NotEnoughData'))
+    error ("cdfplot: not enough data.");
   endif
   ## Create vectors for plotting
   k = length (xx);
@@ -67,9 +67,9 @@ function [hCDF, stats] = cdfplot (x)
   ## Plot cdf
   h = plot (xCDF, yCDF);
   grid  ('on')
-  xlabel ("x")
-  ylabel ("F(x)")
-  title ("CDF plot of x");
+  xlabel ('x')
+  ylabel ('F(x)')
+  title ('CDF plot of x');
 
   ## Return requested output arguments
   if (nargout > 0)
@@ -78,33 +78,33 @@ function [hCDF, stats] = cdfplot (x)
   if (nargout > 1)
     stats.min = nanmin (x);
     stats.max = nanmax (x);
-    stats.mean = mean (x, "omitnan");
-    stats.median = median (x, "omitnan");
-    stats.std = std (x, "omitnan");
+    stats.mean = mean (x, 'omitnan');
+    stats.median = median (x, 'omitnan');
+    stats.std = std (x, 'omitnan');
   endif
 endfunction
 
 %!demo
-%! x = randn(100,1);
+%! x = randn (100,1);
 %! cdfplot (x);
 
 ## Test results
 %!test
-%! hf = figure ("visible", "off");
+%! hf = figure ('visible', 'off');
 %! unwind_protect
 %!   x = [2, 4, 3, 2, 4, 3, 2, 5, 6, 4];
 %!   [hCDF, stats] = cdfplot (x);
-%!   assert (stats.min, 2);
-%!   assert (stats.max, 6);
-%!   assert (stats.median, 3.5);
-%!   assert (stats.std, 1.35400640077266, 1e-14);
+%!   assert_equal (stats.min, 2);
+%!   assert_equal (stats.max, 6);
+%!   assert_equal (stats.median, 3.5);
+%!   assert_equal (stats.std, 1.35400640077266, 1e-14);
 %! unwind_protect_cleanup
 %!   close (hf);
 %! end_unwind_protect
 %!test
-%! hf = figure ("visible", "off");
+%! hf = figure ('visible', 'off');
 %! unwind_protect
-%!   x = randn(100,1);
+%!   x = randn (100,1);
 %!   cdfplot (x);
 %! unwind_protect_cleanup
 %!   close (hf);

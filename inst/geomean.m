@@ -91,7 +91,7 @@ function m = geomean (x, varargin)
   omitnan = false;
 
   nvarg = numel (varargin);
-  varg_chars = cellfun ("ischar", varargin);
+  varg_chars = cellfun ('ischar', varargin);
   szx = size (x);
   ndx = ndims (x);
 
@@ -104,13 +104,13 @@ function m = geomean (x, varargin)
   if (any (varg_chars))
     for i = varargin(varg_chars)
       switch (lower (i{:}))
-        case "all"
+        case 'all'
           all_flag = true;
 
-        case "omitnan"
+        case 'omitnan'
           omitnan = true;
 
-        case "includenan"
+        case 'includenan'
           omitnan = false;
 
         otherwise
@@ -166,7 +166,7 @@ function m = geomean (x, varargin)
       ## FIXME: this special case handling could be removed once sum
       ##        compatibly handles all sizes of empty inputs
       sz_out = szx;
-      sz_out (vecdim(vecdim <= ndx)) = 1;
+      sz_out(vecdim(vecdim <= ndx)) = 1;
       m = NaN (sz_out);
     else
 
@@ -260,47 +260,47 @@ endfunction
 %!test
 %! x = [0:10];
 %! y = [x;x+5;x+10];
-%! assert (geomean (x), 0);
+%! assert_equal (geomean (x), 0);
 %! m = [0 9.462942809849169 14.65658770861967];
-%! assert (geomean (y, 2), m', 4e-14);
-%! assert (geomean (y, "all"), 0);
+%! assert_equal (geomean (y, 2), m', 4e-14);
+%! assert_equal (geomean (y, 'all'), 0);
 %! y(2,4) = NaN;
 %! m(2) = 9.623207231679554;
-%! assert (geomean (y, 2), [0 NaN m(3)]', 4e-14);
-%! assert (geomean (y', "omitnan"), m, 4e-14);
+%! assert_equal (geomean (y, 2), [0 NaN m(3)]', 4e-14);
+%! assert_equal (geomean (y', 'omitnan'), m, 4e-14);
 %! z = y + 20;
-%! assert (geomean (z, "all"), NaN);
-%! assert (geomean (z, "all", "includenan"), NaN);
-%! assert (geomean (z, "all", "omitnan"), 29.59298474535024, 4e-14);
+%! assert_equal (geomean (z, 'all'), NaN);
+%! assert_equal (geomean (z, 'all', 'includenan'), NaN);
+%! assert_equal (geomean (z, 'all', 'omitnan'), 29.59298474535024, 4e-14);
 %! m = [24.79790781765634 NaN 34.85638839503932];
-%! assert (geomean (z'), m, 4e-14);
-%! assert (geomean (z', "includenan"), m, 4e-14);
+%! assert_equal (geomean (z'), m, 4e-14);
+%! assert_equal (geomean (z', 'includenan'), m, 4e-14);
 %! m(2) = 30.02181156156319;
-%! assert (geomean (z', "omitnan"), m, 4e-14);
-%! assert (geomean (z, 2, "omitnan"), m', 4e-14);
+%! assert_equal (geomean (z', 'omitnan'), m, 4e-14);
+%! assert_equal (geomean (z, 2, 'omitnan'), m', 4e-14);
 
 ## Test dimension indexing with vecdim in n-dimensional arrays
 %!test
 %! x = repmat ([1:20;6:25], [5 2 6 3]);
-%! assert (size (geomean (x, [3 2])), [10 1 1 3]);
-%! assert (size (geomean (x, [1 2])), [1 1 6 3]);
-%! assert (size (geomean (x, [1 2 4])), [1 1 6]);
-%! assert (size (geomean (x, [1 4 3])), [1 40]);
-%! assert (size (geomean (x, [1 2 3 4])), [1 1]);
+%! assert_equal (size (geomean (x, [3 2])), [10 1 1 3]);
+%! assert_equal (size (geomean (x, [1 2])), [1 1 6 3]);
+%! assert_equal (size (geomean (x, [1 2 4])), [1 1 6]);
+%! assert_equal (size (geomean (x, [1 4 3])), [1 40]);
+%! assert_equal (size (geomean (x, [1 2 3 4])), [1 1]);
 
 ## Test results with vecdim in n-dimensional arrays and "omitnan"
 %!test
 %! x = repmat ([1:20;6:25], [5 2 6 3]);
 %! m = repmat ([8.304361203739333;14.3078118884256], [5 1 1 3]);
-%! assert (geomean (x, [3 2]), m, 4e-13);
+%! assert_equal (geomean (x, [3 2]), m, 4e-13);
 %! x(2,5,6,3) = NaN;
 %! m(2,3) = NaN;
-%! assert (geomean (x, [3 2]), m, 4e-13);
+%! assert_equal (geomean (x, [3 2]), m, 4e-13);
 %! m(2,3) = 14.3292729579901;
-%! assert (geomean (x, [3 2], "omitnan"), m, 4e-13);
+%! assert_equal (geomean (x, [3 2], 'omitnan'), m, 4e-13);
 
 ## Test errors
-%!error <geomean: X must contain real nonnegative values.> geomean ("char")
+%!error <geomean: X must contain real nonnegative values.> geomean ('char')
 %!error <geomean: X must contain real nonnegative values.> geomean ([1 -1 3])
 %!error <geomean: DIM must be a positive integer scalar or vector.> ...
 %! geomean (repmat ([1:20;6:25], [5 2 6 3 5]), -1)

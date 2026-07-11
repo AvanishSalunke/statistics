@@ -85,7 +85,7 @@ function [paramhat, paramci] = betafit (x, alpha, varargin)
   endif
 
   ## Check X being a constant vector
-  if (min (x) == max(x))
+  if (min (x) == max (x))
     error ("betafit: X must contain distinct values.");
   endif
 
@@ -100,7 +100,7 @@ function [paramhat, paramci] = betafit (x, alpha, varargin)
 
   ## Add defaults
   freq = ones (size (x));
-  options.Display = "off";
+  options.Display = 'off';
   options.MaxFunEvals = 400;
   options.MaxIter = 200;
   options.TolX = 1e-6;
@@ -127,9 +127,9 @@ function [paramhat, paramci] = betafit (x, alpha, varargin)
       error ("betafit: FREQ must contain integer values.");
     endif
     ## Check for valid options structure
-    if (! isstruct (options) || ! isfield (options, "Display") ||
-        ! isfield (options, "MaxFunEvals") || ! isfield (options, "MaxIter")
-                                           || ! isfield (options, "TolX"))
+    if (! isstruct (options) || ! isfield (options, 'Display') ||
+        ! isfield (options, 'MaxFunEvals') || ! isfield (options, 'MaxIter')
+                                           || ! isfield (options, 'TolX'))
       error (strcat ("betafit: 'options' argument must be a", ...
                      " structure with 'Display', 'MaxFunEvals',", ...
                      " 'MaxIter', and 'TolX' fields present."));
@@ -174,7 +174,7 @@ function [paramhat, paramci] = betafit (x, alpha, varargin)
   else
     num0 = sum (x < x_lo);
     num1 = sum (x > x_hi);
-    x_ct = x (x > x_lo & x < x_hi);
+    x_ct = x(x > x_lo & x < x_hi);
     numx = length (x_ct);
     sumlogx = sum (log (x_ct));
     sumlog1px = sum (log1p (-x_ct));
@@ -206,11 +206,11 @@ function [paramhat, paramci] = betafit (x, alpha, varargin)
                * sumlogx - (params(2) - 1) * sumlog1px;
     ## Handle zeros
     if (num0 > 0)
-      nll = nll - num0 * log (betainc (x_lo, params(1), params(2), "lower"));
+      nll = nll - num0 * log (betainc (x_lo, params(1), params(2), 'lower'));
     endif
     ## Handle ones
     if (num1 > 0)
-      nll = nll - num1 * log (betainc (x_hi, params(1), params(2), "upper"));
+      nll = nll - num1 * log (betainc (x_hi, params(1), params(2), 'upper'));
     endif
   endfunction
 
@@ -218,17 +218,17 @@ endfunction
 
 %!demo
 %! ## Sample 2 populations from different Beta distributions
-%! randg ("seed", 1);   # for reproducibility
+%! randg ('seed', 1);   # for reproducibility
 %! r1 = betarnd (2, 5, 500, 1);
-%! randg ("seed", 2);   # for reproducibility
+%! randg ('seed', 2);   # for reproducibility
 %! r2 = betarnd (2, 2, 500, 1);
 %! r = [r1, r2];
 %!
 %! ## Plot them normalized and fix their colors
 %! hist (r, 12, 15);
-%! h = findobj (gca, "Type", "patch");
-%! set (h(1), "facecolor", "c");
-%! set (h(2), "facecolor", "g");
+%! h = findobj (gca, 'Type', 'patch');
+%! set (h(1), 'facecolor', 'c');
+%! set (h(2), 'facecolor', 'g');
 %! hold on
 %!
 %! ## Estimate their shape parameters
@@ -238,17 +238,17 @@ endfunction
 %! ## Plot their estimated PDFs
 %! x = [min(r(:)):0.01:max(r(:))];
 %! y = betapdf (x, a_b_A(1), a_b_A(2));
-%! plot (x, y, "-pr");
+%! plot (x, y, '-pr');
 %! y = betapdf (x, a_b_B(1), a_b_B(2));
-%! plot (x, y, "-sg");
+%! plot (x, y, '-sg');
 %! ylim ([0, 4])
-%! legend ({"Normalized HIST of sample 1 with α=2 and β=5", ...
-%!          "Normalized HIST of sample 2 with α=2 and β=2", ...
+%! legend ({'Normalized HIST of sample 1 with α=2 and β=5', ...
+%!          'Normalized HIST of sample 2 with α=2 and β=2', ...
 %!          sprintf("PDF for sample 1 with estimated α=%0.2f and β=%0.2f", ...
 %!                  a_b_A(1), a_b_A(2)), ...
 %!          sprintf("PDF for sample 2 with estimated α=%0.2f and β=%0.2f", ...
 %!                  a_b_B(1), a_b_B(2))})
-%! title ("Two population samples from different Beta distributions")
+%! title ('Two population samples from different Beta distributions')
 %! hold off
 
 ## Test output
@@ -257,20 +257,20 @@ endfunction
 %! [paramhat, paramci] = betafit (x);
 %! paramhat_out = [1.0199, 1.0199];
 %! paramci_out = [0.6947, 0.6947; 1.4974, 1.4974];
-%! assert (paramhat, paramhat_out, 1e-4);
-%! assert (paramci, paramci_out, 1e-4);
+%! assert_equal (paramhat, paramhat_out, 1e-4);
+%! assert_equal (paramci, paramci_out, 1e-4);
 %!test
 %! x = 0.01:0.02:0.99;
 %! [paramhat, paramci] = betafit (x, 0.01);
 %! paramci_out = [0.6157, 0.6157; 1.6895, 1.6895];
-%! assert (paramci, paramci_out, 1e-4);
+%! assert_equal (paramci, paramci_out, 1e-4);
 %!test
 %! x = 0.00:0.02:1;
 %! [paramhat, paramci] = betafit (x);
 %! paramhat_out = [0.0875, 0.1913];
 %! paramci_out = [0.0822, 0.1490; 0.0931, 0.2455];
-%! assert (paramhat, paramhat_out, 1e-4);
-%! assert (paramci, paramci_out, 1e-4);
+%! assert_equal (paramhat, paramhat_out, 1e-4);
+%! assert_equal (paramci, paramci_out, 1e-4);
 
 ## Test input validation
 %!error<betafit: X must be a vector of real values.> betafit ([0.2, 0.5+i]);
@@ -285,6 +285,6 @@ endfunction
 %!error<betafit: FREQ must contain integer values.> ...
 %! betafit ([0.01:0.01:0.05], 0.05, [1, 2, 3, 2, 1.5]);
 %!error<betafit: 'options' argument must be a structure> ...
-%! betafit ([0.01:0.01:0.05], 0.05, struct ("option", 234));
+%! betafit ([0.01:0.01:0.05], 0.05, struct ('option', 234));
 %!error<betafit: 'options' argument must be a structure> ...
-%! betafit ([0.01:0.01:0.05], 0.05, ones (1,5), struct ("option", 234));
+%! betafit ([0.01:0.01:0.05], 0.05, ones (1,5), struct ('option', 234));

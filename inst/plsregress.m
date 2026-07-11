@@ -36,14 +36,14 @@
 ## the predictor and response loadings in @var{xload} and @var{yload},
 ## respectively.
 ## @itemize
-## @item @var{X} is an @math{NxP} matrix of predictor variables, with rows
+## @item @var{X} is an @math{N*P} matrix of predictor variables, with rows
 ## corresponding to observations, and columns corresponding to variables.
-## @item @var{Y} is an @math{NxM} response matrix.
-## @item @var{xload} is a @math{PxNCOMP} matrix of predictor loadings, where
+## @item @var{Y} is an @math{N*M} response matrix.
+## @item @var{xload} is a @math{P*NCOMP} matrix of predictor loadings, where
 ## each row of @var{xload} contains coefficients that define a linear
 ## combination of PLS components that approximate the original predictor
 ## variables.
-## @item @var{yload} is an @math{MxNCOMP} matrix of response loadings, where
+## @item @var{yload} is an @math{M*NCOMP} matrix of response loadings, where
 ## each row of @var{yload} contains coefficients that define a linear
 ## combination of PLS components that approximate the original response
 ## variables.
@@ -58,33 +58,33 @@
 ## @var{pctVar}, @var{mse}, @var{stats}] = plsregress (@var{X}, @var{Y},
 ## @var{NCOMP})} also returns the following arguments:
 ## @itemize
-## @item @var{xscore} is an @math{NxNCOMP} orthonormal matrix with the predictor
+## @item @var{xscore} is an @math{N*NCOMP} orthonormal matrix with the predictor
 ## scores, i.e., the PLS components that are linear combinations of the
 ## variables in @var{X}, with rows corresponding to observations and columns
 ## corresponding to components.
-## @item @var{yscore} is an @math{NxNCOMP} orthonormal matrix with the response
+## @item @var{yscore} is an @math{N*NCOMP} orthonormal matrix with the response
 ## scores, i.e., the linear combinations of the responses with which the PLS
 ## components @var{xscore} have maximum covariance, with rows corresponding to
 ## observations and columns corresponding to components.
-## @item @var{coef} is a @math{(P+1)xM} matrix with the PLS regression
+## @item @var{coef} is a @math{(P+1)*M} matrix with the PLS regression
 ## coefficients, containing the intercepts in the first row.
-## @item @var{pctVar} is a @math{2xNCOMP} matrix containing the percentage of
+## @item @var{pctVar} is a @math{2*NCOMP} matrix containing the percentage of
 ## the variance explained by the model with the first row containing the
 ## percentage of explained varianced in @var{X} by each PLS component and the
 ## second row containing the percentage of explained variance in @var{Y}.
-## @item @var{mse} is a @math{2x(NCOMP+1)} matrix containing the estimated mean
+## @item @var{mse} is a @math{2*(NCOMP+1)} matrix containing the estimated mean
 ## squared errors for PLS models with @qcode{0:@var{NCOMP}} components with the
 ## first row containing the squared errors for the predictor variables in
 ## @var{X} and the second row containing the mean squared errors for the
 ## response variable(s) in @var{Y}.
 ## @item @var{stats} is a structure with the following fields:
 ## @itemize
-## @item @var{stats}@qcode{.W} is a @math{PxNCOMP} matrix of PLS weights.
+## @item @var{stats}@qcode{.W} is a @math{P*NCOMP} matrix of PLS weights.
 ## @item @var{stats}@qcode{.T2} is the @math{T^2} statistics for each point in
 ## @var{xscore}.
-## @item @var{stats}@qcode{.Xresiduals} is an @math{NxP} matrix with the
+## @item @var{stats}@qcode{.Xresiduals} is an @math{N*P} matrix with the
 ## predictor residuals.
-## @item @var{stats}@qcode{.Yresiduals} is an @math{NxM} matrix with the
+## @item @var{stats}@qcode{.Yresiduals} is an @math{N*M} matrix with the
 ## response residuals.
 ## @end itemize
 ## @end itemize
@@ -92,21 +92,21 @@
 ## @code{[@dots{}] = plsregress (@dots{}, @var{Name}, @var{Value}, @dots{})}
 ## specifies one or more of the following @var{Name}/@var{Value} pairs:
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @headitem @tab @var{Name} @tab @var{Value}
-## @item @tab @qcode{"CV"} @tab The method used to compute @var{mse}.  When
+## @multitable @columnfractions 0.2 0.75
+## @headitem @var{Name} @tab @var{Value}
+## @item @qcode{'CV'} @tab The method used to compute @var{mse}.  When
 ## @var{Value} is a positive integer @math{K}, @code{plsregress} uses
 ## @math{K}-fold cross-validation.  Set @var{Value} to a cross-validation
 ## partition, created using @code{cvpartition}, to use other forms of
-## cross-validation.  Set @var{Value} to @qcode{"resubstitution"} to use both
+## cross-validation.  Set @var{Value} to @qcode{'resubstitution'} to use both
 ## @var{X} and @var{Y} to fit the model and to estimate the mean squared errors,
 ## without cross-validation. By default, @qcode{@var{Value} = "resubstitution"}.
-## @item @tab @qcode{"MCReps"} @tab A positive integer indicating the number of
+## @item @qcode{'MCReps'} @tab A positive integer indicating the number of
 ## Monte-Carlo repetitions for cross-validation.  By default,
-## @qcode{@var{Value} = 1}.  A different @qcode{"MCReps"} value is only
-## meaningful when using the @qcode{"HoldOut"} method for cross-validation,
+## @qcode{@var{Value} = 1}.  A different @qcode{'MCReps'} value is only
+## meaningful when using the @qcode{'HoldOut'} method for cross-validation,
 ## previously set by a @code{cvpartition} object.  If no cross-validation method
-## is used, then @qcode{"MCReps"} must be @qcode{1}.
+## is used, then @qcode{'MCReps'} must be @qcode{1}.
 ## @end multitable
 ##
 ## Further information about the PLS regression can be found at
@@ -159,16 +159,16 @@ function [xload, yload, xscore, yscore, coef, pctVar, mse, stats] = ...
 
   ## Parse additional Name-Value pairs
   while (numel (varargin) > 0)
-    if (strcmpi (varargin{1}, "cv"))
+    if (strcmpi (varargin{1}, 'cv'))
       cvarg = varargin{2};
-      if (isa (cvarg, "cvpartition"))
+      if (isa (cvarg, 'cvpartition'))
         CV = true;
       elseif (isscalar (cvarg) && cvarg == fix (cvarg) && cvarg > 0)
         CV = true;
-      elseif (! strcmpi (cvarg, "resubstitution"))
+      elseif (! strcmpi (cvarg, 'resubstitution'))
         error ("plsregress: invalid VALUE for 'cv' optional argument.");
       endif
-    elseif (strcmpi (varargin{1}, "mcreps"))
+    elseif (strcmpi (varargin{1}, 'mcreps'))
       mcreps = varargin{2};
       if (! (isscalar (mcreps) && mcreps == fix (mcreps) && mcreps > 0))
         error ("plsregress: invalid VALUE for 'mcreps' optional argument.");
@@ -188,7 +188,7 @@ function [xload, yload, xscore, yscore, coef, pctVar, mse, stats] = ...
 
   ## Check number of output arguments
   if (nargout < 2 || nargout > 8)
-    print_usage();
+    print_usage ();
   endif
 
   ## Mean centering Data matrix
@@ -226,12 +226,12 @@ function [xload, yload, xscore, yscore, coef, pctVar, mse, stats] = ...
     if (CV)
       mse = NaN (2, NCOMP + 1);
       ## Check crossval method and recalculate max number of components
-      if isa (cvarg, "cvpartition")
-        type = "Partition";
-        NCOMPmax = min(min(cvarg.TrainSize)-1,npred);
+      if isa (cvarg, 'cvpartition')
+        type = 'Partition';
+        NCOMPmax = min (min (cvarg.TrainSize)-1,npred);
         ts = sum (cvarg.TestSize);
       else
-        type = "Kfold";
+        type = 'Kfold';
         NCOMPmax = min (floor ((nobs * (cvarg - 1) / cvarg) -1), npred);
         ts = nobs;
       endif
@@ -243,7 +243,7 @@ function [xload, yload, xscore, yscore, coef, pctVar, mse, stats] = ...
       ## Create function handle with NCOMP extra argument
       F = @(xtr, ytr, xte, yte) sseCV (xtr, ytr, xte, yte, NCOMP);
       ## Apply cross validation
-      sse = crossval (F, X, Y, type, cvarg, "mcreps", mcreps);
+      sse = crossval (F, X, Y, type, cvarg, 'mcreps', mcreps);
       ## Compute MSE from the SSEs collected from each cross validation set
       mse(:,1:NCOMP+1) = reshape (sum (sse, 1) / (ts * mcreps), [2, NCOMP+1]);
 
@@ -337,8 +337,8 @@ function sse = sseCV (XTR, YTR, XTE, YTE, NCOMP)
   X0TR = bsxfun (@minus, XTR, XTRmeans);
   Y0TR = bsxfun (@minus, YTR, YTRmeans);
   ## Center test data
-  X0TE = bsxfun(@minus, XTE, XTRmeans);
-  Y0TE = bsxfun(@minus, YTE, YTRmeans);
+  X0TE = bsxfun (@minus, XTE, XTRmeans);
+  Y0TE = bsxfun (@minus, YTE, YTRmeans);
   ## Fit the full model
   [xload, yload, ~, ~, W] = simpls (X0TR, Y0TR, NCOMP);
   XTEscore = X0TE * W;
@@ -369,20 +369,20 @@ endfunction
 %!
 %! ## Plot the percentage of explained variance in the response variable
 %! ## (PCTVAR) as a function of the number of components.
-%! plot (1:10, cumsum (100 * ptcVar(2,:)), "-ro");
+%! plot (1:10, cumsum (100 * ptcVar(2,:)), '-ro');
 %! xlim ([1, 10]);
-%! xlabel ("Number of PLS components");
-%! ylabel ("Percentage of Explained Variance in octane");
-%! title ("Explained Variance per PLS components");
+%! xlabel ('Number of PLS components');
+%! ylabel ('Percentage of Explained Variance in octane');
+%! title ('Explained Variance per PLS components');
 %!
 %! ## Compute the fitted response and display the residuals.
 %! octane_fitted = [ones(size(NIR,1),1), NIR] * coef;
 %! residuals = octane - octane_fitted;
 %! figure
-%! stem (residuals, "color", "r", "markersize", 4, "markeredgecolor", "r")
-%! xlabel ("Observations");
-%! ylabel ("Residuals");
-%! title ("Residuals in octane's fitted response");
+%! stem (residuals, 'color', 'r', 'markersize', 4, 'markeredgecolor', 'r')
+%! xlabel ('Observations');
+%! ylabel ('Residuals');
+%! title ('Residuals in octane''s fitted response');
 
 %!demo
 %! ## Calculate Variable Importance in Projection (VIP) for PLS Regression
@@ -398,7 +398,7 @@ endfunction
 %!                                                 plsregress (NIR, octane, 10);
 %!
 %! ## Calculate the normalized PLS weights
-%! W0 = stats.W ./ sqrt(sum(stats.W.^2,1));
+%! W0 = stats.W ./ sqrt (sum (stats.W.^2,1));
 %!
 %! ## Calculate the VIP scores for 10 components
 %! nobs = size (xload, 1);
@@ -409,15 +409,15 @@ endfunction
 %! VIPidx = find (VIPscore >= 1);
 %!
 %! ## Plot the VIP scores
-%! scatter (1:length (VIPscore), VIPscore, "xb");
+%! scatter (1:length (VIPscore), VIPscore, 'xb');
 %! hold on
-%! scatter (VIPidx, VIPscore (VIPidx), "xr");
-%! plot ([1, length(VIPscore)], [1, 1], "--k");
+%! scatter (VIPidx, VIPscore(VIPidx), 'xr');
+%! plot ([1, length(VIPscore)], [1, 1], '--k');
 %! hold off
-%! axis ("tight");
-%! xlabel ("Predictor Variables");
-%! ylabel ("VIP scores");
-%! title ("VIP scores for each predictor variable with 10 components");
+%! axis ('tight');
+%! xlabel ('Predictor Variables');
+%! ylabel ('VIP scores');
+%! title ('VIP scores for each predictor variable with 10 components');
 
 ## Test output
 %!test
@@ -431,10 +431,10 @@ endfunction
 %!                -0.2067,  0.0457,  0.1565, 0.0706, -0.1471];
 %! yscore1_out = [-12.4635, -15.0003,  0.0638,  0.0652, -0.0070, ...
 %!                 -0.0634,   0.0062, -0.0012, -0.0151, -0.0173];
-%! assert (xload(1,:), xload1_out, 1e-4);
-%! assert (yload, yload_out, 1e-4);
-%! assert (xscore(1,:), xscore1_out, 1e-4);
-%! assert (yscore(1,:), yscore1_out, 1e-4);
+%! assert_equal (xload(1,:), xload1_out, 1e-4);
+%! assert_equal (yload, yload_out, 1e-4);
+%! assert_equal (xscore(1,:), xscore1_out, 1e-4);
+%! assert_equal (yscore(1,:), yscore1_out, 1e-4);
 %!test
 %! load spectra
 %! [xload, yload, xscore, yscore, coef, pctVar] = plsregress (NIR, octane, 5);
@@ -442,17 +442,17 @@ endfunction
 %! yload_out = [6.6384, 9.3106, 2.0505, 0.6471, 0.9625];
 %! xscore1_out = [-0.0401, -0.1764, -0.0340, 0.1669, 0.1041];
 %! yscore1_out = [-12.4635, -15.0003, 0.0638, 0.0652, -0.0070];
-%! assert (xload(1,:), xload1_out, 1e-4);
-%! assert (yload, yload_out, 1e-4);
-%! assert (xscore(1,:), xscore1_out, 1e-4);
-%! assert (yscore(1,:), yscore1_out, 1e-4);
+%! assert_equal (xload(1,:), xload1_out, 1e-4);
+%! assert_equal (yload, yload_out, 1e-4);
+%! assert_equal (xscore(1,:), xscore1_out, 1e-4);
+%! assert_equal (yscore(1,:), yscore1_out, 1e-4);
 
 ## Test input validation
 %!error<plsregress: function called with too few input arguments.>
 %! plsregress (1)
-%!error<plsregress: X and Y must be real matrices.> plsregress (1, "asd")
+%!error<plsregress: X and Y must be real matrices.> plsregress (1, 'asd')
 %!error<plsregress: X and Y must be real matrices.> plsregress (1, {1,2,3})
-%!error<plsregress: X and Y must be real matrices.> plsregress ("asd", 1)
+%!error<plsregress: X and Y must be real matrices.> plsregress ('asd', 1)
 %!error<plsregress: X and Y must be real matrices.> plsregress ({1,2,3}, 1)
 %!error<plsregress: X and Y observations mismatch.> ...
 %! plsregress (ones (20,3), ones (15,1))
@@ -467,23 +467,23 @@ endfunction
 %!error<plsregress: NCOMP exceeds maximum components for X.> ...
 %! plsregress (ones (20,3), ones (20,1), 4)
 %!error<plsregress: invalid VALUE for 'cv' optional argument.> ...
-%! plsregress (ones (20,3), ones (20,1), 3, "cv", 4.5)
+%! plsregress (ones (20,3), ones (20,1), 3, 'cv', 4.5)
 %!error<plsregress: invalid VALUE for 'cv' optional argument.> ...
-%! plsregress (ones (20,3), ones (20,1), 3, "cv", -1)
+%! plsregress (ones (20,3), ones (20,1), 3, 'cv', -1)
 %!error<plsregress: invalid VALUE for 'cv' optional argument.> ...
-%! plsregress (ones (20,3), ones (20,1), 3, "cv", "somestring")
+%! plsregress (ones (20,3), ones (20,1), 3, 'cv', 'somestring')
 %!error<plsregress: invalid VALUE for 'mcreps' optional argument.> ...
-%! plsregress (ones (20,3), ones (20,1), 3, "cv", 3, "mcreps", 2.2)
+%! plsregress (ones (20,3), ones (20,1), 3, 'cv', 3, 'mcreps', 2.2)
 %!error<plsregress: invalid VALUE for 'mcreps' optional argument.> ...
-%! plsregress (ones (20,3), ones (20,1), 3, "cv", 3, "mcreps", -2)
+%! plsregress (ones (20,3), ones (20,1), 3, 'cv', 3, 'mcreps', -2)
 %!error<plsregress: invalid VALUE for 'mcreps' optional argument.> ...
-%! plsregress (ones (20,3), ones (20,1), 3, "cv", 3, "mcreps", [1, 2])
+%! plsregress (ones (20,3), ones (20,1), 3, 'cv', 3, 'mcreps', [1, 2])
 %!error<plsregress: invalid NAME argument.> ...
-%! plsregress (ones (20,3), ones (20,1), 3, "Name", 3, "mcreps", 1)
+%! plsregress (ones (20,3), ones (20,1), 3, 'Name', 3, 'mcreps', 1)
 %!error<plsregress: invalid NAME argument.> ...
-%! plsregress (ones (20,3), ones (20,1), 3, "cv", 3, "Name", 1)
+%! plsregress (ones (20,3), ones (20,1), 3, 'cv', 3, 'Name', 1)
 %!error<plsregress: 'mcreps' must be 1 when 'resubstitution' is specified> ...
-%! plsregress (ones (20,3), ones (20,1), 3, "mcreps", 2)
+%! plsregress (ones (20,3), ones (20,1), 3, 'mcreps', 2)
 %!error<plsregress: 'mcreps' must be 1 when 'resubstitution' is specified> ...
-%! plsregress (ones (20,3), ones (20,1), 3, "cv", "resubstitution", "mcreps", 2)
+%! plsregress (ones (20,3), ones (20,1), 3, 'cv', 'resubstitution', 'mcreps', 2)
 %!error<Invalid call to plsregress.  Correct usage is:> plsregress (1, 2)

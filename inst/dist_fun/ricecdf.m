@@ -17,7 +17,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {statistics} {@var{p} =} ricecdf (@var{x}, @var{s}, @var{sigma})
-## @deftypefnx {statistics} {@var{p} =} ricecdf (@var{x}, @var{s}, @var{sigma}, @qcode{"upper"})
+## @deftypefnx {statistics} {@var{p} =} ricecdf (@var{x}, @var{s}, @var{sigma}, @qcode{'upper'})
 ##
 ## Rician cumulative distribution function (CDF).
 ##
@@ -45,9 +45,9 @@ function p = ricecdf (x, s, sigma, uflag)
   endif
 
   ## Check for "upper" flag
-  if (nargin == 4 && strcmpi (uflag, "upper"))
+  if (nargin == 4 && strcmpi (uflag, 'upper'))
     uflag = true;
-  elseif (nargin == 4  && ! strcmpi (uflag, "upper"))
+  elseif (nargin == 4  && ! strcmpi (uflag, 'upper'))
     error ("ricecdf: invalid argument for upper tail.");
   else
     uflag = false;
@@ -67,8 +67,8 @@ function p = ricecdf (x, s, sigma, uflag)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (s, "single") || isa (sigma, "single"));
-    p = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (s, 'single') || isa (sigma, 'single'));
+    p = zeros (size (x), 'single');
   else
     p = zeros (size (x));
   endif
@@ -77,7 +77,7 @@ function p = ricecdf (x, s, sigma, uflag)
   k0 = s >= 0 & sigma > 0 & x < 0;
   if (uflag && any (k0(:)))
     p(k0) = 1;
-  end
+  endif
 
   ## Calculate Rayleigh CDF for valid parameter and data range
   k = s >= 0 & sigma > 0 & x >= 0;
@@ -98,8 +98,8 @@ endfunction
 function Q = marcumQ1 (a, b)
 
   ## Prepare output matrix
-  if (isa (a, "single") || isa (b, "single"))
-   Q = NaN (size (b), "single");
+  if (isa (a, 'single') || isa (b, 'single'))
+   Q = NaN (size (b), 'single');
   else
    Q = NaN (size (b));
   endif
@@ -109,13 +109,13 @@ function Q = marcumQ1 (a, b)
   Q(a != Inf & b == Inf) = 0;
   Q(a == Inf & b != Inf) = 1;
   z = isnan (Q) & a == 0 & b != Inf;
-  if (any(z))
+  if (any (z))
     Q(z) = exp ((-b(z) .^ 2) ./ 2);
-  end
+  endif
 
   ## Compute the remaining cases
   z = isnan (Q) & ! isnan (a) & ! isnan (b);
-  if (any(z(:)))
+  if (any (z(:)))
     aa = (a(z) .^ 2) ./ 2;
     bb = (b(z) .^ 2) ./ 2;
     eA = exp (-aa);
@@ -123,14 +123,14 @@ function Q = marcumQ1 (a, b)
     h = eA;
     d = eB .* h;
     s = d;
-    j = (d > s.*eps(class(d)));
+    j = (d > s.*eps (class (d)));
     k = 1;
     while (any (j))
       eA = aa .* eA ./ k;
       h = h + eA;
       eB = bb .* eB ./ (k + 1);
       d = eB .* h;
-      s(j) = s (j) + d(j);
+      s(j) = s(j) + d(j);
       j = (d > s .* eps (class (d)));
       k = k + 1;
     endwhile
@@ -146,15 +146,15 @@ endfunction
 %! p3 = ricecdf (x, 1, 1);
 %! p4 = ricecdf (x, 2, 1);
 %! p5 = ricecdf (x, 4, 1);
-%! plot (x, p1, "-b", x, p2, "g", x, p3, "-r", x, p4, "-m", x, p5, "-k")
+%! plot (x, p1, '-b', x, p2, 'g', x, p3, '-r', x, p4, '-m', x, p5, '-k')
 %! grid on
 %! ylim ([0, 1])
 %! xlim ([0, 8])
-%! legend ({"s = 0, σ = 1", "s = 0.5, σ = 1", "s = 1, σ = 1", ...
-%!          "s = 2, σ = 1", "s = 4, σ = 1"}, "location", "southeast")
-%! title ("Rician CDF")
-%! xlabel ("values in x")
-%! ylabel ("probability")
+%! legend ({'s = 0, σ = 1', 's = 0.5, σ = 1', 's = 1, σ = 1', ...
+%!          's = 2, σ = 1', 's = 4, σ = 1'}, 'location', 'southeast')
+%! title ('Rician CDF')
+%! xlabel ('values in x')
+%! ylabel ('probability')
 
 %!demo
 %! ## Plot various CDFs from the Rician distribution
@@ -164,15 +164,15 @@ endfunction
 %! p3 = ricecdf (x, 0, 3);
 %! p4 = ricecdf (x, 2, 2);
 %! p5 = ricecdf (x, 4, 2);
-%! plot (x, p1, "-b", x, p2, "g", x, p3, "-r", x, p4, "-m", x, p5, "-k")
+%! plot (x, p1, '-b', x, p2, 'g', x, p3, '-r', x, p4, '-m', x, p5, '-k')
 %! grid on
 %! ylim ([0, 1])
 %! xlim ([0, 8])
-%! legend ({"ν = 0, σ = 0.5", "ν = 0, σ = 2", "ν = 0, σ = 3", ...
-%!          "ν = 2, σ = 2", "ν = 4, σ = 2"}, "location", "southeast")
-%! title ("Rician CDF")
-%! xlabel ("values in x")
-%! ylabel ("probability")
+%! legend ({'ν = 0, σ = 0.5', 'ν = 0, σ = 2', 'ν = 0, σ = 3', ...
+%!          'ν = 2, σ = 2', 'ν = 4, σ = 2'}, 'location', 'southeast')
+%! title ('Rician CDF')
+%! xlabel ('values in x')
+%! ylabel ('probability')
 
 ## Test output
 %!test
@@ -180,34 +180,34 @@ endfunction
 %! s = 1:6;
 %! p = ricecdf (x, s, 1);
 %! expected_p = [0.0000, 0.0179, 0.0108, 0.0034, 0.0008, 0.0001];
-%! assert (p, expected_p, 0.001);
+%! assert_equal (p, expected_p, 0.001);
 %!test
 %! x = 0:0.5:2.5;
 %! sigma = 1:6;
 %! p = ricecdf (x, 1, sigma);
 %! expected_p = [0.0000, 0.0272, 0.0512, 0.0659, 0.0754, 0.0820];
-%! assert (p, expected_p, 0.001);
+%! assert_equal (p, expected_p, 0.001);
 %!test
 %! x = 0:0.5:2.5;
 %! p = ricecdf (x, 0, 1);
 %! expected_p = [0.0000, 0.1175, 0.3935, 0.6753, 0.8647, 0.9561];
-%! assert (p, expected_p, 0.001);
+%! assert_equal (p, expected_p, 0.001);
 %!test
 %! x = 0:0.5:2.5;
 %! p = ricecdf (x, 1, 1);
 %! expected_p = [0.0000, 0.0735, 0.2671, 0.5120, 0.7310, 0.8791];
-%! assert (p, expected_p, 0.001);
+%! assert_equal (p, expected_p, 0.001);
 %!shared x, p
 %! x = [-1, 0, 1, 2, Inf];
 %! p = [0, 0, 0.26712019620318, 0.73098793996409, 1];
-%!assert (ricecdf (x, 1, 1), p, 1e-14)
-%!assert (ricecdf (x, 1, 1, "upper"), 1 - p, 1e-14)
+%!assert_equal (ricecdf (x, 1, 1), p, 1e-14)
+%!assert_equal (ricecdf (x, 1, 1, 'upper'), 1 - p, 1e-14)
 
 ## Test input validation
 %!error<ricecdf: function called with too few input arguments.> ricecdf ()
 %!error<ricecdf: function called with too few input arguments.> ricecdf (1)
 %!error<ricecdf: function called with too few input arguments.> ricecdf (1, 2)
-%!error<ricecdf: invalid argument for upper tail.> ricecdf (1, 2, 3, "uper")
+%!error<ricecdf: invalid argument for upper tail.> ricecdf (1, 2, 3, 'uper')
 %!error<ricecdf: invalid argument for upper tail.> ricecdf (1, 2, 3, 4)
 %!error<ricecdf: X, S, and SIGMA must be of common size or scalars.> ...
 %! ricecdf (ones (3), ones (2), ones (2))

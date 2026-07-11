@@ -27,9 +27,9 @@
 ## @code{@var{idx} = knnsearch (@var{X}, @var{Y})} finds @math{K} nearest
 ## neighbors in @var{X} for @var{Y}. It returns @var{idx} which contains indices
 ## of @math{K} nearest neighbors of each row of @var{Y}, If not specified,
-## @qcode{@var{K} = 1}.  @var{X} must be an @math{NxP} numeric matrix of input
+## @qcode{@var{K} = 1}.  @var{X} must be an @math{N*P} numeric matrix of input
 ## data, where rows correspond to observations and columns correspond to
-## features or variables.  @var{Y} is an @math{MxP} numeric matrix with query
+## features or variables.  @var{Y} is an @math{M*P} numeric matrix with query
 ## points, which must have the same numbers of column as @var{X}.
 ##
 ## @code{[@var{idx}, @var{D}] = knnsearch (@var{X}, @var{Y})} also returns the
@@ -38,104 +38,104 @@
 ##
 ## Additional parameters can be specified by @qcode{Name-Value} pair arguments.
 ##
-## @multitable @columnfractions 0.18 0.02 0.8
-## @headitem @var{Name} @tab @tab @var{Value}
+## @multitable @columnfractions 0.18 0.8
+## @headitem @var{Name} @tab @var{Value}
 ##
-## @item @qcode{"K"} @tab @tab is the number of nearest neighbors to be found
+## @item @qcode{'K'} @tab is the number of nearest neighbors to be found
 ## in the kNN search.  It must be a positive integer value and by default it is
 ## 1.
 ##
-## @item @qcode{"P"} @tab @tab is the Minkowski distance exponent and it must be
+## @item @qcode{'P'} @tab is the Minkowski distance exponent and it must be
 ## a positive scalar.  This argument is only valid when the selected distance
-## metric is @qcode{"minkowski"}.  By default it is 2.
+## metric is @qcode{'minkowski'}.  By default it is 2.
 ##
-## @item @qcode{"Scale"} @tab @tab is the scale parameter for the standardized
+## @item @qcode{'Scale'} @tab is the scale parameter for the standardized
 ## Euclidean distance and it must be a nonnegative numeric vector of equal
 ## length to the number of columns in @var{X}.  This argument is only valid when
-## the selected distance metric is @qcode{"seuclidean"}, in which case each
+## the selected distance metric is @qcode{'seuclidean'}, in which case each
 ## coordinate of @var{X} is scaled by the corresponding element of
-## @qcode{"scale"}, as is each query point in @var{Y}.  By default, the scale
+## @qcode{'scale'}, as is each query point in @var{Y}.  By default, the scale
 ## parameter is the standard deviation of each coordinate in @var{X}.
 ##
-## @item @qcode{"Cov"} @tab @tab is the covariance matrix for computing the
+## @item @qcode{'Cov'} @tab is the covariance matrix for computing the
 ## mahalanobis distance and it must be a positive definite matrix matching the
 ## the number of columns in @var{X}.  This argument is only valid when the
-## selected distance metric is @qcode{"mahalanobis"}.
+## selected distance metric is @qcode{'mahalanobis'}.
 ##
-## @item @qcode{"BucketSize"} @tab @tab is the maximum number of data points in
+## @item @qcode{'BucketSize'} @tab is the maximum number of data points in
 ## the leaf node of the Kd-tree and it must be a positive integer.  This
-## argument is only valid when the selected search method is @qcode{"kdtree"}.
+## argument is only valid when the selected search method is @qcode{'kdtree'}.
 ##
-## @item @qcode{"SortIndices"} @tab @tab is a boolean flag to sort the returned
+## @item @qcode{'SortIndices'} @tab is a boolean flag to sort the returned
 ## indices in ascending order by distance and it is @qcode{true} by default.
-## When the selected search method is @qcode{"exhaustive"} or the
-## @qcode{"IncludeTies"} flag is true, @code{knnsearch} always sorts the
+## When the selected search method is @qcode{'exhaustive'} or the
+## @qcode{'IncludeTies'} flag is true, @code{knnsearch} always sorts the
 ## returned indices.
 ##
-## @item @qcode{"Distance"} @tab @tab is the distance metric used by
+## @item @qcode{'Distance'} @tab is the distance metric used by
 ## @code{knnsearch} as specified below:
 ## @end multitable
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @item @tab @qcode{"euclidean"} @tab Euclidean distance.
-## @item @tab @qcode{"seuclidean"} @tab standardized Euclidean distance.  Each
+## @multitable @columnfractions 0.2 0.75
+## @item @qcode{'euclidean'} @tab Euclidean distance.
+## @item @qcode{'seuclidean'} @tab standardized Euclidean distance.  Each
 ## coordinate difference between the rows in @var{X} and the query matrix
 ## @var{Y} is scaled by dividing by the corresponding element of the standard
 ## deviation computed from @var{X}.  To specify a different scaling, use the
-## @qcode{"Scale"} name-value argument.
-## @item @tab @qcode{"cityblock"} @tab City block distance.
-## @item @tab @qcode{"chebychev"} @tab Chebychev distance (maximum coordinate
+## @qcode{'Scale'} name-value argument.
+## @item @qcode{'cityblock'} @tab City block distance.
+## @item @qcode{'chebychev'} @tab Chebychev distance (maximum coordinate
 ## difference).
-## @item @tab @qcode{"minkowski"} @tab Minkowski distance.  The default exponent
-## is 2.  To specify a different exponent, use the @qcode{"P"} name-value
+## @item @qcode{'minkowski'} @tab Minkowski distance.  The default exponent
+## is 2.  To specify a different exponent, use the @qcode{'P'} name-value
 ## argument.
-## @item @tab @qcode{"mahalanobis"} @tab Mahalanobis distance, computed using a
+## @item @qcode{'mahalanobis'} @tab Mahalanobis distance, computed using a
 ## positive definite covariance matrix.  To change the value of the covariance
-## matrix, use the @qcode{"Cov"} name-value argument.
-## @item @tab @qcode{"cosine"} @tab Cosine distance.
-## @item @tab @qcode{"correlation"} @tab One minus the sample linear correlation
+## matrix, use the @qcode{'Cov'} name-value argument.
+## @item @qcode{'cosine'} @tab Cosine distance.
+## @item @qcode{'correlation'} @tab One minus the sample linear correlation
 ## between observations (treated as sequences of values).
-## @item @tab @qcode{"spearman"} @tab One minus the sample Spearman's rank
+## @item @qcode{'spearman'} @tab One minus the sample Spearman's rank
 ## correlation between observations (treated as sequences of values).
-## @item @tab @qcode{"hamming"} @tab Hamming distance, which is the percentage
+## @item @qcode{'hamming'} @tab Hamming distance, which is the percentage
 ## of coordinates that differ.
-## @item @tab @qcode{"jaccard"} @tab One minus the Jaccard coefficient, which is
+## @item @qcode{'jaccard'} @tab One minus the Jaccard coefficient, which is
 ## the percentage of nonzero coordinates that differ.
-## @item @tab @var{@@distfun} @tab Custom distance function handle.  A distance
+## @item @var{@@distfun} @tab Custom distance function handle.  A distance
 ## function of the form @code{function @var{D2} = distfun (@var{XI}, @var{YI})},
-## where @var{XI} is a @math{1xP} vector containing a single observation in
-## @math{P}-dimensional space, @var{YI} is an @math{NxP} matrix containing an
+## where @var{XI} is a @math{1*P} vector containing a single observation in
+## @math{P}-dimensional space, @var{YI} is an @math{N*P} matrix containing an
 ## arbitrary number of observations in the same @math{P}-dimensional space, and
-## @var{D2} is an @math{NxP} vector of distances, where @qcode{(@var{D2}k)} is
+## @var{D2} is an @math{N*P} vector of distances, where @qcode{(@var{D2}k)} is
 ## the distance between observations @var{XI} and @qcode{(@var{YI}k,:)}.
 ## @end multitable
 ##
-## @multitable @columnfractions 0.18 0.02 0.8
-## @item @qcode{"NSMethod"} @tab @tab is the nearest neighbor search method used
+## @multitable @columnfractions 0.18 0.8
+## @item @qcode{'NSMethod'} @tab is the nearest neighbor search method used
 ## by @code{knnsearch} as specified below.
 ## @end multitable
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @item @tab @qcode{"kdtree"} @tab Creates and uses a Kd-tree to find nearest
-## neighbors.  @qcode{"kdtree"} is the default value when the number of columns
+## @multitable @columnfractions 0.2 0.75
+## @item @qcode{'kdtree'} @tab Creates and uses a Kd-tree to find nearest
+## neighbors.  @qcode{'kdtree'} is the default value when the number of columns
 ## in @var{X} is less than or equal to 10, @var{X} is not sparse, and the
-## distance metric is @qcode{"euclidean"}, @qcode{"cityblock"},
-## @qcode{"manhattan"}, @qcode{"chebychev"}, or @qcode{"minkowski"}.  Otherwise,
-## the default value is @qcode{"exhaustive"}.  This argument is only valid when
+## distance metric is @qcode{'euclidean'}, @qcode{'cityblock'},
+## @qcode{'manhattan'}, @qcode{'chebychev'}, or @qcode{'minkowski'}.  Otherwise,
+## the default value is @qcode{'exhaustive'}.  This argument is only valid when
 ## the distance metric is one of the four aforementioned metrics.
-## @item @tab @qcode{"exhaustive"} @tab Uses the exhaustive search algorithm by
+## @item @qcode{'exhaustive'} @tab Uses the exhaustive search algorithm by
 ## computing the distance values from all the points in @var{X} to each point in
 ## @var{Y}.
 ## @end multitable
 ##
-## @multitable @columnfractions 0.18 0.02 0.8
-## @item @qcode{"IncludeTies"} @tab @tab is a boolean flag to indicate if the
+## @multitable @columnfractions 0.18 0.8
+## @item @qcode{'IncludeTies'} @tab is a boolean flag to indicate if the
 ## returned values should contain the indices that have same distance as the
 ## @math{K^th} neighbor.  When @qcode{false}, @code{knnsearch} chooses the
 ## observation with the smallest index among the observations that have the same
 ## distance from a query point.  When @qcode{true}, @code{knnsearch} includes
 ## all nearest neighbors whose distances are equal to the @math{K^th} smallest
-## distance in the output arguments.  To specify @math{K}, use the @qcode{"K"}
+## distance in the output arguments.  To specify @math{K}, use the @qcode{'K'}
 ## name-value pair argument.
 ## @end multitable
 ##
@@ -146,11 +146,11 @@ function [idx, dist] = knnsearch (X, Y, varargin)
 
   ## Check input data
   if (nargin < 2)
-	  error ("knnsearch: too few input arguments.");
+    error ("knnsearch: too few input arguments.");
   endif
 
   if (size (X, 2) != size (Y, 2))
-	  error ("knnsearch: number of columns in X and Y must match.");
+    error ("knnsearch: number of columns in X and Y must match.");
   endif
 
   ## Add default values
@@ -160,7 +160,7 @@ function [idx, dist] = knnsearch (X, Y, varargin)
   C = [];                   # Covariance matrix for Mahalanobis distance
   BS = 50;                  # Maximum number of points per leaf node for Kd-tree
   SI = true;                # Sort returned indices according to distance
-  Distance = "euclidean";   # Distance metric to be used
+  Distance = 'euclidean';   # Distance metric to be used
   NSMethod = [];            # Nearest neighbor search method
   InclTies = false;         # Include ties for distance with kth neighbor
   DistParameter = [];       # Distance parameter for pdist2
@@ -169,26 +169,26 @@ function [idx, dist] = knnsearch (X, Y, varargin)
   PSC = 0;
   while (numel (varargin) > 0)
     switch (tolower (varargin{1}))
-      case "k"
+      case 'k'
         K = varargin{2};
-      case "p"
+      case 'p'
         P = varargin{2};
         PSC += 1;
-      case "scale"
+      case 'scale'
         S = varargin{2};
         PSC += 1;
-      case "cov"
+      case 'cov'
         C = varargin{2};
         PSC += 1;
-      case "bucketsize"
+      case 'bucketsize'
         BS = varargin{2};
-      case "sortindices"
+      case 'sortindices'
         SI = varargin{2};
-      case "distance"
+      case 'distance'
         Distance = varargin{2};
-      case "nsmethod"
+      case 'nsmethod'
         NSMethod = varargin{2};
-      case "includeties"
+      case 'includeties'
         InclTies = varargin{2};
       otherwise
         error ("knnsearch: invalid NAME in optional pairs of arguments.");
@@ -208,12 +208,12 @@ function [idx, dist] = knnsearch (X, Y, varargin)
   endif
   if (! isempty (S))
     if (any (S) < 0 || numel (S) != columns (X)
-                    || ! strcmpi (Distance, "seuclidean"))
+                    || ! strcmpi (Distance, 'seuclidean'))
       error ("knnsearch: invalid value in Scale or the size of Scale.");
     endif
   endif
   if (! isempty (C))
-    if (! strcmp (Distance, "mahalanobis") || ! ismatrix (C) || ! isnumeric (C))
+    if (! strcmp (Distance, 'mahalanobis') || ! ismatrix (C) || ! isnumeric (C))
       error (strcat ("knnsearch: invalid value in Cov, Cov can only", ...
                      " be given for mahalanobis distance."));
     endif
@@ -223,11 +223,11 @@ function [idx, dist] = knnsearch (X, Y, varargin)
   endif
 
   ## Select the appropriate distance parameter
-  if (strcmpi (Distance, "minkowski"))
+  if (strcmpi (Distance, 'minkowski'))
     DistParameter = P;
-  elseif (strcmpi (Distance, "seuclidean"))
+  elseif (strcmpi (Distance, 'seuclidean'))
     DistParameter = S;
-  elseif (strcmpi (Distance, "mahalanobis"))
+  elseif (strcmpi (Distance, 'mahalanobis'))
     DistParameter = C;
   endif
 
@@ -235,32 +235,32 @@ function [idx, dist] = knnsearch (X, Y, varargin)
   if (isempty (NSMethod))
     ## Set default method 'kdtree' if conditions are satisfied;
     if (! issparse (X) && (columns (X) <= 10) &&
-       (strcmpi (Distance, "euclidean") || strcmpi (Distance, "cityblock")
-     || strcmpi (Distance, "manhattan") || strcmpi (Distance, "minkowski")
-     || strcmpi (Distance, "chebychev")))
-      NSMethod = "kdtree";
+       (strcmpi (Distance, 'euclidean') || strcmpi (Distance, 'cityblock')
+     || strcmpi (Distance, 'manhattan') || strcmpi (Distance, 'minkowski')
+     || strcmpi (Distance, 'chebychev')))
+      NSMethod = 'kdtree';
     else
-      NSMethod = "exhaustive";
+      NSMethod = 'exhaustive';
     endif
   else
     ## Disallow kdtree with custom distance functions
-    if (strcmpi (NSMethod, "kdtree") && isa (Distance, "function_handle"))
+    if (strcmpi (NSMethod, 'kdtree') && isa (Distance, 'function_handle'))
       error (strcat ("knnsearch: 'kdtree' cannot be used", ...
                      " with custom distance functions."));
     endif
     ## Check if kdtree can be used
-    if (strcmpi (NSMethod, "kdtree") && ! (strcmpi (Distance, "euclidean")
-     || strcmpi (Distance, "cityblock") || strcmpi (Distance, "minkowski")
-     || strcmpi (Distance, "chebychev")))
+    if (strcmpi (NSMethod, 'kdtree') && ! (strcmpi (Distance, 'euclidean')
+     || strcmpi (Distance, 'cityblock') || strcmpi (Distance, 'minkowski')
+     || strcmpi (Distance, 'chebychev')))
       error (strcat ("knnsearch: 'kdtree' cannot be used", ...
                      " with the given distance metric."));
     endif
   endif
 
   ## Check for NSMethod
-  if (strcmpi (NSMethod, "kdtree"))
+  if (strcmpi (NSMethod, 'kdtree'))
     ## Build kdtree and search the query point
-    kdtree = __build_kdtree__ (1:size(X,1), 0, X, BS);
+    kdtree = __build_kdtree__ (1:size (X,1), 0, X, BS);
 
     ## Check for ties and sortindices
     if (! InclTies)
@@ -269,8 +269,8 @@ function [idx, dist] = knnsearch (X, Y, varargin)
       idx = zeros (rows (Y), K);
       for i = 1:rows (Y)
         [temp_idx, temp_D] = __search_kdtree__ (kdtree, Y(i,:), K, X, ...
-																								Distance, DistParameter, ...
-																								false);
+                                                Distance, DistParameter, ...
+                                                false);
         if (SI)
           [sorted_D, sort_idx] = sort (temp_D);
           idx(i,:) = temp_idx(sort_idx);
@@ -286,12 +286,12 @@ function [idx, dist] = knnsearch (X, Y, varargin)
       idx = cell (rows (Y), 1);
       for i = 1:rows (Y)
         [temp_idx, temp_D] = __search_kdtree__ (kdtree, Y(i,:), K, ...
-																								X, Distance, DistParameter, ...
-																								false);
+                                                X, Distance, DistParameter, ...
+                                                false);
         r = temp_D(end) + 1e-10; # Add small epsilon to capture ties
         [idx{i}, dist{i}] = __search_kdtree__ (kdtree, Y(i,:), Inf, X, ...
-																							 Distance, DistParameter, ...
-																							 true, r);
+                                               Distance, DistParameter, ...
+                                               true, r);
         if (SI)
           [sorted_D, sort_idx] = sort (dist{i});
           dist{i} = sorted_D;
@@ -313,7 +313,7 @@ function [idx, dist] = knnsearch (X, Y, varargin)
         for i = 1:rows (Y)
           D = pdist2 (X, Y(i,:), Distance, DistParameter);
           [dt, id] = sort (D);
-          kth_dist = dt (K);
+          kth_dist = dt(K);
           tied_idx = (dt <= kth_dist);
           dist {i} = dt(tied_idx, :)';
           idx {i} = id(tied_idx, :)';
@@ -358,20 +358,20 @@ endfunction
 
 ## Search KD-tree
 function [indices, distances] = __search_kdtree__ (node, query, k, X, dist, ...
-																									 distparam, is_range, r)
+                                                   distparam, is_range, r)
   if (nargin < 8)
     r = Inf;
   endif
-  if (strcmpi (dist, "minkowski"))
+  if (strcmpi (dist, 'minkowski'))
     if (! (isscalar (distparam) && isnumeric (distparam) ...
                                 && distparam > 0 && isfinite (distparam)))
-      error (strcat("knnsearch.__search_kdtree__:", ...
+      error (strcat ("knnsearch.__search_kdtree__:", ...
                     " distparam must be a positive finite", ...
                     " scalar for minkowski."));
     endif
   else
     if (! isempty (distparam))
-      error (strcat("knnsearch.__search_kdtree__:", ...
+      error (strcat ("knnsearch.__search_kdtree__:", ...
                     " distparam must be empty for non-minkowski metrics."));
     endif
   endif
@@ -386,7 +386,7 @@ function [indices, distances] = __search_kdtree__ (node, query, k, X, dist, ...
 
     if (isfield (node, 'indices'))
       leaf_indices = node.indices;
-      if (strcmpi (dist, "minkowski"))
+      if (strcmpi (dist, 'minkowski'))
         dists = pdist2 (X(leaf_indices,:), query, dist, distparam);
       else
         dists = pdist2 (X(leaf_indices,:), query, dist);
@@ -442,28 +442,28 @@ endfunction
 %! point = [5, 1.45];
 %!
 %! ## calculate 10 nearest-neighbours by minkowski distance
-%! [id, d] = knnsearch (X, point, "K", 10);
+%! [id, d] = knnsearch (X, point, 'K', 10);
 %!
 %! ## calculate 10 nearest-neighbours by minkowski distance
-%! [idm, dm] = knnsearch (X, point, "K", 10, "distance", "minkowski", "p", 5);
+%! [idm, dm] = knnsearch (X, point, 'K', 10, 'distance', 'minkowski', 'p', 5);
 %!
 %! ## calculate 10 nearest-neighbours by chebychev distance
-%! [idc, dc] = knnsearch (X, point, "K", 10, "distance", "chebychev");
+%! [idc, dc] = knnsearch (X, point, 'K', 10, 'distance', 'chebychev');
 %!
 %! ## plotting the results
-%! gscatter (X(:,1), X(:,2), species, [.75 .75 0; 0 .75 .75; .75 0 .75], ".", 20);
-%! title ("Fisher's Iris Data - Nearest Neighbors with different types of distance metrics");
-%! xlabel("Petal length (cm)");
-%! ylabel("Petal width (cm)");
+%! gscatter (X(:,1), X(:,2), species, [.75 .75 0; 0 .75 .75; .75 0 .75], '.', 20);
+%! title ('Fisher''s Iris Data - Nearest Neighbors with different types of distance metrics');
+%! xlabel ('Petal length (cm)');
+%! ylabel ('Petal width (cm)');
 %!
-%! line (point(1), point(2), "marker", "X", "color", "k", ...
-%!       "linewidth", 2, "displayname", "query point")
-%! line (X(id,1), X(id,2), "color", [0.5 0.5 0.5], "marker", "o", ...
-%!       "linestyle", "none", "markersize", 10, "displayname", "euclidean")
-%! line (X(idm,1), X(idm,2), "color", [0.5 0.5 0.5], "marker", "d", ...
-%!       "linestyle", "none", "markersize", 10, "displayname", "Minkowski")
-%! line (X(idc,1), X(idc,2), "color", [0.5 0.5 0.5], "marker", "p", ...
-%!       "linestyle", "none", "markersize", 10, "displayname", "chebychev")
+%! line (point(1), point(2), 'marker', 'X', 'color', 'k', ...
+%!       'linewidth', 2, 'displayname', 'query point')
+%! line (X(id,1), X(id,2), 'color', [0.5 0.5 0.5], 'marker', 'o', ...
+%!       'linestyle', 'none', 'markersize', 10, 'displayname', 'euclidean')
+%! line (X(idm,1), X(idm,2), 'color', [0.5 0.5 0.5], 'marker', 'd', ...
+%!       'linestyle', 'none', 'markersize', 10, 'displayname', 'Minkowski')
+%! line (X(idc,1), X(idc,2), 'color', [0.5 0.5 0.5], 'marker', 'p', ...
+%!       'linestyle', 'none', 'markersize', 10, 'displayname', 'chebychev')
 %! xlim ([4.5 5.5]);
 %! ylim ([1 2]);
 %! axis square;
@@ -472,22 +472,22 @@ endfunction
 %! ## knnsearch on iris dataset using kdtree method
 %! load fisheriris
 %! X = meas(:,3:4);
-%! gscatter (X(:,1), X(:,2), species, [.75 .75 0; 0 .75 .75; .75 0 .75], ".", 20);
-%! title ("Fisher's iris dataset : Nearest Neighbors with kdtree search");
+%! gscatter (X(:,1), X(:,2), species, [.75 .75 0; 0 .75 .75; .75 0 .75], '.', 20);
+%! title ('Fisher''s iris dataset : Nearest Neighbors with kdtree search');
 %!
 %! ## new point to be predicted
 %! point = [5 1.45];
 %!
-%! line (point(1), point(2), "marker", "X", "color", "k", ...
-%!       "linewidth", 2, "displayname", "query point")
+%! line (point(1), point(2), 'marker', 'X', 'color', 'k', ...
+%!       'linewidth', 2, 'displayname', 'query point')
 %!
 %! ## knnsearch using kdtree method
-%! [idx, d] = knnsearch (X, point, "K", 10, "NSMethod", "kdtree");
+%! [idx, d] = knnsearch (X, point, 'K', 10, 'NSMethod', 'kdtree');
 %!
 %! ## plotting predicted neighbours
-%! line (X(idx,1), X(idx,2), "color", [0.5 0.5 0.5], "marker", "o", ...
-%!       "linestyle", "none", "markersize", 10, ...
-%!       "displayname", "nearest neighbour")
+%! line (X(idx,1), X(idx,2), 'color', [0.5 0.5 0.5], 'marker', 'o', ...
+%!       'linestyle', 'none', 'markersize', 10, ...
+%!       'displayname', 'nearest neighbour')
 %! xlim ([4 6])
 %! ylim ([1 3])
 %! axis square
@@ -497,7 +497,7 @@ endfunction
 %! ctr = point - d(end);
 %! diameter = 2 * d(end);
 %! ##  Draw a circle around the 10 nearest neighbors.
-%! h = rectangle ("position", [ctr, diameter, diameter], "curvature", [1 1]);
+%! h = rectangle ('position', [ctr, diameter, diameter], 'curvature', [1 1]);
 %!
 %! ## here only 8 neighbours are plotted instead of 10 since the dataset
 %! ## contains duplicate values
@@ -508,177 +508,177 @@ endfunction
 %! X = [1, 2, 3, 4; 2, 3, 4, 5; 3, 4, 5, 6];
 %! Y = [1, 2, 2, 3; 2, 3, 3, 4];
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "euclidean");
-%! assert (idx, [1; 1]);
-%! assert (D, ones (2, 1) * sqrt (2));
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'euclidean');
+%! assert_equal (idx, [1; 1]);
+%! assert_equal (D, ones (2, 1) * sqrt (2));
 %!test
-%! eucldist = @(v,m) sqrt(sumsq(repmat(v,rows(m),1)-m,2));
-%! [idx, D] = knnsearch (X, Y, "Distance", eucldist);
-%! assert (idx, [1; 1]);
-%! assert (D, ones (2, 1) * sqrt (2));
+%! eucldist = @(v,m) sqrt (sumsq (repmat (v,rows (m),1)-m,2));
+%! [idx, D] = knnsearch (X, Y, 'Distance', eucldist);
+%! assert_equal (idx, [1; 1]);
+%! assert_equal (D, ones (2, 1) * sqrt (2));
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "euclidean", "includeties", true);
-%! assert (iscell (idx), true);
-%! assert (iscell (D), true)
-%! assert (idx {1}, [1]);
-%! assert (idx {2}', [1, 2]);
-%! assert (D{1}, ones (1, 1) * sqrt (2));
-%! assert (D{2}', ones (1, 2) * sqrt (2));
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'euclidean', 'includeties', true);
+%! assert_equal (iscell (idx), true);
+%! assert_equal (iscell (D), true)
+%! assert_equal (idx {1}, [1]);
+%! assert_equal (idx {2}', [1, 2]);
+%! assert_equal (D{1}, ones (1, 1) * sqrt (2));
+%! assert_equal (D{2}', ones (1, 2) * sqrt (2));
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "euclidean", "k", 2);
-%! assert (idx, [1, 2; 1, 2]);
-%! assert (D, [sqrt(2), 3.162277660168380; sqrt(2), sqrt(2)], 1e-14);
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'euclidean', 'k', 2);
+%! assert_equal (idx, [1, 2; 1, 2]);
+%! assert_equal (D, [sqrt(2), 3.162277660168380; sqrt(2), sqrt(2)], 1e-14);
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "seuclidean");
-%! assert (idx, [1; 1]);
-%! assert (D, ones (2, 1) * sqrt (2));
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'seuclidean');
+%! assert_equal (idx, [1; 1]);
+%! assert_equal (D, ones (2, 1) * sqrt (2));
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "seuclidean", "k", 2);
-%! assert (idx, [1, 2; 1, 2]);
-%! assert (D, [sqrt(2), 3.162277660168380; sqrt(2), sqrt(2)], 1e-14);
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'seuclidean', 'k', 2);
+%! assert_equal (idx, [1, 2; 1, 2]);
+%! assert_equal (D, [sqrt(2), 3.162277660168380; sqrt(2), sqrt(2)], 1e-14);
 %!test
 %! xx = [1, 2; 1, 3; 2, 4; 3, 6];
 %! yy = [2, 4; 2, 6];
-%! [idx, D] = knnsearch (xx, yy, "Distance", "mahalanobis");
-%! assert (idx, [3; 2]);
-%! assert (D, [0; 3.162277660168377], 1e-14);
+%! [idx, D] = knnsearch (xx, yy, 'Distance', 'mahalanobis');
+%! assert_equal (idx, [3; 2]);
+%! assert_equal (D, [0; 3.162277660168377], 1e-14);
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "minkowski");
-%! assert (idx, [1; 1]);
-%! assert (D, ones (2, 1) * sqrt (2));
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'minkowski');
+%! assert_equal (idx, [1; 1]);
+%! assert_equal (D, ones (2, 1) * sqrt (2));
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "minkowski", "p", 3);
-%! assert (idx, [1; 1]);
-%! assert (D, ones (2, 1) * 1.259921049894873, 1e-14);
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'minkowski', 'p', 3);
+%! assert_equal (idx, [1; 1]);
+%! assert_equal (D, ones (2, 1) * 1.259921049894873, 1e-14);
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "cityblock");
-%! assert (idx, [1; 1]);
-%! assert (D, [2; 2]);
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'cityblock');
+%! assert_equal (idx, [1; 1]);
+%! assert_equal (D, [2; 2]);
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "chebychev");
-%! assert (idx, [1; 1]);
-%! assert (D, [1; 1]);
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'chebychev');
+%! assert_equal (idx, [1; 1]);
+%! assert_equal (D, [1; 1]);
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "cosine");
-%! assert (idx, [2; 3]);
-%! assert (D, [0.005674536395645; 0.002911214328620], 1e-14);
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'cosine');
+%! assert_equal (idx, [2; 3]);
+%! assert_equal (D, [0.005674536395645; 0.002911214328620], 1e-14);
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "correlation");
-%! assert (idx, [1; 1]);
-%! assert (D, ones (2, 1) * 0.051316701949486, 1e-14);
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'correlation');
+%! assert_equal (idx, [1; 1]);
+%! assert_equal (D, ones (2, 1) * 0.051316701949486, 1e-14);
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "spearman");
-%! assert (idx, [1; 1]);
-%! assert (D, ones (2, 1) * 0.051316701949486, 1e-14);
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'spearman');
+%! assert_equal (idx, [1; 1]);
+%! assert_equal (D, ones (2, 1) * 0.051316701949486, 1e-14);
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "hamming");
-%! assert (idx, [1; 1]);
-%! assert (D, [0.5; 0.5]);
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'hamming');
+%! assert_equal (idx, [1; 1]);
+%! assert_equal (D, [0.5; 0.5]);
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "jaccard");
-%! assert (idx, [1; 1]);
-%! assert (D, [0.5; 0.5]);
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'jaccard');
+%! assert_equal (idx, [1; 1]);
+%! assert_equal (D, [0.5; 0.5]);
 %!test
-%! [idx, D] = knnsearch (X, Y, "Distance", "jaccard", "k", 2);
-%! assert (idx, [1, 2; 1, 2]);
-%! assert (D, [0.5, 1; 0.5, 0.5]);
-%!test
-%! a = [1, 5; 1, 2; 2, 2; 1.5, 1.5; 5, 1; 2 -1.34; 1, -3; 4, -4; -3, 1; 8, 9];
-%! b = [1, 1];
-%! [idx, D] = knnsearch (a, b, "K", 5, "NSMethod", "kdtree", "includeties", true);
-%! assert (iscell (idx), true);
-%! assert (iscell (D), true)
-%! assert (cell2mat (idx)', [4, 2, 3, 6, 1, 5, 7, 9]);
-%! assert (cell2mat (D)', [0.7071, 1.0000, 1.4142, 2.5447, 4.0000, 4.0000, 4.0000, 4.0000], 1e-4);
+%! [idx, D] = knnsearch (X, Y, 'Distance', 'jaccard', 'k', 2);
+%! assert_equal (idx, [1, 2; 1, 2]);
+%! assert_equal (D, [0.5, 1; 0.5, 0.5]);
 %!test
 %! a = [1, 5; 1, 2; 2, 2; 1.5, 1.5; 5, 1; 2 -1.34; 1, -3; 4, -4; -3, 1; 8, 9];
 %! b = [1, 1];
-%! [idx, D] = knnsearch (a, b, "K", 5, "NSMethod", "exhaustive", "includeties", true);
-%! assert (iscell (idx), true);
-%! assert (iscell (D), true)
-%! assert (cell2mat (idx), [4, 2, 3, 6, 1, 5, 7, 9]);
-%! assert (cell2mat (D), [0.7071, 1.0000, 1.4142, 2.5447, 4.0000, 4.0000, 4.0000, 4.0000], 1e-4);
+%! [idx, D] = knnsearch (a, b, 'K', 5, 'NSMethod', 'kdtree', 'includeties', true);
+%! assert_equal (iscell (idx), true);
+%! assert_equal (iscell (D), true)
+%! assert_equal (cell2mat (idx)', [4, 2, 3, 6, 1, 5, 7, 9]);
+%! assert_equal (cell2mat (D)', [0.7071, 1.0000, 1.4142, 2.5447, 4.0000, 4.0000, 4.0000, 4.0000], 1e-4);
 %!test
 %! a = [1, 5; 1, 2; 2, 2; 1.5, 1.5; 5, 1; 2 -1.34; 1, -3; 4, -4; -3, 1; 8, 9];
 %! b = [1, 1];
-%! [idx, D] = knnsearch (a, b, "K", 5, "NSMethod", "kdtree", "includeties", false);
-%! assert (iscell (idx), false);
-%! assert (iscell (D), false)
-%! assert (idx, [4, 2, 3, 6, 1]);
-%! assert (D, [0.7071, 1.0000, 1.4142, 2.5447, 4.0000], 1e-4);
+%! [idx, D] = knnsearch (a, b, 'K', 5, 'NSMethod', 'exhaustive', 'includeties', true);
+%! assert_equal (iscell (idx), true);
+%! assert_equal (iscell (D), true)
+%! assert_equal (cell2mat (idx), [4, 2, 3, 6, 1, 5, 7, 9]);
+%! assert_equal (cell2mat (D), [0.7071, 1.0000, 1.4142, 2.5447, 4.0000, 4.0000, 4.0000, 4.0000], 1e-4);
 %!test
 %! a = [1, 5; 1, 2; 2, 2; 1.5, 1.5; 5, 1; 2 -1.34; 1, -3; 4, -4; -3, 1; 8, 9];
 %! b = [1, 1];
-%! [idx, D] = knnsearch (a, b, "K", 5, "NSMethod", "exhaustive", "includeties", false);
-%! assert (iscell (idx), false);
-%! assert (iscell (D), false)
-%! assert (idx, [4, 2, 3, 6, 1]);
-%! assert (D, [0.7071, 1.0000, 1.4142, 2.5447, 4.0000], 1e-4);
+%! [idx, D] = knnsearch (a, b, 'K', 5, 'NSMethod', 'kdtree', 'includeties', false);
+%! assert_equal (iscell (idx), false);
+%! assert_equal (iscell (D), false)
+%! assert_equal (idx, [4, 2, 3, 6, 1]);
+%! assert_equal (D, [0.7071, 1.0000, 1.4142, 2.5447, 4.0000], 1e-4);
+%!test
+%! a = [1, 5; 1, 2; 2, 2; 1.5, 1.5; 5, 1; 2 -1.34; 1, -3; 4, -4; -3, 1; 8, 9];
+%! b = [1, 1];
+%! [idx, D] = knnsearch (a, b, 'K', 5, 'NSMethod', 'exhaustive', 'includeties', false);
+%! assert_equal (iscell (idx), false);
+%! assert_equal (iscell (D), false)
+%! assert_equal (idx, [4, 2, 3, 6, 1]);
+%! assert_equal (D, [0.7071, 1.0000, 1.4142, 2.5447, 4.0000], 1e-4);
 %!test
 %! load fisheriris
 %! a = meas;
-%! b = min(meas);
-%! [idx, D] = knnsearch (a, b, "K", 5, "NSMethod", "kdtree");
-%! assert (idx, [42, 9, 14, 39, 13]);
-%! assert (D, [0.5099, 0.9950, 1.0050, 1.0536, 1.1874], 1e-4);
+%! b = min (meas);
+%! [idx, D] = knnsearch (a, b, 'K', 5, 'NSMethod', 'kdtree');
+%! assert_equal (idx, [42, 9, 14, 39, 13]);
+%! assert_equal (D, [0.5099, 0.9950, 1.0050, 1.0536, 1.1874], 1e-4);
 %!test
 %! load fisheriris
 %! a = meas;
-%! b = mean(meas);
-%! [idx, D] = knnsearch (a, b, "K", 5, "NSMethod", "kdtree");
-%! assert (idx, [65, 83, 89, 72, 100]);
-%! assert (D, [0.3451, 0.3869, 0.4354, 0.4481, 0.4625], 1e-4);
+%! b = mean (meas);
+%! [idx, D] = knnsearch (a, b, 'K', 5, 'NSMethod', 'kdtree');
+%! assert_equal (idx, [65, 83, 89, 72, 100]);
+%! assert_equal (D, [0.3451, 0.3869, 0.4354, 0.4481, 0.4625], 1e-4);
 %!test
 %! load fisheriris
 %! a = meas;
-%! b = max(meas);
-%! [idx, D] = knnsearch (a, b, "K", 5, "NSMethod", "kdtree");
-%! assert (idx, [118, 132, 110, 106, 136]);
-%! assert (D, [0.7280, 0.9274, 1.3304, 1.5166, 1.6371], 1e-4);
+%! b = max (meas);
+%! [idx, D] = knnsearch (a, b, 'K', 5, 'NSMethod', 'kdtree');
+%! assert_equal (idx, [118, 132, 110, 106, 136]);
+%! assert_equal (D, [0.7280, 0.9274, 1.3304, 1.5166, 1.6371], 1e-4);
 %!
 %!test
 %! load fisheriris
 %! a = meas;
-%! b = max(meas);
-%! [idx, D] = knnsearch (a, b, "K", 5, "includeties", true);
-%! assert (iscell (idx), true);
-%! assert (iscell (D), true);
-%! assert (cell2mat (idx)', [118, 132, 110, 106, 136]);
-%! assert (cell2mat (D)', [0.7280, 0.9274, 1.3304, 1.5166, 1.6371], 1e-4);
+%! b = max (meas);
+%! [idx, D] = knnsearch (a, b, 'K', 5, 'includeties', true);
+%! assert_equal (iscell (idx), true);
+%! assert_equal (iscell (D), true);
+%! assert_equal (cell2mat (idx)', [118, 132, 110, 106, 136]);
+%! assert_equal (cell2mat (D)', [0.7280, 0.9274, 1.3304, 1.5166, 1.6371], 1e-4);
 
 ## Test input validation
 %!error<knnsearch: too few input arguments.> knnsearch (1)
 %!error<knnsearch: number of columns in X and Y must match.> ...
 %! knnsearch (ones (4, 5), ones (4))
 %!error<knnsearch: invalid NAME in optional pairs of arguments.> ...
-%! knnsearch (ones (4, 2), ones (3, 2), "Distance", "euclidean", "some", "some")
+%! knnsearch (ones (4, 2), ones (3, 2), 'Distance', 'euclidean', 'some', 'some')
 %!error<knnsearch: only a single distance parameter can be defined.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "scale", ones (1, 5), "P", 3)
+%! knnsearch (ones (4, 5), ones (1, 5), 'scale', ones (1, 5), 'P', 3)
 %!error<knnsearch: invalid value of K.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "K", 0)
+%! knnsearch (ones (4, 5), ones (1, 5), 'K', 0)
 %!error<knnsearch: invalid value of Minkowski Exponent.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "P", -2)
+%! knnsearch (ones (4, 5), ones (1, 5), 'P', -2)
 %!error<knnsearch: invalid value in Scale or the size of Scale.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "scale", ones(4,5), "distance", "euclidean")
+%! knnsearch (ones (4, 5), ones (1, 5), 'scale', ones (4,5), 'distance', 'euclidean')
 %!error<knnsearch: invalid value in Cov, Cov can only be given for mahalanobis distance.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "cov", ["some" "some"])
+%! knnsearch (ones (4, 5), ones (1, 5), 'cov', ['some' 'some'])
 %!error<knnsearch: invalid value in Cov, Cov can only be given for mahalanobis distance.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "cov", ones(4,5), "distance", "euclidean")
+%! knnsearch (ones (4, 5), ones (1, 5), 'cov', ones (4,5), 'distance', 'euclidean')
 %!error<knnsearch: invalid value of bucketsize.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "bucketsize", -1)
+%! knnsearch (ones (4, 5), ones (1, 5), 'bucketsize', -1)
 %!error<knnsearch: invalid value of bucketsize.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "bucketsize", 2.5)
+%! knnsearch (ones (4, 5), ones (1, 5), 'bucketsize', 2.5)
 %!error<knnsearch: 'kdtree' cannot be used with the given distance metric.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "NSmethod", "kdtree", "distance", "cosine")
+%! knnsearch (ones (4, 5), ones (1, 5), 'NSmethod', 'kdtree', 'distance', 'cosine')
 %!error<knnsearch: 'kdtree' cannot be used with the given distance metric.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "NSmethod", "kdtree", "distance", "mahalanobis")
+%! knnsearch (ones (4, 5), ones (1, 5), 'NSmethod', 'kdtree', 'distance', 'mahalanobis')
 %!error<knnsearch: 'kdtree' cannot be used with the given distance metric.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "NSmethod", "kdtree", "distance", "correlation")
+%! knnsearch (ones (4, 5), ones (1, 5), 'NSmethod', 'kdtree', 'distance', 'correlation')
 %!error<knnsearch: 'kdtree' cannot be used with the given distance metric.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "NSmethod", "kdtree", "distance", "seuclidean")
+%! knnsearch (ones (4, 5), ones (1, 5), 'NSmethod', 'kdtree', 'distance', 'seuclidean')
 %!error<knnsearch: 'kdtree' cannot be used with the given distance metric.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "NSmethod", "kdtree", "distance", "spearman")
+%! knnsearch (ones (4, 5), ones (1, 5), 'NSmethod', 'kdtree', 'distance', 'spearman')
 %!error<knnsearch: 'kdtree' cannot be used with the given distance metric.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "NSmethod", "kdtree", "distance", "hamming")
+%! knnsearch (ones (4, 5), ones (1, 5), 'NSmethod', 'kdtree', 'distance', 'hamming')
 %!error<knnsearch: 'kdtree' cannot be used with the given distance metric.> ...
-%! knnsearch (ones (4, 5), ones (1, 5), "NSmethod", "kdtree", "distance", "jaccard")
+%! knnsearch (ones (4, 5), ones (1, 5), 'NSmethod', 'kdtree', 'distance', 'jaccard')

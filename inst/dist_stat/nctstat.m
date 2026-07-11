@@ -60,8 +60,8 @@ function [m, v] = nctstat (df, mu)
   endif
 
   ## Initialize mean and variance
-  if (isa (df, "single") || isa (mu, "single"))
-    m = NaN (size (df), "single");
+  if (isa (df, 'single') || isa (mu, 'single'))
+    m = NaN (size (df), 'single');
     v = m;
   else
     m = NaN (size (df));
@@ -87,7 +87,7 @@ endfunction
 %!error<nctstat: function called with too few input arguments.> nctstat ()
 %!error<nctstat: function called with too few input arguments.> nctstat (1)
 %!error<nctstat: DF and MU must be numeric.> nctstat ({}, 2)
-%!error<nctstat: DF and MU must be numeric.> nctstat (1, "")
+%!error<nctstat: DF and MU must be numeric.> nctstat (1, '')
 %!error<nctstat: DF and MU must not be complex.> nctstat (i, 2)
 %!error<nctstat: DF and MU must not be complex.> nctstat (1, i)
 %!error<nctstat: DF and MU must be of common size or scalars.> ...
@@ -99,11 +99,11 @@ endfunction
 %!shared df, mu
 %! df = [2, 0, -1, 1, 4];
 %! mu = [1, NaN, 3, -1, 2];
-%!assert (nctstat (df, mu), [1.7725, NaN, NaN, NaN, 2.5066], 1e-4);
-%!assert (nctstat ([df(1:2), df(4:5)], 1), [1.7725, NaN, NaN, 1.2533], 1e-4);
-%!assert (nctstat ([df(1:2), df(4:5)], 3), [5.3174, NaN, NaN, 3.7599], 1e-4);
-%!assert (nctstat ([df(1:2), df(4:5)], 2), [3.5449, NaN, NaN, 2.5066], 1e-4);
-%!assert (nctstat (2, [mu(1), mu(3:5)]), [1.7725,5.3174,-1.7725,3.5449], 1e-4);
-%!assert (nctstat (0, [mu(1), mu(3:5)]), [NaN, NaN, NaN, NaN]);
-%!assert (nctstat (1, [mu(1), mu(3:5)]), [NaN, NaN, NaN, NaN]);
-%!assert (nctstat (4, [mu(1), mu(3:5)]), [1.2533,3.7599,-1.2533,2.5066], 1e-4);
+%!assert_equal (nctstat (df, mu), [1.7725, NaN, NaN, NaN, 2.5066], 1e-4);
+%!assert_equal (nctstat ([df(1:2), df(4:5)], 1), [1.7725, NaN, NaN, 1.2533], 1e-4);
+%!assert_equal (nctstat ([df(1:2), df(4:5)], 3), [5.3174, NaN, NaN, 3.7599], 1e-4);
+%!assert_equal (nctstat ([df(1:2), df(4:5)], 2), [3.5449, NaN, NaN, 2.5066], 1e-4);
+%!assert_equal (nctstat (2, [mu(1), mu(3:5)]), [1.7725,5.3174,-1.7725,3.5449], 1e-4);
+%!assert_equal (nctstat (0, [mu(1), mu(3:5)]), [NaN, NaN, NaN, NaN]);
+%!assert_equal (nctstat (1, [mu(1), mu(3:5)]), [NaN, NaN, NaN, NaN]);
+%!assert_equal (nctstat (4, [mu(1), mu(3:5)]), [1.2533,3.7599,-1.2533,2.5066], 1e-4);

@@ -62,17 +62,17 @@
 ## which controls specific parameters for the numerical integration used to
 ## compute @var{p}. The required fields are:
 ##
-## @multitable @columnfractions 0.2 0.05 0.75
-## @item @qcode{"TolFun"} @tab @tab Maximum absolute error tolerance.  Default
+## @multitable @columnfractions 0.2 0.75
+## @item @qcode{'TolFun'} @tab Maximum absolute error tolerance.  Default
 ## is 1e-8 for D < 4, or 1e-4 for D >= 4.  Note that for bivariate normal cdf,
 ## the Octave implementation has a precision of more than 1e-10.
 ##
-## @item @qcode{"MaxFunEvals"} @tab @tab Maximum number of integrand
+## @item @qcode{'MaxFunEvals'} @tab Maximum number of integrand
 ## evaluations.  Default is 1e7 for D > 4.
 ##
-## @item @qcode{"Display"} @tab @tab Display options.  Choices are @qcode{"off"}
-## (default), @qcode{"iter"}, which shows the probability and estimated error at
-## each repetition, and @qcode{"final"}, which shows the final probability and
+## @item @qcode{'Display'} @tab Display options.  Choices are @qcode{'off'}
+## (default), @qcode{'iter'}, which shows the probability and estimated error at
+## each repetition, and @qcode{'final'}, which shows the final probability and
 ## related error after the integrand has converged successfully.
 ## @end multitable
 ##
@@ -86,7 +86,7 @@ function [p, err] = mvncdf (varargin)
 
   ## Check for 'options' structure and parse parameters or add defaults
   if (isstruct (varargin{end}))
-    if (isfield (varargin{end}, "TolFun"))
+    if (isfield (varargin{end}, 'TolFun'))
       TolFun = varargin{end}.TolFun;
     else
       error ("mvncdf: options structure missing 'TolFun' field.");
@@ -96,7 +96,7 @@ function [p, err] = mvncdf (varargin)
     elseif (isempty (TolFun) && size (varargin{1}, 2) < 26)
       TolFun = 1e-4;
     endif
-    if (isfield (varargin{end}, "MaxFunEvals"))
+    if (isfield (varargin{end}, 'MaxFunEvals'))
       MaxFunEvals = varargin{end}.MaxFunEvals;
     else
       error ("mvncdf: options structure missing 'MaxFunEvals' field.");
@@ -104,12 +104,12 @@ function [p, err] = mvncdf (varargin)
     if (isempty (MaxFunEvals))
       MaxFunEvals = 1e7;
     endif
-    if (isfield (varargin{end}, "Display"))
+    if (isfield (varargin{end}, 'Display'))
       Display = varargin{end}.Display;
     else
       error ("mvncdf: options structure missing 'Display' field.");
     endif
-    DispOptions = {"off", "final", "iter"};
+    DispOptions = {'off', 'final', 'iter'};
     if (sum (any (strcmpi (Display, DispOptions))) == 0)
       error ("mvncdf: 'Display' field in 'options' has invalid value.");
     endif
@@ -121,7 +121,7 @@ function [p, err] = mvncdf (varargin)
       TolFun = 1e-4;
     endif
     MaxFunEvals = 1e7;
-    Display = "off";
+    Display = 'off';
     rem_nargin = nargin;
   endif
 
@@ -137,7 +137,7 @@ function [p, err] = mvncdf (varargin)
 
     ## Create x_lo according to data type of x_lo
     x_lo = - Inf (size (x_up));
-    if isa (x_up, "single")
+    if isa (x_up, 'single')
       x_lo = single (x_lo);
     endif
 
@@ -174,9 +174,9 @@ function [p, err] = mvncdf (varargin)
   endif
 
   ## Check if data is single or double class
-  is_type = "double";
-  if (isa (x_lo, "single"))
-    is_type = "single";
+  is_type = 'double';
+  if (isa (x_lo, 'single'))
+    is_type = 'single';
   endif
 
   ## Get size of data
@@ -298,7 +298,7 @@ function [p, err] = mvncdf (varargin)
       ## For bvncdf
       x_up(equalLimits) = -Inf;
       x_lo(equalLimits) = -Inf;
-      p = zeros(n_x, 1, is_type);
+      p = zeros (n_x, 1, is_type);
       for i = 0:d_x
         k = nchoosek (1:d_x, i);
         for j = 1:size (k, 1)
@@ -341,16 +341,16 @@ endfunction
 function p = tvncdf (x, rho, tol)
 
   ## Get size of data
-  n = size(x,1);
+  n = size (x,1);
 
   ## Check if data is single or double class
-  is_type = "double";
-  if (isa (x, "single") || isa (rho, "single"))
-    is_type = "single";
+  is_type = 'double';
+  if (isa (x, 'single') || isa (rho, 'single'))
+    is_type = 'single';
   endif
 
   ## Find a permutation that makes rho_32 == max(rho)
-  [dum,imax] = max(abs(rho)); %#ok<ASGLU>
+  [dum,imax] = max (abs (rho)); %#ok<ASGLU>
   if imax == 1 % swap 1 and 3
     rho_21 = rho(3); rho_31 = rho(2); rho_32 = rho(1);
     x = x(:,[3 2 1]);
@@ -359,37 +359,37 @@ function p = tvncdf (x, rho, tol)
     x = x(:,[2 1 3]);
   else % imax == 3
     rho_21 = rho(1); rho_31 = rho(2); rho_32 = rho(3);
-  end
+  endif
 
   phi = 0.5 * erfc (- x(:,1) / sqrt (2));
   p1 = phi .* bvncdf (x(:,2:3), [], rho_32);
 
-  if abs(rho_21) > 0
+  if abs (rho_21) > 0
     loLimit = 0;
-    hiLimit = asin(rho_21);
+    hiLimit = asin (rho_21);
     rho_j1 = rho_21;
     rho_k1 = rho_31;
     p2 = zeros (size (p1), is_type);
     for i = 1:n
       b1 = x(i,1); bj = x(i,2); bk = x(i,3);
-      if isfinite(b1) && isfinite(bj) && ~isnan(bk)
-        p2(i) = quadgk(@tvnIntegrand,loLimit,hiLimit,'AbsTol',tol/3,'RelTol',0);
+      if isfinite (b1) && isfinite (bj) && ! isnan (bk)
+        p2(i) = quadgk (@tvnIntegrand,loLimit,hiLimit,'AbsTol',tol/3,'RelTol',0);
       endif
     endfor
   else
     p2 = zeros (size (p1), is_type);
   endif
 
-  if abs(rho_31) > 0
+  if abs (rho_31) > 0
     loLimit = 0;
-    hiLimit = asin(rho_31);
+    hiLimit = asin (rho_31);
     rho_j1 = rho_31;
     rho_k1 = rho_21;
     p3 = zeros (size (p1), is_type);
     for i = 1:n
       b1 = x(i,1); bj = x(i,3); bk = x(i,2);
-      if isfinite(b1) && isfinite(bj) && ~isnan(bk)
-        p3(i) = quadgk(@tvnIntegrand,loLimit,hiLimit,'AbsTol',tol/3,'RelTol',0);
+      if isfinite (b1) && isfinite (bj) && ! isnan (bk)
+        p3(i) = quadgk (@tvnIntegrand,loLimit,hiLimit,'AbsTol',tol/3,'RelTol',0);
       endif
     endfor
   else
@@ -398,7 +398,7 @@ function p = tvncdf (x, rho, tol)
 
   p = cast (p1 + (p2 + p3) ./ (2 .* pi), is_type);
 
-  function integrand = tvnIntegrand(theta)
+  function integrand = tvnIntegrand (theta)
     # Integrand is exp( -(b1.^2 + bj.^2 - 2*b1*bj*sin(theta))/(2*cos(theta).^2))
     sintheta = sin (theta);
     cossqtheta = cos (theta) .^ 2;
@@ -422,9 +422,9 @@ endfunction
 %! p = mvncdf (X, mu, Sigma);
 %! Z = reshape (p, 25, 25);
 %! surf (X1, X2, Z);
-%! title ("Bivariate Normal Distribution");
-%! ylabel "X1"
-%! xlabel "X2"
+%! title ('Bivariate Normal Distribution');
+%! ylabel 'X1'
+%! xlabel 'X2'
 
 %!demo
 %! mu = [0, 0];
@@ -437,16 +437,16 @@ endfunction
 %! p = mvnpdf (X, mu, Sigma);
 %! p = reshape (p, length (x2), length (x1));
 %! contour (x1, x2, p, [0.0001, 0.001, 0.01, 0.05, 0.15, 0.25, 0.35]);
-%! xlabel ("x");
-%! ylabel ("p");
-%! title ("Probability over Rectangular Region");
-%! line ([0, 0, 1, 1, 0], [1, 0, 0, 1, 1], "Linestyle", "--", "Color", "k");
+%! xlabel ('x');
+%! ylabel ('p');
+%! title ('Probability over Rectangular Region');
+%! line ([0, 0, 1, 1, 0], [1, 0, 0, 1, 1], 'Linestyle', '--', 'Color', 'k');
 
 %!test
 %! fD = (-2:2)';
 %! X = repmat (fD, 1, 4);
 %! p = mvncdf (X);
-%! assert (p, [0; 0.0006; 0.0625; 0.5011; 0.9121], ones (5, 1) * 1e-4);
+%! assert_equal (p, [0; 0.0006; 0.0625; 0.5011; 0.9121], ones (5, 1) * 1e-4);
 %!test
 %! mu = [1, -1];
 %! Sigma = [0.9, 0.4; 0.4, 0.3];
@@ -458,7 +458,7 @@ endfunction
 %!          0.00378235566873474, 0.00638175749734415, ...
 %!          0.00943764224329656, 0.01239164888125426, ...
 %!          0.01472750274376648, 0.01623228313374828]';
-%! assert (p([1:10]), p_out, 1e-16);
+%! assert_equal (p([1:10]), p_out, 1e-16);
 %!test
 %! mu = [1, -1];
 %! Sigma = [0.9, 0.4; 0.4, 0.3];
@@ -470,26 +470,26 @@ endfunction
 %!          0.9722897881414742, 0.9788150170059926, ...
 %!          0.9813597788804785, 0.9821977956568989, ...
 %!          0.9824283794464095, 0.9824809345614861]';
-%! assert (p([616:625]), p_out, 3e-16);
+%! assert_equal (p([616:625]), p_out, 3e-16);
 %!test
 %! mu = [0, 0];
 %! Sigma = [0.25, 0.3; 0.3, 1];
 %! [p, err] = mvncdf ([0, 0], [1, 1], mu, Sigma);
-%! assert (p, 0.2097424404755626, 1e-16);
-%! assert (err, 1e-08);
+%! assert_equal (p, 0.2097424404755626, 1e-16);
+%! assert_equal (err, 1e-08);
 %!test
 %! x = [1 2];
 %! mu = [0.5 1.5];
 %! sigma = [1.0, 0.5; 0.5, 1.0];
 %! p = mvncdf (x, mu, sigma);
-%! assert (p, 0.546244443857090, 1e-15);
+%! assert_equal (p, 0.546244443857090, 1e-15);
 %!test
 %! x = [1 2];
 %! mu = [0.5 1.5];
 %! sigma = [1.0, 0.5; 0.5, 1.0];
 %! a = [-inf 0];
 %! p = mvncdf (a, x, mu, sigma);
-%! assert (p, 0.482672935215631, 1e-15);
+%! assert_equal (p, 0.482672935215631, 1e-15);
 %!error p = mvncdf (randn (25,26), [], eye (26));
 %!error p = mvncdf (randn (25,8), [], eye (9));
 %!error p = mvncdf (randn (25,4), randn (25,5), [], eye (4));

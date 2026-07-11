@@ -63,9 +63,9 @@ function y = tripdf (x, a, b, c)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (a, "single") || isa (b, "single") ...
-                        || isa (c, "single"))
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (a, 'single') || isa (b, 'single') ...
+                        || isa (c, 'single'))
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
@@ -93,36 +93,36 @@ endfunction
 %! y2 = tripdf (x, 1, 2, 5);
 %! y3 = tripdf (x, 2, 3, 9);
 %! y4 = tripdf (x, 2, 5, 9);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-c")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-c')
 %! grid on
 %! xlim ([0, 10])
-%! legend ({"a = 3, b = 4, c = 6", "a = 1, b = 2, c = 5", ...
-%!          "a = 2, b = 3, c = 9", "a = 2, b = 5, c = 9"}, ...
-%!         "location", "northeast")
-%! title ("Triangular CDF")
-%! xlabel ("values in x")
-%! ylabel ("probability")
+%! legend ({'a = 3, b = 4, c = 6', 'a = 1, b = 2, c = 5', ...
+%!          'a = 2, b = 3, c = 9', 'a = 2, b = 5, c = 9'}, ...
+%!         'location', 'northeast')
+%! title ('Triangular CDF')
+%! xlabel ('values in x')
+%! ylabel ('probability')
 
 ## Test output
 %!shared x, y, deps
 %! x = [-1, 0, 0.1, 0.5, 0.9, 1, 2] + 1;
 %! y = [0, 0, 0.4, 2, 0.4, 0, 0];
 %! deps = 2*eps;
-%!assert (tripdf (x, ones (1,7), 1.5*ones (1,7), 2*ones (1,7)), y, deps)
-%!assert (tripdf (x, 1*ones (1,7), 1.5, 2), y, deps)
-%!assert (tripdf (x, 1, 1.5, 2*ones (1,7)), y, deps)
-%!assert (tripdf (x, 1, 1.5*ones (1,7), 2), y, deps)
-%!assert (tripdf (x, 1, 1.5, 2), y, deps)
-%!assert (tripdf (x, [1, 1, NaN, 1, 1, 1, 1], 1.5, 2), [y(1:2), NaN, y(4:7)], deps)
-%!assert (tripdf (x, 1, 1.5, 2*[1, 1, NaN, 1, 1, 1, 1]), [y(1:2), NaN, y(4:7)], deps)
-%!assert (tripdf (x, 1, 1.5*[1, 1, NaN, 1, 1, 1, 1], 2), [y(1:2), NaN, y(4:7)], deps)
-%!assert (tripdf ([x, NaN], 1, 1.5, 2), [y, NaN], deps)
+%!assert_equal (tripdf (x, ones (1,7), 1.5*ones (1,7), 2*ones (1,7)), y, deps)
+%!assert_equal (tripdf (x, 1*ones (1,7), 1.5, 2), y, deps)
+%!assert_equal (tripdf (x, 1, 1.5, 2*ones (1,7)), y, deps)
+%!assert_equal (tripdf (x, 1, 1.5*ones (1,7), 2), y, deps)
+%!assert_equal (tripdf (x, 1, 1.5, 2), y, deps)
+%!assert_equal (tripdf (x, [1, 1, NaN, 1, 1, 1, 1], 1.5, 2), [y(1:2), NaN, y(4:7)], deps)
+%!assert_equal (tripdf (x, 1, 1.5, 2*[1, 1, NaN, 1, 1, 1, 1]), [y(1:2), NaN, y(4:7)], deps)
+%!assert_equal (tripdf (x, 1, 1.5*[1, 1, NaN, 1, 1, 1, 1], 2), [y(1:2), NaN, y(4:7)], deps)
+%!assert_equal (tripdf ([x, NaN], 1, 1.5, 2), [y, NaN], deps)
 
 ## Test class of input preserved
-%!assert (tripdf (single ([x, NaN]), 1, 1.5, 2), single ([y, NaN]), eps("single"))
-%!assert (tripdf ([x, NaN], single (1), 1.5, 2), single ([y, NaN]), eps("single"))
-%!assert (tripdf ([x, NaN], 1, 1.5, single (2)), single ([y, NaN]), eps("single"))
-%!assert (tripdf ([x, NaN], 1, single (1.5), 2), single ([y, NaN]), eps("single"))
+%!assert_equal (tripdf (single ([x, NaN]), 1, 1.5, 2), single ([y, NaN]), eps ('single'))
+%!assert_equal (tripdf ([x, NaN], single (1), 1.5, 2), single ([y, NaN]), eps ('single'))
+%!assert_equal (tripdf ([x, NaN], 1, 1.5, single (2)), single ([y, NaN]), eps ('single'))
+%!assert_equal (tripdf ([x, NaN], 1, single (1.5), 2), single ([y, NaN]), eps ('single'))
 
 ## Test input validation
 %!error<tripdf: function called with too few input arguments.> tripdf ()
@@ -132,13 +132,13 @@ endfunction
 %!error<tripdf: function called with too many inputs> ...
 %! tripdf (1, 2, 3, 4, 5)
 %!error<tripdf: X, A, B, and C must be of common size or scalars.> ...
-%! tripdf (ones (3), ones (2), ones(2), ones(2))
+%! tripdf (ones (3), ones (2), ones (2), ones (2))
 %!error<tripdf: X, A, B, and C must be of common size or scalars.> ...
-%! tripdf (ones (2), ones (3), ones(2), ones(2))
+%! tripdf (ones (2), ones (3), ones (2), ones (2))
 %!error<tripdf: X, A, B, and C must be of common size or scalars.> ...
-%! tripdf (ones (2), ones (2), ones(3), ones(2))
+%! tripdf (ones (2), ones (2), ones (3), ones (2))
 %!error<tripdf: X, A, B, and C must be of common size or scalars.> ...
-%! tripdf (ones (2), ones (2), ones(2), ones(3))
+%! tripdf (ones (2), ones (2), ones (2), ones (3))
 %!error<tripdf: X, A, B, and C must not be complex.> tripdf (i, 2, 3, 4)
 %!error<tripdf: X, A, B, and C must not be complex.> tripdf (1, i, 3, 4)
 %!error<tripdf: X, A, B, and C must not be complex.> tripdf (1, 2, i, 4)

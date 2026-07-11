@@ -56,8 +56,8 @@ function y = unifpdf (x, a, b)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (a, "single") || isa (b, "single"))
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (a, 'single') || isa (b, 'single'))
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
@@ -76,31 +76,31 @@ endfunction
 %! x = 0:0.001:10;
 %! y1 = unifpdf (x, 2, 5);
 %! y2 = unifpdf (x, 3, 9);
-%! plot (x, y1, "-b", x, y2, "-g")
+%! plot (x, y1, '-b', x, y2, '-g')
 %! grid on
 %! xlim ([0, 10])
 %! ylim ([0, 0.4])
-%! legend ({"a = 2, b = 5", "a = 3, b = 9"}, "location", "northeast")
-%! title ("Continuous uniform PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'a = 2, b = 5', 'a = 3, b = 9'}, 'location', 'northeast')
+%! title ('Continuous uniform PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-1 0 0.5 1 2] + 1;
 %! y = [0 1 1 1 0];
-%!assert (unifpdf (x, ones (1,5), 2*ones (1,5)), y)
-%!assert (unifpdf (x, 1, 2*ones (1,5)), y)
-%!assert (unifpdf (x, ones (1,5), 2), y)
-%!assert (unifpdf (x, [2 NaN 1 1 1], 2), [NaN NaN y(3:5)])
-%!assert (unifpdf (x, 1, 2*[0 NaN 1 1 1]), [NaN NaN y(3:5)])
-%!assert (unifpdf ([x, NaN], 1, 2), [y, NaN])
-%!assert (unifpdf (x, 0, 1), [1 1 0 0 0])
+%!assert_equal (unifpdf (x, ones (1,5), 2*ones (1,5)), y)
+%!assert_equal (unifpdf (x, 1, 2*ones (1,5)), y)
+%!assert_equal (unifpdf (x, ones (1,5), 2), y)
+%!assert_equal (unifpdf (x, [2 NaN 1 1 1], 2), [NaN NaN y(3:5)])
+%!assert_equal (unifpdf (x, 1, 2*[0 NaN 1 1 1]), [NaN NaN y(3:5)])
+%!assert_equal (unifpdf ([x, NaN], 1, 2), [y, NaN])
+%!assert_equal (unifpdf (x, 0, 1), [1 1 0 0 0])
 
 ## Test class of input preserved
-%!assert (unifpdf (single ([x, NaN]), 1, 2), single ([y, NaN]))
-%!assert (unifpdf (single ([x, NaN]), single (1), 2), single ([y, NaN]))
-%!assert (unifpdf ([x, NaN], 1, single (2)), single ([y, NaN]))
+%!assert_equal (unifpdf (single ([x, NaN]), 1, 2), single ([y, NaN]))
+%!assert_equal (unifpdf (single ([x, NaN]), single (1), 2), single ([y, NaN]))
+%!assert_equal (unifpdf ([x, NaN], 1, single (2)), single ([y, NaN]))
 
 ## Test input validation
 %!error<unifpdf: function called with too few input arguments.> unifpdf ()

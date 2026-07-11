@@ -61,19 +61,19 @@ function data = plinv (p, x, Fx)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (x, "single") || isa (Fx, "single"));
-    data = zeros (size (p), "single");
+  if (isa (p, 'single') || isa (x, 'single') || isa (Fx, 'single'));
+    data = zeros (size (p), 'single');
   else
     data = zeros (size (p));
   endif
 
   ## Remove consecutive bins with almost zero probability
   pw_diff = diff (Fx);
-  if any(pw_diff==0)
-    zero_p = 2 * eps(Fx);
+  if any (pw_diff==0)
+    zero_p = 2 * eps (Fx);
     same_p = pw_diff <= zero_p(1:end-1);
     remove = same_p(1:end-1) & same_p(2:end);
-    while (any(remove))
+    while (any (remove))
       idx = find (remove);
       same_p(idx) = [];
       Fx(idx+1) = [];
@@ -82,10 +82,10 @@ function data = plinv (p, x, Fx)
       remove = same_p(1:end-1) & same_p(2:end);
     endwhile
     idx = find (pw_diff==0);
-    Fx(idx+1) = Fx(idx) + eps(Fx(idx));
+    Fx(idx+1) = Fx(idx) + eps (Fx(idx));
   endif
   p(p < 0 | 1 < p) = NaN;
-  data = interp1 (Fx, x, p, "linear");
+  data = interp1 (Fx, x, p, 'linear');
 
 endfunction
 
@@ -98,32 +98,32 @@ endfunction
 %! Fx2 = [0, 0.1, 0.3, 0.6, 0.9, 1];
 %! data1 = plinv (p, x1, Fx1);
 %! data2 = plinv (p, x2, Fx2);
-%! plot (p, data1, "-b", p, data2, "-g")
+%! plot (p, data1, '-b', p, data2, '-g')
 %! grid on
-%! legend ({"x1, Fx1", "x2, Fx2"}, "location", "northwest")
-%! title ("Piecewise linear iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in data")
+%! legend ({'x1, Fx1', 'x2, Fx2'}, 'location', 'northwest')
+%! title ('Piecewise linear iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in data')
 
 ## Test output
 %!test
 %! p = 0:0.2:1;
 %! data = plinv (p, [0, 1], [0, 1]);
-%! assert (data, p);
+%! assert_equal (data, p);
 %!test
 %! p = 0:0.2:1;
 %! data = plinv (p, [0, 2], [0, 1]);
-%! assert (data, 2 * p);
+%! assert_equal (data, 2 * p);
 %!test
 %! p = 0:0.2:1;
 %! data_out = 1:6;
 %! data = plinv (p, [0, 1], [0, 0.5]);
-%! assert (data, [0, 0.4, 0.8, NA, NA, NA]);
+%! assert_equal (data, [0, 0.4, 0.8, NA, NA, NA]);
 %!test
 %! p = 0:0.2:1;
 %! data_out = 1:6;
 %! data = plinv (p, [0, 0.5], [0, 1]);
-%! assert (data, [0:0.1:0.5]);
+%! assert_equal (data, [0:0.1:0.5]);
 
 ## Test input validation
 %!error<plinv: function called with too few input arguments.> plinv ()

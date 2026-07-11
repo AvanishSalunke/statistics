@@ -39,7 +39,7 @@
 ## corresponding rows.
 ##
 ## Name-Value pair arguments can be used to set statistical significance.
-## @qcode{"alpha"} can be used to specify the significance level of the test
+## @qcode{'alpha'} can be used to specify the significance level of the test
 ## (the default value is 0.05).
 ##
 ## If @var{h} is 1 the null hypothesis is rejected, meaning that the tested
@@ -86,7 +86,7 @@ function [h, pval, stats] = hotelling_t2test (x, my, varargin)
   endif
 
   ## When X and MY are of equal size, then assume paired-sample
-  if (isequal (size (x), size(my)))
+  if (isequal (size (x), size (my)))
     x = x - my;
     if (isvector (x))
       my = 0;
@@ -103,7 +103,7 @@ function [h, pval, stats] = hotelling_t2test (x, my, varargin)
   i = 1;
   while (i <= length (varargin))
     switch lower (varargin{i})
-      case "alpha"
+      case 'alpha'
         i = i + 1;
         alpha = varargin{i};
         ## Check for valid alpha
@@ -155,36 +155,36 @@ endfunction
 %!error<hotelling_t2test: X must be a vector or a 2D matrix.> ...
 %! hotelling_t2test (1);
 %!error<hotelling_t2test: X must be a vector or a 2D matrix.> ...
-%! hotelling_t2test (ones(2,2,2));
+%! hotelling_t2test (ones (2,2,2));
 %!error<hotelling_t2test: invalid value for alpha.> ...
-%! hotelling_t2test (ones(20,2), [0, 0], "alpha", 1);
+%! hotelling_t2test (ones (20,2), [0, 0], 'alpha', 1);
 %!error<hotelling_t2test: invalid value for alpha.> ...
-%! hotelling_t2test (ones(20,2), [0, 0], "alpha", -0.2);
+%! hotelling_t2test (ones (20,2), [0, 0], 'alpha', -0.2);
 %!error<hotelling_t2test: invalid value for alpha.> ...
-%! hotelling_t2test (ones(20,2), [0, 0], "alpha", "a");
+%! hotelling_t2test (ones (20,2), [0, 0], 'alpha', 'a');
 %!error<hotelling_t2test: invalid value for alpha.> ...
-%! hotelling_t2test (ones(20,2), [0, 0], "alpha", [0.01, 0.05]);
+%! hotelling_t2test (ones (20,2), [0, 0], 'alpha', [0.01, 0.05]);
 %!error<hotelling_t2test: invalid Name argument.> ...
-%! hotelling_t2test (ones(20,2), [0, 0], "name", 0.01);
+%! hotelling_t2test (ones (20,2), [0, 0], 'name', 0.01);
 %!error<hotelling_t2test: if X is a vector, M must be a scalar.> ...
-%! hotelling_t2test (ones(20,1), [0, 0]);
+%! hotelling_t2test (ones (20,1), [0, 0]);
 %!error<hotelling_t2test: X must have more rows than columns.> ...
-%! hotelling_t2test (ones(4,5), [0, 0, 0, 0, 0]);
+%! hotelling_t2test (ones (4,5), [0, 0, 0, 0, 0]);
 %!error<hotelling_t2test: if X is a matrix, M must be a vector of length> ...
-%! hotelling_t2test (ones(20,5), [0, 0, 0, 0]);
+%! hotelling_t2test (ones (20,5), [0, 0, 0, 0]);
 
 ## Test results
 %!test
-%! randn ("seed", 1);
+%! randn ('seed', 1);
 %! x = randn (50000, 5);
 %! [h, pval, stats] = hotelling_t2test (x);
-%! assert (h, 0);
-%! assert (stats.df1, 5);
-%! assert (stats.df2, 49995);
+%! assert_equal (h, 0);
+%! assert_equal (stats.df1, 5);
+%! assert_equal (stats.df2, 49995);
 %!test
-%! randn ("seed", 1);
+%! randn ('seed', 1);
 %! x = randn (50000, 5);
 %! [h, pval, stats] = hotelling_t2test (x, ones (1, 5) * 10);
-%! assert (h, 1);
-%! assert (stats.df1, 5);
-%! assert (stats.df2, 49995);
+%! assert_equal (h, 1);
+%! assert_equal (stats.df1, 5);
+%! assert_equal (stats.df2, 49995);

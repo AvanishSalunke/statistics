@@ -52,7 +52,7 @@ classdef PiecewiseLinearDistribution
   ## @seealso{makedist, plcdf, plinv, plpdf, plrnd, plstat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {PiecewiseLinearDistribution} {property} x
     ##
@@ -75,7 +75,7 @@ classdef PiecewiseLinearDistribution
     Fx
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {PiecewiseLinearDistribution} {property} DistributionName
     ##
@@ -85,7 +85,7 @@ classdef PiecewiseLinearDistribution
     ## object.  This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "PiecewiseLinearDistribution";
+    DistributionName = 'PiecewiseLinearDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {PiecewiseLinearDistribution} {property} NumParameters
@@ -102,38 +102,38 @@ classdef PiecewiseLinearDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter.  This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"x", "Fx"};
+    ParameterNames = {'x', 'Fx'};
     ## -*- texinfo -*-
     ## @deftp {PiecewiseLinearDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter.  This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"x", "cdf = F(x)"};
+    ParameterDescription = {'x', 'cdf = F(x)'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = false;
-    DistributionCode = "pl";
+    DistributionCode = 'pl';
     ParameterRange = [-Inf, Inf; -Inf, Inf; 0, 1; 0, 1];
     ParameterLogCI = [false, false, false, false];
   endproperties
 
-  properties (GetAccess = public , SetAccess = protected)
+  properties(GetAccess = public , SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {PiecewiseLinearDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{2x1} numeric vector containing the values of the distribution
+    ## A @math{2*1} numeric vector containing the values of the distribution
     ## parameters.  This property is read-only. You can change the distribution
     ## parameters by assigning new values to the @qcode{x} and @qcode{Fx}
     ## properties.
@@ -145,7 +145,7 @@ classdef PiecewiseLinearDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution.  First element contains the lower boundary,
     ## second element contains the upper boundary.  This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -165,7 +165,7 @@ classdef PiecewiseLinearDistribution
     IsTruncated
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = PiecewiseLinearDistribution (x, Fx)
       if (nargin == 0)
@@ -181,12 +181,12 @@ classdef PiecewiseLinearDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "Piecewise Linear distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'Piecewise Linear distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "Piecewise Linear distribution");
+      __disp__ (this, 'Piecewise Linear distribution');
     endfunction
 
     function this = set.x (this, x)
@@ -209,11 +209,11 @@ classdef PiecewiseLinearDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {PiecewiseLinearDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {PiecewiseLinearDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {PiecewiseLinearDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -221,7 +221,7 @@ classdef PiecewiseLinearDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -231,9 +231,9 @@ classdef PiecewiseLinearDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -317,7 +317,7 @@ classdef PiecewiseLinearDistribution
       if (this.IsTruncated)
         fm = @(x) x .* pdf (this, x);
         m = integral (fm, this.Truncation(1), this.Truncation(2), ...
-                      "ArrayValued", 1);
+                      'ArrayValued', 1);
       else
         m = plstat (this.x, this.Fx);
       endif
@@ -386,26 +386,26 @@ classdef PiecewiseLinearDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -525,10 +525,10 @@ classdef PiecewiseLinearDistribution
       if (this.IsTruncated)
         fm = @(x) x .* pdf (this, x);
         m = integral (fm, this.Truncation(1), this.Truncation(2), ...
-                      "ArrayValued", 1);
+                      'ArrayValued', 1);
         fv =  @(x) ((x - m) .^ 2) .* pdf (this, x);
         v = integral (fv, this.Truncation(1), this.Truncation(2), ...
-                      "ArrayValued", 1);
+                      'ArrayValued', 1);
       else
         [~, v] = plstat (this.x, this.Fx);
       endif
@@ -565,7 +565,7 @@ endfunction
 %! ## Compute empirical CDF, subsample, create PiecewiseLinearDistribution,
 %! ## and plot the PDF superimposed on a histogram of the data.
 %!
-%! randg ("seed", 2);
+%! randg ('seed', 2);
 %! data = betarnd (2, 5, 5000, 1) * 10;
 %! [f, x] = ecdf (data);
 %! f = f(1:5:end);
@@ -577,10 +577,10 @@ endfunction
 %! hold on
 %! vals = min (data):0.1:max (data);
 %! y = pdf (pd, vals);
-%! plot (vals, y, "-r", "LineWidth", 2)
+%! plot (vals, y, '-r', 'LineWidth', 2)
 %! hold off
-%! title ("Piecewise Linear approximation to scaled Beta(2,5) data")
-%! legend ("Histogram", "Piecewise PDF")
+%! title ('Piecewise Linear approximation to scaled Beta(2,5) data')
+%! legend ('Histogram', 'Piecewise PDF')
 
 ## Test output
 %!shared pd, t
@@ -590,31 +590,31 @@ endfunction
 %! x = x(1:5:end);
 %! pd = PiecewiseLinearDistribution (x, f);
 %! t = truncate (pd, 130, 180);
-%!assert (cdf (pd, [120, 130, 140, 150, 200]), [0.0767, 0.25, 0.4629, 0.5190, 0.9908], 1e-4);
-%!assert (cdf (t, [120, 130, 140, 150, 200]), [0, 0, 0.4274, 0.5403, 1], 1e-4);
-%!assert (cdf (pd, [100, 250, NaN]), [0, 1, NaN], 1e-4);
-%!assert (cdf (t, [115, 290, NaN]), [0, 1, NaN], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [111, 127.5, 136.62, 169.67, 182.17, 202], 1e-2);
-%!assert (icdf (t, [0:0.2:1]), [130, 134.15, 139.26, 162.5, 173.99, 180], 1e-2);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NA, 136.62, 169.67, 182.17, 202, NA], 1e-2);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NA, 139.26, 162.5, 173.99, 180, NA], 1e-2);
-%!assert (iqr (pd), 50.0833, 1e-4);
-%!assert (iqr (t), 36.8077, 1e-4);
-%!assert (mean (pd), 153.61, 1e-10);
-%!assert (mean (t), 152.311, 1e-3);
-%!assert (median (pd), 142, 1e-10);
-%!assert (median (t), 141.9462, 1e-4);
-%!assert (pdf (pd, [120, 130, 140, 150, 200]), [0.0133, 0.0240, 0.0186, 0.0024, 0.0004], 6e-3);
-%!assert (pdf (t, [120, 130, 140, 150, 200]), [0, 0.0482, 0.0373, 0.0048, 0], 1e-4);
-%!assert (pdf (pd, [100, 250, NaN]), [0, 0, NaN], 1e-4);
-%!assert (pdf (t, [100, 250, NaN]), [0, 0, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 130), false);
-%!assert (any (random (t, 1000, 1) > 180), false);
-%!assert (std (pd), 26.5196, 1e-4);
-%!assert (std (t), 18.2941, 1e-4);
-%!assert (var (pd), 703.2879, 1e-4);
-%!assert (var (t), 334.6757, 1e-4);
+%!assert_equal (cdf (pd, [120, 130, 140, 150, 200]), [0.0767, 0.25, 0.4629, 0.5190, 0.9908], 1e-4);
+%!assert_equal (cdf (t, [120, 130, 140, 150, 200]), [0, 0, 0.4274, 0.5403, 1], 1e-4);
+%!assert_equal (cdf (pd, [100, 250, NaN]), [0, 1, NaN], 1e-4);
+%!assert_equal (cdf (t, [115, 290, NaN]), [0, 1, NaN], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [111, 127.5, 136.62, 169.67, 182.17, 202], 1e-2);
+%!assert_equal (icdf (t, [0:0.2:1]), [130, 134.15, 139.26, 162.5, 173.99, 180], 1e-2);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NA, 136.62, 169.67, 182.17, 202, NA], 1e-2);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NA, 139.26, 162.5, 173.99, 180, NA], 1e-2);
+%!assert_equal (iqr (pd), 50.0833, 1e-4);
+%!assert_equal (iqr (t), 36.8077, 1e-4);
+%!assert_equal (mean (pd), 153.61, 1e-10);
+%!assert_equal (mean (t), 152.311, 1e-3);
+%!assert_equal (median (pd), 142, 1e-10);
+%!assert_equal (median (t), 141.9462, 1e-4);
+%!assert_equal (pdf (pd, [120, 130, 140, 150, 200]), [0.0133, 0.0240, 0.0186, 0.0024, 0.0004], 6e-3);
+%!assert_equal (pdf (t, [120, 130, 140, 150, 200]), [0, 0.0482, 0.0373, 0.0048, 0], 1e-4);
+%!assert_equal (pdf (pd, [100, 250, NaN]), [0, 0, NaN], 1e-4);
+%!assert_equal (pdf (t, [100, 250, NaN]), [0, 0, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 130), false);
+%!assert_equal (any (random (t, 1000, 1) > 180), false);
+%!assert_equal (std (pd), 26.5196, 1e-4);
+%!assert_equal (std (t), 18.2941, 1e-4);
+%!assert_equal (var (pd), 703.2879, 1e-4);
+%!assert_equal (var (t), 334.6757, 1e-4);
 
 ## Test input validation
 ## 'PiecewiseLinearDistribution' constructor
@@ -623,7 +623,7 @@ endfunction
 %!error <PiecewiseLinearDistribution: X must be a real vector.> ...
 %! PiecewiseLinearDistribution ([0, Inf], [0, 1])
 %!error <PiecewiseLinearDistribution: X must be a real vector.> ...
-%! PiecewiseLinearDistribution (["a", "c"], [0, 1])
+%! PiecewiseLinearDistribution (['a', 'c'], [0, 1])
 %!error <PiecewiseLinearDistribution: X must be a real vector.> ...
 %! PiecewiseLinearDistribution ([NaN, 1], [0, 1])
 %!error <PiecewiseLinearDistribution: Fx must be a real vector.> ...
@@ -631,7 +631,7 @@ endfunction
 %!error <PiecewiseLinearDistribution: Fx must be a real vector.> ...
 %! PiecewiseLinearDistribution ([0, 1], [0, Inf])
 %!error <PiecewiseLinearDistribution: Fx must be a real vector.> ...
-%! PiecewiseLinearDistribution ([0, 1], ["a", "c"])
+%! PiecewiseLinearDistribution ([0, 1], ['a', 'c'])
 %!error <PiecewiseLinearDistribution: Fx must be a real vector.> ...
 %! PiecewiseLinearDistribution ([0, 1], [NaN, 1])
 %!error <PiecewiseLinearDistribution: X and FX must be vectors of equal size.> ...
@@ -643,33 +643,33 @@ endfunction
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (PiecewiseLinearDistribution, 2, "uper")
+%! cdf (PiecewiseLinearDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (PiecewiseLinearDistribution, 2, 3)
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (PiecewiseLinearDistribution, "Parent")
+%! plot (PiecewiseLinearDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (PiecewiseLinearDistribution, "PlotType", 12)
+%! plot (PiecewiseLinearDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (PiecewiseLinearDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (PiecewiseLinearDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (PiecewiseLinearDistribution, "PlotType", "pdfcdf")
+%! plot (PiecewiseLinearDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (PiecewiseLinearDistribution, "Discrete", "pdfcdf")
+%! plot (PiecewiseLinearDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (PiecewiseLinearDistribution, "Discrete", [1, 0])
+%! plot (PiecewiseLinearDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (PiecewiseLinearDistribution, "Discrete", {true})
+%! plot (PiecewiseLinearDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (PiecewiseLinearDistribution, "Parent", 12)
+%! plot (PiecewiseLinearDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (PiecewiseLinearDistribution, "Parent", "hax")
+%! plot (PiecewiseLinearDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (PiecewiseLinearDistribution, "invalidNAME", "pdf")
+%! plot (PiecewiseLinearDistribution, 'invalidNAME', 'pdf')
 %!error <plot: 'probability' PlotType is not supported for 'PiecewiseLinearDistribution'.> ...
-%! plot (PiecewiseLinearDistribution, "PlotType", "probability")
+%! plot (PiecewiseLinearDistribution, 'PlotType', 'probability')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...

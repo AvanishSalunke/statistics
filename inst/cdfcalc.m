@@ -48,8 +48,8 @@ function [yCDF, xCDF, n, emsg, eid] = cdfcalc (x)
   ## Check that x is a vector
   if (! isvector (x))
     warning ("cdfcalc: vector required as input.");
-    emsg = "VectorRequired";
-    eid = "VectorRequired";
+    emsg = 'VectorRequired';
+    eid = 'VectorRequired';
     return
   endif
   ## Remove NaNs and check if there are remaining data to calculate ecdf
@@ -57,8 +57,8 @@ function [yCDF, xCDF, n, emsg, eid] = cdfcalc (x)
   n = length (x);
   if (n == 0)
     warning ("cdfcalc: not enough data.");
-    emsg = "NotEnoughData";
-    eid = "NotEnoughData";
+    emsg = 'NotEnoughData';
+    eid = 'NotEnoughData';
     return
   endif
   ## Sort data in ascending order
@@ -76,12 +76,12 @@ endfunction
 %!test
 %! x = [2, 4, 3, 2, 4, 3, 2, 5, 6, 4];
 %! [yCDF, xCDF, n, emsg, eid] = cdfcalc (x);
-%! assert (yCDF, [0, 0.3, 0.5, 0.8, 0.9, 1]');
-%! assert (xCDF, [2, 3, 4, 5, 6]');
-%! assert (n, 10);
+%! assert_equal (yCDF, [0, 0.3, 0.5, 0.8, 0.9, 1]');
+%! assert_equal (xCDF, [2, 3, 4, 5, 6]');
+%! assert_equal (n, 10);
 %!shared x
 %! x = [2, 4, 3, 2, 4, 3, 2, 5, 6, 4];
 %!error yCDF = cdfcalc (x);
 %!error [yCDF, xCDF] = cdfcalc ();
 %!error [yCDF, xCDF] = cdfcalc (x, x);
-%!warning [yCDF, xCDF] = cdfcalc (ones(10,2));
+%!warning [yCDF, xCDF] = cdfcalc (ones (10,2));

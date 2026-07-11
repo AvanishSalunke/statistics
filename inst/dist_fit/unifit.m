@@ -22,7 +22,8 @@
 ## @deftypefnx {statistics} {[@var{paramhat}, @var{paramci}] =} unifit (@var{x}, @var{alpha})
 ## @deftypefnx {statistics} {[@var{paramhat}, @var{paramci}] =} unifit (@var{x}, @var{alpha}, @var{freq})
 ##
-## Estimate parameter and confidence intervals for the continuous uniform distribution.
+## Estimate parameter and confidence intervals for the continuous uniform
+## distribution.
 ##
 ## @code{@var{paramhat} = unifit (@var{x})} returns the maximum likelihood
 ## estimate (MLE) of the parameters @var{a} and @var{b} of the continuous
@@ -101,17 +102,17 @@ endfunction
 
 %!demo
 %! ## Sample 2 populations from different continuous uniform distributions
-%! rand ("seed", 5);    # for reproducibility
+%! rand ('seed', 5);    # for reproducibility
 %! r1 = unifrnd (2, 5, 2000, 1);
-%! rand ("seed", 6);    # for reproducibility
+%! rand ('seed', 6);    # for reproducibility
 %! r2 = unifrnd (3, 9, 2000, 1);
 %! r = [r1, r2];
 %!
 %! ## Plot them normalized and fix their colors
 %! hist (r, 0:0.5:10, 2);
-%! h = findobj (gca, "Type", "patch");
-%! set (h(1), "facecolor", "c");
-%! set (h(2), "facecolor", "g");
+%! h = findobj (gca, 'Type', 'patch');
+%! set (h(1), 'facecolor', 'c');
+%! set (h(2), 'facecolor', 'g');
 %! hold on
 %!
 %! ## Estimate their probability of success
@@ -121,32 +122,32 @@ endfunction
 %! ## Plot their estimated PDFs
 %! x = [0:10];
 %! y = unifpdf (x, a_bA(1), a_bA(2));
-%! plot (x, y, "-pg");
+%! plot (x, y, '-pg');
 %! y = unifpdf (x, a_bB(1), a_bB(2));
-%! plot (x, y, "-sc");
+%! plot (x, y, '-sc');
 %! xlim ([1, 10])
 %! ylim ([0, 0.5])
-%! legend ({"Normalized HIST of sample 1 with a=2 and b=5", ...
-%!          "Normalized HIST of sample 2 with a=3 and b=9", ...
+%! legend ({'Normalized HIST of sample 1 with a=2 and b=5', ...
+%!          'Normalized HIST of sample 2 with a=3 and b=9', ...
 %!          sprintf("PDF for sample 1 with estimated a=%0.2f and b=%0.2f", ...
 %!                  a_bA(1), a_bA(2)), ...
 %!          sprintf("PDF for sample 2 with estimated a=%0.2f and b=%0.2f", ...
 %!                  a_bB(1), a_bB(2))})
-%! title ("Two population samples from different continuous uniform distributions")
+%! title ('Two population samples from different continuous uniform distributions')
 %! hold off
 
 ## Test output
 %!test
 %! x = 0:5;
 %! [paramhat, paramci] = unifit (x);
-%! assert (paramhat, [0, 5]);
-%! assert (paramci, [-3.2377, 8.2377; 0, 5], 1e-4);
+%! assert_equal (paramhat, [0, 5]);
+%! assert_equal (paramci, [-3.2377, 8.2377; 0, 5], 1e-4);
 %!test
 %! x = 0:5;
 %! [paramhat, paramci] = unifit (x, [], [1 1 1 1 1 1]);
-%! assert (paramhat, [0, 5]);
-%! assert (paramci, [-3.2377, 8.2377; 0, 5], 1e-4);
-%!assert (unifit ([1 1 2 3]), unifit ([1 2 3], [] ,[2 1 1]))
+%! assert_equal (paramhat, [0, 5]);
+%! assert_equal (paramci, [-3.2377, 8.2377; 0, 5], 1e-4);
+%!assert_equal (unifit ([1 1 2 3]), unifit ([1 2 3], [] ,[2 1 1]))
 
 ## Test input validation
 %!error<unifit: function called with too few input arguments.> unifit ()

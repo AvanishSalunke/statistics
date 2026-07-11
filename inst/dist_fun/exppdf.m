@@ -68,13 +68,13 @@ function y = exppdf (x, mu)
   endif
 
   ## Check for appropriate class
-  if (isa (x, "single") || isa (mu, "single"))
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (mu, 'single'))
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
 
-  k = isnan (x) | !(mu > 0);
+  k = isnan (x) | ! (mu > 0);
   y(k) = NaN;
 
   k = (x >= 0) & (x < Inf) & (mu > 0);
@@ -92,25 +92,25 @@ endfunction
 %! y1 = exppdf (x, 2/3);
 %! y2 = exppdf (x, 1.0);
 %! y3 = exppdf (x, 2.0);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r')
 %! grid on
 %! ylim ([0, 1.5])
-%! legend ({"μ = 2/3", "μ = 1", "μ = 2"}, "location", "northeast")
-%! title ("Exponential PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'μ = 2/3', 'μ = 1', 'μ = 2'}, 'location', 'northeast')
+%! title ('Exponential PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x,y
 %! x = [-1 0 0.5 1 Inf];
 %! y = gampdf (x, 1, 2);
-%!assert (exppdf (x, 2*ones (1,5)), y)
-%!assert (exppdf (x, 2*[1 0 NaN 1 1]), [y(1) NaN NaN y(4:5)])
-%!assert (exppdf ([x, NaN], 2), [y, NaN])
+%!assert_equal (exppdf (x, 2*ones (1,5)), y)
+%!assert_equal (exppdf (x, 2*[1 0 NaN 1 1]), [y(1) NaN NaN y(4:5)])
+%!assert_equal (exppdf ([x, NaN], 2), [y, NaN])
 
 ## Test class of input preserved
-%!assert (exppdf (single ([x, NaN]), 2), single ([y, NaN]))
-%!assert (exppdf ([x, NaN], single (2)), single ([y, NaN]))
+%!assert_equal (exppdf (single ([x, NaN]), 2), single ([y, NaN]))
+%!assert_equal (exppdf ([x, NaN], single (2)), single ([y, NaN]))
 
 ## Test input validation
 %!error<exppdf: function called with too few input arguments.> exppdf ()

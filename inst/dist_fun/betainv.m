@@ -54,13 +54,13 @@ function x = betainv (p, a, b)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (a, "single") || isa (b, "single"))
-    x = zeros (size (p), "single");
+  if (isa (p, 'single') || isa (a, 'single') || isa (b, 'single'))
+    x = zeros (size (p), 'single');
   else
     x = zeros (size (p));
   endif
 
-  k = (p < 0) | (p > 1) | !(a > 0) | !(b > 0) | isnan (p);
+  k = (p < 0) | (p > 1) | ! (a > 0) | ! (b > 0) | isnan (p);
   x(k) = NaN;
 
   k = (p == 1) & (a > 0) & (b > 0);
@@ -77,8 +77,8 @@ function x = betainv (p, a, b)
     endif
     p = p(k);
 
-    if (isa (y, "single"))
-      myeps = eps ("single");
+    if (isa (y, 'single'))
+      myeps = eps ('single');
     else
       myeps = eps;
     endif
@@ -126,29 +126,29 @@ endfunction
 %! x3 = betainv (p, 1, 3);
 %! x4 = betainv (p, 2, 2);
 %! x5 = betainv (p, 2, 5);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-c", p, x5, "-m")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-c', p, x5, '-m')
 %! grid on
-%! legend ({"α = β = 0.5", "α = 5, β = 1", "α = 1, β = 3", ...
-%!          "α = 2, β = 2", "α = 2, β = 5"}, "location", "southeast")
-%! title ("Beta iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'α = β = 0.5', 'α = 5, β = 1', 'α = 1, β = 3', ...
+%!          'α = 2, β = 2', 'α = 2, β = 5'}, 'location', 'southeast')
+%! title ('Beta iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.75 1 2];
-%!assert (betainv (p, ones (1,5), 2*ones (1,5)), [NaN 0 0.5 1 NaN], eps)
-%!assert (betainv (p, 1, 2*ones (1,5)), [NaN 0 0.5 1 NaN], eps)
-%!assert (betainv (p, ones (1,5), 2), [NaN 0 0.5 1 NaN], eps)
-%!assert (betainv (p, [1 0 NaN 1 1], 2), [NaN NaN NaN 1 NaN])
-%!assert (betainv (p, 1, 2*[1 0 NaN 1 1]), [NaN NaN NaN 1 NaN])
-%!assert (betainv ([p(1:2) NaN p(4:5)], 1, 2), [NaN 0 NaN 1 NaN])
+%!assert_equal (betainv (p, ones (1,5), 2*ones (1,5)), [NaN 0 0.5 1 NaN], eps)
+%!assert_equal (betainv (p, 1, 2*ones (1,5)), [NaN 0 0.5 1 NaN], eps)
+%!assert_equal (betainv (p, ones (1,5), 2), [NaN 0 0.5 1 NaN], eps)
+%!assert_equal (betainv (p, [1 0 NaN 1 1], 2), [NaN NaN NaN 1 NaN])
+%!assert_equal (betainv (p, 1, 2*[1 0 NaN 1 1]), [NaN NaN NaN 1 NaN])
+%!assert_equal (betainv ([p(1:2) NaN p(4:5)], 1, 2), [NaN 0 NaN 1 NaN])
 
 ## Test class of input preserved
-%!assert (betainv ([p, NaN], 1, 2), [NaN 0 0.5 1 NaN NaN], eps)
-%!assert (betainv (single ([p, NaN]), 1, 2), single ([NaN 0 0.5 1 NaN NaN]))
-%!assert (betainv ([p, NaN], single (1), 2), single ([NaN 0 0.5 1 NaN NaN]), eps("single"))
-%!assert (betainv ([p, NaN], 1, single (2)), single ([NaN 0 0.5 1 NaN NaN]), eps("single"))
+%!assert_equal (betainv ([p, NaN], 1, 2), [NaN 0 0.5 1 NaN NaN], eps)
+%!assert_equal (betainv (single ([p, NaN]), 1, 2), single ([NaN 0 0.5 1 NaN NaN]))
+%!assert_equal (betainv ([p, NaN], single (1), 2), single ([NaN 0 0.5 1 NaN NaN]), eps ('single'))
+%!assert_equal (betainv ([p, NaN], 1, single (2)), single ([NaN 0 0.5 1 NaN NaN]), eps ('single'))
 
 ## Test input validation
 %!error<betainv: function called with too few input arguments.> betainv ()

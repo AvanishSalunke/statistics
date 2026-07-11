@@ -34,7 +34,7 @@ classdef CompactClassificationGAM
   ## @seealso{ClassificationGAM, fitcgam}
   ## @end deftp
 
-  properties (Access = public)
+  properties(Access = public)
     ## -*- texinfo -*-
     ## @deftp {CompactClassificationGAM} {property} NumPredictors
     ##
@@ -143,20 +143,22 @@ classdef CompactClassificationGAM
     ## built-in functions.  Nevertheless, the @qcode{ScoreTransform} property
     ## always stores their function handle equivalent.
     ##
-    ## @multitable @columnfractions 0.2 0.05 0.75
-    ## @headitem @var{Value} @tab @tab @var{Description}
-    ## @item @qcode{"doublelogit"} @tab @tab @math{1 ./ (1 + exp (-2 * x))}
-    ## @item @qcode{"invlogit"} @tab @tab @math{1 ./ (1 + exp (-x))}
-    ## @item @qcode{"ismax"} @tab @tab Sets the score for the class with the
+    ## @multitable @columnfractions 0.2 0.75
+    ## @headitem @var{Value} @tab @var{Description}
+    ## @item @qcode{'doublelogit'} @tab @math{1 ./ (1 + exp (-2 * x))}
+    ## @item @qcode{'invlogit'} @tab @math{1 ./ (1 + exp (-x))}
+    ## @item @qcode{'ismax'} @tab Sets the score for the class with the
     ## largest score to 1, and for all other classes to 0
-    ## @item @qcode{"logit"} @tab @tab @math{log (x ./ (1 - x))}
-    ## @item @qcode{"none"} @tab @tab @math{x} (no transformation)
-    ## @item @qcode{"identity"} @tab @tab @math{x} (no transformation)
-    ## @item @qcode{"sign"} @tab @tab @math{-1 for x < 0, 0 for x = 0, 1 for x > 0}
-    ## @item @qcode{"symmetric"} @tab @tab @math{2 * x - 1}
-    ## @item @qcode{"symmetricismax"} @tab @tab Sets the score for the class
+    ## @item @qcode{'logit'} @tab @math{log (x ./ (1 - x))}
+    ## @item @qcode{'none'} @tab @math{x} (no transformation)
+    ## @item @qcode{'identity'} @tab @math{x} (no transformation)
+    ## @item @qcode{'sign'} @tab
+    ## @math{-1 for x < 0, 0 for x = 0, 1 for x >
+    ## 0}
+    ## @item @qcode{'symmetric'} @tab @math{2 * x - 1}
+    ## @item @qcode{'symmetricismax'} @tab Sets the score for the class
     ## with the largest score to 1, and for all other classes to -1
-    ## @item @qcode{"symmetriclogit"} @tab @tab @math{2 ./ (1 + exp (-x)) - 1}
+    ## @item @qcode{'symmetriclogit'} @tab @math{2 ./ (1 + exp (-x)) - 1}
     ## @end multitable
     ##
     ## @end deftp
@@ -168,7 +170,7 @@ classdef CompactClassificationGAM
     ## Model specification formula
     ##
     ## A character vector specifying the model formula in the form
-    ## @qcode{"Y ~ terms"} where @qcode{Y} represents the response variable and
+    ## @qcode{'Y ~ terms'} where @qcode{Y} represents the response variable and
     ## @qcode{terms} specifies the predictor variables and interaction terms.
     ## This property is read-only.
     ##
@@ -181,7 +183,7 @@ classdef CompactClassificationGAM
     ## Interaction terms specification
     ##
     ## A logical matrix, positive integer scalar, or character vector
-    ## @qcode{"all"} specifying the interaction terms between predictor
+    ## @qcode{'all'} specifying the interaction terms between predictor
     ## variables.  This property is read-only.
     ##
     ## @end deftp
@@ -279,11 +281,11 @@ classdef CompactClassificationGAM
     IntMatrix       = [];
   endproperties
 
-  properties (Access = private, Hidden)
+  properties(Access = private, Hidden)
     STname = 'none';
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     ## Class object constructor
     function this = CompactClassificationGAM (Mdl = [])
@@ -291,7 +293,7 @@ classdef CompactClassificationGAM
       ## Check for appropriate class
       if (isempty (Mdl))
         return;
-      elseif (! strcmpi (class (Mdl), "ClassificationGAM"))
+      elseif (! strcmpi (class (Mdl), 'ClassificationGAM'))
         error ("CompactClassificationGAM: invalid classification object.");
       endif
 
@@ -334,15 +336,15 @@ classdef CompactClassificationGAM
       ## Print selected properties
       fprintf ("%+25s: '%s'\n", 'ResponseName', this.ResponseName);
       if (iscellstr (this.ClassNames))
-        str = repmat ({"'%s'"}, 1, numel (this.ClassNames));
+        str = repmat ({'''%s'''}, 1, numel (this.ClassNames));
         str = strcat ('{', strjoin (str, ' '), '}');
         str = sprintf (str, this.ClassNames{:});
       elseif (ischar (this.ClassNames))
-        str = repmat ({"'%s'"}, 1, rows (this.ClassNames));
+        str = repmat ({'''%s'''}, 1, rows (this.ClassNames));
         str = strcat ('[', strjoin (str, ' '), ']');
         str = sprintf (str, cellstr (this.ClassNames){:});
       else # single, double, logical
-        str = repmat ({"%d"}, 1, numel (this.ClassNames));
+        str = repmat ({'%d'}, 1, numel (this.ClassNames));
         str = strcat ('[', strjoin (str, ' '), ']');
         str = sprintf (str, this.ClassNames);
       endif
@@ -416,7 +418,7 @@ classdef CompactClassificationGAM
             case 'Cost'
               this = setCost (this, val);
             case 'ScoreTransform'
-              name = "CompactClassificationGAM";
+              name = 'CompactClassificationGAM';
               [this.ScoreTransform, this.STname] = parseScoreTransform ...
                                                    (varargin{2}, name);
             otherwise
@@ -429,7 +431,7 @@ classdef CompactClassificationGAM
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {CompactClassificationGAM} {@var{label} =} predict (@var{obj}, @var{XC})
@@ -455,7 +457,7 @@ classdef CompactClassificationGAM
     ## @item
     ## @var{obj} must be a @qcode{CompactClassificationGAM} class object.
     ## @item
-    ## @var{XC} must be an @math{MxP} numeric matrix where each row is an
+    ## @var{XC} must be an @math{M*P} numeric matrix where each row is an
     ## observation and each column corresponds to a predictor variable.
     ## @item
     ## @var{includeInteractions} is a logical scalar indicating whether to
@@ -481,7 +483,7 @@ classdef CompactClassificationGAM
 
       ## Clean XC data
       notnansf  = ! logical (sum (isnan (XC), 2));
-      XC        = XC (notnansf, :);
+      XC        = XC(notnansf, :);
 
       ## Default values for Name-Value Pairs
       incInt = ! isempty (this.IntMatrix);
@@ -491,7 +493,7 @@ classdef CompactClassificationGAM
       while (numel (varargin) > 0)
         switch (tolower (varargin {1}))
 
-          case "includeinteractions"
+          case 'includeinteractions'
             tmpInt = varargin{2};
             if (! islogical (tmpInt) || (tmpInt != 0 && tmpInt != 1))
               error (strcat ("CompactClassificationGAM.predict:", ...
@@ -508,7 +510,7 @@ classdef CompactClassificationGAM
             error (strcat ("CompactClassificationGAM.predict: invalid", ...
                            " NAME in optional pairs of arguments."));
         endswitch
-        varargin (1:2) = [];
+        varargin(1:2) = [];
       endwhile
 
       ## Choose whether interactions must be included
@@ -584,7 +586,7 @@ classdef CompactClassificationGAM
     ## @end deftypefn
     function savemodel (this, fname)
       ## Generate variable for class name
-      classdef_name = "CompactClassificationGAM";
+      classdef_name = 'CompactClassificationGAM';
 
       ## Create variables from model properties
       NumPredictors   = this.NumPredictors;
@@ -607,16 +609,16 @@ classdef CompactClassificationGAM
       IntMatrix       = this.IntMatrix;
 
       ## Save classdef name and all model properties as individual variables
-      save ("-binary", fname, "classdef_name", "NumPredictors", ...
-            "PredictorNames", "ResponseName", "ClassNames", "Prior", "Cost", ...
-            "ScoreTransform", "STname", "Formula", "Interactions", "Knots", ...
-            "Order", "DoF", "BaseModel", "ModelwInt", "IntMatrix", ...
-            "LearningRate", "NumIterations");
+      save ('-binary', fname, 'classdef_name', 'NumPredictors', ...
+            'PredictorNames', 'ResponseName', 'ClassNames', 'Prior', 'Cost', ...
+            'ScoreTransform', 'STname', 'Formula', 'Interactions', 'Knots', ...
+            'Order', 'DoF', 'BaseModel', 'ModelwInt', 'IntMatrix', ...
+            'LearningRate', 'NumIterations');
     endfunction
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function mdl = load_model (filename, data)
       ## Create a CompactClassificationGAM object
@@ -638,7 +640,7 @@ classdef CompactClassificationGAM
 
   endmethods
 
-  methods (Access = private)
+  methods(Access = private)
 
     ## Set cost
     function this = setCost (this, Cost, gnY = [])
@@ -646,7 +648,7 @@ classdef CompactClassificationGAM
         [~, gnY, gY] = unique (this.Y(this.RowsUsed));
       endif
       if (isempty (Cost))
-        this.Cost = cast (! eye (numel (gnY)), "double");
+        this.Cost = cast (! eye (numel (gnY)), 'double');
       else
         if (numel (gnY) != sqrt (numel (Cost)))
           error (strcat ("CompactClassificationGAM: the number", ...
@@ -668,7 +670,7 @@ function scores = predict_val (params, XC, intercept)
 
   ## Add the remaining terms
   for j = 1:ndims_X
-    ypred = ypred + ppval (params(j), XC (:,j));
+    ypred = ypred + ppval (params(j), XC(:,j));
   endfor
 
   ## Apply the sigmoid function to get probabilities
@@ -692,18 +694,18 @@ endfunction
 ## Test constructor
 %!test
 %! Mdl = CompactClassificationGAM ();
-%! assert (class (Mdl), "CompactClassificationGAM")
+%! assert_equal (class (Mdl), "CompactClassificationGAM")
 %!test
 %! x = [1, 2, 3; 4, 5, 6; 7, 8, 9; 3, 2, 1];
 %! y = [0; 0; 1; 1];
 %! PredictorNames = {'Feature1', 'Feature2', 'Feature3'};
-%! Mdl = fitcgam (x, y, "PredictorNames", PredictorNames);
+%! Mdl = fitcgam (x, y, 'PredictorNames', PredictorNames);
 %! CMdl = compact (Mdl);
-%! assert (class (CMdl), "CompactClassificationGAM");
-%! assert ({CMdl.NumPredictors, CMdl.ResponseName}, {3, "Y"})
-%! assert (CMdl.ClassNames, {'0'; '1'})
-%! assert (CMdl.PredictorNames, PredictorNames)
-%! assert (CMdl.BaseModel.Intercept, 0)
+%! assert_equal (class (CMdl), "CompactClassificationGAM");
+%! assert_equal ({CMdl.NumPredictors, CMdl.ResponseName}, {3, 'Y'})
+%! assert_equal (CMdl.ClassNames, {'0'; '1'})
+%! assert_equal (CMdl.PredictorNames, PredictorNames)
+%! assert_equal (CMdl.BaseModel.Intercept, 0)
 %!test
 %! load fisheriris
 %! inds = strcmp (species,'versicolor') | strcmp (species,'virginica');
@@ -712,25 +714,25 @@ endfunction
 %! Y = strcmp (Y, 'virginica')';
 %! Mdl = fitcgam (X, Y, 'Formula', 'Y ~ x1 + x2 + x3 + x4 + x1:x2 + x2:x3');
 %! CMdl = compact (Mdl);
-%! assert (class (CMdl), "CompactClassificationGAM");
-%! assert ({CMdl.NumPredictors, CMdl.ResponseName}, {4, "Y"})
-%! assert (CMdl.ClassNames, {'0'; '1'})
-%! assert (CMdl.Formula, 'Y ~ x1 + x2 + x3 + x4 + x1:x2 + x2:x3')
-%! assert (CMdl.PredictorNames, {'x1', 'x2', 'x3', 'x4'})
-%! assert (CMdl.ModelwInt.Intercept, 0)
+%! assert_equal (class (CMdl), "CompactClassificationGAM");
+%! assert_equal ({CMdl.NumPredictors, CMdl.ResponseName}, {4, 'Y'})
+%! assert_equal (CMdl.ClassNames, {'0'; '1'})
+%! assert_equal (CMdl.Formula, 'Y ~ x1 + x2 + x3 + x4 + x1:x2 + x2:x3')
+%! assert_equal (CMdl.PredictorNames, {'x1', 'x2', 'x3', 'x4'})
+%! assert_equal (CMdl.ModelwInt.Intercept, 0)
 %!test
 %! X = [2, 3, 5; 4, 6, 8; 1, 2, 3; 7, 8, 9; 5, 4, 3];
 %! Y = [0; 1; 0; 1; 1];
 %! Mdl = fitcgam (X, Y, 'Knots', [4, 4, 4], 'Order', [3, 3, 3]);
 %! CMdl = compact (Mdl);
-%! assert (class (CMdl), "CompactClassificationGAM");
-%! assert ({CMdl.NumPredictors, CMdl.ResponseName}, {3, "Y"})
-%! assert (CMdl.ClassNames, {'0'; '1'})
-%! assert (CMdl.PredictorNames, {'x1', 'x2', 'x3'})
-%! assert (CMdl.Knots, [4, 4, 4])
-%! assert (CMdl.Order, [3, 3, 3])
-%! assert (CMdl.DoF, [7, 7, 7])
-%! assert (CMdl.BaseModel.Intercept, 0.4055, 1e-1)
+%! assert_equal (class (CMdl), "CompactClassificationGAM");
+%! assert_equal ({CMdl.NumPredictors, CMdl.ResponseName}, {3, 'Y'})
+%! assert_equal (CMdl.ClassNames, {'0'; '1'})
+%! assert_equal (CMdl.PredictorNames, {'x1', 'x2', 'x3'})
+%! assert_equal (CMdl.Knots, [4, 4, 4])
+%! assert_equal (CMdl.Order, [3, 3, 3])
+%! assert_equal (CMdl.DoF, [7, 7, 7])
+%! assert_equal (CMdl.BaseModel.Intercept, 0.4055, 1e-1)
 
 ## Test input validation for constructor
 %!error<CompactClassificationGAM: invalid classification object.> ...
@@ -740,35 +742,35 @@ endfunction
 %!test
 %! x = [1, 2; 3, 4; 5, 6; 7, 8; 9, 10];
 %! y = [1; 0; 1; 0; 1];
-%! Mdl = fitcgam (x, y, "interactions", "all");
+%! Mdl = fitcgam (x, y, 'interactions', 'all');
 %! CMdl = compact (Mdl);
 %! l = {'1'; '1'; '1'; '1'; '1'};
 %! s = [0.3760, 0.6240; 0.4259, 0.5741; 0.3760, 0.6240; ...
 %!      0.4259, 0.5741; 0.3760, 0.6240];
 %! [labels, scores] = predict (CMdl, x);
-%! assert (class (CMdl), "CompactClassificationGAM");
-%! assert ({CMdl.NumPredictors, CMdl.ResponseName}, {2, "Y"})
-%! assert (CMdl.ClassNames, {'0'; '1'})
-%! assert (CMdl.PredictorNames, {'x1', 'x2'})
-%! assert (CMdl.ModelwInt.Intercept, 0.4055, 1e-1)
-%! assert (labels, l)
-%! assert (scores, s, 1e-1)
+%! assert_equal (class (CMdl), "CompactClassificationGAM");
+%! assert_equal ({CMdl.NumPredictors, CMdl.ResponseName}, {2, 'Y'})
+%! assert_equal (CMdl.ClassNames, {'0'; '1'})
+%! assert_equal (CMdl.PredictorNames, {'x1', 'x2'})
+%! assert_equal (CMdl.ModelwInt.Intercept, 0.4055, 1e-1)
+%! assert_equal (labels, l)
+%! assert_equal (scores, s, 1e-1)
 %!test
 %! x = [1, 2, 3; 4, 5, 6; 7, 8, 9; 3, 2, 1];
 %! y = [0; 0; 1; 1];
 %! interactions = [false, true, false; true, false, true; false, true, false];
-%! Mdl = fitcgam (x, y, "learningrate", 0.2, "interactions", interactions);
+%! Mdl = fitcgam (x, y, 'learningrate', 0.2, 'interactions', interactions);
 %! CMdl = compact (Mdl);
-%! [label, score] = predict (CMdl, x, "includeinteractions", true);
+%! [label, score] = predict (CMdl, x, 'includeinteractions', true);
 %! l = {'0'; '0'; '1'; '1'};
 %! s = [0.5106, 0.4894; 0.5135, 0.4865; 0.4864, 0.5136; 0.4847, 0.5153];
-%! assert (class (CMdl), "CompactClassificationGAM");
-%! assert ({CMdl.NumPredictors, CMdl.ResponseName}, {3, "Y"})
-%! assert (CMdl.ClassNames, {'0'; '1'})
-%! assert (CMdl.PredictorNames, {'x1', 'x2', 'x3'})
-%! assert (CMdl.ModelwInt.Intercept, 0)
-%! assert (label, l)
-%! assert (score, s, 1e-1)
+%! assert_equal (class (CMdl), "CompactClassificationGAM");
+%! assert_equal ({CMdl.NumPredictors, CMdl.ResponseName}, {3, 'Y'})
+%! assert_equal (CMdl.ClassNames, {'0'; '1'})
+%! assert_equal (CMdl.PredictorNames, {'x1', 'x2', 'x3'})
+%! assert_equal (CMdl.ModelwInt.Intercept, 0)
+%! assert_equal (label, l)
+%! assert_equal (score, s, 1e-1)
 
 ## Test input validation for predict method
 %!shared CMdl

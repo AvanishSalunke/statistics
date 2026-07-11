@@ -26,10 +26,10 @@
 ## @itemize @bullet
 ## @item
 ## @var{x} are the points at which to find the probability, where each row
-## corresponds to an observation. (@math{NxD} matrix)
+## corresponds to an observation. (@math{N*D} matrix)
 ##
 ## @item
-## @var{rho} is the correlation matrix. (@math{DxD} symmetric positive
+## @var{rho} is the correlation matrix. (@math{D*D} symmetric positive
 ## definite matrix)
 ##
 ## @item
@@ -44,7 +44,7 @@
 ## @itemize @bullet
 ## @item
 ## @var{y} is the probability density for each row of @var{x}.
-## (@math{Nx1} vector)
+## (@math{N*1} vector)
 ## @end itemize
 ##
 ## @subheading Examples
@@ -99,12 +99,12 @@ function y = mvtpdf (x, rho, df)
   end_try_catch
 
   df = df(:);
-  sqrt_det_sigma = prod(diag(U)); #square root of determinant of rho
+  sqrt_det_sigma = prod (diag (U)); #square root of determinant of rho
 
   ## Scale factor for PDF
-  c = (gamma((df+d)/2) ./ gamma(df/2)) ./ (sqrt_det_sigma * (df*pi).^(d/2));
+  c = (gamma ((df+d)/2) ./ gamma (df/2)) ./ (sqrt_det_sigma * (df*pi).^(d/2));
   #note: sumsq(U' \ x') is equivalent to the quadratic form x*inv(rho)*x'
-  y = c ./ ((1 + sumsq(U' \ x') ./ df') .^ ((df' + d)/2))';
+  y = c ./ ((1 + sumsq (U' \ x') ./ df') .^ ((df' + d)/2))';
 
 
 endfunction
@@ -119,18 +119,18 @@ endfunction
 %! X = [X1(:), X2(:)];
 %! y = mvtpdf (X, rho, df);
 %! surf (X1, X2, reshape (y, 25, 25));
-%! title ("Bivariate Student's t probability density function");
+%! title ('Bivariate Student''s t probability density function');
 
 ## Test results verified with R mvtnorm package dmvt function
 ## dmvt(x = c(0,0), rho = diag(2), log = FALSE)
-%!assert (mvtpdf ([0 0], eye(2), 1), 0.1591549, 1E-7)
+%!assert_equal (mvtpdf ([0 0], eye (2), 1), 0.1591549, 1E-7)
 ## dmvt(x = c(1,0), rho = matrix(c(1, 0.5, 0.5, 1), nrow=2, ncol=2), df = 2, log = FALSE)
-%!assert (mvtpdf ([1 0], [1 0.5; 0.5 1], 2), 0.06615947, 1E-7)
+%!assert_equal (mvtpdf ([1 0], [1 0.5; 0.5 1], 2), 0.06615947, 1E-7)
 ## dmvt(x = c(1,0.4,0), rho = matrix(c(1, 0.5, 0.3, 0.5, 1, 0.6, 0.3, 0.6, ...
 ## 1), nrow=3, ncol=3), df = 5, log = FALSE); dmvt(x = c(1.2,0.5,0.5), ...
 ## rho = matrix(c(1, 0.5, 0.3, 0.5, 1, 0.6, 0.3, 0.6, 1), nrow=3, ncol=3), ...
 ## df = 6, log = FALSE); dmvt(x = c(1.4,0.6,1), rho = matrix(c(1, 0.5, 0.3,...
 ## 0.5, 1, 0.6, 0.3, 0.6, 1), nrow=3, ncol=3), df = 7, log = FALSE)
-%!assert (mvtpdf ([1 0.4 0; 1.2 0.5 0.5; 1.4 0.6 1], ...
+%!assert_equal (mvtpdf ([1 0.4 0; 1.2 0.5 0.5; 1.4 0.6 1], ...
 %! [1 0.5 0.3; 0.5 1 0.6; 0.3 0.6 1], [5 6 7]), ...
 %! [0.04713313 0.03722421 0.02069011]', 1E-7)

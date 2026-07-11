@@ -56,8 +56,8 @@ function x = poissinv (p, lambda)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (lambda, "single"))
-    x = zeros (size (p), "single");
+  if (isa (p, 'single') || isa (lambda, 'single'))
+    x = zeros (size (p), 'single');
   else
     x = zeros (size (p));
   endif
@@ -204,26 +204,26 @@ endfunction
 %! x1 = poissinv (p, 13);
 %! x2 = poissinv (p, 4);
 %! x3 = poissinv (p, 10);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r')
 %! grid on
 %! ylim ([0, 20])
-%! legend ({"λ = 1", "λ = 4", "λ = 10"}, "location", "northwest")
-%! title ("Poisson iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x (number of occurrences)")
+%! legend ({'λ = 1', 'λ = 4', 'λ = 10'}, 'location', 'northwest')
+%! title ('Poisson iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x (number of occurrences)')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.5 1 2];
-%!assert (poissinv (p, ones (1,5)), [NaN 0 1 Inf NaN])
-%!assert (poissinv (p, 1), [NaN 0 1 Inf NaN])
-%!assert (poissinv (p, [1 0 NaN 1 1]), [NaN NaN NaN Inf NaN])
-%!assert (poissinv ([p(1:2) NaN p(4:5)], 1), [NaN 0 NaN Inf NaN])
+%!assert_equal (poissinv (p, ones (1,5)), [NaN 0 1 Inf NaN])
+%!assert_equal (poissinv (p, 1), [NaN 0 1 Inf NaN])
+%!assert_equal (poissinv (p, [1 0 NaN 1 1]), [NaN NaN NaN Inf NaN])
+%!assert_equal (poissinv ([p(1:2) NaN p(4:5)], 1), [NaN 0 NaN Inf NaN])
 
 ## Test class of input preserved
-%!assert (poissinv ([p, NaN], 1), [NaN 0 1 Inf NaN NaN])
-%!assert (poissinv (single ([p, NaN]), 1), single ([NaN 0 1 Inf NaN NaN]))
-%!assert (poissinv ([p, NaN], single (1)), single ([NaN 0 1 Inf NaN NaN]))
+%!assert_equal (poissinv ([p, NaN], 1), [NaN 0 1 Inf NaN NaN])
+%!assert_equal (poissinv (single ([p, NaN]), 1), single ([NaN 0 1 Inf NaN NaN]))
+%!assert_equal (poissinv ([p, NaN], single (1)), single ([NaN 0 1 Inf NaN NaN]))
 
 ## Test input validation
 %!error<poissinv: function called with too few input arguments.> poissinv ()

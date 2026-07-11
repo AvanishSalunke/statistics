@@ -67,10 +67,10 @@ function [r, T] = mvnrnd (mu, sigma, N, T)
   endif
 
   ## Get data type
-  if (isa (mu, "single") || isa (sigma, "single"))
-    is_class = "single";
+  if (isa (mu, 'single') || isa (sigma, 'single'))
+    is_class = 'single';
   else
-    is_class = "double";
+    is_class = 'double';
   endif
 
   ## Check whether sigma is passed as a diagonal or a matrix
@@ -156,12 +156,12 @@ function [r, T] = mvnrnd (mu, sigma, N, T)
         T = zeros (sd, is_class);
       endif
       if (is_diag)
-        sigma = reshape(sigma,sd(2),sd(3))';
+        sigma = reshape (sigma,sd(2),sd(3))';
         ## Check sigma for invalid values
         if (any (sigma(:) <= 0))
           error ("mvnpdf: SIGMA diagonals contain negative or zero values.");
         endif
-        R = sqrt(sigma);
+        R = sqrt (sigma);
         r = bsxfun (@times, randn (rm, cm, is_class), R) + mu;
         if (nargout > 1)
           for i = 1:rm
@@ -200,5 +200,5 @@ endfunction
 %!error<mvnrnd: wrong size of SIGMA.> mvnrnd (ones (1, 3), ones (1, 2, 3, 4))
 
 ## Output validation tests
-%!assert (size (mvnrnd ([2, 3, 4], [2, 2, 2])), [1, 3])
-%!assert (size (mvnrnd ([2, 3, 4], [2, 2, 2], 10)), [10, 3])
+%!assert_equal (size (mvnrnd ([2, 3, 4], [2, 2, 2])), [1, 3])
+%!assert_equal (size (mvnrnd ([2, 3, 4], [2, 2, 2], 10)), [10, 3])

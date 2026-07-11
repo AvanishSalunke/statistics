@@ -62,9 +62,9 @@ function [T, p] = cholcov (sigma, flag)
   ## Check if sigma is a sparse matrix
   is_sparse = issparse (sigma);
   ## Check if sigma is single or double class
-  is_type = "double";
-  if (isa (sigma, "single"))
-    is_type = "single";
+  is_type = 'double';
+  if (isa (sigma, 'single'))
+    is_type = 'single';
   endif
   ## Check if sigma is square and symmetric
   [col, row] = size (sigma);
@@ -80,7 +80,7 @@ function [T, p] = cholcov (sigma, flag)
         [~, EIGMAX] = max (abs (V), [], 1);
         neg_idx = (V(EIGMAX + (0:row:(col-1)*row)) < 0);
         V(:,neg_idx) = -V(:,neg_idx);
-        LAMBDA = diag(LAMBDA);
+        LAMBDA = diag (LAMBDA);
         Tol = eps (max (LAMBDA)) * length (LAMBDA);
         t = (abs (LAMBDA) > Tol);
         LAMBDA = LAMBDA(t);
@@ -100,7 +100,7 @@ function [T, p] = cholcov (sigma, flag)
     p = NaN (is_type);
   endif
   if (is_sparse)
-    T = sparse(T);
+    T = sparse (T);
   endif
 endfunction
 
@@ -112,5 +112,5 @@ endfunction
 %!test
 %! C1 = [2, 1, 1, 2; 1, 2, 1, 2; 1, 1, 2, 2; 2, 2, 2, 3];
 %! T = cholcov (C1);
-%! assert (C1, T'*T, 1e-15 * ones (size (C1)));
+%! assert_equal (C1, T'*T, 1e-15 * ones (size (C1)));
 

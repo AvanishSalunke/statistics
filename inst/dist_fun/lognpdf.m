@@ -66,14 +66,14 @@ function y = lognpdf (x, mu = 0, sigma = 1)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (mu, "single") || isa (sigma, "single"))
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (mu, 'single') || isa (sigma, 'single'))
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
 
   ## Compute lognormal PDF
-  k = isnan (x) | !(sigma > 0) | !(sigma < Inf);
+  k = isnan (x) | ! (sigma > 0) | ! (sigma < Inf);
   y(k) = NaN;
 
   k = (x > 0) & (x < Inf) & (sigma > 0) & (sigma < Inf);
@@ -91,30 +91,30 @@ endfunction
 %! y1 = lognpdf (x, 0, 1);
 %! y2 = lognpdf (x, 0, 0.5);
 %! y3 = lognpdf (x, 0, 0.25);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r')
 %! grid on
 %! ylim ([0, 2])
-%! legend ({"μ = 0, σ = 1", "μ = 0, σ = 0.5", "μ = 0, σ = 0.25"}, ...
-%!          "location", "northeast")
-%! title ("Log-normal PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'μ = 0, σ = 1', 'μ = 0, σ = 0.5', 'μ = 0, σ = 0.25'}, ...
+%!          'location', 'northeast')
+%! title ('Log-normal PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-1 0 e Inf];
 %! y = [0, 0, 1/(e*sqrt(2*pi)) * exp(-1/2), 0];
-%!assert (lognpdf (x, zeros (1,4), ones (1,4)), y, eps)
-%!assert (lognpdf (x, 0, ones (1,4)), y, eps)
-%!assert (lognpdf (x, zeros (1,4), 1), y, eps)
-%!assert (lognpdf (x, [0 1 NaN 0], 1), [0 0 NaN y(4)], eps)
-%!assert (lognpdf (x, 0, [0 NaN Inf 1]), [NaN NaN NaN y(4)], eps)
-%!assert (lognpdf ([x, NaN], 0, 1), [y, NaN], eps)
+%!assert_equal (lognpdf (x, zeros (1,4), ones (1,4)), y, eps)
+%!assert_equal (lognpdf (x, 0, ones (1,4)), y, eps)
+%!assert_equal (lognpdf (x, zeros (1,4), 1), y, eps)
+%!assert_equal (lognpdf (x, [0 1 NaN 0], 1), [0 0 NaN y(4)], eps)
+%!assert_equal (lognpdf (x, 0, [0 NaN Inf 1]), [NaN NaN NaN y(4)], eps)
+%!assert_equal (lognpdf ([x, NaN], 0, 1), [y, NaN], eps)
 
 ## Test class of input preserved
-%!assert (lognpdf (single ([x, NaN]), 0, 1), single ([y, NaN]), eps ("single"))
-%!assert (lognpdf ([x, NaN], single (0), 1), single ([y, NaN]), eps ("single"))
-%!assert (lognpdf ([x, NaN], 0, single (1)), single ([y, NaN]), eps ("single"))
+%!assert_equal (lognpdf (single ([x, NaN]), 0, 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (lognpdf ([x, NaN], single (0), 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (lognpdf ([x, NaN], 0, single (1)), single ([y, NaN]), eps ('single'))
 
 ## Test input validation
 %!error lognpdf ()

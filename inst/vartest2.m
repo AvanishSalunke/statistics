@@ -53,28 +53,28 @@
 ## @code{[@var{h}, @var{pval}, @var{ci}, @var{stats}] = vartest2 (@dots{})}
 ## returns a structure with the following fields:
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @item @tab @qcode{fstat} @tab the value of the test statistic
-## @item @tab @qcode{df1} @tab the numerator degrees of freedom of the test
-## @item @tab @qcode{df2} @tab the denominator degrees of freedom of the test
+## @multitable @columnfractions 0.2 0.75
+## @item @qcode{fstat} @tab the value of the test statistic
+## @item @qcode{df1} @tab the numerator degrees of freedom of the test
+## @item @qcode{df2} @tab the denominator degrees of freedom of the test
 ## @end multitable
 ##
 ## @code{[@dots{}] = vartest2 (@dots{}, @var{name}, @var{value}), @dots{}}
 ## specifies one or more of the following name/value pairs:
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @headitem @tab Name @tab Value
-## @item @tab @qcode{"alpha"} @tab the significance level. Default is 0.05.
+## @multitable @columnfractions 0.2 0.75
+## @headitem Name @tab Value
+## @item @qcode{'alpha'} @tab the significance level. Default is 0.05.
 ##
-## @item @tab @qcode{"dim"} @tab dimension to work along a matrix or an N-D
+## @item @qcode{'dim'} @tab dimension to work along a matrix or an N-D
 ## array.
 ##
-## @item @tab @qcode{"tail"} @tab a string specifying the alternative hypothesis
+## @item @qcode{'tail'} @tab a string specifying the alternative hypothesis
 ## @end multitable
-## @multitable @columnfractions 0.1 0.15 0.75
-## @item @tab @qcode{"both"} @tab variance is not @var{v} (two-tailed, default)
-## @item @tab @qcode{"left"} @tab variance is less than @var{v} (left-tailed)
-## @item @tab @qcode{"right"} @tab variance is greater than @var{v}
+## @multitable @columnfractions 0.15 0.75
+## @item @qcode{'both'} @tab variance is not @var{v} (two-tailed, default)
+## @item @qcode{'left'} @tab variance is less than @var{v} (left-tailed)
+## @item @qcode{'right'} @tab variance is greater than @var{v}
 ## (right-tailed)
 ## @end multitable
 ##
@@ -87,7 +87,7 @@ function [h, pval, ci, stats] = vartest2 (x, y, varargin)
   if (nargin < 2)
     error ("vartest2: too few input arguments.");
   endif
-  if (isscalar (x) || isscalar(y))
+  if (isscalar (x) || isscalar (y))
     error ("vartest2: X and Y must be vectors or matrices or N-D arrays.");
   endif
   ## If X and Y are vectors make them the same orientation
@@ -100,25 +100,25 @@ function [h, pval, ci, stats] = vartest2 (x, y, varargin)
   endif
   ## Add defaults
   alpha = 0.05;
-  tail = "both";
+  tail = 'both';
   dim = [];
   if (nargin > 2 && mod (numel (varargin(:)), 2) == 0)
     for idx = 3:2:nargin
       name = varargin{idx-2};
       value = varargin{idx-1};
       switch (lower (name))
-        case "alpha"
+        case 'alpha'
           alpha = value;
           if (! isscalar (alpha) || ! isnumeric (alpha) || ...
                 alpha <= 0 || alpha >= 1)
             error ("vartest2: invalid value for alpha.");
           endif
-        case "tail"
+        case 'tail'
           tail = value;
-          if (! any (strcmpi (tail, {"both", "left", "right"})))
+          if (! any (strcmpi (tail, {'both', 'left', 'right'})))
             error ("vartest2: invalid value for tail.");
           endif
-        case "dim"
+        case 'dim'
           dim = value;
           if (! isscalar (dim) || ! ismember (dim, 1:ndims (x)))
             error ("vartest2: invalid value for operating dimension.");
@@ -143,8 +143,8 @@ function [h, pval, ci, stats] = vartest2 (x, y, varargin)
     error ("vartest2: input size mismatch.");
   endif
   ## Compute statistics for each sample
-  [df1, x_var] = getstats(x,dim);
-  [df2, y_var] = getstats(y,dim);
+  [df1, x_var] = getstats (x,dim);
+  [df2, y_var] = getstats (y,dim);
   ## Compute F statistic
   F = NaN (size (x_var));
   t1 = (y_var > 0);
@@ -152,20 +152,20 @@ function [h, pval, ci, stats] = vartest2 (x, y, varargin)
   t2 = (x_var > 0) & ! t1;
   F(t2) = Inf;
   ## Calculate p-value for the test and confidence intervals (if requested)
-  if (strcmpi (tail, "both"))
+  if (strcmpi (tail, 'both'))
     pval = 2 * min (fcdf (F, df1, df2), 1 - fcdf (F, df1, df2));
     if (nargout > 2)
       ci = cat (dim, F .* finv (alpha / 2, df2, df1), ...
                      F ./ finv (alpha / 2, df1, df2));
     endif
-  elseif (strcmpi (tail, "right"))
+  elseif (strcmpi (tail, 'right'))
     Ftmp = F;
     Ftmp(Ftmp < 0) = 0;
     pval = fcdf (1 ./ Ftmp, df2, df1);
     if (nargout > 2)
       ci = cat (dim, F .* finv (alpha, df2, df1), Inf (size (F)));
     endif
-  elseif (strcmpi (tail, "left"))
+  elseif (strcmpi (tail, 'left'))
     pval = fcdf (F, df1, df2);
     if (nargout > 2)
       ci = cat (dim, zeros (size (F)), F ./ finv (alpha, df1, df2));
@@ -176,7 +176,7 @@ function [h, pval, ci, stats] = vartest2 (x, y, varargin)
   h(isnan (pval)) = NaN;
   ## Create stats output structure (if requested)
   if (nargout > 3)
-    stats = struct ("fstat", F, "df1", df1, "df2", df2);
+    stats = struct ('fstat', F, 'df1', df1, 'df2', df2);
   endif
 
 endfunction
@@ -197,7 +197,7 @@ function [df, data_var] = getstats (data, dim)
      rep = ones (1, ndims (data));
      rep(dim) = size (data, dim);
      c_data = data - repmat (m_data, rep);
-  end
+  endif
   c_data(is_nan) = 0;
   data_var = sum (abs (c_data) .^ 2,dim);
   t = (df > 0);
@@ -206,7 +206,7 @@ function [df, data_var] = getstats (data, dim)
   ## Make df a scalar if possible
   if (numel (df) > 1 && all (df(:) == df(1)))
      df = df(1);
-  end
+  endif
 endfunction
 
 ## Test input validation
@@ -215,53 +215,53 @@ endfunction
 %!error<vartest2: X and Y must be vectors or matrices or N-D arrays.> ...
 %! vartest2 (rand (20,1), 5);
 %!error<vartest2: invalid value for alpha.> ...
-%! vartest2 (rand (20,1), rand (25,1)*2, "alpha", 0);
+%! vartest2 (rand (20,1), rand (25,1)*2, 'alpha', 0);
 %!error<vartest2: invalid value for alpha.> ...
-%! vartest2 (rand (20,1), rand (25,1)*2, "alpha", 1.2);
+%! vartest2 (rand (20,1), rand (25,1)*2, 'alpha', 1.2);
 %!error<vartest2: invalid value for alpha.> ...
-%! vartest2 (rand (20,1), rand (25,1)*2, "alpha", "some");
+%! vartest2 (rand (20,1), rand (25,1)*2, 'alpha', 'some');
 %!error<vartest2: invalid value for alpha.> ...
-%! vartest2 (rand (20,1), rand (25,1)*2, "alpha", [0.05, 0.001]);
+%! vartest2 (rand (20,1), rand (25,1)*2, 'alpha', [0.05, 0.001]);
 %!error<vartest2: invalid value for tail.> ...
-%! vartest2 (rand (20,1), rand (25,1)*2, "tail", [0.05, 0.001]);
+%! vartest2 (rand (20,1), rand (25,1)*2, 'tail', [0.05, 0.001]);
 %!error<vartest2: invalid value for tail.> ...
-%! vartest2 (rand (20,1), rand (25,1)*2, "tail", "some");
+%! vartest2 (rand (20,1), rand (25,1)*2, 'tail', 'some');
 %!error<vartest2: invalid value for operating dimension.> ...
-%! vartest2 (rand (20,1), rand (25,1)*2, "dim", 3);
+%! vartest2 (rand (20,1), rand (25,1)*2, 'dim', 3);
 %!error<vartest2: invalid value for operating dimension.> ...
-%! vartest2 (rand (20,1), rand (25,1)*2, "alpha", 0.001, "dim", 3);
+%! vartest2 (rand (20,1), rand (25,1)*2, 'alpha', 0.001, 'dim', 3);
 %!error<vartest2: invalid name for optional arguments.> ...
-%! vartest2 (rand (20,1), rand (25,1)*2, "some", 3);
+%! vartest2 (rand (20,1), rand (25,1)*2, 'some', 3);
 %!error<vartest2: optional arguments must be in name/value pairs.> ...
-%! vartest2 (rand (20,1), rand (25,1)*2, "some");
+%! vartest2 (rand (20,1), rand (25,1)*2, 'some');
 ## Test results
 %!test
 %! load carsmall
 %! [h, pval, ci, stat] = vartest2 (MPG(Model_Year==82), MPG(Model_Year==76));
-%! assert (h, 0);
-%! assert (pval, 0.6288022362718455, 1e-13);
-%! assert (ci, [0.4139; 1.7193], 1e-4);
-%! assert (stat.fstat, 0.8384, 1e-4);
-%! assert (stat.df1, 30);
-%! assert (stat.df2, 33);
+%! assert_equal (h, 0);
+%! assert_equal (pval, 0.6288022362718455, 1e-13);
+%! assert_equal (ci, [0.4139; 1.7193], 1e-4);
+%! assert_equal (stat.fstat, 0.8384, 1e-4);
+%! assert_equal (stat.df1, 30);
+%! assert_equal (stat.df2, 33);
 %!test
 %! load carsmall
 %! [h, pval, ci, stat] = vartest2 (MPG(Model_Year==82), MPG(Model_Year==76), ...
-%!                                 "tail", "left");
-%! assert (h, 0);
-%! assert (pval, 0.314401118135922, 1e-13);
-%! assert (ci, [0; 1.5287], 1e-4);
-%! assert (stat.fstat, 0.8384, 1e-4);
-%! assert (stat.df1, 30);
-%! assert (stat.df2, 33);
+%!                                 'tail', 'left');
+%! assert_equal (h, 0);
+%! assert_equal (pval, 0.314401118135922, 1e-13);
+%! assert_equal (ci, [0; 1.5287], 1e-4);
+%! assert_equal (stat.fstat, 0.8384, 1e-4);
+%! assert_equal (stat.df1, 30);
+%! assert_equal (stat.df2, 33);
 %!test
 %! load carsmall
 %! [h, pval, ci, stat] = vartest2 (MPG(Model_Year==82), MPG(Model_Year==76), ...
-%!                                 "tail", "right");
-%! assert (h, 0);
-%! assert (pval, 0.685598881864077, 1e-13);
-%! assert (ci, [0.4643; Inf], 1e-4);
-%! assert (stat.fstat, 0.8384, 1e-4);
-%! assert (stat.df1, 30);
-%! assert (stat.df2, 33);
+%!                                 'tail', 'right');
+%! assert_equal (h, 0);
+%! assert_equal (pval, 0.685598881864077, 1e-13);
+%! assert_equal (ci, [0.4643; Inf], 1e-4);
+%! assert_equal (stat.fstat, 0.8384, 1e-4);
+%! assert_equal (stat.df1, 30);
+%! assert_equal (stat.df2, 33);
 

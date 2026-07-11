@@ -54,7 +54,7 @@ function y = loglpdf (x, mu, sigma)
   endif
 
   ## Check for common size of X, MU, and SIGMA
-  if (! isscalar (x) || ! isscalar (mu) || ! isscalar(sigma))
+  if (! isscalar (x) || ! isscalar (mu) || ! isscalar (sigma))
     [retval, x, mu, sigma] = common_size (x, mu, sigma);
     if (retval > 0)
       error ("loglpdf: X, MU, and SIGMA must be of common size or scalars.");
@@ -77,8 +77,8 @@ function y = loglpdf (x, mu, sigma)
   y(x <= 0) = 0;
 
   ## Check for class type
-  if (isa (x, "single") || isa (mu, "single") || isa (sigma, "single"));
-    y = cast (y, "single");
+  if (isa (x, 'single') || isa (mu, 'single') || isa (sigma, 'single'));
+    y = cast (y, 'single');
   endif
 
 endfunction
@@ -91,28 +91,28 @@ endfunction
 %! y3 = loglpdf (x, log (1), 1/2);
 %! y4 = loglpdf (x, log (1), 1/4);
 %! y5 = loglpdf (x, log (1), 1/8);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-c", x, y5, "-m")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-c', x, y5, '-m')
 %! grid on
 %! ylim ([0,3])
-%! legend ({"σ = 2 (β = 0.5)", "σ = 1 (β = 1)", "σ = 0.5 (β = 2)", ...
-%!          "σ = 0.25 (β = 4)", "σ = 0.125 (β = 8)"}, "location", "northeast")
-%! title ("Log-logistic PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
-%! text (0.1, 2.8, "μ = 0 (α = 1), values of σ (β) as shown in legend")
+%! legend ({'σ = 2 (β = 0.5)', 'σ = 1 (β = 1)', 'σ = 0.5 (β = 2)', ...
+%!          'σ = 0.25 (β = 4)', 'σ = 0.125 (β = 8)'}, 'location', 'northeast')
+%! title ('Log-logistic PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
+%! text (0.1, 2.8, 'μ = 0 (α = 1), values of σ (β) as shown in legend')
 
 ## Test output
 %!shared out1, out2
 %! out1 = [0, 0, 1, 0.2500, 0.1111, 0.0625, 0.0400, 0.0278, 0];
 %! out2 = [0, 0, 0.0811, 0.0416, 0.0278, 0.0207, 0.0165, 0];
-%!assert (loglpdf ([-1,0,realmin,1:5,Inf], 0, 1), out1, 1e-4)
-%!assert (loglpdf ([-1,0,realmin,1:5,Inf], 0, 1), out1, 1e-4)
-%!assert (loglpdf ([-1:5,Inf], 1, 3), out2, 1e-4)
+%!assert_equal (loglpdf ([-1,0,realmin,1:5,Inf], 0, 1), out1, 1e-4)
+%!assert_equal (loglpdf ([-1,0,realmin,1:5,Inf], 0, 1), out1, 1e-4)
+%!assert_equal (loglpdf ([-1:5,Inf], 1, 3), out2, 1e-4)
 
 ## Test class of input preserved
-%!assert (class (loglpdf (single (1), 2, 3)), "single")
-%!assert (class (loglpdf (1, single (2), 3)), "single")
-%!assert (class (loglpdf (1, 2, single (3))), "single")
+%!assert_equal (class (loglpdf (single (1), 2, 3)), "single")
+%!assert_equal (class (loglpdf (1, single (2), 3)), "single")
+%!assert_equal (class (loglpdf (1, 2, single (3))), "single")
 
 ## Test input validation
 %!error<loglpdf: function called with too few input arguments.> loglpdf (1)

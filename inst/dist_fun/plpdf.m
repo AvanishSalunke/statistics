@@ -66,8 +66,8 @@ function y = plpdf (data, x, Fx)
   Fx = Fx(:)';
 
   ## Check for class type
-  if (isa (data, "single") || isa (x, "single") || isa (Fx, "single"));
-    y = zeros (size (data), "single");
+  if (isa (data, 'single') || isa (x, 'single') || isa (Fx, 'single'));
+    y = zeros (size (data), 'single');
   else
     y = zeros (size (data));
   endif
@@ -76,7 +76,7 @@ function y = plpdf (data, x, Fx)
   [~, bin] = histc (data, [-Inf, x, Inf]);
 
   ## Compute piecewise densities
-  dense = diff(Fx) ./ diff(x);
+  dense = diff (Fx) ./ diff (x);
   bin_d = [0, dense, 0];
 
   ## Fix densities
@@ -85,7 +85,7 @@ function y = plpdf (data, x, Fx)
   y(bin>0) = bin_d(bin(bin>0));
 
   ## Force invalid data to NaN
-  y(isnan(data)) = NaN;
+  y(isnan (data)) = NaN;
 
 endfunction
 
@@ -98,24 +98,24 @@ endfunction
 %! Fx2 = [0, 0.1, 0.3, 0.6, 0.9, 1];
 %! y1 = plpdf (data, x1, Fx1);
 %! y2 = plpdf (data, x2, Fx2);
-%! plot (data, y1, "-b", data, y2, "g")
+%! plot (data, y1, '-b', data, y2, 'g')
 %! grid on
 %! ylim ([0, 0.6])
 %! xlim ([0, 10])
-%! legend ({"x1, Fx1", "x2, Fx2"}, "location", "northeast")
-%! title ("Piecewise linear CDF")
-%! xlabel ("values in data")
-%! ylabel ("density")
+%! legend ({'x1, Fx1', 'x2, Fx2'}, 'location', 'northeast')
+%! title ('Piecewise linear CDF')
+%! xlabel ('values in data')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, Fx
 %! x = [0, 1, 3, 4, 7, 10];
 %! Fx = [0, 0.2, 0.5, 0.6, 0.7, 1];
-%!assert (plpdf (0.5, x, Fx), 0.2, eps);
-%!assert (plpdf (1.5, x, Fx), 0.15, eps);
-%!assert (plpdf (3.5, x, Fx), 0.1, eps);
-%!assert (plpdf (5, x, Fx), 0.1/3, eps);
-%!assert (plpdf (8, x, Fx), 0.1, eps);
+%!assert_equal (plpdf (0.5, x, Fx), 0.2, eps);
+%!assert_equal (plpdf (1.5, x, Fx), 0.15, eps);
+%!assert_equal (plpdf (3.5, x, Fx), 0.1, eps);
+%!assert_equal (plpdf (5, x, Fx), 0.1/3, eps);
+%!assert_equal (plpdf (8, x, Fx), 0.1, eps);
 
 ## Test input validation
 %!error<plpdf: function called with too few input arguments.> plpdf ()

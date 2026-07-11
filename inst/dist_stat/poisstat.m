@@ -66,12 +66,12 @@ endfunction
 ## Input validation tests
 %!error<poisstat: function called with too few input arguments.> poisstat ()
 %!error<poisstat: SIGMA must be numeric.> poisstat ({})
-%!error<poisstat: SIGMA must be numeric.> poisstat ("")
+%!error<poisstat: SIGMA must be numeric.> poisstat ('')
 %!error<poisstat: SIGMA must not be complex.> poisstat (i)
 
 ## Output validation tests
 %!test
 %! lambda = 1 ./ (1:6);
 %! [m, v] = poisstat (lambda);
-%! assert (m, lambda);
-%! assert (v, lambda);
+%! assert_equal (m, lambda);
+%! assert_equal (v, lambda);

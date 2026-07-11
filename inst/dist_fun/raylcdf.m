@@ -18,7 +18,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {statistics} {@var{p} =} raylcdf (@var{x}, @var{sigma})
-## @deftypefnx {statistics} {@var{p} =} raylcdf (@var{x}, @var{sigma}, @qcode{"upper"})
+## @deftypefnx {statistics} {@var{p} =} raylcdf (@var{x}, @var{sigma}, @qcode{'upper'})
 ##
 ## Rayleigh cumulative distribution function (CDF).
 ##
@@ -45,9 +45,9 @@ function p = raylcdf (x, sigma, uflag)
   endif
 
   ## Check for "upper" flag
-  if (nargin == 3 && strcmpi (uflag, "upper"))
+  if (nargin == 3 && strcmpi (uflag, 'upper'))
     uflag = true;
-  elseif (nargin == 3  && ! strcmpi (uflag, "upper"))
+  elseif (nargin == 3  && ! strcmpi (uflag, 'upper'))
     error ("raylcdf: invalid argument for upper tail.");
   else
     uflag = false;
@@ -67,8 +67,8 @@ function p = raylcdf (x, sigma, uflag)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (sigma, "single"));
-    p = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (sigma, 'single'));
+    p = zeros (size (x), 'single');
   else
     p = zeros (size (x));
   endif
@@ -77,7 +77,7 @@ function p = raylcdf (x, sigma, uflag)
   k0 = sigma > 0 & x <= 0;
   if (uflag && any (k0(:)))
     p(k0) = 1;
-  end
+  endif
 
   ## Calculate Rayleigh CDF for valid parameter and data range
   k = sigma > 0 & x > 0;
@@ -102,14 +102,14 @@ endfunction
 %! p3 = raylcdf (x, 2);
 %! p4 = raylcdf (x, 3);
 %! p5 = raylcdf (x, 4);
-%! plot (x, p1, "-b", x, p2, "g", x, p3, "-r", x, p4, "-m", x, p5, "-k")
+%! plot (x, p1, '-b', x, p2, 'g', x, p3, '-r', x, p4, '-m', x, p5, '-k')
 %! grid on
 %! ylim ([0, 1])
-%! legend ({"σ = 0.5", "σ = 1", "σ = 2", ...
-%!          "σ = 3", "σ = 4"}, "location", "southeast")
-%! title ("Rayleigh CDF")
-%! xlabel ("values in x")
-%! ylabel ("probability")
+%! legend ({'σ = 0.5', 'σ = 1', 'σ = 2', ...
+%!          'σ = 3', 'σ = 4'}, 'location', 'southeast')
+%! title ('Rayleigh CDF')
+%! xlabel ('values in x')
+%! ylabel ('probability')
 
 ## Test output
 %!test
@@ -117,22 +117,22 @@ endfunction
 %! sigma = 1:6;
 %! p = raylcdf (x, sigma);
 %! expected_p = [0.0000, 0.0308, 0.0540, 0.0679, 0.0769, 0.0831];
-%! assert (p, expected_p, 0.001);
+%! assert_equal (p, expected_p, 0.001);
 %!test
 %! x = 0:0.5:2.5;
 %! p = raylcdf (x, 0.5);
 %! expected_p = [0.0000, 0.3935, 0.8647, 0.9889, 0.9997, 1.0000];
-%! assert (p, expected_p, 0.001);
+%! assert_equal (p, expected_p, 0.001);
 %!shared x, p
 %! x = [-1, 0, 1, 2, Inf];
 %! p = [0, 0, 0.39346934028737, 0.86466471676338, 1];
-%!assert (raylcdf (x, 1), p, 1e-14)
-%!assert (raylcdf (x, 1, "upper"), 1 - p, 1e-14)
+%!assert_equal (raylcdf (x, 1), p, 1e-14)
+%!assert_equal (raylcdf (x, 1, 'upper'), 1 - p, 1e-14)
 
 ## Test input validation
 %!error<raylcdf: function called with too few input arguments.> raylcdf ()
 %!error<raylcdf: function called with too few input arguments.> raylcdf (1)
-%!error<raylcdf: invalid argument for upper tail.> raylcdf (1, 2, "uper")
+%!error<raylcdf: invalid argument for upper tail.> raylcdf (1, 2, 'uper')
 %!error<raylcdf: invalid argument for upper tail.> raylcdf (1, 2, 3)
 %!error<raylcdf: X and SIGMA must be of common size or scalars.> ...
 %! raylcdf (ones (3), ones (2))

@@ -36,20 +36,20 @@
 ## samples are roughly the same) we need to use this function.
 ##
 ## @subheading Arguments
-## @multitable @columnfractions 0.1 0.01 0.10 0.01 0.78
-## @headitem Variable @tab @tab Type @tab @tab Description
-## @item @var{X} @tab @tab int vector @tab @tab sample frequencies bins.
-## @item @var{N} @tab @tab int scalar @tab @tab Population size that was sampled
+## @multitable @columnfractions 0.1 0.10 0.78
+## @headitem Variable @tab Type @tab Description
+## @item @var{X} @tab int vector @tab sample frequencies bins.
+## @item @var{N} @tab int scalar @tab Population size that was sampled
 ## by @var{X}.  If @qcode{N < sum (@var{X})}, infinite number assumed.
-## @item @var{b} @tab @tab real vector @tab @tab confidence interval. If vector,
-## it should be the size of @var{X} containing confidence interval for each cells.
-## If scalar, each cell will have the same value of b unless it is zero or -1.
-## If value is 0, @var{b} = 0.02 is assumed which is standard choice at
+## @item @var{b} @tab real vector @tab confidence interval. If vector,
+## it should be the size of @var{X} containing confidence interval for each
+## cells. If scalar, each cell will have the same value of b unless it is zero
+## or -1. If value is 0, @var{b} = 0.02 is assumed which is standard choice at
 ## elections otherwise it is calculated in a way that one sample in a cell
 ## alteration defines the confidence interval.
-## @item @var{method} @tab @tab string @tab @tab An optional argument
+## @item @var{method} @tab string @tab An optional argument
 ## for defining the calculation method.  Available choices are
-## @qcode{"bromaghin"} (default), @qcode{"cochran"}, and @qcode{agresti_cull}.
+## @qcode{'bromaghin'} (default), @qcode{'cochran'}, and @qcode{agresti_cull}.
 ## @end multitable
 ##
 ## Note!  The @qcode{agresti_cull} method is not exactly the solution at
@@ -87,7 +87,7 @@
 ##
 ## @end deftypefn
 
-function CL = cl_multinom (X, N, b = 0.05, method = "bromaghin")
+function CL = cl_multinom (X, N, b = 0.05, method = 'bromaghin')
 
   if (nargin < 2 || nargin > 4)
     print_usage;
@@ -124,16 +124,16 @@ function CL = cl_multinom (X, N, b = 0.05, method = "bromaghin")
   beta = p .* (1 - p);
 
   switch lower (method)
-    case "cochran"
+    case 'cochran'
       t = sqrt (fpc * nn * bb ./ beta);
       alpha = (1 - normcdf (t)) * 2;
 
-    case "bromaghin"
+    case 'bromaghin'
       t = sqrt (fpc * (nn * 2 * bb ) ./ ...
                (beta - 2 * bb + sqrt (beta .* beta - bb .* (4 * beta - 1))));
       alpha = (1 - normcdf (t)) * 2;
 
-    case "agresti_cull"
+    case 'agresti_cull'
       ts = fpc * nn * bb ./ beta ;
       if (k <= 2)
         alpha = 1 - chi2cdf (ts, k - 1); # adjusted Wilson interval
@@ -144,7 +144,7 @@ function CL = cl_multinom (X, N, b = 0.05, method = "bromaghin")
       error ("cl_multinom: unknown calculation type '%s'.", method);
   endswitch
 
-  CL = 1 - max( alpha );
+  CL = 1 - max ( alpha );
 
 endfunction
 
@@ -157,4 +157,4 @@ endfunction
 %!error<cl_multinom: argument method must be a string.> ...
 %! cl_multinom (1, 2, 3, 4);
 %!error<cl_multinom: unknown calculation type.> ...
-%! cl_multinom (1, 2, 3, "some string");
+%! cl_multinom (1, 2, 3, 'some string');

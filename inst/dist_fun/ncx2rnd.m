@@ -35,7 +35,8 @@
 ## also be specified with a row vector of dimensions, @var{sz}.
 ##
 ## Further information about the noncentral chi-squared distribution can be
-## found at @url{https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution}
+## found at
+## @url{https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution}
 ##
 ## @seealso{ncx2cdf, ncx2inv, ncx2pdf, ncx2stat}
 ## @end deftypefn
@@ -92,10 +93,10 @@ function r = ncx2rnd (df, lambda, varargin)
   endif
 
   ## Check for class type
-  if (isa (df, "single") || isa (lambda, "single"));
-    cls = "single";
+  if (isa (df, 'single') || isa (lambda, 'single'));
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ## Return NaNs for out of range values of DF and LAMBDA
@@ -121,27 +122,27 @@ function r = ncx2rnd (df, lambda, varargin)
 endfunction
 
 ## Test output
-%!assert (size (ncx2rnd (1, 1)), [1, 1])
-%!assert (size (ncx2rnd (1, ones (2, 1))), [2, 1])
-%!assert (size (ncx2rnd (1, ones (2, 2))), [2, 2])
-%!assert (size (ncx2rnd (ones (2, 1), 1)), [2, 1])
-%!assert (size (ncx2rnd (ones (2, 2), 1)), [2, 2])
-%!assert (size (ncx2rnd (1, 1, 3)), [3, 3])
-%!assert (size (ncx2rnd (1, 1, [4, 1])), [4, 1])
-%!assert (size (ncx2rnd (1, 1, 4, 1)), [4, 1])
-%!assert (size (ncx2rnd (1, 1, 4, 1, 5)), [4, 1, 5])
-%!assert (size (ncx2rnd (1, 1, 0, 1)), [0, 1])
-%!assert (size (ncx2rnd (1, 1, 1, 0)), [1, 0])
-%!assert (size (ncx2rnd (1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
-%!assert (size (ncx2rnd (1, 1, [])), [0, 0])
-%!assert (size (ncx2rnd (1, 1, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (ncx2rnd (1, 1)), [1, 1])
+%!assert_equal (size (ncx2rnd (1, ones (2, 1))), [2, 1])
+%!assert_equal (size (ncx2rnd (1, ones (2, 2))), [2, 2])
+%!assert_equal (size (ncx2rnd (ones (2, 1), 1)), [2, 1])
+%!assert_equal (size (ncx2rnd (ones (2, 2), 1)), [2, 2])
+%!assert_equal (size (ncx2rnd (1, 1, 3)), [3, 3])
+%!assert_equal (size (ncx2rnd (1, 1, [4, 1])), [4, 1])
+%!assert_equal (size (ncx2rnd (1, 1, 4, 1)), [4, 1])
+%!assert_equal (size (ncx2rnd (1, 1, 4, 1, 5)), [4, 1, 5])
+%!assert_equal (size (ncx2rnd (1, 1, 0, 1)), [0, 1])
+%!assert_equal (size (ncx2rnd (1, 1, 1, 0)), [1, 0])
+%!assert_equal (size (ncx2rnd (1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
+%!assert_equal (size (ncx2rnd (1, 1, [])), [0, 0])
+%!assert_equal (size (ncx2rnd (1, 1, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (ncx2rnd (1, 1)), "double")
-%!assert (class (ncx2rnd (1, single (1))), "single")
-%!assert (class (ncx2rnd (1, single ([1, 1]))), "single")
-%!assert (class (ncx2rnd (single (1), 1)), "single")
-%!assert (class (ncx2rnd (single ([1, 1]), 1)), "single")
+%!assert_equal (class (ncx2rnd (1, 1)), "double")
+%!assert_equal (class (ncx2rnd (1, single (1))), "single")
+%!assert_equal (class (ncx2rnd (1, single ([1, 1]))), "single")
+%!assert_equal (class (ncx2rnd (single (1), 1)), "single")
+%!assert_equal (class (ncx2rnd (single ([1, 1]), 1)), "single")
 
 ## Test input validation
 %!error<ncx2rnd: function called with too few input arguments.> ncx2rnd ()

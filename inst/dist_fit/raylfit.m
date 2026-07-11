@@ -45,7 +45,8 @@
 ## @qcode{@var{censor} = zeros (size (@var{x}))}.
 ##
 ## @code{[@dots{}] = raylfit (@var{x}, @var{alpha}, @var{censor}, @var{freq})}
-## accepts a frequency vector or matrix, @var{freq}, of the same size as @var{x}.
+## accepts a frequency vector or matrix, @var{freq}, of the same size as
+## @var{x}.
 ## @var{freq} typically contains integer frequencies for the corresponding
 ## elements in @var{x}.  @var{freq} cannot contain negative values.
 ##
@@ -116,20 +117,20 @@ endfunction
 
 %!demo
 %! ## Sample 3 populations from 3 different Rayleigh distributions
-%! rand ("seed", 2);    # for reproducibility
+%! rand ('seed', 2);    # for reproducibility
 %! r1 = raylrnd (1, 1000, 1);
-%! rand ("seed", 2);    # for reproducibility
+%! rand ('seed', 2);    # for reproducibility
 %! r2 = raylrnd (2, 1000, 1);
-%! rand ("seed", 3);    # for reproducibility
+%! rand ('seed', 3);    # for reproducibility
 %! r3 = raylrnd (4, 1000, 1);
 %! r = [r1, r2, r3];
 %!
 %! ## Plot them normalized and fix their colors
 %! hist (r, [0.5:0.5:10.5], 2);
-%! h = findobj (gca, "Type", "patch");
-%! set (h(1), "facecolor", "c");
-%! set (h(2), "facecolor", "g");
-%! set (h(3), "facecolor", "r");
+%! h = findobj (gca, 'Type', 'patch');
+%! set (h(1), 'facecolor', 'c');
+%! set (h(2), 'facecolor', 'g');
+%! set (h(3), 'facecolor', 'r');
 %! hold on
 %!
 %! ## Estimate their lambda parameter
@@ -140,55 +141,55 @@ endfunction
 %! ## Plot their estimated PDFs
 %! x = [0:0.1:10];
 %! y = raylpdf (x, sigmaA);
-%! plot (x, y, "-pr");
+%! plot (x, y, '-pr');
 %! y = raylpdf (x, sigmaB);
-%! plot (x, y, "-sg");
+%! plot (x, y, '-sg');
 %! y = raylpdf (x, sigmaC);
-%! plot (x, y, "-^c");
+%! plot (x, y, '-^c');
 %! xlim ([0, 10])
 %! ylim ([0, 0.7])
-%! legend ({"Normalized HIST of sample 1 with σ=1", ...
-%!          "Normalized HIST of sample 2 with σ=2", ...
-%!          "Normalized HIST of sample 3 with σ=4", ...
+%! legend ({'Normalized HIST of sample 1 with σ=1', ...
+%!          'Normalized HIST of sample 2 with σ=2', ...
+%!          'Normalized HIST of sample 3 with σ=4', ...
 %!          sprintf("PDF for sample 1 with estimated σ=%0.2f", ...
 %!                  sigmaA), ...
 %!          sprintf("PDF for sample 2 with estimated σ=%0.2f", ...
 %!                  sigmaB), ...
 %!          sprintf("PDF for sample 3 with estimated σ=%0.2f", ...
 %!                  sigmaC)})
-%! title ("Three population samples from different Rayleigh distributions")
+%! title ('Three population samples from different Rayleigh distributions')
 %! hold off
 
 ## Test output
 %!test
 %! x = [1 3 2 4 5 4 3 4];
 %! [shat, sci] = raylfit (x);
-%! assert (shat, 2.4495, 1e-4)
-%! assert (sci, [1.8243; 3.7279], 1e-4)
+%! assert_equal (shat, 2.4495, 1e-4)
+%! assert_equal (sci, [1.8243; 3.7279], 1e-4)
 %!test
 %! x = [1 3 2 4 5 4 3 4];
 %! [shat, sci] = raylfit (x, 0.01);
-%! assert (shat, 2.4495, 1e-4)
-%! assert (sci, [1.6738; 4.3208], 1e-4)
+%! assert_equal (shat, 2.4495, 1e-4)
+%! assert_equal (sci, [1.6738; 4.3208], 1e-4)
 %!test
 %! x = [1 2 3 4 5];
 %! f = [1 1 2 3 1];
 %! [shat, sci] = raylfit (x, [], [], f);
-%! assert (shat, 2.4495, 1e-4)
-%! assert (sci, [1.8243; 3.7279], 1e-4)
+%! assert_equal (shat, 2.4495, 1e-4)
+%! assert_equal (sci, [1.8243; 3.7279], 1e-4)
 %!test
 %! x = [1 2 3 4 5];
 %! f = [1 1 2 3 1];
 %! [shat, sci] = raylfit (x, 0.01, [], f);
-%! assert (shat, 2.4495, 1e-4)
-%! assert (sci, [1.6738; 4.3208], 1e-4)
+%! assert_equal (shat, 2.4495, 1e-4)
+%! assert_equal (sci, [1.6738; 4.3208], 1e-4)
 %!test
 %! x = [1 2 3 4 5 6];
 %! c = [0 0 0 0 0 1];
 %! f = [1 1 2 3 1 1];
 %! [shat, sci] = raylfit (x, 0.01, c, f);
-%! assert (shat, 2.4495, 1e-4)
-%! assert (sci, [1.6738; 4.3208], 1e-4)
+%! assert_equal (shat, 2.4495, 1e-4)
+%! assert_equal (sci, [1.6738; 4.3208], 1e-4)
 
 ## Test input validation
 %!error<raylfit: X must be a vector.> raylfit (ones (2,5));

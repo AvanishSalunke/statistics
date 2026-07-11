@@ -19,7 +19,7 @@
 ## -*- texinfo -*-
 ## @deftypefn  {statistics} {@var{h} =} runstest (@var{x})
 ## @deftypefnx {statistics} {@var{h} =} runstest (@var{x}, @var{v})
-## @deftypefnx {statistics} {@var{h} =} runstest (@var{x}, @qcode{"ud"})
+## @deftypefnx {statistics} {@var{h} =} runstest (@var{x}, @qcode{'ud'})
 ## @deftypefnx {statistics} {@var{h} =} runstest (@dots{}, @var{Name}, @var{Value})
 ## @deftypefnx {statistics} {[@var{h}, @var{pval}, @var{stats}] =} runstest (@dots{})
 ##
@@ -35,7 +35,7 @@
 ## on the number of runs of consecutive values above or below the specified
 ## reference value @var{v}.  Values exactly equal to @var{v} are omitted.
 ##
-## @code{@var{h} = runstest (@var{x}, @qcode{"ud"})} calculates the number of
+## @code{@var{h} = runstest (@var{x}, @qcode{'ud'})} calculates the number of
 ## runs up or down and tests the null hypothesis that the values in the data
 ## vector @var{x} follow a trend.  Too few runs indicate a trend, while too
 ## many runs indicate an oscillation.  Values exactly equal to the preceding
@@ -45,24 +45,24 @@
 ## additional options to the above tests by one or more @var{Name}-@var{Value}
 ## pair arguments.
 ##
-## @multitable @columnfractions 0.15 0.05 0.8
-## @headitem Name @tab @tab Value
-## @item @qcode{"alpha"} @tab @tab the significance level. Default is 0.05.
+## @multitable @columnfractions 0.15 0.8
+## @headitem Name @tab Value
+## @item @qcode{'alpha'} @tab the significance level. Default is 0.05.
 ##
-## @item @qcode{"method"} @tab @tab a string specifying the method used to
-## compute the p-value of the test.  It can be either @qcode{"exact"} to use an
-## exact algorithm, or @qcode{"approximate"} to use a normal approximation.  The
-## default is @qcode{"exact"} for runs above/below, and for runs up/down when
+## @item @qcode{'method'} @tab a string specifying the method used to
+## compute the p-value of the test.  It can be either @qcode{'exact'} to use an
+## exact algorithm, or @qcode{'approximate'} to use a normal approximation.  The
+## default is @qcode{'exact'} for runs above/below, and for runs up/down when
 ## the length of x is less than or equal to 50.  When testing for runs up/down
 ## and the length of @var{x} is greater than 50, then the default is
-## @qcode{"approximate"}, and the @qcode{"exact"} method is not available.
+## @qcode{'approximate'}, and the @qcode{'exact'} method is not available.
 ##
-## @item @qcode{"tail"} @tab @tab a string specifying the alternative hypothesis
+## @item @qcode{'tail'} @tab a string specifying the alternative hypothesis
 ## @end multitable
-## @multitable @columnfractions 0.2 0.15 0.05 0.5
-## @item @tab @qcode{"both"} @tab @tab two-tailed (default)
-## @item @tab @qcode{"left"} @tab @tab left-tailed
-## @item @tab @qcode{"right"} @tab @tab right-tailed
+## @multitable @columnfractions 0.15 0.5
+## @item @qcode{'both'} @tab two-tailed (default)
+## @item @qcode{'left'} @tab left-tailed
+## @item @qcode{'right'} @tab right-tailed
 ## @end multitable
 ##
 ## @seealso{signrank, signtest}
@@ -95,16 +95,16 @@ function [h, pval, stats] = runstest (x, v, varargin)
         warning ("runstest: %d elements equal to V were omitted.", sum (rm));
       endif
       x(rm) = [];
-      N = numel(x);
+      N = numel (x);
       UD = false;
-    elseif (strcmpi (v, "ud"))
+    elseif (strcmpi (v, 'ud'))
       x = diff (x);
       rm = x == 0;
       if (sum (rm) > 0)
         warning ("runstest: %d repeated elements were omitted.", sum (rm));
       endif
       x(rm) = [];
-      N = numel(x) + 1;
+      N = numel (x) + 1;
       UD = true;
     else
       error ("runstest: V must be either a scalar number or 'ud' char string.");
@@ -119,7 +119,7 @@ function [h, pval, stats] = runstest (x, v, varargin)
                sum (rm));
     endif
     x(rm) = [];
-    N = numel(x);
+    N = numel (x);
     UD = false;
   endif
 
@@ -130,35 +130,35 @@ function [h, pval, stats] = runstest (x, v, varargin)
   ## Add defaults
   alpha = 0.05;
   if (N < 50 || ! UD)
-    method = "exact";
+    method = 'exact';
   else
-    method = "approximate";
+    method = 'approximate';
   endif
-  tail = "both";
+  tail = 'both';
 
   ## Parse optional arguments and validate parameters
   while (numel (varargin) > 1)
     switch (lower (varargin{1}))
-      case "alpha"
+      case 'alpha'
         alpha = varargin{2};
         if (! isscalar (alpha) ||
             ! isnumeric (alpha) || alpha <= 0 || alpha >= 1)
           error ("runstest: invalid value for alpha.");
         endif
 
-      case "method"
+      case 'method'
         method = varargin{2};
-        if (! any (strcmpi (method, {"exact", "approximate"})))
+        if (! any (strcmpi (method, {'exact', 'approximate'})))
           error ("runstest: invalid value for method.");
         endif
-        if (strcmpi (method, "exact") && N > 50)
+        if (strcmpi (method, 'exact') && N > 50)
           warning ("runstest: exact method is not available for N > 50.");
-          method = "approximate";
+          method = 'approximate';
         endif
 
-      case "tail"
+      case 'tail'
         tail = varargin{2};
-        if (! any (strcmpi (tail, {"both", "left", "right"})))
+        if (! any (strcmpi (tail, {'both', 'left', 'right'})))
           error ("runstest: invalid value for tail.");
         endif
 
@@ -186,11 +186,11 @@ function [h, pval, stats] = runstest (x, v, varargin)
           R_bar = 1 + 2 * n_up * n_dn / N;
           R_std = sqrt (2 * n_up * n_dn * (2 * n_up * n_dn - N) / ...
                        (N ^ 2 * (N - 1)));
-      end
+      endif
       ## Handle tail
-      if (strcmpi (tail, "both"))
+      if (strcmpi (tail, 'both'))
           tc = -0.5 * sign (R_num - R_bar);
-      elseif (strcmpi (tail, "left"))
+      elseif (strcmpi (tail, 'left'))
           tc = 0.5;
       else
           tc = -0.5;
@@ -203,11 +203,11 @@ function [h, pval, stats] = runstest (x, v, varargin)
       endif
     endif
     ## Exact method
-    if (strcmpi (method, "exact"))
+    if (strcmpi (method, 'exact'))
       if (UD)
         R_max = N - 1;
         ## Get precalculated results from rundist.mat file
-        temp = load ("rundist.mat");
+        temp = load ('rundist.mat');
         runD = temp.rundist;
         M = runD{N};
         p = M / sum (M);
@@ -243,7 +243,7 @@ function [h, pval, stats] = runstest (x, v, varargin)
         p_ex = 1;
       else
         p_ex = p(R_num);
-      end
+      endif
       p_lo = sum (p([1:R_num-1]));
       p_hi = sum (p([R_num+1:end]));
 
@@ -252,7 +252,7 @@ function [h, pval, stats] = runstest (x, v, varargin)
       p_ex = 0;
       p_lo = normcdf (z);
       p_hi = normcdf (-z);
-    end
+    endif
   ## Assume a constant vector in data
   else
     R_num = NaN;
@@ -263,9 +263,9 @@ function [h, pval, stats] = runstest (x, v, varargin)
   endif
 
   ## Compute tail probability
-  if (strcmpi (tail, "both"))
-    pval = min([1, 2*(p_ex + min ([p_lo, p_hi]))]);
-  elseif (strcmpi (tail, "left"))
+  if (strcmpi (tail, 'both'))
+    pval = min ([1, 2*(p_ex + min ([p_lo, p_hi]))]);
+  elseif (strcmpi (tail, 'left'))
     pval = p_ex + p_lo;
   else
     pval = p_ex + p_hi;
@@ -284,7 +284,7 @@ function [h, pval, stats] = runstest (x, v, varargin)
 endfunction
 
 ## Compute the log of the binomial coefficient
-function logBC = logBinoCoeff(N,n)
+function logBC = logBinoCoeff (N,n)
   logBC = gammaln (N + 1) - gammaln (n + 1) - gammaln (N - n + 1);
 endfunction
 
@@ -312,46 +312,46 @@ endfunction
 %! expected_h = 1;
 %! expected_p = 0.008562;
 %! expected_z = 2.6229;
-%! assert (h, expected_h);
-%! assert (p, expected_p, 1E-6);
-%! assert (stats.z, expected_z, 1E-4);
+%! assert_equal (h, expected_h);
+%! assert_equal (p, expected_p, 1E-6);
+%! assert_equal (stats.z, expected_z, 1E-4);
 
 %!shared x
 %! x = [45, -60, 1.225, 55.4, -9 27];
 %!test
 %! [h, p, stats] = runstest (x);
-%! assert (h, 0);
-%! assert (p, 0.6, 1e-14);
-%! assert (stats.nruns, 5);
-%! assert (stats.n1, 3);
-%! assert (stats.n0, 3);
-%! assert (stats.z, 0.456435464587638, 1e-14);
+%! assert_equal (h, 0);
+%! assert_equal (p, 0.6, 1e-14);
+%! assert_equal (stats.nruns, 5);
+%! assert_equal (stats.n1, 3);
+%! assert_equal (stats.n0, 3);
+%! assert_equal (stats.z, 0.456435464587638, 1e-14);
 %!test
-%! [h, p, stats] = runstest (x, [], "method", "approximate");
-%! assert (h, 0);
-%! assert (p, 0.6481, 1e-4);
-%! assert (stats.z, 0.456435464587638, 1e-14);
+%! [h, p, stats] = runstest (x, [], 'method', 'approximate');
+%! assert_equal (h, 0);
+%! assert_equal (p, 0.6481, 1e-4);
+%! assert_equal (stats.z, 0.456435464587638, 1e-14);
 %!test
-%! [h, p, stats] = runstest (x, [], "tail", "left");
-%! assert (h, 0);
-%! assert (p, 0.9, 1e-14);
-%! assert (stats.z, 1.369306393762915, 1e-14);
+%! [h, p, stats] = runstest (x, [], 'tail', 'left');
+%! assert_equal (h, 0);
+%! assert_equal (p, 0.9, 1e-14);
+%! assert_equal (stats.z, 1.369306393762915, 1e-14);
 
 %!error<runstest: X must be a vector a scalar values.> runstest (ones (2,20))
-%!error<runstest: X must be a vector a scalar values.> runstest (["asdasda"])
+%!error<runstest: X must be a vector a scalar values.> runstest (['asdasda'])
 %!error<runstest: V must be either a scalar number or> ...
-%! runstest ([2 3 4 3 2 3 4], "updown")
+%! runstest ([2 3 4 3 2 3 4], 'updown')
 %!error<runstest: invalid value for alpha.> ...
-%! runstest ([2 3 4 3 2 3 4], [], "alpha", 0)
+%! runstest ([2 3 4 3 2 3 4], [], 'alpha', 0)
 %!error<runstest: invalid value for alpha.> ...
-%! runstest ([2 3 4 3 2 3 4], [], "alpha", [0.02 0.2])
+%! runstest ([2 3 4 3 2 3 4], [], 'alpha', [0.02 0.2])
 %!error<runstest: invalid value for alpha.> ...
-%! runstest ([2 3 4 3 2 3 4], [], "alpha", 1.2)
+%! runstest ([2 3 4 3 2 3 4], [], 'alpha', 1.2)
 %!error<runstest: invalid value for alpha.> ...
-%! runstest ([2 3 4 3 2 3 4], [], "alpha", -0.05)
+%! runstest ([2 3 4 3 2 3 4], [], 'alpha', -0.05)
 %!error<runstest: invalid value for method.> ...
-%! runstest ([2 3 4 3 2 3 4], [], "method", "some")
+%! runstest ([2 3 4 3 2 3 4], [], 'method', 'some')
 %!error<runstest: invalid value for tail.> ...
-%! runstest ([2 3 4 3 2 3 4], [], "tail", "some")
+%! runstest ([2 3 4 3 2 3 4], [], 'tail', 'some')
 %!error<runstest: invalid optional argument.> ...
-%! runstest ([2 3 4 3 2 3 4], [], "option", "some")
+%! runstest ([2 3 4 3 2 3 4], [], 'option', 'some')

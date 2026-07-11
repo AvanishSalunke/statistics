@@ -53,13 +53,13 @@ function x = ncfinv (p, df1, df2, lambda)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (df1, "single") || ...
-      isa (df2, "single") || isa (lambda, "single"))
-    x = NaN (size (p), "single");
-    crit = sqrt (eps ("single"));
+  if (isa (p, 'single') || isa (df1, 'single') || ...
+      isa (df2, 'single') || isa (lambda, 'single'))
+    x = NaN (size (p), 'single');
+    crit = sqrt (eps ('single'));
   else
-    x = NaN (size (p), "double");
-    crit = sqrt (eps ("double"));
+    x = NaN (size (p), 'double');
+    crit = sqrt (eps ('double'));
   endif
 
   ## For lambda == 0, call finv
@@ -76,7 +76,7 @@ function x = ncfinv (p, df1, df2, lambda)
   ## Find remaining valid cases within the range of 0 < p < 1
   k = find (p > 0 & p < 1 & valid);
   ## Return if nothing left
-  if isempty(k)
+  if isempty (k)
     return;
   endif
 
@@ -91,11 +91,11 @@ function x = ncfinv (p, df1, df2, lambda)
   count = 0;
 
   ## Start at the mean (if it exists)
-  mu0 = df2.*(df1+lambda) ./ (df1.*max(1,df2-2));
+  mu0 = df2.*(df1+lambda) ./ (df1.*max (1,df2-2));
   next = mu0;
   prev = 0;
   F = ncfcdf (mu0, df1, df2, lambda);
-  while(count < count_limit)
+  while (count < count_limit)
     count += 1;
     next = (F - p) ./ ncfpdf (mu0, df1, df2, lambda);
 
@@ -132,7 +132,7 @@ function x = ncfinv (p, df1, df2, lambda)
     F = F1(mask);
     mu0 = mu1(mask);
     prev = next(mask);
-    if (! all(mask))
+    if (! all (mask))
       df1 = df1(mask);
       df2 = df2(mask);
       lambda = lambda(mask);
@@ -154,15 +154,15 @@ endfunction
 %! x2 = ncfinv (p, 2, 5, 2);
 %! x3 = ncfinv (p, 5, 10, 1);
 %! x4 = ncfinv (p, 10, 20, 10);
-%! plot (p, x1, "-r", p, x2, "-g", p, x3, "-k", p, x4, "-m")
+%! plot (p, x1, '-r', p, x2, '-g', p, x3, '-k', p, x4, '-m')
 %! grid on
 %! ylim ([0, 5])
-%! legend ({"df1 = 2, df2 = 5, λ = 1", "df1 = 2, df2 = 5, λ = 2", ...
-%!          "df1 = 5, df2 = 10, λ = 1", "df1 = 10, df2 = 20, λ = 10"}, ...
-%!         "location", "northwest")
-%! title ("Noncentral F iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'df1 = 2, df2 = 5, λ = 1', 'df1 = 2, df2 = 5, λ = 2', ...
+%!          'df1 = 5, df2 = 10, λ = 1', 'df1 = 10, df2 = 20, λ = 10'}, ...
+%!         'location', 'northwest')
+%! title ('Noncentral F iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 %!demo
 %! ## Compare the noncentral F iCDF with LAMBDA = 10 to the F iCDF with the
@@ -171,35 +171,35 @@ endfunction
 %! p = 0.001:0.001:0.999;
 %! x1 = ncfinv (p, 5, 20, 10);
 %! x2 = finv (p, 5, 20);
-%! plot (p, x1, "-", p, x2, "-");
+%! plot (p, x1, '-', p, x2, '-');
 %! grid on
 %! ylim ([0, 10])
-%! legend ({"Noncentral F(5,20,10)", "F(5,20)"}, "location", "northwest")
-%! title ("Noncentral F vs F quantile functions")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'Noncentral F(5,20,10)', 'F(5,20)'}, 'location', 'northwest')
+%! title ('Noncentral F vs F quantile functions')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!test
 %! x = [0,0.1775,0.3864,0.6395,0.9564,1.3712,1.9471,2.8215,4.3679,8.1865,Inf];
-%! assert (ncfinv ([0:0.1:1], 2, 3, 1), x, 1e-4);
+%! assert_equal (ncfinv ([0:0.1:1], 2, 3, 1), x, 1e-4);
 %!test
 %! x = [0,0.7492,1.3539,2.0025,2.7658,3.7278,5.0324,6.9826,10.3955,18.7665,Inf];
-%! assert (ncfinv ([0:0.1:1], 2, 3, 5), x, 1e-4);
+%! assert_equal (ncfinv ([0:0.1:1], 2, 3, 5), x, 1e-4);
 %!test
 %! x = [0,0.2890,0.8632,1.5653,2.4088,3.4594,4.8442,6.8286,10.0983,17.3736,Inf];
-%! assert (ncfinv ([0:0.1:1], 1, 4, 3), x, 1e-4);
+%! assert_equal (ncfinv ([0:0.1:1], 1, 4, 3), x, 1e-4);
 %!test
 %! x = [0.078410, 0.212716, 0.288618, 0.335752, 0.367963, 0.391460];
-%! assert (ncfinv (0.05, [1, 2, 3, 4, 5, 6], 10, 3), x, 1e-6);
+%! assert_equal (ncfinv (0.05, [1, 2, 3, 4, 5, 6], 10, 3), x, 1e-6);
 %!test
 %! x = [0.2574, 0.2966, 0.3188, 0.3331, 0.3432, 0.3507];
-%! assert (ncfinv (0.05, 5, [1, 2, 3, 4, 5, 6], 3), x, 1e-4);
+%! assert_equal (ncfinv (0.05, 5, [1, 2, 3, 4, 5, 6], 3), x, 1e-4);
 %!test
 %! x = [1.6090, 1.8113, 1.9215, 1.9911, NaN, 2.0742];
-%! assert (ncfinv (0.05, 1, [1, 2, 3, 4, -1, 6], 10), x, 1e-4);
+%! assert_equal (ncfinv (0.05, 1, [1, 2, 3, 4, -1, 6], 10), x, 1e-4);
 %!test
-%! assert (ncfinv (0.996, 3, 5, 8), 58.0912074080671, 4e-12);
+%! assert_equal (ncfinv (0.996, 3, 5, 8), 58.0912074080671, 4e-12);
 
 ## Test input validation
 %!error<ncfinv: function called with too few input arguments.> ncfinv ()

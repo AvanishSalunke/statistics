@@ -31,11 +31,11 @@
 ## @code{x2fx} returns the design matrix for a linear additive model with a
 ## constant term.  @var{model} can be any one of the following strings:
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @item @tab "linear" @tab Constant and linear terms (the default)
-## @item @tab "interaction" @tab Constant, linear, and interaction terms
-## @item @tab "quadratic" @tab Constant, linear, interaction, and squared terms
-## @item @tab "purequadratic" @tab Constant, linear, and squared terms
+## @multitable @columnfractions 0.2 0.75
+## @item "linear" @tab Constant and linear terms (the default)
+## @item "interaction" @tab Constant, linear, and interaction terms
+## @item "quadratic" @tab Constant, linear, interaction, and squared terms
+## @item "purequadratic" @tab Constant, linear, and squared terms
 ## @end multitable
 ##
 ## If @var{x} has n columns, the order of the columns of @var{d} for a full
@@ -83,7 +83,7 @@ function [D, model, termstart, termend] = x2fx (x, model, categ, catlevels)
   ## Get matrix size
   [m, n]  = size (x);
   ## Get data class
-  if (isa (x, "single"))
+  if (isa (x, 'single'))
     data_class = 'single';
   else
     data_class = 'double';
@@ -105,16 +105,16 @@ function [D, model, termstart, termend] = x2fx (x, model, categ, catlevels)
 
   ## Convert models parsed as strings to numerical matrix
   if (ischar (model))
-    if (strcmpi (model, "linear") || strcmpi (model, "additive"))
+    if (strcmpi (model, 'linear') || strcmpi (model, 'additive'))
       interactions = false;
       quadratic = false;
-    elseif (strcmpi (model, "interaction"))
+    elseif (strcmpi (model, 'interaction'))
       interactions = true;
       quadratic = false;
-    elseif (strcmpi (model, "quadratic"))
+    elseif (strcmpi (model, 'quadratic'))
       interactions = true;
       quadratic = true;
-    elseif (strcmpi (model, "purequadratic"))
+    elseif (strcmpi (model, 'purequadratic'))
       interactions = false;
       quadratic = true;
     else
@@ -127,23 +127,23 @@ function [D, model, termstart, termend] = x2fx (x, model, categ, catlevels)
       termend = [];
       return
     endif
-    I = eye(n);
+    I = eye (n);
     ## Construct interactions part
     if (interactions && n > 1)
       [r, c] = find (tril (ones (n) ,-1));
-      nt = length(r);
-      intpart = zeros(nt,n);
+      nt = length (r);
+      intpart = zeros (nt,n);
       intpart(sub2ind (size (intpart),(1:nt)', r)) = 1;
       intpart(sub2ind (size (intpart),(1:nt)', c)) = 1;
     else
-        intpart = zeros(0,n);
+        intpart = zeros (0,n);
     endif
     ## Construct quadratic part
     if (quadratic)
       quadpart = 2 * I;
       quadpart(categ,:) = [];
     else
-      quadpart = zeros(0,n);
+      quadpart = zeros (0,n);
     endif
     model = [zeros(1,n); I];
     model = [model; intpart; quadpart];
@@ -151,10 +151,10 @@ function [D, model, termstart, termend] = x2fx (x, model, categ, catlevels)
 
   ## Process each categorical variable
   catmember = ismember (1:n, categ);
-  var_DF = ones(1,n);
+  var_DF = ones (1,n);
   if (isempty (catlevels))
     ## Get values of each categorical variable and replace them with integers
-    for idx=1:length(categ)
+    for idx=1:length (categ)
       categ_idx = categ(idx);
       [Y, I, J] = unique (x(:,categ_idx));
       var_DF(categ_idx) = length (Y) - 1;
@@ -216,7 +216,7 @@ function [D, model, termstart, termend] = x2fx (x, model, categ, catlevels)
         if (length (C) > 1)
           C = C(keep);
         endif
-        Z(sub2ind(size(Z),allrows(keep),colnum(keep))) = C;
+        Z(sub2ind (size (Z),allrows(keep),colnum(keep))) = C;
         C = Z;
       endif
     endif
@@ -226,58 +226,58 @@ endfunction
 
 %!test
 %! X = [1, 10; 2, 20; 3, 10; 4, 20; 5, 15; 6, 15];
-%! D = x2fx(X,'quadratic');
-%! assert (D(1,:), [1, 1, 10, 10, 1, 100]);
-%! assert (D(2,:), [1, 2, 20, 40, 4, 400]);
+%! D = x2fx (X,'quadratic');
+%! assert_equal (D(1,:), [1, 1, 10, 10, 1, 100]);
+%! assert_equal (D(2,:), [1, 2, 20, 40, 4, 400]);
 
 %!test
 %! X = [1, 10; 2, 20; 3, 10; 4, 20; 5, 15; 6, 15];
 %! model = [0, 0; 1, 0; 0, 1; 1, 1; 2, 0];
-%! D = x2fx(X,model);
-%! assert (D(1,:), [1, 1, 10, 10, 1]);
-%! assert (D(2,:), [1, 2, 20, 40, 4]);
-%! assert (D(4,:), [1, 4, 20, 80, 16]);
+%! D = x2fx (X,model);
+%! assert_equal (D(1,:), [1, 1, 10, 10, 1]);
+%! assert_equal (D(2,:), [1, 2, 20, 40, 4]);
+%! assert_equal (D(4,:), [1, 4, 20, 80, 16]);
 
 %!test
 %! x = [1, 2, 3; 2, 3, 4; 3, 4, 5];
 %! D = x2fx (x, 'linear');
-%! assert (D, [1, 1, 2, 3; 1, 2, 3, 4;, 1, 3, 4, 5]);
+%! assert_equal (D, [1, 1, 2, 3; 1, 2, 3, 4;, 1, 3, 4, 5]);
 %! D = x2fx (x, 'interaction');
-%! assert (D(1,:), [1, 1, 2, 3, 2, 3, 6]);
-%! assert (D(2,:), [1, 2, 3, 4, 6, 8, 12]);
-%! assert (D(3,:), [1, 3, 4, 5, 12, 15, 20]);
+%! assert_equal (D(1,:), [1, 1, 2, 3, 2, 3, 6]);
+%! assert_equal (D(2,:), [1, 2, 3, 4, 6, 8, 12]);
+%! assert_equal (D(3,:), [1, 3, 4, 5, 12, 15, 20]);
 %! D = x2fx (x, 'quadratic');
-%! assert (D(1,:), [1, 1, 2, 3, 2, 3, 6, 1, 4, 9]);
-%! assert (D(2,:), [1, 2, 3, 4, 6, 8, 12, 4, 9, 16]);
-%! assert (D(3,:), [1, 3, 4, 5, 12, 15, 20, 9, 16, 25]);
+%! assert_equal (D(1,:), [1, 1, 2, 3, 2, 3, 6, 1, 4, 9]);
+%! assert_equal (D(2,:), [1, 2, 3, 4, 6, 8, 12, 4, 9, 16]);
+%! assert_equal (D(3,:), [1, 3, 4, 5, 12, 15, 20, 9, 16, 25]);
 %! D = x2fx (x, 'purequadratic');
-%! assert (D(1,:), [1, 1, 2, 3, 1, 4, 9]);
-%! assert (D(2,:), [1, 2, 3, 4, 4, 9, 16]);
-%! assert (D(3,:), [1, 3, 4, 5, 9, 16, 25]);
+%! assert_equal (D(1,:), [1, 1, 2, 3, 1, 4, 9]);
+%! assert_equal (D(2,:), [1, 2, 3, 4, 4, 9, 16]);
+%! assert_equal (D(3,:), [1, 3, 4, 5, 9, 16, 25]);
 
 %!test
 %! x = [1, 2, 3; 2, 3, 4; 3, 4, 5];
 %! D = x2fx (x, [0, 0, 1; 1, 0, 2]);
-%! assert (D, [3, 9; 4, 32; 5, 75]);
+%! assert_equal (D, [3, 9; 4, 32; 5, 75]);
 
 %!test
 %! x = [1, 2, 3; 2, 3, 4; 3, 4, 5];
 %! D = x2fx (x, 'linear', [1, 3]);
-%! assert (D, [1, 1, 0, 2, 1, 0; 1, 0, 1, 3, 0, 1; 1, 0, 0, 4, 0, 0]);
+%! assert_equal (D, [1, 1, 0, 2, 1, 0; 1, 0, 1, 3, 0, 1; 1, 0, 0, 4, 0, 0]);
 
 %!test
 %! x = [1, 2, 3; 2, 3, 4; 3, 4, 5];
 %! D = x2fx (x, 'quadratic', [1, 3]);
-%! assert (D(1,:), [1, 1, 0, 2, 1, 0, 2, 0, 1, 0, 0, 0, 2, 0, 4]);
-%! assert (D(2,:), [1, 0, 1, 3, 0, 1, 0, 3, 0, 0, 0, 1, 0, 3, 9]);
-%! assert (D(3,:), [1, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16]);
+%! assert_equal (D(1,:), [1, 1, 0, 2, 1, 0, 2, 0, 1, 0, 0, 0, 2, 0, 4]);
+%! assert_equal (D(2,:), [1, 0, 1, 3, 0, 1, 0, 3, 0, 0, 0, 1, 0, 3, 9]);
+%! assert_equal (D(3,:), [1, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16]);
 
 %!test
 %! x = [1, 2, 3; 2, 3, 4; 3, 4, 5];
 %! D = x2fx (x, 'cos');
-%! assert (D(1,:), [0.5403, -0.4161, -0.9900], 1e-4);
-%! assert (D(2,:), [-0.4161, -0.9900, -0.6536], 1e-4);
-%! assert (D(3,:), [-0.9900, -0.6536, 0.2837], 1e-4);
+%! assert_equal (D(1,:), [0.5403, -0.4161, -0.9900], 1e-4);
+%! assert_equal (D(2,:), [-0.4161, -0.9900, -0.6536], 1e-4);
+%! assert_equal (D(3,:), [-0.9900, -0.6536, 0.2837], 1e-4);
 
 %!error <x2fx: category index exceeds number of columns in X.> ...
 %! x2fx ([1, 2, 3; 2, 3, 4], 'quadratic', [1, 4])

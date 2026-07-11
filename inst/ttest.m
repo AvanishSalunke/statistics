@@ -45,15 +45,15 @@
 ## @qcode{ttest} treats NaNs as missing values, and ignores them.
 ##
 ## Name-Value pair arguments can be used to set various options.
-## @qcode{"alpha"} can be used to specify the significance level
-## of the test (the default value is 0.05).  @qcode{"tail"}, can be used
+## @qcode{'alpha'} can be used to specify the significance level
+## of the test (the default value is 0.05).  @qcode{'tail'}, can be used
 ## to select the desired alternative hypotheses.  If the value is
-## @qcode{"both"} (default) the null is tested against the two-sided
+## @qcode{'both'} (default) the null is tested against the two-sided
 ## alternative @code{mean (@var{x}) != @var{m}}.
-## If it is @qcode{"right"} the one-sided alternative @code{mean (@var{x})
-## > @var{m}} is considered.  Similarly for @qcode{"left"}, the one-sided
+## If it is @qcode{'right'} the one-sided alternative @code{mean (@var{x})
+## > @var{m}} is considered.  Similarly for @qcode{'left'}, the one-sided
 ## alternative @code{mean (@var{x}) < @var{m}} is considered.
-## When argument @var{x} is a matrix, @qcode{"dim"} can be used to select
+## When argument @var{x} is a matrix, @qcode{'dim'} can be used to select
 ## the dimension over which to perform the test.  (The default is the
 ## first non-singleton dimension).
 ##
@@ -75,7 +75,7 @@ function [h, p, ci, stats] = ttest (x, my, varargin)
   ## Set default arguments
   my_default = 0;
   alpha = 0.05;
-  tail = "both";
+  tail = 'both';
 
   ## Find the first non-singleton dimension of x
   dim = min (find (size (x) != 1));
@@ -90,13 +90,13 @@ function [h, p, ci, stats] = ttest (x, my, varargin)
   i = 1;
   while (i <= length (varargin))
     switch lower (varargin{i})
-      case "alpha"
+      case 'alpha'
         i = i + 1;
         alpha = varargin{i};
-      case "tail"
+      case 'tail'
         i = i + 1;
         tail = varargin{i};
-      case "dim"
+      case 'dim'
         i = i + 1;
         dim = varargin{i};
       otherwise
@@ -105,7 +105,7 @@ function [h, p, ci, stats] = ttest (x, my, varargin)
     i = i + 1;
   endwhile
 
-  if (! isa (tail, "char"))
+  if (! isa (tail, 'char'))
     error ("ttest: tail argument must be a string.");
   endif
 
@@ -126,27 +126,27 @@ function [h, p, ci, stats] = ttest (x, my, varargin)
   endif
 
   ## Calculate the test statistic value (tval)
-  n = sum (!isnan (x), dim);
-  x_bar = mean (x, dim, "omitnan");
+  n = sum (! isnan (x), dim);
+  x_bar = mean (x, dim, 'omitnan');
   stats.tstat = [];
   stats.df = n - 1;
-  stats.sd = std (x, 0, dim, "omitnan");
-  x_bar_std = stats.sd ./ sqrt(n);
+  stats.sd = std (x, 0, dim, 'omitnan');
+  x_bar_std = stats.sd ./ sqrt (n);
   tval = (x_bar) ./ x_bar_std;
   stats.tstat = tval;
 
   ## Based on the "tail" argument determine the P-value, the critical values,
   ## and the confidence interval.
   switch lower (tail)
-    case "both"
+    case 'both'
       p = 2 * (1 - tcdf (abs (tval), n - 1));
       tcrit = - tinv (alpha / 2, n - 1);
       ci = [x_bar-tcrit.*x_bar_std; x_bar+tcrit.*x_bar_std] + my;
-    case "left"
+    case 'left'
       p = tcdf (tval, n - 1);
       tcrit = - tinv (alpha, n - 1);
       ci = [-inf*ones(size(x_bar)); my+x_bar+tcrit.*x_bar_std];
-    case "right"
+    case 'right'
       p = 1 - tcdf (tval, n - 1);
       tcrit = - tinv (alpha, n - 1);
       ci = [my+x_bar-tcrit.*x_bar_std; inf*ones(size(x_bar))];
@@ -169,16 +169,16 @@ endfunction
 %!test
 %! x = 8:0.1:12;
 %! [h, pval, ci] = ttest (x, 10);
-%! assert (h, 0)
-%! assert (pval, 1, 10*eps)
-%! assert (ci, [9.6219 10.3781], 1E-5)
+%! assert_equal (h, 0)
+%! assert_equal (pval, 1, 10*eps)
+%! assert_equal (ci, [9.6219 10.3781], 1E-5)
 %! [h, pval, ci0] = ttest (x, 0);
-%! assert (h, 1)
-%! assert (pval, 0)
-%! assert (ci0, ci, 2e-15)
-%! [h, pval, ci] = ttest (x, 10, "tail", "right", "dim", 2, "alpha", 0.05);
-%! assert (h, 0)
-%! assert (pval, 0.5, 10*eps)
-%! assert (ci, [9.68498 Inf], 1E-5)
-%!error ttest ([8:0.1:12], 10, "tail", "invalid");
-%!error ttest ([8:0.1:12], 10, "tail", 25);
+%! assert_equal (h, 1)
+%! assert_equal (pval, 0)
+%! assert_equal (ci0, ci, 2e-15)
+%! [h, pval, ci] = ttest (x, 10, 'tail', 'right', 'dim', 2, 'alpha', 0.05);
+%! assert_equal (h, 0)
+%! assert_equal (pval, 0.5, 10*eps)
+%! assert_equal (ci, [9.68498 Inf], 1E-5)
+%!error ttest ([8:0.1:12], 10, 'tail', 'invalid');
+%!error ttest ([8:0.1:12], 10, 'tail', 25);

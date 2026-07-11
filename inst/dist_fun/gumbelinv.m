@@ -36,7 +36,7 @@
 ## When called with three output arguments, i.e. @qcode{[@var{x}, @var{xlo},
 ## @var{xup}]}, @code{gumbelinv} computes the confidence bounds for @var{x} when
 ## the input parameters @var{mu} and @var{beta} are estimates.  In such case,
-## @var{pcov}, a @math{2x2} matrix containing the covariance matrix of the
+## @var{pcov}, a @math{2*2} matrix containing the covariance matrix of the
 ## estimated parameters, is necessary.  Optionally, @var{alpha}, which has a
 ## default value of 0.05, specifies the @qcode{100 * (1 - @var{alpha})} percent
 ## confidence bounds.  @var{xlo} and @var{xup} are arrays of the same size as
@@ -102,10 +102,10 @@ function [x, xlo, xup] = gumbelinv (p, mu, beta, pcov, alpha)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (mu, "single") || isa (beta, "single"));
-    is_class = "single";
+  if (isa (p, 'single') || isa (mu, 'single') || isa (beta, 'single'));
+    is_class = 'single';
   else
-    is_class = "double";
+    is_class = 'double';
   endif
 
   ## Compute inverse of type 1 extreme value cdf
@@ -129,7 +129,7 @@ function [x, xlo, xup] = gumbelinv (p, mu, beta, pcov, alpha)
   ## Compute confidence bounds if requested.
   if (nargout >= 2)
     xvar = pcov(1,1) + 2 * pcov(1,2) * q + pcov(2,2) * q .^ 2;
-    if (any (xvar < 0)) || any(isnan(xvar))
+    if (any (xvar < 0)) || any (isnan (xvar))
       error ("gumbelinv: bad covariance matrix.");
     endif
     z = -norminv (alpha / 2);
@@ -147,37 +147,37 @@ endfunction
 %! x2 = gumbelinv (p, 1.0, 2);
 %! x3 = gumbelinv (p, 1.5, 3);
 %! x4 = gumbelinv (p, 3.0, 4);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-c")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-c')
 %! grid on
 %! ylim ([-5, 20])
-%! legend ({"μ = 0.5, β = 2", "μ = 1.0, β = 2", ...
-%!          "μ = 1.5, β = 3", "μ = 3.0, β = 4"}, "location", "northwest")
-%! title ("Gumbel iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'μ = 0.5, β = 2', 'μ = 1.0, β = 2', ...
+%!          'μ = 1.5, β = 3', 'μ = 3.0, β = 4'}, 'location', 'northwest')
+%! title ('Gumbel iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p, x
 %! p = [0, 0.05, 0.5 0.95];
 %! x = [-Inf, -1.0972, 0.3665, 2.9702];
-%!assert (gumbelinv (p), x, 1e-4)
-%!assert (gumbelinv (p, zeros (1,4), ones (1,4)), x, 1e-4)
-%!assert (gumbelinv (p, 0, ones (1,4)), x, 1e-4)
-%!assert (gumbelinv (p, zeros (1,4), 1), x, 1e-4)
-%!assert (gumbelinv (p, [0, -Inf, NaN, Inf], 1), [-Inf, -Inf, NaN, Inf], 1e-4)
-%!assert (gumbelinv (p, 0, [Inf, NaN, -1, 0]), [-Inf, NaN, NaN, NaN], 1e-4)
-%!assert (gumbelinv ([p(1:2), NaN, p(4)], 0, 1), [x(1:2), NaN, x(4)], 1e-4)
+%!assert_equal (gumbelinv (p), x, 1e-4)
+%!assert_equal (gumbelinv (p, zeros (1,4), ones (1,4)), x, 1e-4)
+%!assert_equal (gumbelinv (p, 0, ones (1,4)), x, 1e-4)
+%!assert_equal (gumbelinv (p, zeros (1,4), 1), x, 1e-4)
+%!assert_equal (gumbelinv (p, [0, -Inf, NaN, Inf], 1), [-Inf, -Inf, NaN, Inf], 1e-4)
+%!assert_equal (gumbelinv (p, 0, [Inf, NaN, -1, 0]), [-Inf, NaN, NaN, NaN], 1e-4)
+%!assert_equal (gumbelinv ([p(1:2), NaN, p(4)], 0, 1), [x(1:2), NaN, x(4)], 1e-4)
 
 ## Test class of input preserved
-%!assert (gumbelinv ([p, NaN], 0, 1), [x, NaN], 1e-4)
-%!assert (gumbelinv (single ([p, NaN]), 0, 1), single ([x, NaN]), 1e-4)
-%!assert (gumbelinv ([p, NaN], single (0), 1), single ([x, NaN]), 1e-4)
-%!assert (gumbelinv ([p, NaN], 0, single (1)), single ([x, NaN]), 1e-4)
+%!assert_equal (gumbelinv ([p, NaN], 0, 1), [x, NaN], 1e-4)
+%!assert_equal (gumbelinv (single ([p, NaN]), 0, 1), single ([x, NaN]), 1e-4)
+%!assert_equal (gumbelinv ([p, NaN], single (0), 1), single ([x, NaN]), 1e-4)
+%!assert_equal (gumbelinv ([p, NaN], 0, single (1)), single ([x, NaN]), 1e-4)
 
 ## Test whether gumbelcdf is successfully inverted
 %! p = [0.05, 0.5, 0.95];
 %! x = gumbelinv(p);
-%!assert (gumbelcdf(x), p, 1e-4)
+%!assert_equal (gumbelcdf (x), p, 1e-4)
 
 ## Test input validation
 %!error<gumbelinv: invalid number of input arguments.> gumbelinv ()

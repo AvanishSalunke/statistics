@@ -58,8 +58,8 @@ function x = tinv (p, df)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (df, "single"))
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (df, 'single'))
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -100,28 +100,28 @@ endfunction
 %! x2 = tinv (p, 2);
 %! x3 = tinv (p, 5);
 %! x4 = tinv (p, Inf);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-m")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-m')
 %! grid on
 %! xlim ([0, 1])
 %! ylim ([-5, 5])
-%! legend ({"df = 1", "df = 2", ...
-%!          "df = 5", 'df = \infty'}, "location", "northwest")
-%! title ("Student's T iCDF")
-%! xlabel ("probability")
-%! ylabel ("values in x")
+%! legend ({'df = 1', 'df = 2', ...
+%!          'df = 5', 'df = \infty'}, 'location', 'northwest')
+%! title ('Student''s T iCDF')
+%! xlabel ('probability')
+%! ylabel ('values in x')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.5 1 2];
-%!assert (tinv (p, ones (1,5)), [NaN -Inf 0 Inf NaN])
-%!assert (tinv (p, 1), [NaN -Inf 0 Inf NaN], eps)
-%!assert (tinv (p, [1 0 NaN 1 1]), [NaN NaN NaN Inf NaN], eps)
-%!assert (tinv ([p(1:2) NaN p(4:5)], 1), [NaN -Inf NaN Inf NaN])
+%!assert_equal (tinv (p, ones (1,5)), [NaN -Inf 0 Inf NaN])
+%!assert_equal (tinv (p, 1), [NaN -Inf 0 Inf NaN], eps)
+%!assert_equal (tinv (p, [1 0 NaN 1 1]), [NaN NaN NaN Inf NaN], eps)
+%!assert_equal (tinv ([p(1:2) NaN p(4:5)], 1), [NaN -Inf NaN Inf NaN])
 
 ## Test class of input preserved
-%!assert (tinv ([p, NaN], 1), [NaN -Inf 0 Inf NaN NaN], eps)
-%!assert (tinv (single ([p, NaN]), 1), single ([NaN -Inf 0 Inf NaN NaN]), eps ("single"))
-%!assert (tinv ([p, NaN], single (1)), single ([NaN -Inf 0 Inf NaN NaN]), eps ("single"))
+%!assert_equal (tinv ([p, NaN], 1), [NaN -Inf 0 Inf NaN NaN], eps)
+%!assert_equal (tinv (single ([p, NaN]), 1), single ([NaN -Inf 0 Inf NaN NaN]), eps ('single'))
+%!assert_equal (tinv ([p, NaN], single (1)), single ([NaN -Inf 0 Inf NaN NaN]), eps ('single'))
 
 ## Test input validation
 %!error<tinv: function called with too few input arguments.> tinv ()

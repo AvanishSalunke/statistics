@@ -60,14 +60,14 @@
 ## @code{@var{R} = rmmissing (@dots{}, @var{Name}, @var{Value})} also accepts
 ## the following paired arguments.
 ##
-## @multitable @columnfractions 0.2 0.05 0.75
-## @headitem Name @tab @tab Value
-## @item @qcode{'MinNumMissing'} @tab @tab A positive integer scalar value
+## @multitable @columnfractions 0.2 0.75
+## @headitem Name @tab Value
+## @item @qcode{'MinNumMissing'} @tab A positive integer scalar value
 ## specifying the required minimum number of missing values for removing any
 ## particular row or column from a matrix input.  Note that this argument is
 ## ignored if input @var{A} is a vector.
 ##
-## @item @qcode{'MissingLocations'} @tab @tab A logical array of the same size
+## @item @qcode{'MissingLocations'} @tab A logical array of the same size
 ## as input @var{A} indexing the locations of missing values in input array
 ## @var{A}.  Note that specifying @qcode{'MissingLocations'} overrides any
 ## standard missing values in @var{A}.
@@ -85,7 +85,7 @@ function [R, TF] = rmmissing (A, varargin)
   if (nargin < 1)
     print_usage ();
   endif
-  if (ndims(A) > 2)
+  if (ndims (A) > 2)
     error ("rmmissing: A must be a matrix; no more than 2 dimensions allowed.");
   endif
   if (isempty (A))
@@ -163,69 +163,69 @@ function [R, TF] = rmmissing (A, varargin)
 
 endfunction
 
-%!assert (rmmissing ([1, NaN, 3]), [1, 3])
-%!assert (rmmissing ('abcd f'), 'abcd f')
-%!assert (rmmissing ({'xxx', '', 'xyz'}), {'xxx', 'xyz'})
-%!assert (rmmissing ({'xxx', ''; 'xyz', 'yyy'}), {'xyz', 'yyy'})
-%!assert (rmmissing ({'xxx', ''; 'xyz', 'yyy'}, 2), {'xxx'; 'xyz'})
-%!assert (rmmissing ([1, 2; NaN, 2]), [1, 2])
-%!assert (rmmissing ([1, 2; NaN, 2], 2), [2, 2]')
-%!assert (rmmissing ([1, 2; NaN, 4; NaN, NaN],"MinNumMissing", 2), [1, 2; NaN, 4])
+%!assert_equal (rmmissing ([1, NaN, 3]), [1, 3])
+%!assert_equal (rmmissing ('abcd f'), 'abcd f')
+%!assert_equal (rmmissing ({'xxx', '', 'xyz'}), {'xxx', 'xyz'})
+%!assert_equal (rmmissing ({'xxx', ''; 'xyz', 'yyy'}), {'xyz', 'yyy'})
+%!assert_equal (rmmissing ({'xxx', ''; 'xyz', 'yyy'}, 2), {'xxx'; 'xyz'})
+%!assert_equal (rmmissing ([1, 2; NaN, 2]), [1, 2])
+%!assert_equal (rmmissing ([1, 2; NaN, 2], 2), [2, 2]')
+%!assert_equal (rmmissing ([1, 2; NaN, 4; NaN, NaN],'MinNumMissing', 2), [1, 2; NaN, 4])
 
 ## Test second output
 %!test
 %! x = [1:6];
 %! x([2,4]) = NaN;
 %! [~, idx] = rmmissing (x);
-%! assert (idx, logical ([0, 1, 0, 1, 0, 0]));
-%! assert (class(idx), 'logical');
+%! assert_equal (idx, logical ([0, 1, 0, 1, 0, 0]));
+%! assert_equal (class (idx), 'logical');
 %! x = reshape (x, [2, 3]);
 %! [~, idx] = rmmissing (x);
-%! assert (idx, logical ([0; 1]));
-%! assert (class(idx), 'logical');
+%! assert_equal (idx, logical ([0; 1]));
+%! assert_equal (class (idx), 'logical');
 %! [~, idx] = rmmissing (x, 2);
-%! assert (idx, logical ([1, 1, 0]));
-%! assert (class(idx), 'logical');
-%! [~, idx] = rmmissing (x, 1, "MinNumMissing", 2);
-%! assert (idx, logical ([0; 1]));
-%! assert (class(idx), 'logical');
-%! [~, idx] = rmmissing (x, 2, "MinNumMissing", 2);
-%! assert (idx, logical ([0, 0, 0]));
-%! assert (class(idx), 'logical');
+%! assert_equal (idx, logical ([1, 1, 0]));
+%! assert_equal (class (idx), 'logical');
+%! [~, idx] = rmmissing (x, 1, 'MinNumMissing', 2);
+%! assert_equal (idx, logical ([0; 1]));
+%! assert_equal (class (idx), 'logical');
+%! [~, idx] = rmmissing (x, 2, 'MinNumMissing', 2);
+%! assert_equal (idx, logical ([0, 0, 0]));
+%! assert_equal (class (idx), 'logical');
 
 ## Test data type handling
-%!assert (rmmissing (single ([1, 2, NaN; 3, 4, 5])), single ([3, 4, 5]))
-%!assert (rmmissing (logical (ones (3))), logical (ones (3)))
-%!assert (rmmissing (int32 (ones (3))), int32 (ones (3)))
-%!assert (rmmissing (uint32 (ones (3))), uint32 (ones (3)))
-%!assert (rmmissing ({1, 2, 3}), {1, 2, 3})
-%!assert (rmmissing ([struct, struct, struct]), [struct, struct, struct])
+%!assert_equal (rmmissing (single ([1, 2, NaN; 3, 4, 5])), single ([3, 4, 5]))
+%!assert_equal (rmmissing (logical (ones (3))), logical (ones (3)))
+%!assert_equal (rmmissing (int32 (ones (3))), int32 (ones (3)))
+%!assert_equal (rmmissing (uint32 (ones (3))), uint32 (ones (3)))
+%!assert_equal (rmmissing ({1, 2, 3}), {1, 2, 3})
+%!assert_equal (rmmissing ([struct, struct, struct]), [struct, struct, struct])
 
 ## Test empty input handling
-%!assert (rmmissing ([]), [])
-%!assert (rmmissing (ones (1, 0)), ones (1, 0))
-%!assert (rmmissing (ones (1, 0), 1), ones (1, 0))
-%!assert (rmmissing (ones (1, 0), 2), ones (1, 0))
-%!assert (rmmissing (ones (0, 1)), ones (0, 1))
-%!assert (rmmissing (ones (0, 1), 1), ones (0, 1))
-%!assert (rmmissing (ones (0, 1), 2), ones (0, 1))
+%!assert_equal (rmmissing ([]), [])
+%!assert_equal (rmmissing (ones (1, 0)), ones (1, 0))
+%!assert_equal (rmmissing (ones (1, 0), 1), ones (1, 0))
+%!assert_equal (rmmissing (ones (1, 0), 2), ones (1, 0))
+%!assert_equal (rmmissing (ones (0, 1)), ones (0, 1))
+%!assert_equal (rmmissing (ones (0, 1), 1), ones (0, 1))
+%!assert_equal (rmmissing (ones (0, 1), 2), ones (0, 1))
 %!error <rmmissing: A must be a matrix; no more than 2 dimensions allowed.> ...
 %!       rmmissing (ones (0, 1, 2))
 
 ## Test input validation
 %!error rmmissing ()
 %!error <rmmissing: A must be a matrix; no more than 2 dimensions allowed.> ...
-%!       rmmissing (ones(2, 2, 2))
+%!       rmmissing (ones (2, 2, 2))
 %!error <rmmissing: 'MinNumMissing' must be a positive integer value.> ...
-%!       rmmissing (ones(2, 2), 'MinNumMissing', 0)
+%!       rmmissing (ones (2, 2), 'MinNumMissing', 0)
 %!error <rmmissing: 'MinNumMissing' must be a positive integer value.> ...
-%!       rmmissing ([1, 2; 3, 4], 2, "MinNumMissing", -2)
+%!       rmmissing ([1, 2; 3, 4], 2, 'MinNumMissing', -2)
 %!error <rmmissing: 'MinNumMissing' must be a positive integer value.> ...
-%!       rmmissing ([1, 2; 3, 4], "MinNumMissing", 3.8)
+%!       rmmissing ([1, 2; 3, 4], 'MinNumMissing', 3.8)
 %!error <rmmissing: 'MinNumMissing' must be a positive integer value.> ...
-%!       rmmissing ([1, 2; 3, 4], "MinNumMissing", [1, 2, 3])
+%!       rmmissing ([1, 2; 3, 4], 'MinNumMissing', [1, 2, 3])
 %!error <rmmissing: 'MinNumMissing' must be a positive integer value.> ...
-%!       rmmissing ([1, 2; 3, 4], "MinNumMissing", 'xxx')
+%!       rmmissing ([1, 2; 3, 4], 'MinNumMissing', 'xxx')
 %!error <rmmissing: 'MissingLocations' must be a logical matrix of the same size as input A.> ...
 %!       rmmissing ([1, 2; 3, 4], 'MissingLocations', false ([1, 1, 1]))
 %!error <rmmissing: specified DIM must be either 1 or 2.> rmmissing ([1, 2; 3, 4], 5)

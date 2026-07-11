@@ -53,8 +53,8 @@ function y = ricepdf (x, s, sigma)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (s, "single") || isa (sigma, "single"));
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (s, 'single') || isa (sigma, 'single'));
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
@@ -74,7 +74,7 @@ function y = ricepdf (x, s, sigma)
   y(k) = x_s2 .* term .* besseli (0, x_s2 .* n_k, 1);
 
   ## Fix arithmetic overflow due to exponent
-  y(epxt > (log(realmax(class(y))))) = 0;
+  y(epxt > (log (realmax (class (y))))) = 0;
 
   ## Fix x < 0 -> 0
   y(x < 0) = 0;
@@ -89,31 +89,31 @@ endfunction
 %! y3 = ricepdf (x, 1, 1);
 %! y4 = ricepdf (x, 2, 1);
 %! y5 = ricepdf (x, 4, 1);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-m", x, y5, "-k")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-m', x, y5, '-k')
 %! grid on
 %! ylim ([0, 0.65])
 %! xlim ([0, 8])
-%! legend ({"s = 0, σ = 1", "s = 0.5, σ = 1", "s = 1, σ = 1", ...
-%!          "s = 2, σ = 1", "s = 4, σ = 1"}, "location", "northeast")
-%! title ("Rician PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'s = 0, σ = 1', 's = 0.5, σ = 1', 's = 1, σ = 1', ...
+%!          's = 2, σ = 1', 's = 4, σ = 1'}, 'location', 'northeast')
+%! title ('Rician PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-1 0 0.5 1 2];
 %! y = [0 0 0.1073 0.1978 0.2846];
-%!assert (ricepdf (x, ones (1, 5), 2 * ones (1, 5)), y, 1e-4)
-%!assert (ricepdf (x, 1, 2 * ones (1, 5)), y, 1e-4)
-%!assert (ricepdf (x, ones (1, 5), 2), y, 1e-4)
-%!assert (ricepdf (x, [0 NaN 1 1 1], 2), [0 NaN y(3:5)], 1e-4)
-%!assert (ricepdf (x, 1, 2 * [0 NaN 1 1 1]), [0 NaN y(3:5)], 1e-4)
-%!assert (ricepdf ([x, NaN], 1, 2), [y, NaN], 1e-4)
+%!assert_equal (ricepdf (x, ones (1, 5), 2 * ones (1, 5)), y, 1e-4)
+%!assert_equal (ricepdf (x, 1, 2 * ones (1, 5)), y, 1e-4)
+%!assert_equal (ricepdf (x, ones (1, 5), 2), y, 1e-4)
+%!assert_equal (ricepdf (x, [0 NaN 1 1 1], 2), [0 NaN y(3:5)], 1e-4)
+%!assert_equal (ricepdf (x, 1, 2 * [0 NaN 1 1 1]), [0 NaN y(3:5)], 1e-4)
+%!assert_equal (ricepdf ([x, NaN], 1, 2), [y, NaN], 1e-4)
 
 ## Test class of input preserved
-%!assert (ricepdf (single ([x, NaN]), 1, 2), single ([y, NaN]), 1e-4)
-%!assert (ricepdf ([x, NaN], single (1), 2), single ([y, NaN]), 1e-4)
-%!assert (ricepdf ([x, NaN], 1, single (2)), single ([y, NaN]), 1e-4)
+%!assert_equal (ricepdf (single ([x, NaN]), 1, 2), single ([y, NaN]), 1e-4)
+%!assert_equal (ricepdf ([x, NaN], single (1), 2), single ([y, NaN]), 1e-4)
+%!assert_equal (ricepdf ([x, NaN], 1, single (2)), single ([y, NaN]), 1e-4)
 
 ## Test input validation
 %!error<ricepdf: function called with too few input arguments.> ricepdf ()

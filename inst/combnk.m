@@ -37,7 +37,7 @@ function retval = combnk (data, k)
   if (k == 0 || k > n)
     retval = resize (data, 0, k);
   elseif (k == n)
-    retval = data (:).';
+    retval = data(:).';
   else
     retval = __combnk__ (data, k);
   endif
@@ -52,7 +52,7 @@ endfunction
 function retval = __combnk__ (data, k)
   ## Recursion stopping criteria
   if (k == 1)
-    retval = data (:);
+    retval = data(:);
   else
     ## Process data
     n = numel (data);
@@ -62,8 +62,8 @@ function retval = __combnk__ (data, k)
       retval = [];
     endif
     for j = 1:n
-      C = __combnk__ (data ((j+1):end), k-1);
-      C = cat (2, repmat (data (j), rows (C), 1), C);
+      C = __combnk__ (data((j+1):end), k-1);
+      C = cat (2, repmat (data(j), rows (C), 1), C);
       if (! isempty (C))
         if (isempty (retval))
           retval = C;
@@ -77,21 +77,21 @@ endfunction
 
 %!demo
 %! c = combnk (1:5, 2);
-%! disp ("All pairs of integers between 1 and 5:");
+%! disp ('All pairs of integers between 1 and 5:');
 %! disp (c);
 
 %!test
 %! c = combnk (1:3, 2);
-%! assert (c, [1, 2; 1, 3; 2, 3]);
+%! assert_equal (c, [1, 2; 1, 3; 2, 3]);
 
 %!test
 %! c = combnk (1:3, 6);
-%! assert (isempty (c));
+%! assert_equal (isempty (c), true);
 
 %!test
 %! c = combnk ({1, 2, 3}, 2);
-%! assert (c, {1, 2; 1, 3; 2, 3});
+%! assert_equal (c, {1, 2; 1, 3; 2, 3});
 
 %!test
-%! c = combnk ("hello", 2);
-%! assert (c, ["lo"; "lo"; "ll"; "eo"; "el"; "el"; "ho"; "hl"; "hl"; "he"]);
+%! c = combnk ('hello', 2);
+%! assert_equal (c, ['lo'; 'lo'; 'll'; 'eo'; 'el'; 'el'; 'ho'; 'hl'; 'hl'; 'he']);

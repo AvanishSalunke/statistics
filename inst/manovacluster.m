@@ -31,12 +31,12 @@
 ## @code{manovacluster (@var{stats}, @var{method})} uses the @var{method}
 ## algorithm in place of single linkage.  The available methods are:
 ##
-## @multitable @columnfractions 0.05 0.2 0.75
-## @item @tab "single" @tab --- nearest distance
-## @item @tab "complete" @tab --- furthest distance
-## @item @tab "average" @tab --- average distance
-## @item @tab "centroid" @tab --- center of mass distance
-## @item @tab "ward" @tab --- inner squared distance
+## @multitable @columnfractions 0.2 0.75
+## @item "single" @tab --- nearest distance
+## @item "complete" @tab --- furthest distance
+## @item "average" @tab --- average distance
+## @item "centroid" @tab --- center of mass distance
+## @item "ward" @tab --- inner squared distance
 ## @end multitable
 ##
 ## @code{@var{h} = manovacluster (@dots{})} returns a vector of line handles.
@@ -49,31 +49,31 @@ function h = manovacluster (stats, method)
   ## Check for valid input arguments
   narginchk (1, 2);
   if nargin > 1
-    valid_methods = {"single", "complete", "average", "centroid", "ward"};
+    valid_methods = {'single', 'complete', 'average', 'centroid', 'ward'};
     if ! any (strcmpi (method, valid_methods))
       error ("manovacluster: invalid method.");
     endif
   else
-    method = "single";
-  end
+    method = 'single';
+  endif
   ## Get stats fields and create dendrogram
   dist = stats.gmdist;
   group_names = stats.gnames;
   [a, b] = meshgrid (1:length (dist));
   hh = dendrogram (linkage (dist(a < b)', method), 0);
   ## Fix tick labels on x-axis
-  oldlab = get (gca, "XTickLabel");
-  maxlen = max (cellfun ("length", group_names));
-  newlab = repmat(" ", size (oldlab, 1), maxlen);
+  oldlab = get (gca, 'XTickLabel');
+  maxlen = max (cellfun ('length', group_names));
+  newlab = repmat (' ', size (oldlab, 1), maxlen);
   ng = size (group_names, 1);
   for j = 1:size (oldlab, 1)
     k = str2num (oldlab(j,:));
     if (! isempty (k) & k > 0 & k <= ng)
       x = group_names{k,:};
-      newlab(j,1:length(x)) = x;
+      newlab(j,1:length (x)) = x;
     endif
   endfor
-  set(gca, "XtickLabel", newlab);
+  set (gca, 'XtickLabel', newlab);
   ## Return plot handles if requested
   if nargout > 0
     h = hh;
@@ -88,7 +88,7 @@ endfunction
 
 ## Test plotting
 %!test
-%! hf = figure ("visible", "off");
+%! hf = figure ('visible', 'off');
 %! unwind_protect
 %!   load carbig
 %!   X = [MPG Acceleration Weight Displacement];
@@ -99,4 +99,4 @@ endfunction
 %! end_unwind_protect
 
 ## Test input validation
-%!error manovacluster (stats, "some");
+%!error manovacluster (stats, 'some');

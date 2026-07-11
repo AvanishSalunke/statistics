@@ -68,12 +68,12 @@ endfunction
 ## Input validation tests
 %!error<geostat: function called with too few input arguments.> geostat ()
 %!error<geostat: PS must be numeric.> geostat ({})
-%!error<geostat: PS must be numeric.> geostat ("")
+%!error<geostat: PS must be numeric.> geostat ('')
 %!error<geostat: PS must not be complex.> geostat (i)
 
 ## Output validation tests
 %!test
 %! ps = 1 ./ (1:6);
 %! [m, v] = geostat (ps);
-%! assert (m, [0, 1, 2, 3, 4, 5], 0.001);
-%! assert (v, [0, 2, 6, 12, 20, 30], 0.001);
+%! assert_equal (m, [0, 1, 2, 3, 4, 5], 0.001);
+%! assert_equal (v, [0, 2, 6, 12, 20, 30], 0.001);

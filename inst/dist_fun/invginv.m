@@ -43,7 +43,7 @@ function x = invginv (p, mu, lambda)
   endif
 
   ## Check for common size of P, MU, and LAMBDA
-  if (! isscalar (p) || ! isscalar (mu) || ! isscalar(lambda))
+  if (! isscalar (p) || ! isscalar (mu) || ! isscalar (lambda))
     [retval, p, mu, lambda] = common_size (p, mu, lambda);
     vec = true;
     if (retval > 0)
@@ -59,8 +59,8 @@ function x = invginv (p, mu, lambda)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (mu, "single") || isa (lambda, "single"));
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (mu, 'single') || isa (lambda, 'single'));
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -137,7 +137,7 @@ function x = invginv (p, mu, lambda)
   endfor
 
   ## Issue a warning for exceeding iterations or not converging to tolerance
-  notconv = (abs(dF./F) > tol.^(2/3));
+  notconv = (abs (dF./F) > tol.^(2/3));
   if (it > mit || any (notconv(:)))
     warning (strcat ("invginv: Newton's Method did not converge", ...
                      " or exceeded maximum iterations."));
@@ -160,28 +160,28 @@ endfunction
 %! x3 = invginv (p, 1, 3);
 %! x4 = invginv (p, 3, 0.2);
 %! x5 = invginv (p, 3, 1);
-%! plot (p, x1, "-b", p, x2, "-g", p, x3, "-r", p, x4, "-c", p, x5, "-y")
+%! plot (p, x1, '-b', p, x2, '-g', p, x3, '-r', p, x4, '-c', p, x5, '-y')
 %! grid on
 %! ylim ([0, 3])
-%! legend ({"μ = 1, σ = 0.2", "μ = 1, σ = 1", "μ = 1, σ = 3", ...
-%!          "μ = 3, σ = 0.2", "μ = 3, σ = 1"}, "location", "northwest")
-%! title ("Inverse Gaussian iCDF")
-%! xlabel ("probability")
-%! ylabel ("x")
+%! legend ({'μ = 1, σ = 0.2', 'μ = 1, σ = 1', 'μ = 1, σ = 3', ...
+%!          'μ = 3, σ = 0.2', 'μ = 3, σ = 1'}, 'location', 'northwest')
+%! title ('Inverse Gaussian iCDF')
+%! xlabel ('probability')
+%! ylabel ('x')
 
 ## Test output
 %!shared p, x
 %! p = [0, 0.3829, 0.6827, 1];
 %! x = [0, 0.5207, 1.0376, Inf];
-%!assert (invginv (p, 1, 1), x, 1e-4);
-%!assert (invginv (p, 1, ones (1,4)), x, 1e-4);
-%!assert (invginv (p, 1, [-1, 0, 1, 1]), [NaN, NaN, x(3:4)], 1e-4)
-%!assert (invginv (p, [-1, 0, 1, 1], 1), [NaN, NaN, x(3:4)], 1e-4)
+%!assert_equal (invginv (p, 1, 1), x, 1e-4);
+%!assert_equal (invginv (p, 1, ones (1,4)), x, 1e-4);
+%!assert_equal (invginv (p, 1, [-1, 0, 1, 1]), [NaN, NaN, x(3:4)], 1e-4)
+%!assert_equal (invginv (p, [-1, 0, 1, 1], 1), [NaN, NaN, x(3:4)], 1e-4)
 
 ## Test class of input preserved
-%!assert (class (invginv (single ([p, NaN]), 0, 1)), "single")
-%!assert (class (invginv ([p, NaN], single (0), 1)), "single")
-%!assert (class (invginv ([p, NaN], 0, single (1))), "single")
+%!assert_equal (class (invginv (single ([p, NaN]), 0, 1)), "single")
+%!assert_equal (class (invginv ([p, NaN], single (0), 1)), "single")
+%!assert_equal (class (invginv ([p, NaN], 0, single (1))), "single")
 
 ## Test input validation
 %!error<invginv: function called with too few input arguments.> invginv (1)

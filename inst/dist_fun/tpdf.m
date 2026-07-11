@@ -54,8 +54,8 @@ function y = tpdf (x, df)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (df, "single"))
-    y = zeros (size (x), "single");
+  if (isa (x, 'single') || isa (df, 'single'))
+    y = zeros (size (x), 'single');
   else
     y = zeros (size (x));
   endif
@@ -82,33 +82,33 @@ endfunction
 %! y2 = tpdf (x, 2);
 %! y3 = tpdf (x, 5);
 %! y4 = tpdf (x, Inf);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-m")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-m')
 %! grid on
 %! xlim ([-5, 5])
 %! ylim ([0, 0.41])
-%! legend ({"df = 1", "df = 2", ...
-%!          "df = 5", 'df = \infty'}, "location", "northeast")
-%! title ("Student's T PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'df = 1', 'df = 2', ...
+%!          'df = 5', 'df = \infty'}, 'location', 'northeast')
+%! title ('Student''s T PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!test
 %! x = rand (10,1);
 %! y = 1./(pi * (1 + x.^2));
-%! assert (tpdf (x, 1), y, 5*eps);
+%! assert_equal (tpdf (x, 1), y, 5*eps);
 %!shared x, y
 %! x = [-Inf 0 0.5 1 Inf];
 %! y = 1./(pi * (1 + x.^2));
-%!assert (tpdf (x, ones (1,5)), y, eps)
-%!assert (tpdf (x, 1), y, eps)
-%!assert (tpdf (x, [0 NaN 1 1 1]), [NaN NaN y(3:5)], eps)
-%!assert (tpdf (x, Inf), normpdf (x))
+%!assert_equal (tpdf (x, ones (1,5)), y, eps)
+%!assert_equal (tpdf (x, 1), y, eps)
+%!assert_equal (tpdf (x, [0 NaN 1 1 1]), [NaN NaN y(3:5)], eps)
+%!assert_equal (tpdf (x, Inf), normpdf (x))
 
 ## Test class of input preserved
-%!assert (tpdf ([x, NaN], 1), [y, NaN], eps)
-%!assert (tpdf (single ([x, NaN]), 1), single ([y, NaN]), eps ("single"))
-%!assert (tpdf ([x, NaN], single (1)), single ([y, NaN]), eps ("single"))
+%!assert_equal (tpdf ([x, NaN], 1), [y, NaN], eps)
+%!assert_equal (tpdf (single ([x, NaN]), 1), single ([y, NaN]), eps ('single'))
+%!assert_equal (tpdf ([x, NaN], single (1)), single ([y, NaN]), eps ('single'))
 
 ## Test input validation
 %!error<tpdf: function called with too few input arguments.> tpdf ()

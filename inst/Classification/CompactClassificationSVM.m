@@ -37,7 +37,7 @@ classdef CompactClassificationSVM
   ## @seealso{ClassificationSVM}
   ## @end deftp
 
-  properties (Access = public)
+  properties(Access = public)
     ## -*- texinfo -*-
     ## @deftp {CompactClassificationSVM} {property} NumPredictors
     ##
@@ -110,20 +110,22 @@ classdef CompactClassificationSVM
     ## built-in functions.  Nevertheless, the @qcode{ScoreTransform} property
     ## always stores their function handle equivalent.
     ##
-    ## @multitable @columnfractions 0.2 0.05 0.75
-    ## @headitem @var{Value} @tab @tab @var{Description}
-    ## @item @qcode{"doublelogit"} @tab @tab @math{1 ./ (1 + exp (-2 * x))}
-    ## @item @qcode{"invlogit"} @tab @tab @math{1 ./ (1 + exp (-x))}
-    ## @item @qcode{"ismax"} @tab @tab Sets the score for the class with the
+    ## @multitable @columnfractions 0.2 0.75
+    ## @headitem @var{Value} @tab @var{Description}
+    ## @item @qcode{'doublelogit'} @tab @math{1 ./ (1 + exp (-2 * x))}
+    ## @item @qcode{'invlogit'} @tab @math{1 ./ (1 + exp (-x))}
+    ## @item @qcode{'ismax'} @tab Sets the score for the class with the
     ## largest score to 1, and for all other classes to 0
-    ## @item @qcode{"logit"} @tab @tab @math{log (x ./ (1 - x))}
-    ## @item @qcode{"none"} @tab @tab @math{x} (no transformation)
-    ## @item @qcode{"identity"} @tab @tab @math{x} (no transformation)
-    ## @item @qcode{"sign"} @tab @tab @math{-1 for x < 0, 0 for x = 0, 1 for x > 0}
-    ## @item @qcode{"symmetric"} @tab @tab @math{2 * x - 1}
-    ## @item @qcode{"symmetricismax"} @tab @tab Sets the score for the class
+    ## @item @qcode{'logit'} @tab @math{log (x ./ (1 - x))}
+    ## @item @qcode{'none'} @tab @math{x} (no transformation)
+    ## @item @qcode{'identity'} @tab @math{x} (no transformation)
+    ## @item @qcode{'sign'} @tab
+    ## @math{-1 for x < 0, 0 for x = 0, 1 for x >
+    ## 0}
+    ## @item @qcode{'symmetric'} @tab @math{2 * x - 1}
+    ## @item @qcode{'symmetricismax'} @tab Sets the score for the class
     ## with the largest score to 1, and for all other classes to -1
-    ## @item @qcode{"symmetriclogit"} @tab @tab @math{2 ./ (1 + exp (-x)) - 1}
+    ## @item @qcode{'symmetriclogit'} @tab @math{2 ./ (1 + exp (-x)) - 1}
     ## @end multitable
     ##
     ## @end deftp
@@ -195,7 +197,7 @@ classdef CompactClassificationSVM
     ##
     ## Trained classifier coefficients
     ##
-    ## The coefficients of the trained SVM classifier specified as an @math{sx1}
+    ## The coefficients of the trained SVM classifier specified as an @math{s*1}
     ## numeric vector, where @math{s} is the number of support vectors equal to
     ## @qcode{sum (obj.IsSupportVector)}.  If the SVM classifier was trained
     ## with a kernel function other than @qcode{'linear'}, then @qcode{Alpha} is
@@ -209,7 +211,7 @@ classdef CompactClassificationSVM
     ##
     ## Linear predictor coefficients
     ##
-    ## The linear predictor coefficients specified as an @math{sx1} numeric
+    ## The linear predictor coefficients specified as an @math{s*1} numeric
     ## vector, where @math{s} is the number of support vectors equal to
     ## @qcode{sum (obj.IsSupportVector)}.  If the SVM classifier was trained
     ## with a @qcode{'linear'} kernel function, then @qcode{Beta} is empty.
@@ -233,7 +235,7 @@ classdef CompactClassificationSVM
     ##
     ## Support vector indicator
     ##
-    ## An @math{Nx1} logical vector that flags whether a corresponding
+    ## An @math{N*1} logical vector that flags whether a corresponding
     ## observation in the predictor data matrix is a Support Vector.  @math{N}
     ## is the number of observations in the training data.  This property is
     ## read-only.
@@ -246,7 +248,7 @@ classdef CompactClassificationSVM
     ##
     ## Support vector class labels
     ##
-    ## The support vector class labels specified as an @math{sx1} numeric
+    ## The support vector class labels specified as an @math{s*1} numeric
     ## vector, where @math{s} is the number of support vectors equal to
     ## @qcode{sum (obj.IsSupportVector)}.  A value of +1 in
     ## @code{SupportVectorLabels} indicates that the corresponding support
@@ -262,7 +264,7 @@ classdef CompactClassificationSVM
     ##
     ## Support vectors
     ##
-    ## The support vectors of the trained SVM classifier specified an @math{sxp}
+    ## The support vectors of the trained SVM classifier specified an @math{s*p}
     ## numeric matrix, where @math{s} is the number of support vectors equal to
     ## @qcode{sum (obj.IsSupportVector)}, and @math{p} is the number of
     ## predictor variables in the predictor data.  This property is read-only.
@@ -271,7 +273,7 @@ classdef CompactClassificationSVM
     SupportVectors      = [];
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     ## constructor
     function this = CompactClassificationSVM (Mdl = [])
@@ -279,7 +281,7 @@ classdef CompactClassificationSVM
       ## Check for appropriate class
       if (isempty (Mdl))
         return;
-      elseif (! strcmpi (class (Mdl), "ClassificationSVM"))
+      elseif (! strcmpi (class (Mdl), 'ClassificationSVM'))
         error (strcat ("CompactClassificationSVM: invalid", ...
                        " classification object."));
       endif
@@ -310,7 +312,7 @@ classdef CompactClassificationSVM
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {CompactClassificationSVM} {@var{label} =} predict (@var{obj}, @var{XC})
@@ -328,7 +330,7 @@ classdef CompactClassificationSVM
     ## @item
     ## @var{obj} must be a @qcode{CompactClassificationSVM} class object.
     ## @item
-    ## @var{XC} must be an @math{MxP} numeric matrix with the same number of
+    ## @var{XC} must be an @math{M*P} numeric matrix with the same number of
     ## features @math{P} as the corresponding predictors of the SVM model in
     ## @var{obj}.
     ## @end itemize
@@ -390,13 +392,13 @@ classdef CompactClassificationSVM
 
       if (nargout > 1)
         ## Apply ScoreTransform to return probability estimates
-        if (! strcmp (this.ScoreTransform, "none"))
+        if (! strcmp (this.ScoreTransform, 'none'))
           f = this.ScoreTransform;
-          if (! strcmp (class (f), "function_handle"))
+          if (! strcmp (class (f), 'function_handle'))
             error (strcat ("CompactClassificationSVM.predict: 'Score", ...
                            "Transform' must be a 'function_handle' object."));
           endif
-          scores = f (scores);
+          scores = f(scores);
         endif
       endif
 
@@ -409,17 +411,17 @@ classdef CompactClassificationSVM
     ##
     ## @code{@var{m} = margin (@var{obj}, @var{X}, @var{Y})} returns
     ## the classification margins for @var{obj} with data @var{X} and
-    ## classification @var{Y}.  @var{m} is a numeric vector of length size (X,1).
+    ## classification @var{Y}. @var{m} is a numeric vector of length size (X,1).
     ##
     ## @itemize
     ## @item
     ## @var{obj} is a @var{CompactClassificationSVM} object.
     ## @item
-    ## @var{X} must be a @math{NxP} numeric matrix of input data where rows
+    ## @var{X} must be a @math{N*P} numeric matrix of input data where rows
     ## correspond to observations and columns correspond to features or
     ## variables.
     ## @item
-    ## @var{Y} is @math{Nx1} matrix or cell matrix containing the class labels
+    ## @var{Y} is @math{N*1} matrix or cell matrix containing the class labels
     ## of corresponding predictor data in @var{X}.  @var{Y} must have same
     ## numbers of Rows as @var{X}.
     ## @end itemize
@@ -473,11 +475,11 @@ classdef CompactClassificationSVM
     ## @item
     ## @code{obj} is a @var{CompactClassificationSVM} object.
     ## @item
-    ## @code{X} must be a @math{NxP} numeric matrix of input data where rows
+    ## @code{X} must be a @math{N*P} numeric matrix of input data where rows
     ## correspond to observations and columns correspond to features or
     ## variables.
     ## @item
-    ## @code{Y} is @math{Nx1} matrix or cell matrix containing the class labels
+    ## @code{Y} is @math{N*1} matrix or cell matrix containing the class labels
     ## of corresponding predictor data in @var{X}. @var{Y} must have same
     ## numbers of Rows as @var{X}.
     ## @end itemize
@@ -485,32 +487,32 @@ classdef CompactClassificationSVM
     ## @code{@var{L} = loss (@dots{}, @var{name}, @var{value})} allows
     ## additional options specified by @var{name}-@var{value} pairs:
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"LossFun"} @tab @tab Specifies the loss function to use.
+    ## @item @qcode{'LossFun'} @tab Specifies the loss function to use.
     ## Can be a function handle with four input arguments (C, S, W, Cost)
     ## which returns a scalar value or one of:
     ## 'binodeviance', 'classifcost', 'classiferror', 'exponential',
     ## 'hinge', 'logit','mincost', 'quadratic'.
     ## @itemize
     ## @item
-    ## @code{C} is a logical matrix of size @math{NxK}, where @math{N} is the
+    ## @code{C} is a logical matrix of size @math{N*K}, where @math{N} is the
     ## number of observations and @math{K} is the number of classes.
     ## The element @code{C(i,j)} is true if the class label of the i-th
     ## observation is equal to the j-th class.
     ## @item
-    ## @code{S} is a numeric matrix of size @math{NxK}, where each element
+    ## @code{S} is a numeric matrix of size @math{N*K}, where each element
     ## represents the classification score for the corresponding class.
     ## @item
     ## @code{W} is a numeric vector of length @math{N}, representing
     ## the observation weights.
     ## @item
-    ## @code{Cost} is a @math{KxK} matrix representing the misclassification
+    ## @code{Cost} is a @math{K*K} matrix representing the misclassification
     ## costs.
     ## @end itemize
     ##
-    ## @item @qcode{"Weights"} @tab @tab Specifies observation weights, must be
+    ## @item @qcode{'Weights'} @tab Specifies observation weights, must be
     ## a numeric vector of length equal to the number of rows in X.
     ## Default is @code{ones (size (X, 1))}. loss normalizes the weights so that
     ## observation weights in each class sum to the prior probability of that
@@ -559,24 +561,24 @@ classdef CompactClassificationSVM
       while (numel (varargin) > 0)
         switch (tolower (varargin {1}))
 
-          case "lossfun"
+          case 'lossfun'
             LossFun = varargin{2};
             if (! (ischar (LossFun)))
               error (strcat ("CompactClassificationSVM.loss: 'LossFun'", ...
                              " must be a character vector."));
             endif
             LossFun = tolower (LossFun);
-            if (! any (strcmpi (LossFun, {"binodeviance", "classiferror", ...
-                                          "exponential", "hinge", "logit", ...
-                                          "quadratic"})))
+            if (! any (strcmpi (LossFun, {'binodeviance', 'classiferror', ...
+                                          'exponential', 'hinge', 'logit', ...
+                                          'quadratic'})))
               error (strcat ("CompactClassificationSVM.loss:", ...
                              " unsupported Loss function."));
             endif
 
-          case "weights"
+          case 'weights'
             Weights = varargin{2};
             ## Validate if weights is a numeric vector
-            if(! (isnumeric (Weights) && isvector (Weights)))
+            if (! (isnumeric (Weights) && isvector (Weights)))
               error (strcat ("CompactClassificationSVM.loss: 'Weights'", ...
                              " must be a numeric vector."));
             endif
@@ -592,7 +594,7 @@ classdef CompactClassificationSVM
             error (strcat ("CompactClassificationSVM.loss: invalid", ...
                            " parameter name in optional pair arguments."));
           endswitch
-        varargin (1:2) = [];
+        varargin(1:2) = [];
       endwhile
 
       ## Compute the classification score
@@ -603,22 +605,22 @@ classdef CompactClassificationSVM
 
         ## Compute the loss based on the specified loss function
         switch (LossFun)
-          case "classiferror"
+          case 'classiferror'
             L = mean ((margin <= 0) .* Weights);
 
-          case "hinge"
+          case 'hinge'
             L = mean (max (0, 1 - margin) .* Weights);
 
-          case "logit"
+          case 'logit'
             L = mean (log (1 + exp (-margin)) .* Weights);
 
-          case "exponential"
+          case 'exponential'
             L = mean (exp (-margin) .* Weights);
 
-          case "quadratic"
+          case 'quadratic'
             L = mean (((1 - margin) .^2) .* Weights);
 
-          case "binodeviance"
+          case 'binodeviance'
             L = mean (log (1 + exp (-2 * margin)) .* Weights);
 
           otherwise
@@ -644,7 +646,7 @@ classdef CompactClassificationSVM
 
     function savemodel (this, fname)
       ## Generate variable for class name
-      classdef_name = "CompactClassificationSVM";
+      classdef_name = 'CompactClassificationSVM';
 
       ## Create variables from model properties
       NumPredictors       = this.NumPredictors;
@@ -665,16 +667,16 @@ classdef CompactClassificationSVM
       SupportVectors      = this.SupportVectors;
 
       ## Save classdef name and all model properties as individual variables
-      save ("-binary", fname, "classdef_name", "NumPredictors", ...
-            "PredictorNames", "ResponseName", "ClassNames", ...
-            "ScoreTransform", "Standardize", "Sigma", "Mu", ...
-            "ModelParameters", "Model", "Alpha", "Beta", "Bias", ...
-            "IsSupportVector", "SupportVectorLabels", "SupportVectors");
+      save ('-binary', fname, 'classdef_name', 'NumPredictors', ...
+            'PredictorNames', 'ResponseName', 'ClassNames', ...
+            'ScoreTransform', 'Standardize', 'Sigma', 'Mu', ...
+            'ModelParameters', 'Model', 'Alpha', 'Beta', 'Bias', ...
+            'IsSupportVector', 'SupportVectorLabels', 'SupportVectors');
     endfunction
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function mdl = load_model (filename, data)
       ## Create a ClassificationSVM object
@@ -685,7 +687,7 @@ classdef CompactClassificationSVM
       names = fieldnames (data);
       props = fieldnames (mdl);
       if (! isequal (sort (names), sort (props)))
-        msg = "CompactClassificationSVM.load_model: invalid model in '%s'.";
+        msg = 'CompactClassificationSVM.load_model: invalid model in ''%s''.';
         error (msg, filename);
       endif
 
@@ -728,22 +730,22 @@ endclassdef
 %! xc = [min(x); mean(x); max(x)];
 %! Mdl = fitcsvm (x, y, 'KernelFunction', 'rbf', 'Tolerance', 1e-7);
 %! CMdl = compact (Mdl);
-%! assert (isempty (CMdl.Alpha), true)
-%! assert (sum (CMdl.IsSupportVector), numel (CMdl.Beta))
+%! assert_equal (isempty (CMdl.Alpha), true)
+%! assert_equal (sum (CMdl.IsSupportVector), numel (CMdl.Beta))
 %! [label, score] = predict (CMdl, xc);
-%! assert (label, [1; 2; 2]);
-%! assert (score(:,1), [0.99285; -0.080296; -0.93694], 1e-5);
-%! assert (score(:,1), -score(:,2), eps)
+%! assert_equal (label, [1; 2; 2]);
+%! assert_equal (score(:,1), [0.99285; -0.080296; -0.93694], 1e-5);
+%! assert_equal (score(:,1), -score(:,2), eps)
 %!test
 %! Mdl = fitcsvm (x, y);
 %! CMdl = compact (Mdl);
-%! assert (isempty (CMdl.Beta), true)
-%! assert (sum (CMdl.IsSupportVector), numel (CMdl.Alpha))
-%! assert (numel (CMdl.Alpha), 24)
-%! assert (CMdl.Bias, -14.415, 1e-3)
+%! assert_equal (isempty (CMdl.Beta), true)
+%! assert_equal (sum (CMdl.IsSupportVector), numel (CMdl.Alpha))
+%! assert_equal (numel (CMdl.Alpha), 24)
+%! assert_equal (CMdl.Bias, -14.415, 1e-3)
 %! xc = [min(x); mean(x); max(x)];
 %! label = predict (CMdl, xc);
-%! assert (label, [1; 2; 2]);
+%! assert_equal (label, [1; 2; 2]);
 
 ## Test input validation for predict method
 %!error<CompactClassificationSVM.predict: too few input arguments.> ...
@@ -753,13 +755,13 @@ endclassdef
 %!error<CompactClassificationSVM.predict: XC must have the same number of predictors as the trained SVM model.> ...
 %! predict (CMdl, 1)
 %!test
-%! CMdl.ScoreTransform = "a";
+%! CMdl.ScoreTransform = 'a';
 %!error<CompactClassificationSVM.predict: 'ScoreTransform' must be a 'function_handle' object.> ...
 %! [labels, scores] = predict (CMdl, x);
 
 ## Test output for margin method
 %!test
-%! rand ("seed", 1);
+%! rand ('seed', 1);
 %! C = cvpartition (y, 'HoldOut', 0.15);
 %! Mdl = fitcsvm (x(training (C),:), y(training (C)), ...
 %!                'KernelFunction', 'rbf', 'Tolerance', 1e-7);
@@ -769,7 +771,7 @@ endclassdef
 %!                    2.6605;  3.5251; -4.0000; -6.3411; -6.4511; ...
 %!                   -3.0532; -7.5054; -1.6700; -5.6227; -7.3640];
 %! computed_margin = margin (CMdl, x(testInds,:), y(testInds,:));
-%! assert (computed_margin, expected_margin, 1e-4);
+%! assert_equal (computed_margin, expected_margin, 1e-4);
 
 ## Test input validation for margin method
 %!error<CompactClassificationSVM.margin: too few input arguments.> ...
@@ -787,7 +789,7 @@ endclassdef
 
 ## Test output for loss method
 %!test
-%! rand ("seed", 1);
+%! rand ('seed', 1);
 %! C = cvpartition (y, 'HoldOut', 0.15);
 %! Mdl = fitcsvm (x(training (C),:), y(training (C)), ...
 %!                'KernelFunction', 'rbf', 'Tolerance', 1e-7);
@@ -799,12 +801,12 @@ endclassdef
 %! L4 = loss (CMdl, x(testInds,:), y(testInds,:), 'LossFun', 'hinge');
 %! L5 = loss (CMdl, x(testInds,:), y(testInds,:), 'LossFun', 'logit');
 %! L6 = loss (CMdl, x(testInds,:), y(testInds,:), 'LossFun', 'quadratic');
-%! assert (L1, 2.8711, 1e-4);
-%! assert (L2, 0.5333, 1e-4);
-%! assert (L3, 10.9685, 1e-4);
-%! assert (L4, 1.9827, 1e-4);
-%! assert (L5, 1.5849, 1e-4);
-%! assert (L6, 7.6739, 1e-4);
+%! assert_equal (L1, 2.8711, 1e-4);
+%! assert_equal (L2, 0.5333, 1e-4);
+%! assert_equal (L3, 10.9685, 1e-4);
+%! assert_equal (L4, 1.9827, 1e-4);
+%! assert_equal (L5, 1.5849, 1e-4);
+%! assert_equal (L6, 7.6739, 1e-4);
 
 ## Test input validation for loss method
 %!error<CompactClassificationSVM.loss: too few input arguments.> ...
@@ -812,7 +814,7 @@ endclassdef
 %!error<CompactClassificationSVM.loss: too few input arguments.> ...
 %! loss (CMdl, zeros (2))
 %!error<CompactClassificationSVM.loss: Name-Value arguments must be in pairs.> ...
-%! loss (CMdl, [1, 2], 1, "LossFun")
+%! loss (CMdl, [1, 2], 1, 'LossFun')
 %!error<CompactClassificationSVM.loss: X is empty.> ...
 %! loss (CMdl, [], zeros (2))
 %!error<CompactClassificationSVM.loss: X must have the same number of predictors as the trained SVM model.> ...
@@ -822,14 +824,14 @@ endclassdef
 %!error<CompactClassificationSVM.loss: Y must have the same number of rows as X.> ...
 %! loss (CMdl, [1, 2], [1; 2])
 %!error<CompactClassificationSVM.loss: 'LossFun' must be a character vector.> ...
-%! loss (CMdl, [1, 2], 1, "LossFun", 1)
+%! loss (CMdl, [1, 2], 1, 'LossFun', 1)
 %!error<CompactClassificationSVM.loss: unsupported Loss function.> ...
-%! loss (CMdl, [1, 2], 1, "LossFun", "some")
+%! loss (CMdl, [1, 2], 1, 'LossFun', 'some')
 %!error<CompactClassificationSVM.loss: 'Weights' must be a numeric vector.> ...
-%! loss (CMdl, [1, 2], 1, "Weights", ['a', 'b'])
+%! loss (CMdl, [1, 2], 1, 'Weights', ['a', 'b'])
 %!error<CompactClassificationSVM.loss: 'Weights' must be a numeric vector.> ...
-%! loss (CMdl, [1, 2], 1, "Weights", 'a')
+%! loss (CMdl, [1, 2], 1, 'Weights', 'a')
 %!error<CompactClassificationSVM.loss: size of 'Weights' must be equal to the number of rows in X.> ...
-%! loss (CMdl, [1, 2], 1, "Weights", [1, 2])
+%! loss (CMdl, [1, 2], 1, 'Weights', [1, 2])
 %!error<CompactClassificationSVM.loss: invalid parameter name in optional pair arguments.> ...
-%! loss (CMdl, [1, 2], 1, "some", "some")
+%! loss (CMdl, [1, 2], 1, 'some', 'some')

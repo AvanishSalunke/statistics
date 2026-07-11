@@ -38,7 +38,9 @@
 ## that specifies the maximum dimensionality of the desired embedding @var{Y}.
 ## If specified, @var{Y} will have at most @var{p} columns, and the returned
 ## eigenvalues @var{e} will be a vector of exactly length @var{p}. Specifying
-## @var{p} can be useful for reducing dimensions for visualization (e.g., @code{@var{p} = 2}).
+## @var{p} can be useful for reducing dimensions for visualization (e.g.,
+## @code{@var{p} =
+## 2}).
 ##
 ## @var{D} can be a full or sparse matrix or a vector of length
 ## @code{@var{n}*(@var{n}-1)/2} containing the upper triangular elements (like
@@ -164,8 +166,8 @@ endfunction
 %! n = randi (100) + 1;
 %! X = rand (m, n);
 %! D = pdist (X);
-%! assert (norm (pdist (cmdscale (D))), norm (D), sqrt (eps));
-%! assert (norm (pdist (cmdscale (squareform (D)))), norm (D), sqrt (eps));
+%! assert_equal (norm (pdist (cmdscale (D))), norm (D), sqrt (eps));
+%! assert_equal (norm (pdist (cmdscale (squareform (D)))), norm (D), sqrt (eps));
 %!test
 %! ## test output
 %! X = [
@@ -186,39 +188,39 @@ endfunction
 %!   -0.140618193512467,  0.093241089846740
 %! ];
 %! expected_e = [0.810349112746116; 0.651912015993974];
-%! assert (Y, expected_Y, 1e-14);
-%! assert (e, expected_e, 1e-14);
+%! assert_equal (Y, expected_Y, 1e-14);
+%! assert_equal (e, expected_e, 1e-14);
 %!test
 %! ## basic dimentionality reduction
 %! D = [0 2 3; 2 0 4; 3 4 0];
 %! [Y, e] = cmdscale (D, 2);
-%! assert (size (Y, 2), 2);
-%! assert (length (e), 2);
+%! assert_equal (size (Y, 2), 2);
+%! assert_equal (length (e), 2);
 %!test
 %! ## oversized dimension
 %! X = [0 0; 1 0; 0 1; 1 1];
 %! D = pdist (X);
 %! [Y, e] = cmdscale (D, 3);
-%! assert (size (Y, 2), 2);
-%! assert (length (e), 3);
+%! assert_equal (size (Y, 2), 2);
+%! assert_equal (length (e), 3);
 %!test
 %! ## non euclidean distance.
 %! X = [1 2; 3 4; 5 6; 7 8; 9 10];
-%! D = pdist (X, "cityblock");
+%! D = pdist (X, 'cityblock');
 %! [Y, e] = cmdscale (D, 2);
-%! assert (size (Y, 2), 1);
-%! assert (length (e), 2);
+%! assert_equal (size (Y, 2), 1);
+%! assert_equal (length (e), 2);
 %!test
 %! ## compatability with p
 %! X = rand (10, 4);
 %! D = pdist (X);
 %! [Y, e] = cmdscale (D, 3);
-%! assert (size (Y, 2), 3);
-%! assert (length (e), 3);
-%! assert (size (Y, 1), 10);
+%! assert_equal (size (Y, 2), 3);
+%! assert_equal (length (e), 3);
+%! assert_equal (size (Y, 1), 10);
 %!test
 %! ## sign convention.
-%! rng (0, "twister");
+%! rng (0, 'twister');
 %! X = rand (10, 3);
 %! D = pdist (X);
 %! Y = cmdscale (D);
@@ -226,16 +228,16 @@ endfunction
 %! d = size (Y, 2);
 %! n = size (Y, 1);
 %! idx = maxind + (0 : n : (d - 1) * n);
-%! assert (all (Y(idx) >= 0));
+%! assert_equal (all (Y(idx) >= 0), true);
 %!test
 %! ## testing with p = n and without p
-%! rng (1, "twister");
+%! rng (1, 'twister');
 %! X = rand (10, 4);
 %! D = pdist (X);
 %! n_points = size (X, 1);
 %! [Y1, e1] = cmdscale (D);
 %! [Y2, e2] = cmdscale (D, n_points);
-%! assert (size (Y1, 2), size (Y2, 2));
+%! assert_equal (size (Y1, 2), size (Y2, 2));
 %!error <cmdscale: input must be a numeric vector or matrix.> cmdscale ({'not', 'a', 'matrix'})
 %!error <matrix input must be square symmetric> cmdscale (rand (3, 4))
 %!error <entries must be nonnegative> cmdscale (-ones (3))

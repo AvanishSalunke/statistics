@@ -48,7 +48,7 @@ classdef LoguniformDistribution
   ## @seealso{makedist}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {LoguniformDistribution} {property} Lower
     ##
@@ -74,7 +74,7 @@ classdef LoguniformDistribution
     Upper
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {LoguniformDistribution} {property} DistributionName
     ##
@@ -84,7 +84,7 @@ classdef LoguniformDistribution
     ## object.  This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "LoguniformDistribution";
+    DistributionName = 'LoguniformDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {LoguniformDistribution} {property} NumParameters
@@ -102,39 +102,39 @@ classdef LoguniformDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter.  This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"Lower", "Upper"};
+    ParameterNames = {'Lower', 'Upper'};
 
     ## -*- texinfo -*-
     ## @deftp {LoguniformDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter.  This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Lower limit", "Upper limit"};
+    ParameterDescription = {'Lower limit', 'Upper limit'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = false;
-    DistributionCode = "logu";
+    DistributionCode = 'logu';
     ParameterRange = [realmin, realmin; Inf, Inf];
     ParameterLogCI = [false, false];
   endproperties
 
-  properties (GetAccess = public , SetAccess = protected)
+  properties(GetAccess = public , SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {LoguniformDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{2x1} numeric vector containing the values of the distribution
+    ## A @math{2*1} numeric vector containing the values of the distribution
     ## parameters.  This property is read-only. You can change the distribution
     ## parameters by assigning new values to the @qcode{Lower} and @qcode{Upper}
     ## properties.
@@ -147,7 +147,7 @@ classdef LoguniformDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution.  First element contains the lower boundary,
     ## second element contains the upper boundary.  This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -168,7 +168,7 @@ classdef LoguniformDistribution
     IsTruncated
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = LoguniformDistribution (Lower, Upper)
       if (nargin == 0)
@@ -182,12 +182,12 @@ classdef LoguniformDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "Log-uniform distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'Log-uniform distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "Log-uniform distribution");
+      __disp__ (this, 'Log-uniform distribution');
     endfunction
 
     function this = set.Lower (this, Lower)
@@ -210,11 +210,11 @@ classdef LoguniformDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {LoguniformDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {LoguniformDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {LoguniformDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -222,7 +222,7 @@ classdef LoguniformDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -232,9 +232,9 @@ classdef LoguniformDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -386,21 +386,21 @@ classdef LoguniformDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).
-    ## @qcode{"cdf"} plots the cumulative density function (CDF).
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).
+    ## @qcode{'cdf'} plots the cumulative density function (CDF).
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -536,47 +536,47 @@ endfunction
 %! ## parameters Lower = 1 and Upper = 10.  Plot a PDF of the distribution superimposed
 %! ## on a histogram of the data.
 %!
-%! pd_fixed = makedist ("Loguniform", "Lower", 1, "Upper", 10);
-%! rand ("seed", 2);
+%! pd_fixed = makedist ('Loguniform', 'Lower', 1, 'Upper', 10);
+%! rand ('seed', 2);
 %! data = random (pd_fixed, 5000, 1);
 %! plot (pd_fixed)
 %! hold on
 %! hist (data, 50)
 %! hold off
-%! msg = "Log-uniform distribution with Lower = %0.2f and Upper = %0.2f";
+%! msg = 'Log-uniform distribution with Lower = %0.2f and Upper = %0.2f';
 %! title (sprintf (msg, pd_fixed.Lower, pd_fixed.Upper))
 
 ## Test output
 %!shared pd, t
 %! pd = LoguniformDistribution (1, 4);
 %! t = truncate (pd, 2, 4);
-%!assert (cdf (pd, [0, 1, 2, 3, 4, 5]), [0, 0, 0.5, 0.7925, 1, 1], 1e-4);
-%!assert (cdf (t, [0, 1, 2, 3, 4, 5]), [0, 0, 0, 0.5850, 1, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4]), [0.2925, 0.5, 0.7925, 1], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4]), [0, 0, 0.5850, 1], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [1, 1.3195, 1.7411, 2.2974, 3.0314, 4], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [2, 2.2974, 2.6390, 3.0314, 3.4822, 4], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 1.7411, 2.2974, 3.0314, 4, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.6390, 3.0314, 3.4822, 4, NaN], 1e-4);
-%!assert (iqr (pd), 1.4142, 1e-4);
-%!assert (iqr (t), 0.9852, 1e-4);
-%!assert (mean (pd), 2.1640, 1e-4);
-%!assert (mean (t), 2.8854, 1e-4);
-%!assert (median (pd), 2);
-%!assert (median (t), 2.8284, 1e-4);
-%!assert (pdf (pd, [0, 1, 2, 3, 4, 5]), [0, 0.7213, 0.3607, 0.2404, 0.1803, 0], 1e-4);
-%!assert (pdf (t, [0, 1, 2, 3, 4, 5]), [0, 0, 0.7213, 0.4809, 0.3607, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1, 2, 3, 4, NaN]), [0, 0.7213, 0.3607, 0.2404, 0.1803, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1, 2, 3, 4, NaN]), [0, 0, 0.7213, 0.4809, 0.3607, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (pd, 1000, 1) < 1), false);
-%!assert (any (random (pd, 1000, 1) > 4), false);
-%!assert (any (random (t, 1000, 1) < 2), false);
-%!assert (any (random (t, 1000, 1) > 4), false);
-%!assert (std (pd), 0.8527, 1e-4);
-%!assert (std (t), 0.5751, 1e-4);
-%!assert (var (pd), 0.7270, 1e-4);
-%!assert (var (t), 0.3307, 1e-4);
+%!assert_equal (cdf (pd, [0, 1, 2, 3, 4, 5]), [0, 0, 0.5, 0.7925, 1, 1], 1e-4);
+%!assert_equal (cdf (t, [0, 1, 2, 3, 4, 5]), [0, 0, 0, 0.5850, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4]), [0.2925, 0.5, 0.7925, 1], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4]), [0, 0, 0.5850, 1], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [1, 1.3195, 1.7411, 2.2974, 3.0314, 4], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [2, 2.2974, 2.6390, 3.0314, 3.4822, 4], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 1.7411, 2.2974, 3.0314, 4, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.6390, 3.0314, 3.4822, 4, NaN], 1e-4);
+%!assert_equal (iqr (pd), 1.4142, 1e-4);
+%!assert_equal (iqr (t), 0.9852, 1e-4);
+%!assert_equal (mean (pd), 2.1640, 1e-4);
+%!assert_equal (mean (t), 2.8854, 1e-4);
+%!assert_equal (median (pd), 2);
+%!assert_equal (median (t), 2.8284, 1e-4);
+%!assert_equal (pdf (pd, [0, 1, 2, 3, 4, 5]), [0, 0.7213, 0.3607, 0.2404, 0.1803, 0], 1e-4);
+%!assert_equal (pdf (t, [0, 1, 2, 3, 4, 5]), [0, 0, 0.7213, 0.4809, 0.3607, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1, 2, 3, 4, NaN]), [0, 0.7213, 0.3607, 0.2404, 0.1803, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1, 2, 3, 4, NaN]), [0, 0, 0.7213, 0.4809, 0.3607, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (pd, 1000, 1) < 1), false);
+%!assert_equal (any (random (pd, 1000, 1) > 4), false);
+%!assert_equal (any (random (t, 1000, 1) < 2), false);
+%!assert_equal (any (random (t, 1000, 1) > 4), false);
+%!assert_equal (std (pd), 0.8527, 1e-4);
+%!assert_equal (std (t), 0.5751, 1e-4);
+%!assert_equal (var (pd), 0.7270, 1e-4);
+%!assert_equal (var (t), 0.3307, 1e-4);
 
 ## Test input validation
 ## 'LoguniformDistribution' constructor
@@ -587,7 +587,7 @@ endfunction
 %!error <LoguniformDistribution: LOWER must be a positive real scalar.> ...
 %! LoguniformDistribution ([1, 2], 1)
 %!error <LoguniformDistribution: LOWER must be a positive real scalar.> ...
-%! LoguniformDistribution ("a", 1)
+%! LoguniformDistribution ('a', 1)
 %!error <LoguniformDistribution: LOWER must be a positive real scalar.> ...
 %! LoguniformDistribution (NaN, 1)
 %!error <LoguniformDistribution: UPPER must be a real scalar.> ...
@@ -597,7 +597,7 @@ endfunction
 %!error <LoguniformDistribution: UPPER must be a real scalar.> ...
 %! LoguniformDistribution (1, [1, 2])
 %!error <LoguniformDistribution: UPPER must be a real scalar.> ...
-%! LoguniformDistribution (1, "a")
+%! LoguniformDistribution (1, 'a')
 %!error <LoguniformDistribution: UPPER must be a real scalar.> ...
 %! LoguniformDistribution (1, NaN)
 %!error <LoguniformDistribution: LOWER must be less than UPPER.> ...
@@ -605,33 +605,33 @@ endfunction
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (LoguniformDistribution, 2, "uper")
+%! cdf (LoguniformDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (LoguniformDistribution, 2, 3)
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (LoguniformDistribution, "Parent")
+%! plot (LoguniformDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (LoguniformDistribution, "PlotType", 12)
+%! plot (LoguniformDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (LoguniformDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (LoguniformDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (LoguniformDistribution, "PlotType", "pdfcdf")
+%! plot (LoguniformDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (LoguniformDistribution, "Discrete", "pdfcdf")
+%! plot (LoguniformDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (LoguniformDistribution, "Discrete", [1, 0])
+%! plot (LoguniformDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (LoguniformDistribution, "Discrete", {true})
+%! plot (LoguniformDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (LoguniformDistribution, "Parent", 12)
+%! plot (LoguniformDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (LoguniformDistribution, "Parent", "hax")
+%! plot (LoguniformDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (LoguniformDistribution, "invalidNAME", "pdf")
+%! plot (LoguniformDistribution, 'invalidNAME', 'pdf')
 %!error <plot: 'probability' PlotType is not supported for 'LoguniformDistribution'.> ...
-%! plot (LoguniformDistribution, "PlotType", "probability")
+%! plot (LoguniformDistribution, 'PlotType', 'probability')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...
@@ -643,8 +643,8 @@ endfunction
 
 ## Catch errors when using array of probability objects with available methods
 %!shared pd
-%! pd = LoguniformDistribution(1, 4);
-%! pd(2) = LoguniformDistribution(2, 5);
+%! pd = LoguniformDistribution (1, 4);
+%! pd(2) = LoguniformDistribution (2, 5);
 %!error <cdf: requires a scalar probability distribution.> cdf (pd, 1)
 %!error <icdf: requires a scalar probability distribution.> icdf (pd, 0.5)
 %!error <iqr: requires a scalar probability distribution.> iqr (pd)

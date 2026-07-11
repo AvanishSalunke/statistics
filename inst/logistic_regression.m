@@ -35,7 +35,8 @@
 ## fits the model
 ##
 ## @example
-## logit (P_i (@var{x})) = @var{x} * @var{slope} + @var{intercept}_i,   i = 1 @dots{} k-1
+## logit (P_i (@var{x})) = @var{x} * @var{slope} + @var{intercept}_i,
+##                         i = 1 @dots{} k-1
 ## @end example
 ##
 ## The number of ordinal categories, k, is taken to be the number
@@ -50,8 +51,9 @@
 ##
 ## @example
 ## @group
-## [@var{intercept}, @var{slope}, @var{dev}, @var{dl}, @var{d2l}, @var{P}, @var{stats}]
-##    = logistic_regression (@var{y}, @var{x}, @var{print}, @var{intercept}, @var{slope})
+## [@var{intercept}, @var{slope}, @var{dev}, @var{dl}, @var{d2l}, @var{P}, ...
+##  @var{stats}] = logistic_regression (@var{y}, @var{x}, @var{print}, ...
+##                                      @var{intercept}, @var{slope})
 ## @end group
 ## @end example
 ##
@@ -117,7 +119,7 @@ function [intercept, slope, dev, dl, d2l, P, stats] = logistic_regression (y, x,
   z  = (y * ones (1, yrange)) == ((y * 0 + 1) * (ymin : (ymax - 1)));
   z1 = (y * ones (1, yrange)) == ((y * 0 + 1) * ((ymin + 1) : ymax));
   z  = z(:, any (z));
-  z1 = z1(:, any(z1));
+  z1 = z1(:, any (z1));
   [mz, nz] = size (z);
 
   ## starting values
@@ -156,15 +158,15 @@ function [intercept, slope, dev, dl, d2l, P, stats] = logistic_regression (y, x,
          endif
          tb = tbold - (d2l - epsilon * eye (size (d2l))) \ dl;
          [g, g1, p, dev] = logistic_regression_likelihood (y, x, tb, z, z1);
-         disp ("epsilon"); disp (epsilon);
+         disp ('epsilon'); disp (epsilon);
       endwhile
     endif
     [dl, d2l] = logistic_regression_derivatives (x, z, z1, g, g1, p);
     if (print == 2)
-      disp ("Iteration"); disp (iter);
-      disp ("Deviance"); disp (dev);
-      disp ("First derivative"); disp (dl');
-      disp ("Eigenvalues of second derivative"); disp (eig (d2l)');
+      disp ('Iteration'); disp (iter);
+      disp ('Deviance'); disp (dev);
+      disp ('First derivative'); disp (dl');
+      disp ('Eigenvalues of second derivative'); disp (eig (d2l)');
     endif
   endwhile
 
@@ -191,14 +193,14 @@ function [intercept, slope, dev, dl, d2l, P, stats] = logistic_regression (y, x,
     zstat = tb ./ se;
     coeffcorr = cov2corr (cov);
     resid = y - P(:,2);
-    stats = struct ("intercept", intercept, ...
-                    "slope", slope, ...
-                    "coeff", tb, ...
-                    "cov", cov, ...
-                    "coeffcorr", coeffcorr, ...
-                    "se", se, ...
-                    "z", zstat, ...
-                    "pval", 2 * normcdf (-abs (zstat)));
+    stats = struct ('intercept', intercept, ...
+                    'slope', slope, ...
+                    'coeff', tb, ...
+                    'cov', cov, ...
+                    'coeffcorr', coeffcorr, ...
+                    'se', se, ...
+                    'z', zstat, ...
+                    'pval', 2 * normcdf (-abs (zstat)));
   endif
 
   if (print >= 1)
@@ -210,12 +212,12 @@ function [intercept, slope, dev, dl, d2l, P, stats] = logistic_regression (y, x,
     printf ("Parameter Estimates:\n");
     printf ("    Intercept      S.E.\n");
     for i = 1 : nz
-      printf ("    %8.4f    %8.4f\n", tb (i), se (i));
+      printf ("    %8.4f    %8.4f\n", tb(i), se(i));
     endfor
     if (nx > 0)
       printf ("      Slope        S.E.\n");
       for i = (nz + 1) : (nz + nx)
-        printf ("    %8.4f    %8.4f\n", tb (i), se (i));
+        printf ("    %8.4f    %8.4f\n", tb(i), se(i));
       endfor
     endif
   endif
@@ -276,11 +278,11 @@ endfunction
 %!      -0.11875465773681024, 0.5512305689880763];
 %! Y = [1,1,1,1,1,0,0,0,0,0]';
 %! [INTERCEPT, SLOPE, DEV, DL, D2L, P] = logistic_regression (Y, X, false);
-#%! assert (DEV, 5.680728861124, 1e-05);
-#%! assert (INTERCEPT(1), -1.10999599948243, 1e-05);
-#%! assert (SLOPE(1), -9.12480634225699, 1e-05);
-#%! assert (SLOPE(2), -2.18746124517476, 1e-05);
-#%! assert (corr(P(:,1),Y), -0.786673288976468, 1e-05);
+#%! assert_equal (DEV, 5.680728861124, 1e-05);
+#%! assert_equal (INTERCEPT(1), -1.10999599948243, 1e-05);
+#%! assert_equal (SLOPE(1), -9.12480634225699, 1e-05);
+#%! assert_equal (SLOPE(2), -2.18746124517476, 1e-05);
+#%! assert_equal (corr(P(:,1),Y), -0.786673288976468, 1e-05);
 
 %!test
 %! # Output compared to following MATLAB commands
@@ -301,11 +303,11 @@ endfunction
 %!          2,2,2,2,3,4,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,NaN,3,2,2,2,2,2,1,2, ...
 %!          2,3,3,3,2,2,2,3,3,3,3,3,3,3,3,3,3,3,2,3,2,2,3,3,2,2,4,3,2,3]';
 %! [INTERCEPT, SLOPE, DEV, DL, D2L, P] = logistic_regression (miles, X, false);
-%! assert (DEV, 433.197174495549, 1e-05);
-%! assert (INTERCEPT(1), -16.6895155618903, 1e-05);
-%! assert (INTERCEPT(2), -11.7207818178493, 1e-05);
-%! assert (INTERCEPT(3), -8.0605768506075, 1e-05);
-%! assert (SLOPE(1), 0.104762463756714, 1e-05);
-%! assert (SLOPE(2), 0.0103357623191891, 1e-05);
-%! assert (SLOPE(3), 0.0645199313242276, 1e-05);
-%! assert (SLOPE(4), 0.00166377028388103, 1e-05);
+%! assert_equal (DEV, 433.197174495549, 1e-05);
+%! assert_equal (INTERCEPT(1), -16.6895155618903, 1e-05);
+%! assert_equal (INTERCEPT(2), -11.7207818178493, 1e-05);
+%! assert_equal (INTERCEPT(3), -8.0605768506075, 1e-05);
+%! assert_equal (SLOPE(1), 0.104762463756714, 1e-05);
+%! assert_equal (SLOPE(2), 0.0103357623191891, 1e-05);
+%! assert_equal (SLOPE(3), 0.0645199313242276, 1e-05);
+%! assert_equal (SLOPE(4), 0.00166377028388103, 1e-05);

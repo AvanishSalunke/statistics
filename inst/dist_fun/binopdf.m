@@ -64,8 +64,8 @@ function y = binopdf (x, n, ps)
   x = x(:); n = n(:); ps = ps(:); # columns for easier vectorization
 
   ## Initialize output, preserve class of output if any are singles
-  if (isa (x, "single") || isa (n, "single") || isa (ps, "single"));
-    y = zeros (numel (x), 1, "single");
+  if (isa (x, 'single') || isa (n, 'single') || isa (ps, 'single'));
+    y = zeros (numel (x), 1, 'single');
   else
     y = zeros (numel (x), 1);
   endif
@@ -109,7 +109,7 @@ function y = binopdf (x, n, ps)
 
   ## Input NaN, n not pos int, or ps outside [0,1],
   ## set output to NaN (overrides 0 or 1)
-  ksp = (n ~= fix (n)) | (n < 0) | (ps < 0) | (ps > 1) | isnan (x) ...
+  ksp = (n != fix (n)) | (n < 0) | (ps < 0) | (ps > 1) | isnan (x) ...
            | isnan (n) | isnan (ps);
   y(ksp) = NaN;
 
@@ -152,7 +152,7 @@ function y = loader_expansion (x, n, ps, nx, q)
       0.00287344936235246638755235148906672207372,
       0.00277767492975269360359490376220667282839
       ];
-    stored_dn = numel(d_n);
+    stored_dn = numel (d_n);
 
     ## Indices for precalculated vs to-be-calculated values
     n_precalc = (n > 0) & (n < stored_dn);
@@ -166,15 +166,15 @@ function y = loader_expansion (x, n, ps, nx, q)
     delta_nx(nx_precalc) = d_n(nx(nx_precalc));
 
     ## Calculate any other d(n) values
-    delta_n(!n_precalc) = delta_fn (n(!n_precalc));
-    delta_x(!x_precalc) = delta_fn (x(!x_precalc));
-    delta_nx(!nx_precalc) = delta_fn (nx(!nx_precalc));
+    delta_n(! n_precalc) = delta_fn (n(! n_precalc));
+    delta_x(! x_precalc) = delta_fn (x(! x_precalc));
+    delta_nx(! nx_precalc) = delta_fn (nx(! nx_precalc));
 
     ## Calculate exp(log(pdf));
     y = exp ((delta_n - delta_x - delta_nx - ...
                        deviance (x, n .* ps) - ...
                         deviance (nx, n .* q)) - ...
-                         0.5 * (log(2*pi) + log (x) + log (1-x./n)));
+                         0.5 * (log (2*pi) + log (x) + log (1-x./n)));
 endfunction
 
 function y = delta_fn (n)
@@ -234,54 +234,54 @@ endfunction
 %! y1 = binopdf (x, 20, 0.5);
 %! y2 = binopdf (x, 20, 0.7);
 %! y3 = binopdf (x, 40, 0.5);
-%! plot (x, y1, "*b", x, y2, "*g", x, y3, "*r")
+%! plot (x, y1, '*b', x, y2, '*g', x, y3, '*r')
 %! grid on
 %! ylim ([0, 0.25])
-%! legend ({"n = 20, ps = 0.5", "n = 20, ps = 0.7", ...
-%!          "n = 40, ps = 0.5"}, "location", "northeast")
-%! title ("Binomial PDF")
-%! xlabel ("values in x (number of successes)")
-%! ylabel ("density")
+%! legend ({'n = 20, ps = 0.5', 'n = 20, ps = 0.7', ...
+%!          'n = 40, ps = 0.5'}, 'location', 'northeast')
+%! title ('Binomial PDF')
+%! xlabel ('values in x (number of successes)')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y
 %! x = [-1 0 1 2 3];
 %! y = [0 1/4 1/2 1/4 0];
-%!assert (binopdf (x, 2 * ones (1, 5), 0.5 * ones (1, 5)), y, eps)
-%!assert (binopdf (x, 2, 0.5 * ones (1, 5)), y, eps)
-%!assert (binopdf (x, 2 * ones (1, 5), 0.5), y, eps)
-%!assert (binopdf (x, 2 * [0 -1 NaN 1.1 1], 0.5), [0 NaN NaN NaN 0])
-%!assert (binopdf (x, 2, 0.5 * [0 -1 NaN 3 1]), [0 NaN NaN NaN 0])
-%!assert (binopdf ([x, NaN], 2, 0.5), [y, NaN], eps)
-%!assert (binopdf (cat (3, x, x), 2, 0.5), cat (3, y, y), eps)
+%!assert_equal (binopdf (x, 2 * ones (1, 5), 0.5 * ones (1, 5)), y, eps)
+%!assert_equal (binopdf (x, 2, 0.5 * ones (1, 5)), y, eps)
+%!assert_equal (binopdf (x, 2 * ones (1, 5), 0.5), y, eps)
+%!assert_equal (binopdf (x, 2 * [0 -1 NaN 1.1 1], 0.5), [0 NaN NaN NaN 0])
+%!assert_equal (binopdf (x, 2, 0.5 * [0 -1 NaN 3 1]), [0 NaN NaN NaN 0])
+%!assert_equal (binopdf ([x, NaN], 2, 0.5), [y, NaN], eps)
+%!assert_equal (binopdf (cat (3, x, x), 2, 0.5), cat (3, y, y), eps)
 
 ## Test Special input values
-%!assert (binopdf (1, 1, 1), 1)
-%!assert (binopdf (0, 3, 0), 1)
-%!assert (binopdf (2, 2, 1), 1)
-%!assert (binopdf (1, 2, 1), 0)
-%!assert (binopdf (0, 1.1, 0), NaN)
-%!assert (binopdf (1, 2, -1), NaN)
-%!assert (binopdf (1, 2, 1.5), NaN)
+%!assert_equal (binopdf (1, 1, 1), 1)
+%!assert_equal (binopdf (0, 3, 0), 1)
+%!assert_equal (binopdf (2, 2, 1), 1)
+%!assert_equal (binopdf (1, 2, 1), 0)
+%!assert_equal (binopdf (0, 1.1, 0), NaN)
+%!assert_equal (binopdf (1, 2, -1), NaN)
+%!assert_equal (binopdf (1, 2, 1.5), NaN)
 
 ## Test empty inputs
-%!assert (binopdf ([], 1, 1), [])
-%!assert (binopdf (1, [], 1), [])
-%!assert (binopdf (1, 1, []), [])
-%!assert (binopdf (ones (1, 0), 2, .5), ones(1, 0))
-%!assert (binopdf (ones (0, 1), 2, .5), ones(0, 1))
-%!assert (binopdf (ones (0, 1, 2), 2, .5), ones(0, 1, 2))
-%!assert (binopdf (1, ones (0, 1, 2), .5), ones(0, 1, 2))
-%!assert (binopdf (1, 2, ones (0, 1, 2)), ones(0, 1, 2))
-%!assert (binopdf (ones (1, 0, 2), 2, .5), ones(1, 0, 2))
-%!assert (binopdf (ones (1, 2, 0), 2, .5), ones(1, 2, 0))
-%!assert (binopdf (ones (0, 1, 2), NaN, .5), ones(0, 1, 2))
-%!assert (binopdf (ones (0, 1, 2), 2, NaN), ones(0, 1, 2))
+%!assert_equal (binopdf ([], 1, 1), [])
+%!assert_equal (binopdf (1, [], 1), [])
+%!assert_equal (binopdf (1, 1, []), [])
+%!assert_equal (binopdf (ones (1, 0), 2, .5), ones (1, 0))
+%!assert_equal (binopdf (ones (0, 1), 2, .5), ones (0, 1))
+%!assert_equal (binopdf (ones (0, 1, 2), 2, .5), ones (0, 1, 2))
+%!assert_equal (binopdf (1, ones (0, 1, 2), .5), ones (0, 1, 2))
+%!assert_equal (binopdf (1, 2, ones (0, 1, 2)), ones (0, 1, 2))
+%!assert_equal (binopdf (ones (1, 0, 2), 2, .5), ones (1, 0, 2))
+%!assert_equal (binopdf (ones (1, 2, 0), 2, .5), ones (1, 2, 0))
+%!assert_equal (binopdf (ones (0, 1, 2), NaN, .5), ones (0, 1, 2))
+%!assert_equal (binopdf (ones (0, 1, 2), 2, NaN), ones (0, 1, 2))
 
 ## Test class of input preserved
-%!assert (binopdf (single ([x, NaN]), 2, 0.5), single ([y, NaN]))
-%!assert (binopdf ([x, NaN], single (2), 0.5), single ([y, NaN]))
-%!assert (binopdf ([x, NaN], 2, single (0.5)), single ([y, NaN]))
+%!assert_equal (binopdf (single ([x, NaN]), 2, 0.5), single ([y, NaN]))
+%!assert_equal (binopdf ([x, NaN], single (2), 0.5), single ([y, NaN]))
+%!assert_equal (binopdf ([x, NaN], 2, single (0.5)), single ([y, NaN]))
 
 ## Test input validation
 %!error<binopdf: function called with too few input arguments.> binopdf ()

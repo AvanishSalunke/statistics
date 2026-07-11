@@ -23,7 +23,8 @@
 ## Random arrays from the noncentral @math{F}-distribution.
 ##
 ## @code{@var{x} = ncfrnd (@var{p}, @var{df1}, @var{df2}, @var{lambda})} returns
-## an array of random numbers chosen from the noncentral @math{F}-distribution with
+## an array of random numbers chosen from the noncentral @math{F}-distribution
+## with
 ## @var{df1} and @var{df2} degrees of freedom and noncentrality parameter
 ## @var{lambda}.  The size of @var{r} is the common size of @var{df1},
 ## @var{df2}, and @var{lambda}.  A scalar input functions as a constant matrix
@@ -97,10 +98,10 @@ function r = ncfrnd (df1, df2, lambda, varargin)
   endif
 
   ## Check for class type
-  if (isa (df1, "single") || isa (df2, "single") || isa (lambda, "single"));
-    cls = "single";
+  if (isa (df1, 'single') || isa (df2, 'single') || isa (lambda, 'single'));
+    cls = 'single';
   else
-    cls = "double";
+    cls = 'double';
   endif
 
   ## Return NaNs for out of range values of DF1, DF2, and LAMBDA
@@ -118,29 +119,29 @@ function r = ncfrnd (df1, df2, lambda, varargin)
 endfunction
 
 ## Test output
-%!assert (size (ncfrnd (1, 1, 1)), [1, 1])
-%!assert (size (ncfrnd (1, ones (2, 1), 1)), [2, 1])
-%!assert (size (ncfrnd (1, ones (2, 2), 1)), [2, 2])
-%!assert (size (ncfrnd (ones (2, 1), 1, 1)), [2, 1])
-%!assert (size (ncfrnd (ones (2, 2), 1, 1)), [2, 2])
-%!assert (size (ncfrnd (1, 1, 1, 3)), [3, 3])
-%!assert (size (ncfrnd (1, 1, 1, [4, 1])), [4, 1])
-%!assert (size (ncfrnd (1, 1, 1, 4, 1)), [4, 1])
-%!assert (size (ncfrnd (1, 1, 1, 4, 1, 5)), [4, 1, 5])
-%!assert (size (ncfrnd (1, 1, 1, 0, 1)), [0, 1])
-%!assert (size (ncfrnd (1, 1, 1, 1, 0)), [1, 0])
-%!assert (size (ncfrnd (1, 1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
-%!assert (size (ncfrnd (1, 1, 1, [])), [0, 0])
-%!assert (size (ncfrnd (1, 1, 1, [2, 0, 2, 1])), [2, 0, 2])
+%!assert_equal (size (ncfrnd (1, 1, 1)), [1, 1])
+%!assert_equal (size (ncfrnd (1, ones (2, 1), 1)), [2, 1])
+%!assert_equal (size (ncfrnd (1, ones (2, 2), 1)), [2, 2])
+%!assert_equal (size (ncfrnd (ones (2, 1), 1, 1)), [2, 1])
+%!assert_equal (size (ncfrnd (ones (2, 2), 1, 1)), [2, 2])
+%!assert_equal (size (ncfrnd (1, 1, 1, 3)), [3, 3])
+%!assert_equal (size (ncfrnd (1, 1, 1, [4, 1])), [4, 1])
+%!assert_equal (size (ncfrnd (1, 1, 1, 4, 1)), [4, 1])
+%!assert_equal (size (ncfrnd (1, 1, 1, 4, 1, 5)), [4, 1, 5])
+%!assert_equal (size (ncfrnd (1, 1, 1, 0, 1)), [0, 1])
+%!assert_equal (size (ncfrnd (1, 1, 1, 1, 0)), [1, 0])
+%!assert_equal (size (ncfrnd (1, 1, 1, 1, 2, 0, 5)), [1, 2, 0, 5])
+%!assert_equal (size (ncfrnd (1, 1, 1, [])), [0, 0])
+%!assert_equal (size (ncfrnd (1, 1, 1, [2, 0, 2, 1])), [2, 0, 2])
 
 ## Test class of input preserved
-%!assert (class (ncfrnd (1, 1, 1)), "double")
-%!assert (class (ncfrnd (1, single (1), 1)), "single")
-%!assert (class (ncfrnd (1, 1, single (1))), "single")
-%!assert (class (ncfrnd (1, single ([1, 1]), 1)), "single")
-%!assert (class (ncfrnd (1, 1, single ([1, 1]))), "single")
-%!assert (class (ncfrnd (single (1), 1, 1)), "single")
-%!assert (class (ncfrnd (single ([1, 1]), 1, 1)), "single")
+%!assert_equal (class (ncfrnd (1, 1, 1)), "double")
+%!assert_equal (class (ncfrnd (1, single (1), 1)), "single")
+%!assert_equal (class (ncfrnd (1, 1, single (1))), "single")
+%!assert_equal (class (ncfrnd (1, single ([1, 1]), 1)), "single")
+%!assert_equal (class (ncfrnd (1, 1, single ([1, 1]))), "single")
+%!assert_equal (class (ncfrnd (single (1), 1, 1)), "single")
+%!assert_equal (class (ncfrnd (single ([1, 1]), 1, 1)), "single")
 
 ## Test input validation
 %!error<ncfrnd: function called with too few input arguments.> ncfrnd ()

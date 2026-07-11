@@ -31,7 +31,7 @@ classdef ClusterCriterion < handle
   ## GapEvaluation, SilhouetteEvaluation}
   ## @end deftp
 
-  properties (GetAccess = public, SetAccess = protected)
+  properties(GetAccess = public, SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {ClusterCriterion} {property} ClusteringFunction
     ##
@@ -43,7 +43,7 @@ classdef ClusterCriterion < handle
     ## read-only.
     ##
     ## @end deftp
-    ClusteringFunction = "";
+    ClusteringFunction = '';
 
     ## -*- texinfo -*-
     ## @deftp {ClusterCriterion} {property} CriterionName
@@ -54,7 +54,7 @@ classdef ClusterCriterion < handle
     ## the clustering solutions.  This property is read-only.
     ##
     ## @end deftp
-    CriterionName = "";
+    CriterionName = '';
 
     ## -*- texinfo -*-
     ## @deftp {ClusterCriterion} {property} CriterionValues
@@ -134,14 +134,14 @@ classdef ClusterCriterion < handle
     X = [];
   endproperties
 
-  properties (Access = protected)
+  properties(Access = protected)
     N = 0; # number of observations
     P = 0; # number of variables
     ClusteringSolutions = []; #
     OptimalIndex = 0; # index of the optimal K
   endproperties
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn {ClusterCriterion} {@var{obj} =} ClusterCriterion (@var{x}, @var{clust}, @var{KList})
@@ -168,17 +168,17 @@ classdef ClusterCriterion < handle
 
       ## parsing the clustering algorithm
       if (ischar (clust))
-        if (any (strcmpi (clust, {"kmeans", "linkage", "gmdistribution"})))
+        if (any (strcmpi (clust, {'kmeans', 'linkage', 'gmdistribution'})))
           this.ClusteringFunction = lower (clust);
         else
           error ("ClusterCriterion: unknown clustering algorithm '%s'.", clust);
         endif
-      elseif (isa (clust, "function_handle"))
+      elseif (isa (clust, 'function_handle'))
         this.ClusteringFunction = clust;
       elseif (ismatrix (clust))
         if (isnumeric (clust)  && (length (size (clust)) == 2) && ...
             (rows (clust) == this.N))
-          this.ClusteringFunction = "";
+          this.ClusteringFunction = '';
           this.ClusteringSolutions = clust(find (this.Missing == false), :);
         else
           error ("ClusterCriterion: invalid matrix of clustering solutions.");
@@ -261,9 +261,9 @@ classdef ClusterCriterion < handle
       yLabel = sprintf ("%s value", this.CriterionName);
       h = gca ();
       hold on;
-      plot (this.InspectedK, this.CriterionValues, "bo-");
-      plot (this.OptimalK, this.CriterionValues(this.OptimalIndex), "b*");
-      xlabel ("number of clusters");
+      plot (this.InspectedK, this.CriterionValues, 'bo-');
+      plot (this.OptimalK, this.CriterionValues(this.OptimalIndex), 'b*');
+      xlabel ('number of clusters');
       ylabel (yLabel);
       hold off;
     endfunction
@@ -282,7 +282,7 @@ classdef ClusterCriterion < handle
 
   endmethods
 
-  methods (Access = private)
+  methods(Access = private)
     ## check if a list of cluster sizes is correct
     function retList = parseKList (this, KList)
       if (isnumeric (KList) && isvector (KList) && all (find (KList > 0)) && ...
@@ -298,9 +298,9 @@ endclassdef
 
 ## Test input validation
 %!error <ClusterCriterion: X must be a numeric matrix.> ...
-%! ClusterCriterion ("1", "kmeans", [1:6])
+%! ClusterCriterion ('1', 'kmeans', [1:6])
 %!error <ClusterCriterion: unknown clustering algorithm 'k'.> ...
-%! ClusterCriterion ([1, 2, 1, 3, 2, 4, 3], "k", [1:6])
+%! ClusterCriterion ([1, 2, 1, 3, 2, 4, 3], 'k', [1:6])
 %!error <ClusterCriterion: invalid matrix of clustering solutions.> ...
 %! ClusterCriterion ([1, 2, 1; 3, 2, 4], 1, [1:6])
 %!error <ClusterCriterion: invalid argument.> ...

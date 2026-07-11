@@ -64,7 +64,8 @@
 ## @end itemize
 ##
 ## Further information about the location-scale Student's T distribution can be
-## found at @url{https://en.wikipedia.org/wiki/Student%27s_t-distribution#Location-scale_t_distribution}
+## found at
+## @url{https://en.wikipedia.org/wiki/Student%27s_t-distribution#Location-scale_t_distribution}
 ##
 ## @seealso{tlscdf, tlsinv, tlspdf, tlsrnd, tlslike, tlsstat}
 ## @end deftypefn
@@ -103,11 +104,11 @@ function [paramhat, paramci] = tlsfit (x, alpha, censor, freq, options)
 
   ## Get options structure or add defaults
   if (nargin < 5)
-    options.Display = "off";
+    options.Display = 'off';
     options.TolX = 1e-6;
   else
-    if (! isstruct (options) || ! isfield (options, "Display") || ...
-                                ! isfield (options, "TolX"))
+    if (! isstruct (options) || ! isfield (options, 'Display') || ...
+                                ! isfield (options, 'TolX'))
       error (strcat ("tlsfit: 'options' 5th argument must be a structure", ...
                      " with 'Display' and 'TolX' fields present."));
     endif
@@ -165,23 +166,23 @@ endfunction
 
 %!demo
 %! ## Sample 3 populations from 3 different location-scale T distributions
-%! randn ("seed", 1);    # for reproducibility
-%! randg ("seed", 2);    # for reproducibility
+%! randn ('seed', 1);    # for reproducibility
+%! randg ('seed', 2);    # for reproducibility
 %! r1 = tlsrnd (-4, 3, 1, 2000, 1);
-%! randn ("seed", 3);    # for reproducibility
-%! randg ("seed", 4);    # for reproducibility
+%! randn ('seed', 3);    # for reproducibility
+%! randg ('seed', 4);    # for reproducibility
 %! r2 = tlsrnd (0, 3, 1, 2000, 1);
-%! randn ("seed", 5);    # for reproducibility
-%! randg ("seed", 6);    # for reproducibility
+%! randn ('seed', 5);    # for reproducibility
+%! randg ('seed', 6);    # for reproducibility
 %! r3 = tlsrnd (5, 5, 4, 2000, 1);
 %! r = [r1, r2, r3];
 %!
 %! ## Plot them normalized and fix their colors
 %! hist (r, [-21:21], [1, 1, 1]);
-%! h = findobj (gca, "Type", "patch");
-%! set (h(1), "facecolor", "c");
-%! set (h(2), "facecolor", "g");
-%! set (h(3), "facecolor", "r");
+%! h = findobj (gca, 'Type', 'patch');
+%! set (h(1), 'facecolor', 'c');
+%! set (h(2), 'facecolor', 'g');
+%! set (h(3), 'facecolor', 'r');
 %! ylim ([0, 0.25]);
 %! xlim ([-20, 20]);
 %! hold on
@@ -194,22 +195,22 @@ endfunction
 %! ## Plot their estimated PDFs
 %! x = [-20:0.1:20];
 %! y = tlspdf (x, mu_sigma_nuA(1), mu_sigma_nuA(2), mu_sigma_nuA(3));
-%! plot (x, y, "-pr");
+%! plot (x, y, '-pr');
 %! y = tlspdf (x, mu_sigma_nuB(1), mu_sigma_nuB(2), mu_sigma_nuB(3));
-%! plot (x, y, "-sg");
+%! plot (x, y, '-sg');
 %! y = tlspdf (x, mu_sigma_nuC(1), mu_sigma_nuC(2), mu_sigma_nuC(3));
-%! plot (x, y, "-^c");
+%! plot (x, y, '-^c');
 %! hold off
-%! legend ({"Normalized HIST of sample 1 with μ=0, σ=2 and nu=1", ...
-%!          "Normalized HIST of sample 2 with μ=5, σ=2 and nu=1", ...
-%!          "Normalized HIST of sample 3 with μ=3, σ=4 and nu=3", ...
+%! legend ({'Normalized HIST of sample 1 with μ=0, σ=2 and nu=1', ...
+%!          'Normalized HIST of sample 2 with μ=5, σ=2 and nu=1', ...
+%!          'Normalized HIST of sample 3 with μ=3, σ=4 and nu=3', ...
 %!          sprintf("PDF for sample 1 with estimated μ=%0.2f, σ=%0.2f, and ν=%0.2f", ...
 %!                  mu_sigma_nuA(1), mu_sigma_nuA(2), mu_sigma_nuA(3)), ...
 %!          sprintf("PDF for sample 2 with estimated μ=%0.2f, σ=%0.2f, and ν=%0.2f", ...
 %!                  mu_sigma_nuB(1), mu_sigma_nuB(2), mu_sigma_nuB(3)), ...
 %!          sprintf("PDF for sample 3 with estimated μ=%0.2f, σ=%0.2f, and ν=%0.2f", ...
 %!                  mu_sigma_nuC(1), mu_sigma_nuC(2), mu_sigma_nuC(3))})
-%! title ("Three population samples from different location-scale T distributions")
+%! title ('Three population samples from different location-scale T distributions')
 %! hold off
 
 ## Test output
@@ -218,19 +219,19 @@ endfunction
 %! [paramhat, paramci] = tlsfit (x);
 %! paramhat_out = [0.035893, 0.862711, 0.649261];
 %! paramci_out = [-0.949034, 0.154655, 0.181080; 1.02082, 4.812444, 2.327914];
-%! assert (paramhat, paramhat_out, 1e-6);
-%! assert (paramci, paramci_out, 1e-5);
+%! assert_equal (paramhat, paramhat_out, 1e-6);
+%! assert_equal (paramci, paramci_out, 1e-5);
 %!test
 %! x = [-1.2352, -0.2741, 0.1726, 7.4356, 1.0392, 16.4165];
 %! [paramhat, paramci] = tlsfit (x, 0.01);
 %! paramci_out = [-1.2585, 0.0901, 0.1212; 1.3303, 8.2591, 3.4771];
-%! assert (paramci, paramci_out, 1e-4);
+%! assert_equal (paramci, paramci_out, 1e-4);
 
 ## Test input validation
 %!error<tlsfit: X must be a vector.> tlsfit (ones (2,5));
 %!error<tlsfit: wrong value for ALPHA.> tlsfit ([1, 2, 3, 4, 5], 1.2);
 %!error<tlsfit: wrong value for ALPHA.> tlsfit ([1, 2, 3, 4, 5], 0);
-%!error<tlsfit: wrong value for ALPHA.> tlsfit ([1, 2, 3, 4, 5], "alpha");
+%!error<tlsfit: wrong value for ALPHA.> tlsfit ([1, 2, 3, 4, 5], 'alpha');
 %!error<tlsfit: X and CENSOR vectors mismatch.> ...
 %! tlsfit ([1, 2, 3, 4, 5], 0.05, [1 1 0]);
 %!error<tlsfit: X and CENSOR vectors mismatch.> ...

@@ -29,7 +29,8 @@
 ## same size as the other inputs.
 ##
 ## Further information about the noncentral chi-squared distribution can be
-## found at @url{https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution}
+## found at
+## @url{https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution}
 ##
 ## @seealso{ncx2cdf, ncx2inv, ncx2pdf, ncx2rnd}
 ## @end deftypefn
@@ -60,8 +61,8 @@ function [m, v] = ncx2stat (df, lambda)
   endif
 
   ## Initialize mean and variance
-  if (isa (df, "single") || isa (lambda, "single"))
-    m = NaN (size (df), "single");
+  if (isa (df, 'single') || isa (lambda, 'single'))
+    m = NaN (size (df), 'single');
     v = m;
   else
     m = NaN (size (df));
@@ -81,7 +82,7 @@ endfunction
 %!error<ncx2stat: function called with too few input arguments.> ncx2stat ()
 %!error<ncx2stat: function called with too few input arguments.> ncx2stat (1)
 %!error<ncx2stat: DF and LAMBDA must be numeric.> ncx2stat ({}, 2)
-%!error<ncx2stat: DF and LAMBDA must be numeric.> ncx2stat (1, "")
+%!error<ncx2stat: DF and LAMBDA must be numeric.> ncx2stat (1, '')
 %!error<ncx2stat: DF and LAMBDA must not be complex.> ncx2stat (i, 2)
 %!error<ncx2stat: DF and LAMBDA must not be complex.> ncx2stat (1, i)
 %!error<ncx2stat: DF and LAMBDA must be of common size or scalars.> ...
@@ -93,11 +94,11 @@ endfunction
 %!shared df, d1
 %! df = [2, 0, -1, 1, 4];
 %! d1 = [1, NaN, 3, -1, 2];
-%!assert (ncx2stat (df, d1), [3, NaN, NaN, NaN, 6]);
-%!assert (ncx2stat ([df(1:2), df(4:5)], 1), [3, NaN, 2, 5]);
-%!assert (ncx2stat ([df(1:2), df(4:5)], 3), [5, NaN, 4, 7]);
-%!assert (ncx2stat ([df(1:2), df(4:5)], 2), [4, NaN, 3, 6]);
-%!assert (ncx2stat (2, [d1(1), d1(3:5)]), [3, 5, NaN, 4]);
-%!assert (ncx2stat (0, [d1(1), d1(3:5)]), [NaN, NaN, NaN, NaN]);
-%!assert (ncx2stat (1, [d1(1), d1(3:5)]), [2, 4, NaN, 3]);
-%!assert (ncx2stat (4, [d1(1), d1(3:5)]), [5, 7, NaN, 6]);
+%!assert_equal (ncx2stat (df, d1), [3, NaN, NaN, NaN, 6]);
+%!assert_equal (ncx2stat ([df(1:2), df(4:5)], 1), [3, NaN, 2, 5]);
+%!assert_equal (ncx2stat ([df(1:2), df(4:5)], 3), [5, NaN, 4, 7]);
+%!assert_equal (ncx2stat ([df(1:2), df(4:5)], 2), [4, NaN, 3, 6]);
+%!assert_equal (ncx2stat (2, [d1(1), d1(3:5)]), [3, 5, NaN, 4]);
+%!assert_equal (ncx2stat (0, [d1(1), d1(3:5)]), [NaN, NaN, NaN, NaN]);
+%!assert_equal (ncx2stat (1, [d1(1), d1(3:5)]), [2, 4, NaN, 3]);
+%!assert_equal (ncx2stat (4, [d1(1), d1(3:5)]), [5, 7, NaN, 6]);

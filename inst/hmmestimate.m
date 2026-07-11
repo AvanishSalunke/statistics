@@ -209,7 +209,8 @@ function [transprobest, outprobest] = hmmestimate (sequence, states, varargin)
     endfor
     if (! all (sequenceint))
       index = max ((sequenceint == 0) .* (1:len));
-      error (["hmmestimate: sequence(" int2str (index) ") not in symbols"]);
+      error (strcat ("hmmestimate: sequence(", int2str (index), ...
+                     ") not in symbols"));
     endif
     sequence = sequenceint;
   else
@@ -218,7 +219,8 @@ function [transprobest, outprobest] = hmmestimate (sequence, states, varargin)
     endif
     if (! all (ismember (sequence, 1:max (sequence))))
       index = max ((ismember (sequence, 1:max (sequence)) == 0) .* (1:len));
-      error (["hmmestimate: sequence(" int2str (index) ") not feasible"]);
+      error (strcat ("hmmestimate: sequence(", int2str (index), ...
+                     ") not feasible"));
     endif
   endif
 
@@ -239,7 +241,8 @@ function [transprobest, outprobest] = hmmestimate (sequence, states, varargin)
     endfor
     if (! all (statesint))
       index = max ((statesint == 0) .* (1:len));
-      error (["hmmestimate: states(" int2str (index) ") not in statenames"]);
+      error (strcat ("hmmestimate: states(", int2str (index), ...
+                     ") not in statenames"));
     endif
     states = statesint;
   else
@@ -248,7 +251,8 @@ function [transprobest, outprobest] = hmmestimate (sequence, states, varargin)
     endif
     if (! all (ismember (states, 1:max (states))))
       index = max ((ismember (states, 1:max (states)) == 0) .* (1:len));
-      error (["hmmestimate: states(" int2str (index) ") not feasible"]);
+      error (strcat ("hmmestimate: states(", int2str (index), ...
+                     ") not feasible"));
     endif
   endif
 
@@ -296,7 +300,7 @@ function [transprobest, outprobest] = hmmestimate (sequence, states, varargin)
   for i = 1:len
     # Count the number of transitions for each state pair
     transprobest(cstate, states(i)) ++;
-    cstate = states (i);
+    cstate = states(i);
     # Count the number of outputs for each state output pair
     outprobest(cstate, sequence(i)) ++;
   endfor
@@ -325,23 +329,23 @@ endfunction
 %! [transprobest, outprobest] = hmmestimate (sequence, states);
 %! expectedtransprob = [0.88889, 0.11111; 0.28571, 0.71429];
 %! expectedoutprob = [0.16667, 0.33333, 0.50000; 1.00000, 0.00000, 0.00000];
-%! assert (transprobest, expectedtransprob, 0.001);
-%! assert (outprobest, expectedoutprob, 0.001);
+%! assert_equal (transprobest, expectedtransprob, 0.001);
+%! assert_equal (outprobest, expectedoutprob, 0.001);
 
 %!test
-%! sequence = {"A", "B", "A", "A", "A", "B", "B", "A", "B", "C", "C", "C", ...
-%!             "C", "B", "C", "A", "A", "A", "A", "C", "C", "B", "C", "A", "C"};
-%! states = {"One", "One", "Two", "Two", "Two", "One", "One", "One", "One", ...
-%!           "One", "One", "One", "One", "One", "One", "Two", "Two", "Two", ...
-%!           "Two", "One", "One", "One", "One", "One", "One"};
-%! symbols = {"A", "B", "C"};
-%! statenames = {"One", "Two"};
-%! [transprobest, outprobest] = hmmestimate (sequence, states, "symbols", ...
-%!                                           symbols, "statenames", statenames);
+%! sequence = {'A', 'B', 'A', 'A', 'A', 'B', 'B', 'A', 'B', 'C', 'C', 'C', ...
+%!             'C', 'B', 'C', 'A', 'A', 'A', 'A', 'C', 'C', 'B', 'C', 'A', 'C'};
+%! states = {'One', 'One', 'Two', 'Two', 'Two', 'One', 'One', 'One', 'One', ...
+%!           'One', 'One', 'One', 'One', 'One', 'One', 'Two', 'Two', 'Two', ...
+%!           'Two', 'One', 'One', 'One', 'One', 'One', 'One'};
+%! symbols = {'A', 'B', 'C'};
+%! statenames = {'One', 'Two'};
+%! [transprobest, outprobest] = hmmestimate (sequence, states, 'symbols', ...
+%!                                           symbols, 'statenames', statenames);
 %! expectedtransprob = [0.88889, 0.11111; 0.28571, 0.71429];
 %! expectedoutprob = [0.16667, 0.33333, 0.50000; 1.00000, 0.00000, 0.00000];
-%! assert (transprobest, expectedtransprob, 0.001);
-%! assert (outprobest, expectedoutprob, 0.001);
+%! assert_equal (transprobest, expectedtransprob, 0.001);
+%! assert_equal (outprobest, expectedoutprob, 0.001);
 
 %!test
 %! sequence = [1, 2, 1, 1, 1, 2, 2, 1, 2, 3, 3, 3, ...
@@ -351,9 +355,9 @@ endfunction
 %! pseudotransitions = [8, 2; 4, 6];
 %! pseudoemissions = [2, 4, 4; 7, 2, 1];
 %! [transprobest, outprobest] = hmmestimate (sequence, states, ...
-%!  "pseudotransitions", pseudotransitions, "pseudoemissions", pseudoemissions);
+%!  'pseudotransitions', pseudotransitions, 'pseudoemissions', pseudoemissions);
 %! expectedtransprob = [0.85714, 0.14286; 0.35294, 0.64706];
 %! expectedoutprob = [0.178571, 0.357143, 0.464286; ...
 %!                    0.823529, 0.117647, 0.058824];
-%! assert (transprobest, expectedtransprob, 0.001);
-%! assert (outprobest, expectedoutprob, 0.001);
+%! assert_equal (transprobest, expectedtransprob, 0.001);
+%! assert_equal (outprobest, expectedoutprob, 0.001);

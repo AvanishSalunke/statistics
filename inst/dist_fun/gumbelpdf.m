@@ -90,23 +90,23 @@ endfunction
 %! y2 = gumbelpdf (x, 1.0, 2);
 %! y3 = gumbelpdf (x, 1.5, 3);
 %! y4 = gumbelpdf (x, 3.0, 4);
-%! plot (x, y1, "-b", x, y2, "-g", x, y3, "-r", x, y4, "-c")
+%! plot (x, y1, '-b', x, y2, '-g', x, y3, '-r', x, y4, '-c')
 %! grid on
 %! ylim ([0, 0.2])
-%! legend ({"μ = 0.5, β = 2", "μ = 1.0, β = 2", ...
-%!          "μ = 1.5, β = 3", "μ = 3.0, β = 4"}, "location", "northeast")
-%! title ("Extreme value PDF")
-%! xlabel ("values in x")
-%! ylabel ("density")
+%! legend ({'μ = 0.5, β = 2', 'μ = 1.0, β = 2', ...
+%!          'μ = 1.5, β = 3', 'μ = 3.0, β = 4'}, 'location', 'northeast')
+%! title ('Extreme value PDF')
+%! xlabel ('values in x')
+%! ylabel ('density')
 
 ## Test output
 %!shared x, y0, y1
 %! x = [-5, 0, 1, 2, 3];
 %! y0 = [0, 0.3679, 0.2547, 0.1182, 0.0474];
 %! y1 = [0, 0.1794, 0.3679, 0.2547, 0.1182];
-%!assert (gumbelpdf (x), y0, 1e-4)
-%!assert (gumbelpdf (x, zeros (1,5), ones (1,5)), y0, 1e-4)
-%!assert (gumbelpdf (x, ones (1,5), ones (1,5)), y1, 1e-4)
+%!assert_equal (gumbelpdf (x), y0, 1e-4)
+%!assert_equal (gumbelpdf (x, zeros (1,5), ones (1,5)), y0, 1e-4)
+%!assert_equal (gumbelpdf (x, ones (1,5), ones (1,5)), y1, 1e-4)
 
 ## Test input validation
 %!error<gumbelpdf: too few input arguments.> gumbelpdf ()

@@ -66,12 +66,12 @@ endfunction
 ## Input validation tests
 %!error<chi2stat: function called with too few input arguments.> chi2stat ()
 %!error<chi2stat: DF must be numeric.> chi2stat ({})
-%!error<chi2stat: DF must be numeric.> chi2stat ("")
+%!error<chi2stat: DF must be numeric.> chi2stat ('')
 %!error<chi2stat: DF must not be complex.> chi2stat (i)
 
 ## Output validation tests
 %!test
 %! df = 1:6;
 %! [m, v] = chi2stat (df);
-%! assert (m, df);
-%! assert (v, [2, 4, 6, 8, 10, 12], 0.001);
+%! assert_equal (m, df);
+%! assert_equal (v, [2, 4, 6, 8, 10, 12], 0.001);

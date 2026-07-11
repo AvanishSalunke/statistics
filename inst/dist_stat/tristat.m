@@ -77,8 +77,8 @@ endfunction
 %!error<tristat: function called with too few input arguments.> tristat ()
 %!error<tristat: function called with too few input arguments.> tristat (1)
 %!error<tristat: function called with too few input arguments.> tristat (1, 2)
-%!error<tristat: A, B, and C must be numeric.> tristat ("i", 2, 1)
-%!error<tristat: A, B, and C must be numeric.> tristat (0, "d", 1)
+%!error<tristat: A, B, and C must be numeric.> tristat ('i', 2, 1)
+%!error<tristat: A, B, and C must be numeric.> tristat (0, 'd', 1)
 %!error<tristat: A, B, and C must be numeric.> tristat (0, 3, {})
 %!error<tristat: A, B, and C must be real.> tristat (i, 2, 1)
 %!error<tristat: A, B, and C must be real.> tristat (0, i, 1)
@@ -91,5 +91,5 @@ endfunction
 %! c = 5:9;
 %! [m, v] = tristat (a, b, c);
 %! expected_m = [3, 4, 5, 6, 7];
-%! assert (m, expected_m);
-%! assert (v, ones (1, 5) * (2/3));
+%! assert_equal (m, expected_m);
+%! assert_equal (v, ones (1, 5) * (2/3));

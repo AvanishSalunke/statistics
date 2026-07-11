@@ -71,8 +71,8 @@ function x = wblinv (p, varargin)
   endif
 
   ## Check for class type
-  if (isa (p, "single") || isa (lambda, "single") || isa (k, "single"))
-    x = NaN (size (p), "single");
+  if (isa (p, 'single') || isa (lambda, 'single') || isa (k, 'single'))
+    x = NaN (size (p), 'single');
   else
     x = NaN (size (p));
   endif
@@ -101,30 +101,30 @@ endfunction
 %! x2 = wblinv (p, 1, 1);
 %! x3 = wblinv (p, 1, 1.5);
 %! x4 = wblinv (p, 1, 5);
-%! plot (p, x1, "-b", p, x2, "-r", p, x3, "-m", p, x4, "-g")
+%! plot (p, x1, '-b', p, x2, '-r', p, x3, '-m', p, x4, '-g')
 %! ylim ([0, 2.5])
 %! grid on
-%! legend ({"λ = 1, k = 0.5", "λ = 1, k = 1",  ...
-%!          "λ = 1, k = 1.5", "λ = 1, k = 5"}, "location", "northwest")
-%! title ("Weibull iCDF")
-%! xlabel ("probability")
-%! ylabel ("x")
+%! legend ({'λ = 1, k = 0.5', 'λ = 1, k = 1',  ...
+%!          'λ = 1, k = 1.5', 'λ = 1, k = 5'}, 'location', 'northwest')
+%! title ('Weibull iCDF')
+%! xlabel ('probability')
+%! ylabel ('x')
 
 ## Test output
 %!shared p
 %! p = [-1 0 0.63212055882855778 1 2];
-%!assert (wblinv (p, ones (1,5), ones (1,5)), [NaN 0 1 Inf NaN], eps)
-%!assert (wblinv (p, 1, ones (1,5)), [NaN 0 1 Inf NaN], eps)
-%!assert (wblinv (p, ones (1,5), 1), [NaN 0 1 Inf NaN], eps)
-%!assert (wblinv (p, [1 -1 NaN Inf 1], 1), [NaN NaN NaN NaN NaN])
-%!assert (wblinv (p, 1, [1 -1 NaN Inf 1]), [NaN NaN NaN NaN NaN])
-%!assert (wblinv ([p(1:2) NaN p(4:5)], 1, 1), [NaN 0 NaN Inf NaN])
+%!assert_equal (wblinv (p, ones (1,5), ones (1,5)), [NaN 0 1 Inf NaN], eps)
+%!assert_equal (wblinv (p, 1, ones (1,5)), [NaN 0 1 Inf NaN], eps)
+%!assert_equal (wblinv (p, ones (1,5), 1), [NaN 0 1 Inf NaN], eps)
+%!assert_equal (wblinv (p, [1 -1 NaN Inf 1], 1), [NaN NaN NaN NaN NaN])
+%!assert_equal (wblinv (p, 1, [1 -1 NaN Inf 1]), [NaN NaN NaN NaN NaN])
+%!assert_equal (wblinv ([p(1:2) NaN p(4:5)], 1, 1), [NaN 0 NaN Inf NaN])
 
 ## Test class of input preserved
-%!assert (wblinv ([p, NaN], 1, 1), [NaN 0 1 Inf NaN NaN], eps)
-%!assert (wblinv (single ([p, NaN]), 1, 1), single ([NaN 0 1 Inf NaN NaN]), eps ("single"))
-%!assert (wblinv ([p, NaN], single (1), 1), single ([NaN 0 1 Inf NaN NaN]), eps ("single"))
-%!assert (wblinv ([p, NaN], 1, single (1)), single ([NaN 0 1 Inf NaN NaN]), eps ("single"))
+%!assert_equal (wblinv ([p, NaN], 1, 1), [NaN 0 1 Inf NaN NaN], eps)
+%!assert_equal (wblinv (single ([p, NaN]), 1, 1), single ([NaN 0 1 Inf NaN NaN]), eps ('single'))
+%!assert_equal (wblinv ([p, NaN], single (1), 1), single ([NaN 0 1 Inf NaN NaN]), eps ('single'))
+%!assert_equal (wblinv ([p, NaN], 1, single (1)), single ([NaN 0 1 Inf NaN NaN]), eps ('single'))
 
 ## Test input validation
 %!error<wblinv: invalid number of input arguments.> wblinv ()

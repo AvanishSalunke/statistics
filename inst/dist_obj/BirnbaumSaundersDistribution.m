@@ -28,7 +28,8 @@ classdef BirnbaumSaundersDistribution
   ##
   ## The Birnbaum-Saunders distribution is a continuous probability distribution
   ## that models the time to failure of materials subjected to cyclic loading.
-  ## It is defined by scale parameter @var{beta} and shape parameter @var{gamma}.
+  ## It is defined by scale parameter @var{beta} and shape parameter
+  ## @var{gamma}.
   ##
   ## There are several ways to create a @code{BirnbaumSaundersDistribution}
   ## object.
@@ -50,14 +51,15 @@ classdef BirnbaumSaundersDistribution
   ## functions to create probability distribution objects, instead of the class
   ## constructor or the aforementioned static method.
   ##
-  ## Further information about the Birnbaum-Saunders distribution can be found at
+  ## Further information about the Birnbaum-Saunders distribution can be found
+  ## at
   ## @url{https://en.wikipedia.org/wiki/Birnbaum%E2%80%93Saunders_distribution}
   ##
   ## @seealso{fitdist, makedist, bisacdf, bisainv, bisapdf, bisarnd, bisafit,
   ## bisalike, bisastat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {BirnbaumSaundersDistribution} {property} beta
     ##
@@ -83,7 +85,7 @@ classdef BirnbaumSaundersDistribution
     gamma
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {BirnbaumSaundersDistribution} {property} DistributionName
     ##
@@ -93,7 +95,7 @@ classdef BirnbaumSaundersDistribution
     ## object. This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "BirnbaumSaundersDistribution";
+    DistributionName = 'BirnbaumSaundersDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {BirnbaumSaundersDistribution} {property} NumParameters
@@ -111,39 +113,39 @@ classdef BirnbaumSaundersDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter. This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"beta", "gamma"};
+    ParameterNames = {'beta', 'gamma'};
 
     ## -*- texinfo -*-
     ## @deftp {BirnbaumSaundersDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter. This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"Scale", "Shape"};
+    ParameterDescription = {'Scale', 'Shape'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = true;
-    DistributionCode = "bisa";
+    DistributionCode = 'bisa';
     ParameterRange = [realmin, realmin; Inf, Inf];
     ParameterLogCI = [true, true];
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected)
+  properties(GetAccess = public, SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {BirnbaumSaundersDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{2x1} numeric vector containing the values of the distribution
+    ## A @math{2*1} numeric vector containing the values of the distribution
     ## parameters. This property is read-only. You can change the distribution
     ## parameters by assigning new values to the @qcode{beta} and @qcode{gamma}
     ## properties.
@@ -156,7 +158,7 @@ classdef BirnbaumSaundersDistribution
     ##
     ## Covariance matrix of the parameter estimates
     ##
-    ## A @math{2x2} numeric matrix containing the variance-covariance of the
+    ## A @math{2*2} numeric matrix containing the variance-covariance of the
     ## parameter estimates. Diagonal elements contain the variance of each
     ## estimated parameter, and non-diagonal elements contain the covariance
     ## between the parameter estimates. The covariance matrix is only meaningful
@@ -173,7 +175,7 @@ classdef BirnbaumSaundersDistribution
     ##
     ## Flag for fixed parameters
     ##
-    ## A @math{1x2} logical vector specifying which parameters are fixed and
+    ## A @math{1*2} logical vector specifying which parameters are fixed and
     ## which are estimated. @qcode{true} values correspond to fixed parameters,
     ## @qcode{false} values correspond to parameter estimates. This property is
     ## read-only.
@@ -186,7 +188,7 @@ classdef BirnbaumSaundersDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution. First element contains the lower boundary,
     ## second element contains the upper boundary. This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -229,11 +231,11 @@ classdef BirnbaumSaundersDistribution
     InputData
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected, Hidden)
+  properties(GetAccess = public, SetAccess = protected, Hidden)
     ParameterCI
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = BirnbaumSaundersDistribution (beta, gamma)
       if (nargin == 0)
@@ -249,12 +251,12 @@ classdef BirnbaumSaundersDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "Birnbaum-Saunders distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'Birnbaum-Saunders distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "Birnbaum-Saunders distribution");
+      __disp__ (this, 'Birnbaum-Saunders distribution');
     endfunction
 
     function this = set.beta (this, beta)
@@ -283,11 +285,11 @@ classdef BirnbaumSaundersDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {BirnbaumSaundersDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {BirnbaumSaundersDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {BirnbaumSaundersDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -295,7 +297,7 @@ classdef BirnbaumSaundersDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -305,9 +307,9 @@ classdef BirnbaumSaundersDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -450,18 +452,19 @@ classdef BirnbaumSaundersDistribution
     ## boundaries of the 95% confidence interval for each parameter of the
     ## probability distribution object, @var{pd}.
     ##
-    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes the
+    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes
+    ## the
     ## confidence intervals with additional options specified by
     ## @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Alpha"} @tab @tab A scalar value in the range @math{(0,1)}
+    ## @item @qcode{'Alpha'} @tab A scalar value in the range @math{(0,1)}
     ## specifying the significance level for the confidence interval.  The
     ## default value 0.05 corresponds to a 95% confidence interval.
     ##
-    ## @item @qcode{"Parameter"} @tab @tab A character vector or a cell array of
+    ## @item @qcode{'Parameter'} @tab A character vector or a cell array of
     ## character vectors specifying the parameter names for which to compute
     ## confidence intervals.  By default, @code{paramci} computes confidence
     ## intervals for all distribution parameters.
@@ -522,26 +525,26 @@ classdef BirnbaumSaundersDistribution
     ## @code{plot (@var{pd}, @var{Name}, @var{Value})} specifies additional
     ## options with the @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -562,9 +565,9 @@ classdef BirnbaumSaundersDistribution
 
     ## -*- texinfo -*-
     ## @deftypefn  {BirnbaumSaundersDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum})
-    ## @deftypefnx {BirnbaumSaundersDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {BirnbaumSaundersDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{'Display'}, @var{display})
     ## @deftypefnx {BirnbaumSaundersDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam})
-    ## @deftypefnx {BirnbaumSaundersDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {BirnbaumSaundersDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{'Display'}, @var{display})
     ##
     ## Profile likelihood function for a probability distribution object.
     ##
@@ -577,14 +580,14 @@ classdef BirnbaumSaundersDistribution
     ## fitted to data.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @qcode{"Display"}, @qcode{"on"})} also plots the profile likelihood
+    ## @qcode{'Display'}, @qcode{'on'})} also plots the profile likelihood
     ## against the default range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
     ## @var{setparam})} defines a user-defined range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @var{setparam}, @qcode{"Display"}, @qcode{"on"})} also plots the profile
+    ## @var{setparam}, @qcode{'Display'}, @qcode{'on'})} also plots the profile
     ## likelihood against the user-defined range of the selected parameter.
     ##
     ## For the Birnbaum-Saunders distribution, @qcode{@var{pnum} = 1} selects
@@ -675,7 +678,8 @@ classdef BirnbaumSaundersDistribution
     ##
     ## @code{@var{t} = truncate (@var{pd}, @var{lower}, @var{upper})} returns a
     ## probability distribution @var{t}, which is the probability distribution
-    ## @var{pd} truncated to the specified interval with lower limit, @var{lower},
+    ## @var{pd} truncated to the specified interval with lower limit,
+    ## @var{lower},
     ## and upper limit, @var{upper}.  If @var{pd} is fitted to data with
     ## @code{fitdist}, the returned probability distribution @var{t} is not
     ## fitted, does not contain any data or estimated values, and it is as it
@@ -724,7 +728,7 @@ classdef BirnbaumSaundersDistribution
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function pd = fit (x, varargin)
       ## Check input arguments
@@ -744,7 +748,7 @@ classdef BirnbaumSaundersDistribution
         freq = varargin{3};
       endif
       if (nargin < 5)
-        options.Display = "off";
+        options.Display = 'off';
         options.MaxFunEvals = 400;
         options.MaxIter = 200;
         options.TolX = 1e-6;
@@ -766,7 +770,7 @@ classdef BirnbaumSaundersDistribution
       pd.ParameterCI = pci;
       pd.ParameterIsFixed = [false, false];
       pd.ParameterCovariance = acov;
-      pd.InputData = struct ("data", x, "cens", censor, "freq", freq);
+      pd.InputData = struct ('data', x, 'cens', censor, 'freq', freq);
     endfunction
 
   endmethods
@@ -790,141 +794,141 @@ endfunction
 %! ## distribution to this data and plot a PDF of the fitted distribution
 %! ## superimposed on a histogram of the data.
 %!
-%! pd_fixed = makedist ("BirnbaumSaunders", "beta", 1, "gamma", 0.5)
-%! randg ("seed", 21);
+%! pd_fixed = makedist ('BirnbaumSaunders', 'beta', 1, 'gamma', 0.5)
+%! randg ('seed', 21);
 %! data = random (pd_fixed, 5000, 1);
-%! pd_fitted = fitdist (data, "BirnbaumSaunders")
+%! pd_fitted = fitdist (data, 'BirnbaumSaunders')
 %! plot (pd_fitted)
-%! msg = "Fitted Birnbaum-Saunders distribution with beta = %0.2f and gamma = %0.2f";
+%! msg = 'Fitted Birnbaum-Saunders distribution with beta = %0.2f and gamma = %0.2f';
 %! title (sprintf (msg, pd_fitted.beta, pd_fitted.gamma))
 
 ## Test output
 %!shared pd, t
 %! pd = BirnbaumSaundersDistribution;
 %! t = truncate (pd, 2, 4);
-%!assert (cdf (pd, [0:5]), [0, 0.5, 0.7602, 0.8759, 0.9332, 0.9632], 1e-4);
-%!assert (cdf (t, [0:5]), [0, 0, 0, 0.6687, 1, 1], 1e-4);
-%!assert (cdf (pd, [1.5, 2, 3, 4, NaN]), [0.6585, 0.7602, 0.8759, 0.9332, NaN], 1e-4);
-%!assert (cdf (t, [1.5, 2, 3, 4, NaN]), [0, 0, 0.6687, 1, NaN], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [0, 0.4411, 0.7767, 1.2875, 2.2673, Inf], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [2, 2.2293, 2.5073, 2.8567, 3.3210, 4], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 0.7767, 1.2875, 2.2673, Inf, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.5073, 2.8567, 3.3210, 4, NaN], 1e-4);
-%!assert (iqr (pd), 1.4236, 1e-4);
-%!assert (iqr (t), 0.8968, 1e-4);
-%!assert (mean (pd), 1.5, eps);
-%!assert (mean (t), 2.7723, 1e-4);
-%!assert (median (pd), 1, 1e-4);
-%!assert (median (t), 2.6711, 1e-4);
-%!assert (pdf (pd, [0:5]), [0, 0.3989, 0.1648, 0.0788, 0.0405, 0.0216], 1e-4);
-%!assert (pdf (t, [0:5]), [0, 0, 0.9528, 0.4559, 0.2340, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1.5, NaN]), [0, 0.2497, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 2), false);
-%!assert (any (random (t, 1000, 1) > 4), false);
-%!assert (std (pd), 1.5, eps);
-%!assert (std (t), 0.5528, 1e-4);
-%!assert (var (pd), 2.25, eps);
-%!assert (var (t), 0.3056, 1e-4);
+%!assert_equal (cdf (pd, [0:5]), [0, 0.5, 0.7602, 0.8759, 0.9332, 0.9632], 1e-4);
+%!assert_equal (cdf (t, [0:5]), [0, 0, 0, 0.6687, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [1.5, 2, 3, 4, NaN]), [0.6585, 0.7602, 0.8759, 0.9332, NaN], 1e-4);
+%!assert_equal (cdf (t, [1.5, 2, 3, 4, NaN]), [0, 0, 0.6687, 1, NaN], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [0, 0.4411, 0.7767, 1.2875, 2.2673, Inf], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [2, 2.2293, 2.5073, 2.8567, 3.3210, 4], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 0.7767, 1.2875, 2.2673, Inf, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 2.5073, 2.8567, 3.3210, 4, NaN], 1e-4);
+%!assert_equal (iqr (pd), 1.4236, 1e-4);
+%!assert_equal (iqr (t), 0.8968, 1e-4);
+%!assert_equal (mean (pd), 1.5, eps);
+%!assert_equal (mean (t), 2.7723, 1e-4);
+%!assert_equal (median (pd), 1, 1e-4);
+%!assert_equal (median (t), 2.6711, 1e-4);
+%!assert_equal (pdf (pd, [0:5]), [0, 0.3989, 0.1648, 0.0788, 0.0405, 0.0216], 1e-4);
+%!assert_equal (pdf (t, [0:5]), [0, 0, 0.9528, 0.4559, 0.2340, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1.5, NaN]), [0, 0.2497, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1.5, NaN]), [0, 0, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 2), false);
+%!assert_equal (any (random (t, 1000, 1) > 4), false);
+%!assert_equal (std (pd), 1.5, eps);
+%!assert_equal (std (t), 0.5528, 1e-4);
+%!assert_equal (var (pd), 2.25, eps);
+%!assert_equal (var (t), 0.3056, 1e-4);
 
 ## Test input validation
 ## 'BirnbaumSaundersDistribution' constructor
 %!error <BirnbaumSaundersDistribution: BETA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution(0, 1)
+%! BirnbaumSaundersDistribution (0, 1)
 %!error <BirnbaumSaundersDistribution: BETA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution(Inf, 1)
+%! BirnbaumSaundersDistribution (Inf, 1)
 %!error <BirnbaumSaundersDistribution: BETA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution(i, 1)
+%! BirnbaumSaundersDistribution (i, 1)
 %!error <BirnbaumSaundersDistribution: BETA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution("beta", 1)
+%! BirnbaumSaundersDistribution ('beta', 1)
 %!error <BirnbaumSaundersDistribution: BETA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution([1, 2], 1)
+%! BirnbaumSaundersDistribution ([1, 2], 1)
 %!error <BirnbaumSaundersDistribution: BETA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution(NaN, 1)
+%! BirnbaumSaundersDistribution (NaN, 1)
 %!error <BirnbaumSaundersDistribution: GAMMA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution(1, 0)
+%! BirnbaumSaundersDistribution (1, 0)
 %!error <BirnbaumSaundersDistribution: GAMMA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution(1, -1)
+%! BirnbaumSaundersDistribution (1, -1)
 %!error <BirnbaumSaundersDistribution: GAMMA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution(1, Inf)
+%! BirnbaumSaundersDistribution (1, Inf)
 %!error <BirnbaumSaundersDistribution: GAMMA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution(1, i)
+%! BirnbaumSaundersDistribution (1, i)
 %!error <BirnbaumSaundersDistribution: GAMMA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution(1, "beta")
+%! BirnbaumSaundersDistribution (1, 'beta')
 %!error <BirnbaumSaundersDistribution: GAMMA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution(1, [1, 2])
+%! BirnbaumSaundersDistribution (1, [1, 2])
 %!error <BirnbaumSaundersDistribution: GAMMA must be a positive real scalar.> ...
-%! BirnbaumSaundersDistribution(1, NaN)
+%! BirnbaumSaundersDistribution (1, NaN)
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (BirnbaumSaundersDistribution, 2, "uper")
+%! cdf (BirnbaumSaundersDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (BirnbaumSaundersDistribution, 2, 3)
 
 ## 'paramci' method
 %!shared x
-%! rand ("seed", 5);
+%! rand ('seed', 5);
 %! x = bisarnd (1, 1, [100, 1]);
 %!error <paramci: optional arguments must be in NAME-VALUE pairs.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "alpha")
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'alpha')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "alpha", 0)
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'alpha', 0)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "alpha", 1)
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'alpha', 1)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "alpha", [0.5 2])
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'alpha', [0.5 2])
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "alpha", "")
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'alpha', '')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "alpha", {0.05})
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'alpha', {0.05})
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "parameter", ...
-%!          "beta", "alpha", {0.05})
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'parameter', ...
+%!          'beta', 'alpha', {0.05})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
 %! paramci (BirnbaumSaundersDistribution.fit (x), ...
-%!          "parameter", {"beta", "gamma", "param"})
+%!          'parameter', {'beta', 'gamma', 'param'})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", {"beta", "gamma", "param"})
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', {'beta', 'gamma', 'param'})
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "parameter", "param")
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'parameter', 'param')
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", "param")
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', 'param')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "NAME", "value")
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "alpha", 0.01, ...
-%!          "NAME", "value")
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'alpha', 0.01, ...
+%!          'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (BirnbaumSaundersDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", "beta", "NAME", "value")
+%! paramci (BirnbaumSaundersDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', 'beta', 'NAME', 'value')
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (BirnbaumSaundersDistribution, "Parent")
+%! plot (BirnbaumSaundersDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (BirnbaumSaundersDistribution, "PlotType", 12)
+%! plot (BirnbaumSaundersDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (BirnbaumSaundersDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (BirnbaumSaundersDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (BirnbaumSaundersDistribution, "PlotType", "pdfcdf")
+%! plot (BirnbaumSaundersDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (BirnbaumSaundersDistribution, "Discrete", "pdfcdf")
+%! plot (BirnbaumSaundersDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (BirnbaumSaundersDistribution, "Discrete", [1, 0])
+%! plot (BirnbaumSaundersDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (BirnbaumSaundersDistribution, "Discrete", {true})
+%! plot (BirnbaumSaundersDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (BirnbaumSaundersDistribution, "Parent", 12)
+%! plot (BirnbaumSaundersDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (BirnbaumSaundersDistribution, "Parent", "hax")
+%! plot (BirnbaumSaundersDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (BirnbaumSaundersDistribution, "invalidNAME", "pdf")
+%! plot (BirnbaumSaundersDistribution, 'invalidNAME', 'pdf')
 %!error <plot: no fitted DATA to plot a probability plot.> ...
-%! plot (BirnbaumSaundersDistribution, "PlotType", "probability")
+%! plot (BirnbaumSaundersDistribution, 'PlotType', 'probability')
 
 ## 'proflik' method
 %!error <proflik: no fitted data available.> ...
@@ -938,23 +942,23 @@ endfunction
 %!error <proflik: SETPARAM must be a numeric vector.> ...
 %! proflik (BirnbaumSaundersDistribution.fit (x), 1, ones (2))
 %!error <proflik: missing VALUE for 'Display' argument.> ...
-%! proflik (BirnbaumSaundersDistribution.fit (x), 1, "Display")
+%! proflik (BirnbaumSaundersDistribution.fit (x), 1, 'Display')
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (BirnbaumSaundersDistribution.fit (x), 1, "Display", 1)
+%! proflik (BirnbaumSaundersDistribution.fit (x), 1, 'Display', 1)
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (BirnbaumSaundersDistribution.fit (x), 1, "Display", {1})
+%! proflik (BirnbaumSaundersDistribution.fit (x), 1, 'Display', {1})
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (BirnbaumSaundersDistribution.fit (x), 1, "Display", {"on"})
+%! proflik (BirnbaumSaundersDistribution.fit (x), 1, 'Display', {'on'})
 %!error <proflik: invalid VALUE size for 'Display' argument.> ...
-%! proflik (BirnbaumSaundersDistribution.fit (x), 1, "Display", ["on"; "on"])
+%! proflik (BirnbaumSaundersDistribution.fit (x), 1, 'Display', ['on'; 'on'])
 %!error <proflik: invalid VALUE for 'Display' argument.> ...
-%! proflik (BirnbaumSaundersDistribution.fit (x), 1, "Display", "onnn")
+%! proflik (BirnbaumSaundersDistribution.fit (x), 1, 'Display', 'onnn')
 %!error <proflik: invalid NAME for optional arguments.> ...
-%! proflik (BirnbaumSaundersDistribution.fit (x), 1, "NAME", "on")
+%! proflik (BirnbaumSaundersDistribution.fit (x), 1, 'NAME', 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (BirnbaumSaundersDistribution.fit (x), 1, {"NAME"}, "on")
+%! proflik (BirnbaumSaundersDistribution.fit (x), 1, {'NAME'}, 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (BirnbaumSaundersDistribution.fit (x), 1, {[1 2 3 4]}, "Display", "on")
+%! proflik (BirnbaumSaundersDistribution.fit (x), 1, {[1 2 3 4]}, 'Display', 'on')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...
@@ -966,8 +970,8 @@ endfunction
 
 ## Catch errors when using array of probability objects with available methods
 %!shared pd
-%! pd = BirnbaumSaundersDistribution(1, 1);
-%! pd(2) = BirnbaumSaundersDistribution(1, 3);
+%! pd = BirnbaumSaundersDistribution (1, 1);
+%! pd(2) = BirnbaumSaundersDistribution (1, 3);
 %!error <cdf: requires a scalar probability distribution.> cdf (pd, 1)
 %!error <icdf: requires a scalar probability distribution.> icdf (pd, 0.5)
 %!error <iqr: requires a scalar probability distribution.> iqr (pd)

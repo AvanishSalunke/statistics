@@ -53,23 +53,23 @@
 ## Additional input properties can be specified by pairs of properties and
 ## values. Known properties are:
 ## @itemize @bullet
-## @item @qcode{"Reorder"}
+## @item @qcode{'Reorder'}
 ## Reorder the leaves of the dendrogram plot using a numerical vector of size n,
 ## the number of leaves. When @var{p} is smaller than @var{n}, the reordering
 ## cannot break the @var{p} groups of leaves.
 ##
-## @item @qcode{"Orientation"}
+## @item @qcode{'Orientation'}
 ## Change the orientation of the plot. Available values: @qcode{top} (default),
 ## @qcode{bottom}, @qcode{left}, @qcode{right}.
 ##
-## @item @qcode{"CheckCrossing"}
+## @item @qcode{'CheckCrossing'}
 ## Check if the lines of a reordered dendrogram cross each other. Available
 ## values: @qcode{true} (default), @qcode{false}.
 ##
-## @item @qcode{"ColorThreshold"}
+## @item @qcode{'ColorThreshold'}
 ## Not implemented.
 ##
-## @item @qcode{"Labels"}
+## @item @qcode{'Labels'}
 ## Use a char, string or cellstr array of size @var{n} to set the label for each
 ## leaf; the label is displayed only for nodes with just one leaf.
 ## @end itemize
@@ -95,7 +95,7 @@ function [H, T, perm] = dendrogram (tree, varargin)
   vReorder = [];
   csLabels = {};
   checkCrossing = 1;
-  orientation = "top";
+  orientation = 'top';
   if (nargin > 1)
     if (isnumeric (varargin{1}) && isscalar (varargin{1}))
       ## dendrogram (tree, P)
@@ -106,7 +106,7 @@ function [H, T, perm] = dendrogram (tree, varargin)
     ## dendrogram (..., Name, Value)
     while (pair_index < (nargin - 1))
       switch (lower (varargin{pair_index}))
-        case "reorder"
+        case 'reorder'
           if (isvector (varargin{pair_index + 1}) &&
               isnumeric (varargin{pair_index + 1}) &&
               length (varargin{pair_index + 1}) == n )
@@ -115,12 +115,12 @@ function [H, T, perm] = dendrogram (tree, varargin)
             error (strcat ("dendrogram: 'reorder' must be a numeric", ...
                            " vector of size n, the number of leaves."));
           endif
-        case "checkcrossing"
+        case 'checkcrossing'
           if (ischar (varargin{pair_index + 1}))
             switch (lower (varargin{pair_index + 1}))
-              case "true"
+              case 'true'
                 checkCrossing = 1;
-              case "false"
+              case 'false'
                 checkCrossing = 0;
               otherwise
                 error ("dendrogram: unknown value '%s' for CheckCrossing.", ...
@@ -130,12 +130,12 @@ function [H, T, perm] = dendrogram (tree, varargin)
             error (strcat ("dendrogram: 'CheckCrossing' must be", ...
                            " either 'true' or 'false'."));
           endif
-        case "colorthreshold"
+        case 'colorthreshold'
           warning ("dendrogram: property '%s' not implemented.",...
             varargin{pair_index});
-        case "orientation"
+        case 'orientation'
           orientation = varargin{pair_index + 1}; # validity check below
-        case "labels"
+        case 'labels'
           if (ischar (varargin{pair_index + 1}) &&
               (isvector (varargin{pair_index + 1}) &&
                length (varargin{pair_index + 1}) == n) ||
@@ -170,7 +170,7 @@ function [H, T, perm] = dendrogram (tree, varargin)
     level_0 = 0;
   endif
 
-  vLeafPosition = zeros((n + m), 1);
+  vLeafPosition = zeros ((n + m), 1);
   T = (1:n)';
   nodecnt = 1;
 
@@ -204,7 +204,7 @@ function [H, T, perm] = dendrogram (tree, varargin)
   endif
 
   ## leaf reordering
-  if (! isempty(vReorder))
+  if (! isempty (vReorder))
     if (P < n)
       checkT = newT(vReorder(:));
       for i = 1 : P
@@ -216,9 +216,9 @@ function [H, T, perm] = dendrogram (tree, varargin)
           endif
         endif
       endfor
-      checkT = unique (checkT, "stable");
+      checkT = unique (checkT, 'stable');
       vNewLeafPosition = zeros (n, 1);
-      uT = unique (T, "stable");
+      uT = unique (T, 'stable');
       for i = 1:P
         vNewLeafPosition(uT(checkT(i))) = i;
       endfor
@@ -258,20 +258,20 @@ function [H, T, perm] = dendrogram (tree, varargin)
   endfor
 
   ## plot stuff
-  if (strcmp (orientation, "top"))
-    H = line (x(:, 1:2)', x(:, 3:4)', "color", "blue");
-    set (gca, "xticklabel", perm, "xtick", xticks);
-  elseif (strcmp (orientation, "bottom"))
-    H = line (x(:, 1:2)', x(:, 3:4)', "color", "blue");
-    set (gca, "xticklabel", perm, "xtick", xticks, "xaxislocation", "top");
-    axis ("ij");
-  elseif (strcmp (orientation, "left"))
-    H = line (x(:, 3:4)', x(:, 1:2)', "color", "blue");
-    set (gca, "yticklabel", perm, "ytick", xticks, "xdir", "reverse",...
-         "yaxislocation", "right");
-  elseif (strcmp (orientation, "right"))
-    H = line (x(:, 3:4)', x(:, 1:2)', "color", "blue");
-    set (gca, "yticklabel", perm, "ytick", xticks);
+  if (strcmp (orientation, 'top'))
+    H = line (x(:, 1:2)', x(:, 3:4)', 'color', 'blue');
+    set (gca, 'xticklabel', perm, 'xtick', xticks);
+  elseif (strcmp (orientation, 'bottom'))
+    H = line (x(:, 1:2)', x(:, 3:4)', 'color', 'blue');
+    set (gca, 'xticklabel', perm, 'xtick', xticks, 'xaxislocation', 'top');
+    axis ('ij');
+  elseif (strcmp (orientation, 'left'))
+    H = line (x(:, 3:4)', x(:, 1:2)', 'color', 'blue');
+    set (gca, 'yticklabel', perm, 'ytick', xticks, 'xdir', 'reverse',...
+         'yaxislocation', 'right');
+  elseif (strcmp (orientation, 'right'))
+    H = line (x(:, 3:4)', x(:, 1:2)', 'color', 'blue');
+    set (gca, 'yticklabel', perm, 'ytick', xticks);
   else
     close (H);
     error ("dendrogram: invalid orientation '%s'", orientation);
@@ -289,15 +289,15 @@ function [H, T, perm] = dendrogram (tree, varargin)
     endfor
 
     switch (orientation)
-      case {"top", "bottom"}
+      case {'top', 'bottom'}
         xticklabels (csCurrent);
-      case {"left", "right"}
+      case {'left', 'right'}
         yticklabels (csCurrent);
     endswitch
   endif
 
   ## check crossings
-  if (checkCrossing && ! isempty(vReorder))
+  if (checkCrossing && ! isempty (vReorder))
     for j = 1:rows (x)
       if (x(j, 3) == x(j, 4)) # an horizontal line
         for i = 1:rows (x)
@@ -345,57 +345,57 @@ endfunction
 %! y = [4, 5; 2, 6; 3, 7; 8, 9; 1, 10];
 %! y(:,3) = 1:5;
 %! dendrogram (y);
-%! title ("simple dendrogram");
+%! title ('simple dendrogram');
 
 %!demo
 %! ## another simple dendrogram
 %! v = 2 * rand (30, 1) - 1;
 %! d = abs (bsxfun (@minus, v(:, 1), v(:, 1)'));
-%! y = linkage (squareform (d, "tovector"));
+%! y = linkage (squareform (d, 'tovector'));
 %! dendrogram (y);
-%! title ("another simple dendrogram");
+%! title ('another simple dendrogram');
 
 %!demo
 %! ## collapsed tree, find all the leaves of node 5
 %! X = randn (60, 2);
 %! D = pdist (X);
-%! y = linkage (D, "average");
+%! y = linkage (D, 'average');
 %! subplot (2, 1, 1);
-%! title ("original tree");
+%! title ('original tree');
 %! dendrogram (y, 0);
 %! subplot (2, 1, 2);
-%! title ("collapsed tree");
+%! title ('collapsed tree');
 %! [~, t] = dendrogram (y, 20);
-%! find(t == 5)
+%! find (t == 5)
 
 %!demo
 %! ## optimal leaf order
 %! X = randn (30, 2);
 %! D = pdist (X);
-%! y = linkage (D, "average");
+%! y = linkage (D, 'average');
 %! order = optimalleaforder (y, D);
 %! subplot (2, 1, 1);
-%! title ("original leaf order");
+%! title ('original leaf order');
 %! dendrogram (y);
 %! subplot (2, 1, 2);
-%! title ("optimal leaf order");
-%! dendrogram (y, "Reorder", order);
+%! title ('optimal leaf order');
+%! dendrogram (y, 'Reorder', order);
 
 %!demo
 %! ## horizontal orientation and labels
 %! X = randn (8, 2);
 %! D = pdist (X);
-%! L = ["Snow White"; "Doc"; "Grumpy"; "Happy"; "Sleepy"; "Bashful"; ...
-%!      "Sneezy"; "Dopey"];
-%! y = linkage (D, "average");
-%! dendrogram (y, "Orientation", "left", "Labels", L);
-%! title ("horizontal orientation and labels");
+%! L = ['Snow White'; 'Doc'; 'Grumpy'; 'Happy'; 'Sleepy'; 'Bashful'; ...
+%!      'Sneezy'; 'Dopey'];
+%! y = linkage (D, 'average');
+%! dendrogram (y, 'Orientation', 'left', 'Labels', L);
+%! title ('horizontal orientation and labels');
 
 ## Test plotting
 %!shared visibility_setting
-%! visibility_setting = get (0, "DefaultFigureVisible");
+%! visibility_setting = get (0, 'DefaultFigureVisible');
 %!test
-%! hf = figure ("visible", "off");
+%! hf = figure ('visible', 'off');
 %! unwind_protect
 %!   y = [4, 5; 2, 6; 3, 7; 8, 9; 1, 10];
 %!   y(:,3) = 1:5;
@@ -404,7 +404,7 @@ endfunction
 %!   close (hf);
 %! end_unwind_protect
 %!test
-%! hf = figure ("visible", "off");
+%! hf = figure ('visible', 'off');
 %! unwind_protect
 %!   y = [4, 5; 2, 6; 3, 7; 8, 9; 1, 10];
 %!   y(:,3) = 1:5;
@@ -413,28 +413,28 @@ endfunction
 %!   close (hf);
 %! end_unwind_protect
 %!test
-%! hf = figure ("visible", "off");
+%! hf = figure ('visible', 'off');
 %! unwind_protect
 %!   v = 2 * rand (30, 1) - 1;
 %!   d = abs (bsxfun (@minus, v(:, 1), v(:, 1)'));
-%!   y = linkage (squareform (d, "tovector"));
+%!   y = linkage (squareform (d, 'tovector'));
 %!   dendrogram (y);
 %! unwind_protect_cleanup
 %!   close (hf);
 %! end_unwind_protect
 %!test
-%! hf = figure ("visible", "off");
+%! hf = figure ('visible', 'off');
 %! unwind_protect
 %!   X = randn (30, 2);
 %!   D = pdist (X);
-%!   y = linkage (D, "average");
+%!   y = linkage (D, 'average');
 %!   order = optimalleaforder (y, D);
 %!   subplot (2, 1, 1);
-%!   title ("original leaf order");
+%!   title ('original leaf order');
 %!   dendrogram (y);
 %!   subplot (2, 1, 2);
-%!   title ("optimal leaf order");
-%!   dendrogram (y, "Reorder", order);
+%!   title ('optimal leaf order');
+%!   dendrogram (y, 'Reorder', order);
 %! unwind_protect_cleanup
 %!   close (hf);
 %! end_unwind_protect
@@ -442,7 +442,7 @@ endfunction
 ## Test input validation
 %!error dendrogram ();
 %!error <tree must be .*> dendrogram (ones (2, 2), 1);
-%!error <unknown property .*> dendrogram ([1 2 1], 1, "xxx", "xxx");
-%!error <reorder.*> dendrogram ([1 2 1], "Reorder", "xxx");
-%!error <reorder.*> dendrogram ([1 2 1], "Reorder", [1 2 3 4]);
-%! fail ('dendrogram ([1 2 1], "Orientation", "north")', "invalid orientation .*")
+%!error <unknown property .*> dendrogram ([1 2 1], 1, 'xxx', 'xxx');
+%!error <reorder.*> dendrogram ([1 2 1], 'Reorder', 'xxx');
+%!error <reorder.*> dendrogram ([1 2 1], 'Reorder', [1 2 3 4]);
+%! fail ('dendrogram ([1 2 1], "Orientation", "north")', 'invalid orientation .*')

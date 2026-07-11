@@ -19,10 +19,10 @@
 ## @deftypefn  {statistics} {@var{p} =} gumbelcdf (@var{x})
 ## @deftypefnx {statistics} {@var{p} =} gumbelcdf (@var{x}, @var{mu})
 ## @deftypefnx {statistics} {@var{p} =} gumbelcdf (@var{x}, @var{mu}, @var{beta})
-## @deftypefnx {statistics} {@var{p} =} gumbelcdf (@dots{}, @qcode{"upper"})
+## @deftypefnx {statistics} {@var{p} =} gumbelcdf (@dots{}, @qcode{'upper'})
 ## @deftypefnx {statistics} {[@var{p}, @var{plo}, @var{pup}] =} gumbelcdf (@var{x}, @var{mu}, @var{beta}, @var{pcov})
 ## @deftypefnx {statistics} {[@var{p}, @var{plo}, @var{pup}] =} gumbelcdf (@var{x}, @var{mu}, @var{beta}, @var{pcov}, @var{alpha})
-## @deftypefnx {statistics} {[@var{p}, @var{plo}, @var{pup}] =} gumbelcdf (@dots{}, @qcode{"upper"})
+## @deftypefnx {statistics} {[@var{p}, @var{plo}, @var{pup}] =} gumbelcdf (@dots{}, @qcode{'upper'})
 ##
 ## Gumbel cumulative distribution function (CDF).
 ##
@@ -38,7 +38,7 @@
 ## When called with three output arguments, i.e. @code{[@var{p}, @var{plo},
 ## @var{pup}]}, @code{gumbelcdf} computes the confidence bounds for @var{p} when
 ## the input parameters @var{mu} and @var{beta} are estimates.  In such case,
-## @var{pcov}, a @math{2x2} matrix containing the covariance matrix of the
+## @var{pcov}, a @math{2*2} matrix containing the covariance matrix of the
 ## estimated parameters, is necessary.  Optionally, @var{alpha}, which has a
 ## default value of 0.05, specifies the @qcode{100 * (1 - @var{alpha})} percent
 ## confidence bounds.  @var{plo} and @var{pup} are arrays of the same size as
@@ -71,11 +71,11 @@ function [varargout] = gumbelcdf (x, varargin)
   endif
 
   ## Check for 'upper' flag
-  if (nargin > 1 && strcmpi (varargin{end}, "upper"))
+  if (nargin > 1 && strcmpi (varargin{end}, 'upper'))
     uflag = true;
     varargin(end) = [];
   elseif (nargin > 1 && ischar (varargin{end}) && ...
-          ! strcmpi (varargin{end}, "upper"))
+          ! strcmpi (varargin{end}, 'upper'))
     error ("gumbelcdf: invalid argument for upper tail.");
   else
     uflag = false;
@@ -139,10 +139,10 @@ function [varargout] = gumbelcdf (x, varargin)
   endif
 
   ## Check for class type
-  if (isa (x, "single") || isa (mu, "single") || isa (beta, "single"));
-    is_class = "single";
+  if (isa (x, 'single') || isa (mu, 'single') || isa (beta, 'single'));
+    is_class = 'single';
   else
-    is_class = "double";
+    is_class = 'double';
   endif
 
   ## Prepare output
@@ -198,36 +198,36 @@ endfunction
 %! p2 = gumbelcdf (x, 1.0, 2);
 %! p3 = gumbelcdf (x, 1.5, 3);
 %! p4 = gumbelcdf (x, 3.0, 4);
-%! plot (x, p1, "-b", x, p2, "-g", x, p3, "-r", x, p4, "-c")
+%! plot (x, p1, '-b', x, p2, '-g', x, p3, '-r', x, p4, '-c')
 %! grid on
-%! legend ({"μ = 0.5, β = 2", "μ = 1.0, β = 2", ...
-%!          "μ = 1.5, β = 3", "μ = 3.0, β = 4"}, "location", "southeast")
-%! title ("Gumbel CDF")
-%! xlabel ("values in x")
-%! ylabel ("probability")
+%! legend ({'μ = 0.5, β = 2', 'μ = 1.0, β = 2', ...
+%!          'μ = 1.5, β = 3', 'μ = 3.0, β = 4'}, 'location', 'southeast')
+%! title ('Gumbel CDF')
+%! xlabel ('values in x')
+%! ylabel ('probability')
 
 ## Test output
 %!shared x, y
 %! x = [-Inf, 1, 2, Inf];
 %! y = [0, 0.3679, 0.6922, 1];
-%!assert (gumbelcdf (x, ones (1,4), ones (1,4)), y, 1e-4)
-%!assert (gumbelcdf (x, 1, ones (1,4)), y, 1e-4)
-%!assert (gumbelcdf (x, ones (1,4), 1), y, 1e-4)
-%!assert (gumbelcdf (x, [0, -Inf, NaN, Inf], 1), [0, 1, NaN, NaN], 1e-4)
-%!assert (gumbelcdf (x, 1, [Inf, NaN, -1, 0]), [NaN, NaN, NaN, NaN], 1e-4)
-%!assert (gumbelcdf ([x(1:2), NaN, x(4)], 1, 1), [y(1:2), NaN, y(4)], 1e-4)
-%!assert (gumbelcdf (x, "upper"), [1, 0.3078, 0.1266, 0], 1e-4)
+%!assert_equal (gumbelcdf (x, ones (1,4), ones (1,4)), y, 1e-4)
+%!assert_equal (gumbelcdf (x, 1, ones (1,4)), y, 1e-4)
+%!assert_equal (gumbelcdf (x, ones (1,4), 1), y, 1e-4)
+%!assert_equal (gumbelcdf (x, [0, -Inf, NaN, Inf], 1), [0, 1, NaN, NaN], 1e-4)
+%!assert_equal (gumbelcdf (x, 1, [Inf, NaN, -1, 0]), [NaN, NaN, NaN, NaN], 1e-4)
+%!assert_equal (gumbelcdf ([x(1:2), NaN, x(4)], 1, 1), [y(1:2), NaN, y(4)], 1e-4)
+%!assert_equal (gumbelcdf (x, 'upper'), [1, 0.3078, 0.1266, 0], 1e-4)
 
 ## Test class of input preserved
-%!assert (gumbelcdf ([x, NaN], 1, 1), [y, NaN], 1e-4)
-%!assert (gumbelcdf (single ([x, NaN]), 1, 1), single ([y, NaN]), 1e-4)
-%!assert (gumbelcdf ([x, NaN], single (1), 1), single ([y, NaN]), 1e-4)
-%!assert (gumbelcdf ([x, NaN], 1, single (1)), single ([y, NaN]), 1e-4)
+%!assert_equal (gumbelcdf ([x, NaN], 1, 1), [y, NaN], 1e-4)
+%!assert_equal (gumbelcdf (single ([x, NaN]), 1, 1), single ([y, NaN]), 1e-4)
+%!assert_equal (gumbelcdf ([x, NaN], single (1), 1), single ([y, NaN]), 1e-4)
+%!assert_equal (gumbelcdf ([x, NaN], 1, single (1)), single ([y, NaN]), 1e-4)
 
 ## Test input validation
 %!error<gumbelcdf: invalid number of input arguments.> gumbelcdf ()
 %!error<gumbelcdf: invalid number of input arguments.> gumbelcdf (1,2,3,4,5,6,7)
-%!error<gumbelcdf: invalid argument for upper tail.> gumbelcdf (1, 2, 3, 4, "uper")
+%!error<gumbelcdf: invalid argument for upper tail.> gumbelcdf (1, 2, 3, 4, 'uper')
 %!error<gumbelcdf: X, MU, and BETA must be of common size or scalars.> ...
 %! gumbelcdf (ones (3), ones (2), ones (2))
 %!error<gumbelcdf: invalid size of covariance matrix.> gumbelcdf (2, 3, 4, [1, 2])
@@ -238,7 +238,7 @@ endfunction
 %!error<gumbelcdf: invalid value for alpha.> [p, plo, pup] = ...
 %! gumbelcdf (1, 2, 3, [1, 0; 0, 1], 1.22)
 %!error<gumbelcdf: invalid value for alpha.> [p, plo, pup] = ...
-%! gumbelcdf (1, 2, 3, [1, 0; 0, 1], "alpha", "upper")
+%! gumbelcdf (1, 2, 3, [1, 0; 0, 1], 'alpha', 'upper')
 %!error<gumbelcdf: X, MU, and BETA must not be complex.> gumbelcdf (i, 2, 2)
 %!error<gumbelcdf: X, MU, and BETA must not be complex.> gumbelcdf (2, i, 2)
 %!error<gumbelcdf: X, MU, and BETA must not be complex.> gumbelcdf (2, 2, i)

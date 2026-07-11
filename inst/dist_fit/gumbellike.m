@@ -40,7 +40,8 @@
 ## observed exactly.  By default, or if left empty,
 ## @qcode{@var{censor} = zeros (size (@var{x}))}.
 ##
-## @code{[@dots{}] = gumbellike (@var{params}, @var{x}, @var{censor}, @var{freq})}
+## @code{[@dots{}] = gumbellike (@var{params}, @var{x}, @var{censor},
+## @var{freq})}
 ## accepts a frequency vector, @var{freq}, of the same size as @var{x}.
 ## @var{freq} typically contains integer frequencies for the corresponding
 ## elements in @var{x}, but it can contain any non-integer non-negative values.
@@ -111,9 +112,9 @@ function [nlogL, avar] = gumbellike (params, x, censor, freq)
   ## Invert to get the observed information matrix.
   if (nargout == 2)
     unc = (1-censor);
-    nH11 = sum(freq .* expz);
-    nH12 = sum(freq .* ((z + 1) .* expz - unc));
-    nH22 = sum(freq .* (z .* (z+2) .* expz - ((2 .* z + 1) .* unc)));
+    nH11 = sum (freq .* expz);
+    nH12 = sum (freq .* ((z + 1) .* expz - unc));
+    nH22 = sum (freq .* (z .* (z+2) .* expz - ((2 .* z + 1) .* unc)));
     avar =  (sigma .^ 2) * ...
             [nH22 -nH12; -nH12 nH11] / (nH11 * nH22 - nH12 * nH12);
   endif
@@ -124,21 +125,21 @@ endfunction
 %! x = 1:50;
 %! [nlogL, avar] = gumbellike ([2.3, 1.2], x);
 %! avar_out = [-1.2778e-13, 3.1859e-15; 3.1859e-15, -7.9430e-17];
-%! assert (nlogL, 3.242264755689906e+17, 1e-14);
-%! assert (avar, avar_out, 1e-3);
+%! assert_equal (nlogL, 3.242264755689906e+17, 1e-14);
+%! assert_equal (avar, avar_out, 1e-3);
 %!test
 %! x = 1:50;
 %! [nlogL, avar] = gumbellike ([2.3, 1.2], x * 0.5);
 %! avar_out = [-7.6094e-05, 3.9819e-06; 3.9819e-06, -2.0836e-07];
-%! assert (nlogL, 481898704.0472211, 1e-6);
-%! assert (avar, avar_out, 1e-3);
+%! assert_equal (nlogL, 481898704.0472211, 1e-6);
+%! assert_equal (avar, avar_out, 1e-3);
 %!test
 %! x = 1:50;
 %! [nlogL, avar] = gumbellike ([21, 15], x);
 %! avar_out = [11.73913876598908, -5.9546128523121216; ...
 %!             -5.954612852312121, 3.708060045170236];
-%! assert (nlogL, 223.7612479380652, 1e-13);
-%! assert (avar, avar_out, 1e-14);
+%! assert_equal (nlogL, 223.7612479380652, 1e-13);
+%! assert_equal (avar, avar_out, 1e-14);
 
 ## Test input validation
 %!error<gumbellike: too few input arguments.> gumbellike ([12, 15]);

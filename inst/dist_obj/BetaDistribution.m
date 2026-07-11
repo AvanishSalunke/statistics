@@ -56,7 +56,7 @@ classdef BetaDistribution
   ## betalike, betastat}
   ## @end deftp
 
-  properties (Dependent = true)
+  properties(Dependent = true)
     ## -*- texinfo -*-
     ## @deftp {BetaDistribution} {property} a
     ##
@@ -82,7 +82,7 @@ classdef BetaDistribution
     b
   endproperties
 
-  properties (GetAccess = public, Constant = true)
+  properties(GetAccess = public, Constant = true)
     ## -*- texinfo -*-
     ## @deftp {BetaDistribution} {property} DistributionName
     ##
@@ -92,7 +92,7 @@ classdef BetaDistribution
     ## object.  This property is read-only.
     ##
     ## @end deftp
-    DistributionName = "BetaDistribution";
+    DistributionName = 'BetaDistribution';
 
     ## -*- texinfo -*-
     ## @deftp {BetaDistribution} {property} NumParameters
@@ -110,39 +110,39 @@ classdef BetaDistribution
     ##
     ## Names of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## the name of a distribution parameter.  This property is read-only.
     ##
     ## @end deftp
-    ParameterNames = {"a", "b"};
+    ParameterNames = {'a', 'b'};
 
     ## -*- texinfo -*-
     ## @deftp {BetaDistribution} {property} ParameterDescription
     ##
     ## Description of parameters
     ##
-    ## A @math{2x1} cell array of character vectors with each element containing
+    ## A @math{2*1} cell array of character vectors with each element containing
     ## a short description of a distribution parameter.  This property is
     ## read-only.
     ##
     ## @end deftp
-    ParameterDescription = {"First shape parameter", "Second shape parameter"};
+    ParameterDescription = {'First shape parameter', 'Second shape parameter'};
   endproperties
 
-  properties (GetAccess = public, Constant = true, Hidden)
+  properties(GetAccess = public, Constant = true, Hidden)
     CensoringAllowed = false;
-    DistributionCode = "beta";
+    DistributionCode = 'beta';
     ParameterRange = [realmin, realmin; Inf, Inf];
     ParameterLogCI = [true, true];
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected)
+  properties(GetAccess = public, SetAccess = protected)
     ## -*- texinfo -*-
     ## @deftp {BetaDistribution} {property} ParameterValues
     ##
     ## Distribution parameter values
     ##
-    ## A @math{2x1} numeric vector containing the values of the distribution
+    ## A @math{2*1} numeric vector containing the values of the distribution
     ## parameters.  This property is read-only.  You can change the distribution
     ## parameters by assigning new values to the @qcode{a} and @qcode{b}
     ## properties.
@@ -155,7 +155,7 @@ classdef BetaDistribution
     ##
     ## Covariance matrix of the parameter estimates
     ##
-    ## A @math{2x2} numeric matrix containing the variance-covariance of the
+    ## A @math{2*2} numeric matrix containing the variance-covariance of the
     ## parameter estimates.  Diagonal elements contain the variance of each
     ## estimated parameter and non-diagonal elements contain the covariance
     ## between the parameter estimates.  The covariance matrix is only
@@ -172,7 +172,7 @@ classdef BetaDistribution
     ##
     ## Flag for fixed parameters
     ##
-    ## A @math{1x2} logical vector specifying which parameters are fixed and
+    ## A @math{1*2} logical vector specifying which parameters are fixed and
     ## which are estimated.  @qcode{true} values correspond to fixed parameters,
     ## @qcode{false} values correspond to parameter estimates.  This property is
     ## read-only.
@@ -185,7 +185,7 @@ classdef BetaDistribution
     ##
     ## Truncation interval
     ##
-    ## A @math{1x2} numeric vector specifying the truncation interval for the
+    ## A @math{1*2} numeric vector specifying the truncation interval for the
     ## probability distribution.  First element contains the lower boundary,
     ## second element contains the upper boundary.  This property is read-only.
     ## You can only truncate a probability distribution with the
@@ -226,11 +226,11 @@ classdef BetaDistribution
     InputData
   endproperties
 
-  properties (GetAccess = public, SetAccess = protected, Hidden)
+  properties(GetAccess = public, SetAccess = protected, Hidden)
     ParameterCI
   endproperties
 
-  methods (Hidden)
+  methods(Hidden)
 
     function this = BetaDistribution (a, b)
       if (nargin == 0)
@@ -246,12 +246,12 @@ classdef BetaDistribution
     endfunction
 
     function display (this)
-      fprintf ("%s =\n", inputname(1));
-      __disp__ (this, "beta distribution");
+      fprintf ("%s =\n", inputname (1));
+      __disp__ (this, 'beta distribution');
     endfunction
 
     function disp (this)
-      __disp__ (this, "beta distribution");
+      __disp__ (this, 'beta distribution');
     endfunction
 
     function this = set.a (this, a)
@@ -280,11 +280,11 @@ classdef BetaDistribution
 
   endmethods
 
-  methods (Access = public)
+  methods(Access = public)
 
     ## -*- texinfo -*-
     ## @deftypefn  {BetaDistribution} {@var{p} =} cdf (@var{pd}, @var{x})
-    ## @deftypefnx {BetaDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{"upper"})
+    ## @deftypefnx {BetaDistribution} {@var{p} =} cdf (@var{pd}, @var{x}, @qcode{'upper'})
     ##
     ## Compute the cumulative distribution function (CDF).
     ##
@@ -292,7 +292,7 @@ classdef BetaDistribution
     ## probability distribution object, @var{pd}, evaluated at the values in
     ## @var{x}.
     ##
-    ## @code{@var{p} = cdf (@dots{}, @qcode{"upper"})} returns the complement of
+    ## @code{@var{p} = cdf (@dots{}, @qcode{'upper'})} returns the complement of
     ## the CDF of the probability distribution object, @var{pd}, evaluated at
     ## the values in @var{x}.
     ##
@@ -302,9 +302,9 @@ classdef BetaDistribution
         error ("cdf: requires a scalar probability distribution.");
       endif
       ## Check for "upper" flag
-      if (nargin > 2 && strcmpi (uflag, "upper"))
+      if (nargin > 2 && strcmpi (uflag, 'upper'))
         utail = true;
-      elseif (nargin > 2 && ! strcmpi (uflag, "upper"))
+      elseif (nargin > 2 && ! strcmpi (uflag, 'upper'))
         error ("cdf: invalid argument for upper tail.");
       else
         utail = false;
@@ -421,7 +421,8 @@ classdef BetaDistribution
     ##
     ## Compute the negative loglikelihood of a probability distribution.
     ##
-    ## @code{@var{nlogL} = negloglik (@var{pd})} computes the negative loglikelihood
+    ## @code{@var{nlogL} = negloglik (@var{pd})} computes the negative
+    ## loglikelihood
     ## of the probability distribution object, @var{pd}.
     ##
     ## @end deftypefn
@@ -447,18 +448,19 @@ classdef BetaDistribution
     ## boundaries of the 95% confidence interval for each parameter of the
     ## probability distribution object, @var{pd}.
     ##
-    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes the
+    ## @code{@var{ci} = paramci (@var{pd}, @var{Name}, @var{Value})} computes
+    ## the
     ## confidence intervals with additional options specified by
     ## @qcode{Name-Value} pair arguments listed below.
     ##
-    ## @multitable @columnfractions 0.18 0.02 0.8
-    ## @headitem @var{Name} @tab @tab @var{Value}
+    ## @multitable @columnfractions 0.18 0.8
+    ## @headitem @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"Alpha"} @tab @tab A scalar value in the range @math{(0,1)}
+    ## @item @qcode{'Alpha'} @tab A scalar value in the range @math{(0,1)}
     ## specifying the significance level for the confidence interval.  The
     ## default value 0.05 corresponds to a 95% confidence interval.
     ##
-    ## @item @qcode{"Parameter"} @tab @tab A character vector or a cell array of
+    ## @item @qcode{'Parameter'} @tab A character vector or a cell array of
     ## character vectors specifying the parameter names for which to compute
     ## confidence intervals.  By default, @code{paramci} computes confidence
     ## intervals for all distribution parameters.
@@ -522,23 +524,23 @@ classdef BetaDistribution
     ## @multitable @columnfractions 0.18 0.02 0.8
     ## @headitem @tab @var{Name} @tab @var{Value}
     ##
-    ## @item @qcode{"PlotType"} @tab @tab A character vector specifying the plot
-    ## type.  @qcode{"pdf"} plots the probability density function (PDF).  When
+    ## @item @qcode{'PlotType'} @tab @tab A character vector specifying the plot
+    ## type.  @qcode{'pdf'} plots the probability density function (PDF).  When
     ## @var{pd} is fit to data, the PDF is superimposed on a histogram of the
-    ## data.  @qcode{"cdf"} plots the cumulative density function (CDF).  When
+    ## data.  @qcode{'cdf'} plots the cumulative density function (CDF).  When
     ## @var{pd} is fit to data, the CDF is superimposed over an empirical CDF.
-    ## @qcode{"probability"} plots a probability plot using a CDF of the data
+    ## @qcode{'probability'} plots a probability plot using a CDF of the data
     ## and a CDF of the fitted probability distribution.  This option is
     ## available only when @var{pd} is fitted to data.
     ##
-    ## @item @qcode{"Discrete"} @tab @tab A logical scalar to specify whether to
+    ## @item @qcode{'Discrete'} @tab @tab A logical scalar to specify whether to
     ## plot the PDF or CDF of a discrete distribution object as a line plot or a
     ## stem plot, by specifying @qcode{false} or @qcode{true}, respectively.  By
     ## default, it is @qcode{true} for discrete distributions and @qcode{false}
     ## for continuous distributions.  When @var{pd} is a continuous distribution
     ## object, option is ignored.
     ##
-    ## @item @qcode{"Parent"} @tab @tab An axes graphics object for plot.  If
+    ## @item @qcode{'Parent'} @tab @tab An axes graphics object for plot.  If
     ## not specified, the @code{plot} function plots into the current axes or
     ## creates a new axes object if one does not exist.
     ## @end multitable
@@ -559,9 +561,9 @@ classdef BetaDistribution
 
     ## -*- texinfo -*-
     ## @deftypefn  {BetaDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum})
-    ## @deftypefnx {BetaDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {BetaDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @qcode{'Display'}, @var{display})
     ## @deftypefnx {BetaDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam})
-    ## @deftypefnx {BetaDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{"Display"}, @var{display})
+    ## @deftypefnx {BetaDistribution} {[@var{nlogL}, @var{param}] =} proflik (@var{pd}, @var{pnum}, @var{setparam}, @qcode{'Display'}, @var{display})
     ##
     ## Profile likelihood function for a probability distribution object.
     ##
@@ -574,14 +576,14 @@ classdef BetaDistribution
     ## fitted to data.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @qcode{"Display"}, @qcode{"on"})} also plots the profile likelihood
+    ## @qcode{'Display'}, @qcode{'on'})} also plots the profile likelihood
     ## against the default range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
     ## @var{setparam})} defines a user-defined range of the selected parameter.
     ##
     ## @code{[@var{nlogL}, @var{param}] = proflik (@var{pd}, @var{pnum},
-    ## @var{setparam}, @qcode{"Display"}, @qcode{"on"})} also plots the profile
+    ## @var{setparam}, @qcode{'Display'}, @qcode{'on'})} also plots the profile
     ## likelihood against the user-defined range of the selected parameter.
     ##
     ## For the beta distribution, @qcode{@var{pnum} = 1} selects the parameter
@@ -671,7 +673,8 @@ classdef BetaDistribution
     ##
     ## @code{@var{t} = truncate (@var{pd}, @var{lower}, @var{upper})} returns a
     ## probability distribution @var{t}, which is the probability distribution
-    ## @var{pd} truncated to the specified interval with lower limit, @var{lower},
+    ## @var{pd} truncated to the specified interval with lower limit,
+    ## @var{lower},
     ## and upper limit, @var{upper}.  If @var{pd} is fitted to data with
     ## @code{fitdist}, the returned probability distribution @var{t} is not
     ## fitted, does not contain any data or estimated values, and it is as it
@@ -720,7 +723,7 @@ classdef BetaDistribution
 
   endmethods
 
-  methods (Static, Hidden)
+  methods(Static, Hidden)
 
     function pd = fit (x, varargin)
       ## Check input arguments
@@ -735,7 +738,7 @@ classdef BetaDistribution
         freq = varargin{2};
       endif
       if (nargin < 4)
-        options.Display = "off";
+        options.Display = 'off';
         options.MaxFunEvals = 400;
         options.MaxIter = 200;
         options.TolX = 1e-6;
@@ -756,7 +759,7 @@ classdef BetaDistribution
       pd.ParameterCI = pci;
       pd.ParameterIsFixed = [false, false];
       pd.ParameterCovariance = acov;
-      pd.InputData = struct ("data", x, "cens", [], "freq", freq);
+      pd.InputData = struct ('data', x, 'cens', [], 'freq', freq);
     endfunction
 
   endmethods
@@ -779,137 +782,137 @@ endfunction
 %! ## parameters a = 2 and b = 5.  Fit a Beta distribution to this data and plot
 %! ## a PDF of the fitted distribution superimposed on a histogram of the data.
 %!
-%! pd_fixed = makedist ("Beta", "a", 2, "b", 5)
-%! randg ("seed", 2);
+%! pd_fixed = makedist ('Beta', 'a', 2, 'b', 5)
+%! randg ('seed', 2);
 %! data = random (pd_fixed, 5000, 1);
-%! pd_fitted = fitdist (data, "Beta")
+%! pd_fitted = fitdist (data, 'Beta')
 %! plot (pd_fitted)
-%! msg = "Fitted Beta distribution with a = %0.2f and b = %0.2f";
+%! msg = 'Fitted Beta distribution with a = %0.2f and b = %0.2f';
 %! title (sprintf (msg, pd_fitted.a, pd_fitted.b))
 
 ## Test output
 %!shared pd, t
 %! pd = BetaDistribution;
 %! t = truncate (pd, 0.2, 0.8);
-%!assert (cdf (pd, [0:0.2:1]), [0, 0.2, 0.4, 0.6, 0.8, 1], 1e-4);
-%!assert (cdf (t, [0:0.2:1]), [0, 0, 0.3333, 0.6667, 1, 1], 1e-4);
-%!assert (cdf (pd, [-1, 1, NaN]), [0, 1, NaN], 1e-4);
-%!assert (cdf (t, [-1, 1, NaN]), [0, 1, NaN], 1e-4);
-%!assert (icdf (pd, [0:0.2:1]), [0, 0.2, 0.4, 0.6, 0.8, 1], 1e-4);
-%!assert (icdf (t, [0:0.2:1]), [0.2, 0.32, 0.44, 0.56, 0.68, 0.8], 1e-4);
-%!assert (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 0.4, 0.6, 0.8, 1, NaN], 1e-4);
-%!assert (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 0.44, 0.56, 0.68, 0.8, NaN], 1e-4);
-%!assert (iqr (pd), 0.5, 1e-4);
-%!assert (iqr (t), 0.3, 1e-4);
-%!assert (mean (pd), 0.5);
-%!assert (mean (t), 0.5, 1e-6);
-%!assert (median (pd), 0.5);
-%!assert (median (t), 0.5, 1e-6);
-%!assert (pdf (pd, [0:0.2:1]), [1, 1, 1, 1, 1, 1], 1e-4);
-%!assert (pdf (t, [0:0.2:1]), [0, 1.6667, 1.6667, 1.6667, 1.6667, 0], 1e-4);
-%!assert (pdf (pd, [-1, 1, NaN]), [0, 1, NaN], 1e-4);
-%!assert (pdf (t, [-1, 1, NaN]), [0, 0, NaN], 1e-4);
-%!assert (isequal (size (random (pd, 100, 50)), [100, 50]))
-%!assert (any (random (t, 1000, 1) < 0.2), false);
-%!assert (any (random (t, 1000, 1) > 0.8), false);
-%!assert (std (pd), 0.2887, 1e-4);
-%!assert (std (t), 0.1732, 1e-4);
-%!assert (var (pd), 0.0833, 1e-4);
-%!assert (var (t), 0.0300, 1e-4);
+%!assert_equal (cdf (pd, [0:0.2:1]), [0, 0.2, 0.4, 0.6, 0.8, 1], 1e-4);
+%!assert_equal (cdf (t, [0:0.2:1]), [0, 0, 0.3333, 0.6667, 1, 1], 1e-4);
+%!assert_equal (cdf (pd, [-1, 1, NaN]), [0, 1, NaN], 1e-4);
+%!assert_equal (cdf (t, [-1, 1, NaN]), [0, 1, NaN], 1e-4);
+%!assert_equal (icdf (pd, [0:0.2:1]), [0, 0.2, 0.4, 0.6, 0.8, 1], 1e-4);
+%!assert_equal (icdf (t, [0:0.2:1]), [0.2, 0.32, 0.44, 0.56, 0.68, 0.8], 1e-4);
+%!assert_equal (icdf (pd, [-1, 0.4:0.2:1, NaN]), [NaN, 0.4, 0.6, 0.8, 1, NaN], 1e-4);
+%!assert_equal (icdf (t, [-1, 0.4:0.2:1, NaN]), [NaN, 0.44, 0.56, 0.68, 0.8, NaN], 1e-4);
+%!assert_equal (iqr (pd), 0.5, 1e-4);
+%!assert_equal (iqr (t), 0.3, 1e-4);
+%!assert_equal (mean (pd), 0.5);
+%!assert_equal (mean (t), 0.5, 1e-6);
+%!assert_equal (median (pd), 0.5);
+%!assert_equal (median (t), 0.5, 1e-6);
+%!assert_equal (pdf (pd, [0:0.2:1]), [1, 1, 1, 1, 1, 1], 1e-4);
+%!assert_equal (pdf (t, [0:0.2:1]), [0, 1.6667, 1.6667, 1.6667, 1.6667, 0], 1e-4);
+%!assert_equal (pdf (pd, [-1, 1, NaN]), [0, 1, NaN], 1e-4);
+%!assert_equal (pdf (t, [-1, 1, NaN]), [0, 0, NaN], 1e-4);
+%!assert_equal (isequal (size (random (pd, 100, 50)), [100, 50]), true)
+%!assert_equal (any (random (t, 1000, 1) < 0.2), false);
+%!assert_equal (any (random (t, 1000, 1) > 0.8), false);
+%!assert_equal (std (pd), 0.2887, 1e-4);
+%!assert_equal (std (t), 0.1732, 1e-4);
+%!assert_equal (var (pd), 0.0833, 1e-4);
+%!assert_equal (var (t), 0.0300, 1e-4);
 
 ## Test input validation
 ## 'BetaDistribution' constructor
 %!error <BetaDistribution: A must be a positive real scalar.> ...
-%! BetaDistribution(0, 1)
+%! BetaDistribution (0, 1)
 %!error <BetaDistribution: A must be a positive real scalar.> ...
-%! BetaDistribution(Inf, 1)
+%! BetaDistribution (Inf, 1)
 %!error <BetaDistribution: A must be a positive real scalar.> ...
-%! BetaDistribution(i, 1)
+%! BetaDistribution (i, 1)
 %!error <BetaDistribution: A must be a positive real scalar.> ...
-%! BetaDistribution("a", 1)
+%! BetaDistribution ('a', 1)
 %!error <BetaDistribution: A must be a positive real scalar.> ...
-%! BetaDistribution([1, 2], 1)
+%! BetaDistribution ([1, 2], 1)
 %!error <BetaDistribution: A must be a positive real scalar.> ...
-%! BetaDistribution(NaN, 1)
+%! BetaDistribution (NaN, 1)
 %!error <BetaDistribution: B must be a positive real scalar.> ...
-%! BetaDistribution(1, 0)
+%! BetaDistribution (1, 0)
 %!error <BetaDistribution: B must be a positive real scalar.> ...
-%! BetaDistribution(1, -1)
+%! BetaDistribution (1, -1)
 %!error <BetaDistribution: B must be a positive real scalar.> ...
-%! BetaDistribution(1, Inf)
+%! BetaDistribution (1, Inf)
 %!error <BetaDistribution: B must be a positive real scalar.> ...
-%! BetaDistribution(1, i)
+%! BetaDistribution (1, i)
 %!error <BetaDistribution: B must be a positive real scalar.> ...
-%! BetaDistribution(1, "a")
+%! BetaDistribution (1, 'a')
 %!error <BetaDistribution: B must be a positive real scalar.> ...
-%! BetaDistribution(1, [1, 2])
+%! BetaDistribution (1, [1, 2])
 %!error <BetaDistribution: B must be a positive real scalar.> ...
-%! BetaDistribution(1, NaN)
+%! BetaDistribution (1, NaN)
 
 ## 'cdf' method
 %!error <cdf: invalid argument for upper tail.> ...
-%! cdf (BetaDistribution, 2, "uper")
+%! cdf (BetaDistribution, 2, 'uper')
 %!error <cdf: invalid argument for upper tail.> ...
 %! cdf (BetaDistribution, 2, 3)
 
 ## 'paramci' method
 %!shared x
-%! randg ("seed", 1);
+%! randg ('seed', 1);
 %! x = betarnd (1, 1, [100, 1]);
 %!error <paramci: optional arguments must be in NAME-VALUE pairs.> ...
-%! paramci (BetaDistribution.fit (x), "alpha")
+%! paramci (BetaDistribution.fit (x), 'alpha')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BetaDistribution.fit (x), "alpha", 0)
+%! paramci (BetaDistribution.fit (x), 'alpha', 0)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BetaDistribution.fit (x), "alpha", 1)
+%! paramci (BetaDistribution.fit (x), 'alpha', 1)
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BetaDistribution.fit (x), "alpha", [0.5 2])
+%! paramci (BetaDistribution.fit (x), 'alpha', [0.5 2])
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BetaDistribution.fit (x), "alpha", "")
+%! paramci (BetaDistribution.fit (x), 'alpha', '')
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BetaDistribution.fit (x), "alpha", {0.05})
+%! paramci (BetaDistribution.fit (x), 'alpha', {0.05})
 %!error <paramci: invalid VALUE for 'Alpha' argument.> ...
-%! paramci (BetaDistribution.fit (x), "parameter", "a", "alpha", {0.05})
+%! paramci (BetaDistribution.fit (x), 'parameter', 'a', 'alpha', {0.05})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (BetaDistribution.fit (x), "parameter", {"a", "b", "param"})
+%! paramci (BetaDistribution.fit (x), 'parameter', {'a', 'b', 'param'})
 %!error <paramci: invalid VALUE size for 'Parameter' argument.> ...
-%! paramci (BetaDistribution.fit (x), "alpha", 0.01, ...
-%!          "parameter", {"a", "b", "param"})
+%! paramci (BetaDistribution.fit (x), 'alpha', 0.01, ...
+%!          'parameter', {'a', 'b', 'param'})
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (BetaDistribution.fit (x), "parameter", "param")
+%! paramci (BetaDistribution.fit (x), 'parameter', 'param')
 %!error <paramci: unknown distribution parameter.> ...
-%! paramci (BetaDistribution.fit (x), "alpha", 0.01, "parameter", "param")
+%! paramci (BetaDistribution.fit (x), 'alpha', 0.01, 'parameter', 'param')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (BetaDistribution.fit (x), "NAME", "value")
+%! paramci (BetaDistribution.fit (x), 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (BetaDistribution.fit (x), "alpha", 0.01, "NAME", "value")
+%! paramci (BetaDistribution.fit (x), 'alpha', 0.01, 'NAME', 'value')
 %!error <paramci: invalid NAME for optional argument.> ...
-%! paramci (BetaDistribution.fit (x), "alpha", 0.01, "parameter", "a", ...
-%!          "NAME", "value")
+%! paramci (BetaDistribution.fit (x), 'alpha', 0.01, 'parameter', 'a', ...
+%!          'NAME', 'value')
 
 ## 'plot' method
 %!error <plot: optional arguments must be in NAME-VALUE pairs.> ...
-%! plot (BetaDistribution, "Parent")
+%! plot (BetaDistribution, 'Parent')
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (BetaDistribution, "PlotType", 12)
+%! plot (BetaDistribution, 'PlotType', 12)
 %!error <plot: invalid VALUE size for 'Parameter' argument.> ...
-%! plot (BetaDistribution, "PlotType", {"pdf", "cdf"})
+%! plot (BetaDistribution, 'PlotType', {'pdf', 'cdf'})
 %!error <plot: invalid VALUE for 'PlotType' argument.> ...
-%! plot (BetaDistribution, "PlotType", "pdfcdf")
+%! plot (BetaDistribution, 'PlotType', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (BetaDistribution, "Discrete", "pdfcdf")
+%! plot (BetaDistribution, 'Discrete', 'pdfcdf')
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (BetaDistribution, "Discrete", [1, 0])
+%! plot (BetaDistribution, 'Discrete', [1, 0])
 %!error <plot: invalid VALUE for 'Discrete' argument.> ...
-%! plot (BetaDistribution, "Discrete", {true})
+%! plot (BetaDistribution, 'Discrete', {true})
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (BetaDistribution, "Parent", 12)
+%! plot (BetaDistribution, 'Parent', 12)
 %!error <plot: invalid VALUE for 'Parent' argument.> ...
-%! plot (BetaDistribution, "Parent", "hax")
+%! plot (BetaDistribution, 'Parent', 'hax')
 %!error <plot: invalid NAME for optional argument.> ...
-%! plot (BetaDistribution, "invalidNAME", "pdf")
+%! plot (BetaDistribution, 'invalidNAME', 'pdf')
 %!error <plot: no fitted DATA to plot a probability plot.> ...
-%! plot (BetaDistribution, "PlotType", "probability")
+%! plot (BetaDistribution, 'PlotType', 'probability')
 
 ## 'proflik' method
 %!error <proflik: no fitted data available.> ...
@@ -923,23 +926,23 @@ endfunction
 %!error <proflik: SETPARAM must be a numeric vector.> ...
 %! proflik (BetaDistribution.fit (x), 1, ones (2))
 %!error <proflik: missing VALUE for 'Display' argument.> ...
-%! proflik (BetaDistribution.fit (x), 1, "Display")
+%! proflik (BetaDistribution.fit (x), 1, 'Display')
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (BetaDistribution.fit (x), 1, "Display", 1)
+%! proflik (BetaDistribution.fit (x), 1, 'Display', 1)
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (BetaDistribution.fit (x), 1, "Display", {1})
+%! proflik (BetaDistribution.fit (x), 1, 'Display', {1})
 %!error <proflik: invalid VALUE type for 'Display' argument.> ...
-%! proflik (BetaDistribution.fit (x), 1, "Display", {"on"})
+%! proflik (BetaDistribution.fit (x), 1, 'Display', {'on'})
 %!error <proflik: invalid VALUE size for 'Display' argument.> ...
-%! proflik (BetaDistribution.fit (x), 1, "Display", ["on"; "on"])
+%! proflik (BetaDistribution.fit (x), 1, 'Display', ['on'; 'on'])
 %!error <proflik: invalid VALUE for 'Display' argument.> ...
-%! proflik (BetaDistribution.fit (x), 1, "Display", "onnn")
+%! proflik (BetaDistribution.fit (x), 1, 'Display', 'onnn')
 %!error <proflik: invalid NAME for optional arguments.> ...
-%! proflik (BetaDistribution.fit (x), 1, "NAME", "on")
+%! proflik (BetaDistribution.fit (x), 1, 'NAME', 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (BetaDistribution.fit (x), 1, {"NAME"}, "on")
+%! proflik (BetaDistribution.fit (x), 1, {'NAME'}, 'on')
 %!error <proflik: invalid optional argument.> ...
-%! proflik (BetaDistribution.fit (x), 1, {[1 2 3 4]}, "Display", "on")
+%! proflik (BetaDistribution.fit (x), 1, {[1 2 3 4]}, 'Display', 'on')
 
 ## 'truncate' method
 %!error <truncate: missing input argument.> ...
@@ -951,8 +954,8 @@ endfunction
 
 ## Catch errors when using array of probability objects with available methods
 %!shared pd
-%! pd = BetaDistribution(1, 1);
-%! pd(2) = BetaDistribution(1, 3);
+%! pd = BetaDistribution (1, 1);
+%! pd(2) = BetaDistribution (1, 3);
 %!error <cdf: requires a scalar probability distribution.> cdf (pd, 1)
 %!error <icdf: requires a scalar probability distribution.> icdf (pd, 0.5)
 %!error <iqr: requires a scalar probability distribution.> iqr (pd)
