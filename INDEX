@@ -253,6 +253,7 @@ Hypothesis Testing
  anova1
  anova2
  anovan
+ ansaribradley
  bartlett_test
  barttest
  binotest
@@ -320,6 +321,8 @@ Regression
  factoran
  glmfit
  glmval
+ lasso
+ lassoglm
  logistic_regression
  mnrfit
  mnrval
@@ -333,6 +336,7 @@ Regression
  regress
  regress_gp
  ridge
+ robustfit
  stepwisefit
 Transforms
  logit

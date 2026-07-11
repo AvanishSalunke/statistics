@@ -653,7 +653,7 @@ classdef LinearModel
     ## n by 1 logical mask: true for rows used in the fit
     SubsetMask = [];
 
-    ## Terms matrix from modelspec or lm_parse_modelspec
+    ## Terms matrix from modelspec or parse_modelspec
     TermsMatrix = [];
 
     ## Categorical level info for re-encoding in predict
@@ -1130,15 +1130,18 @@ classdef LinearModel
         X_num_sub = X_num_full(subset_mask, :);
         y_sub     = y_full(subset_mask);
 
-        [X_enc_sub, enc_names, cat_info] = lm_encode_categorical ( ...
+        [X_enc_sub, enc_names, cat_info] = encode_categorical ( ...
           X_num_sub, cat_logical, pred_names_raw, cat_str_levels);
         p_enc  = size (X_enc_sub, 2);
 
-        [terms, has_intercept, coef_names] = lm_parse_modelspec ( ...
+        [terms, has_intercept, coef_names, emsg] = parse_modelspec ( ...
           modelspec, enc_names, p_enc, opts.Intercept);
+        if (! isempty (emsg))
+          error ("LinearModel: %s", emsg);
+        endif
         n_coef = rows (terms);
 
-        X_design_sub = LinearModel.lm_build_design (terms, X_enc_sub);
+        X_design_sub = build_design (terms, X_enc_sub);
 
       endif
 
@@ -1510,8 +1513,8 @@ classdef LinearModel
       endif
 
       nan_rows     = any (isnan (X_raw), 2);
-      X_enc_new    = LinearModel.lm_predict (X_raw, pred_names, mdl.CatLevelInfo, mdl.EncPredictorNames);
-      X_design_new = LinearModel.lm_build_design (mdl.TermsMatrix, X_enc_new);
+      X_enc_new    = reencode_predictors (X_raw, pred_names, mdl.CatLevelInfo, mdl.EncPredictorNames);
+      X_design_new = build_design (mdl.TermsMatrix, X_enc_new);
 
       beta            = mdl.Coefficients.Estimate;
       ypred           = X_design_new * beta;
@@ -3082,10 +3085,10 @@ classdef LinearModel
         X_hi_rows = X_act;  X_hi_rows(:,j) = x_hi_v(j);
         X_lo_rows = X_act;  X_lo_rows(:,j) = x_lo_v(j);
 
-        X_hi_enc = LinearModel.lm_predict (X_hi_rows, pred, cinfo, ename);
-        X_lo_enc = LinearModel.lm_predict (X_lo_rows, pred, cinfo, ename);
-        D_hi     = LinearModel.lm_build_design (mdl.TermsMatrix, X_hi_enc);
-        D_lo     = LinearModel.lm_build_design (mdl.TermsMatrix, X_lo_enc);
+        X_hi_enc = reencode_predictors (X_hi_rows, pred, cinfo, ename);
+        X_lo_enc = reencode_predictors (X_lo_rows, pred, cinfo, ename);
+        D_hi     = build_design (mdl.TermsMatrix, X_hi_enc);
+        D_lo     = build_design (mdl.TermsMatrix, X_lo_enc);
 
         c_bar      = mean (D_hi - D_lo, 1);
         effects(j) = c_bar * beta;
@@ -3300,8 +3303,8 @@ classdef LinearModel
         for L = 1:n_lvl
           X_rows      = X_act;
           X_rows(:,j) = L;
-          X_enc = LinearModel.lm_predict (X_rows, pred, mdl.CatLevelInfo, mdl.EncPredictorNames);
-          D     = LinearModel.lm_build_design (mdl.TermsMatrix, X_enc);
+          X_enc = reencode_predictors (X_rows, pred, mdl.CatLevelInfo, mdl.EncPredictorNames);
+          D     = build_design (mdl.TermsMatrix, X_enc);
           fit_y(L) = mean (D * beta);
         endfor
         fit_x = (1:n_lvl)';
@@ -3312,8 +3315,8 @@ classdef LinearModel
         for i = 1:n_act
           X_rows      = X_act;
           X_rows(:,j) = x_active(i);
-          X_enc = LinearModel.lm_predict (X_rows, pred, mdl.CatLevelInfo, mdl.EncPredictorNames);
-          D     = LinearModel.lm_build_design (mdl.TermsMatrix, X_enc);
+          X_enc = reencode_predictors (X_rows, pred, mdl.CatLevelInfo, mdl.EncPredictorNames);
+          D     = build_design (mdl.TermsMatrix, X_enc);
           g_active(i) = mean (D * beta);
         endfor
         ydata(act) = g_active + resid(act);
@@ -3323,8 +3326,8 @@ classdef LinearModel
         for k = 1:100
           X_rows      = X_act;
           X_rows(:,j) = fit_x(k);
-          X_enc = LinearModel.lm_predict (X_rows, pred, mdl.CatLevelInfo, mdl.EncPredictorNames);
-          D     = LinearModel.lm_build_design (mdl.TermsMatrix, X_enc);
+          X_enc = reencode_predictors (X_rows, pred, mdl.CatLevelInfo, mdl.EncPredictorNames);
+          D     = build_design (mdl.TermsMatrix, X_enc);
           fit_y(k) = mean (D * beta);
         endfor
       endif
@@ -3530,8 +3533,8 @@ classdef LinearModel
         endif
       endfor
 
-      D = LinearModel.lm_predict (X_act, pred, cinfo, mdl.EncPredictorNames);
-      D = LinearModel.lm_build_design (mdl.TermsMatrix, D);
+      D = reencode_predictors (X_act, pred, cinfo, mdl.EncPredictorNames);
+      D = build_design (mdl.TermsMatrix, D);
 
       beta  = mdl.Coefficients.Estimate;
       y_act = mdl.Variables{act, mdl.ResponseName};
@@ -3716,21 +3719,6 @@ classdef LinearModel
       fit.Raw         = Raw;
     endfunction
 
-    function X_design = lm_build_design (terms, X_enc)
-      n_obs    = rows (X_enc);
-      n_coef   = rows (terms);
-      p_enc    = columns (X_enc);
-      X_design = zeros (n_obs, n_coef);
-      for t = 1:n_coef
-        term_row = terms(t, 1:p_enc);
-        col_t    = ones (n_obs, 1);
-        for j = find (term_row != 0)
-          col_t = col_t .* (X_enc(:, j) .^ term_row(j));
-        endfor
-        X_design(:, t) = col_t;
-      endfor
-    endfunction
-
     function crit = lm_criteria (fit, n_obs, has_intercept)
       p   = fit.rank_X;
       SSE = fit.SSE;
@@ -3784,53 +3772,6 @@ classdef LinearModel
       crit.AdjRsquared   = R2_adj;
       crit.Fstat         = Fstat;
       crit.Fpval         = Fpval;
-    endfunction
-
-    function X_enc = lm_predict (X_raw, pred_names, cat_info, enc_names)
-      if (nargin < 4)
-        enc_names = pred_names;
-      endif
-      n     = rows (X_raw);
-      X_enc = zeros (n, numel (enc_names));
-      for c = 1:numel (enc_names)
-        name = enc_names{c};
-
-        j = find (strcmp (pred_names, name), 1);
-        if (! isempty (j))
-          X_enc(:, c) = X_raw(:, j);
-          continue;
-        endif
-
-        tok = regexp (name, '^(.+)\^(\d+)$', 'tokens');
-        if (! isempty (tok))
-          j = find (strcmp (pred_names, tok{1}{1}), 1);
-          k = str2double (tok{1}{2});
-          X_enc(:, c) = X_raw(:, j) .^ k;
-          continue;
-        endif
-
-        found = false;
-        for j = 1:numel (pred_names)
-          ci = [];
-          if (! isempty (cat_info.names))
-            ci = find (strcmp (cat_info.names, pred_names{j}));
-          endif
-          if (isempty (ci))
-            continue;
-          endif
-          levels_j = cat_info.levels{ci};
-          for L = 2:numel (levels_j)
-            if (strcmp (name, sprintf ("%s_%s", pred_names{j}, char (levels_j{L}))))
-              X_enc(:, c) = double (X_raw(:, j) == L);
-              found = true;
-              break;
-            endif
-          endfor
-          if (found)
-            break;
-          endif
-        endfor
-      endfor
     endfunction
 
   endmethods
@@ -3938,139 +3879,6 @@ function opts = lm_parse_nv (nv_args)
     opts.PredictorVars = cellstr (predvars);
   endif
 
-endfunction
-
-## Parse modelspec into terms matrix.
-function [terms, has_intercept, coef_names] = lm_parse_modelspec ( ...
-    modelspec, pred_names, n_preds, intercept_nv)
-
-  p = n_preds;
-
-  if (isempty (modelspec) || (ischar (modelspec) && strcmpi (modelspec, 'linear')))
-    terms = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
-
-  elseif (ischar (modelspec) && strcmpi (modelspec, 'constant'))
-    terms = zeros (1, p+1);
-
-  elseif (ischar (modelspec) && strcmpi (modelspec, 'interactions'))
-    linear_part = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
-    inter_part  = zeros (0, p+1);
-    for i = 1:p
-      for j = i+1:p
-        row = zeros (1, p+1); row(i) = 1; row(j) = 1;
-        inter_part = [inter_part; row];
-      endfor
-    endfor
-    terms = [linear_part; inter_part];
-
-  elseif (ischar (modelspec) && strcmpi (modelspec, 'purequadratic'))
-    linear_part = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
-    quad_part   = zeros (p, p+1);
-    for j = 1:p
-      quad_part(j, j) = 2;
-    endfor
-    terms = [linear_part; quad_part];
-
-  elseif (ischar (modelspec) && strcmpi (modelspec, 'quadratic'))
-    linear_part = [zeros(1, p+1); [eye(p), zeros(p, 1)]];
-    quad_part   = zeros (p, p+1);
-    for j = 1:p
-      quad_part(j, j) = 2;
-    endfor
-    inter_part = zeros (0, p+1);
-    for i = 1:p
-      for j = i+1:p
-        row = zeros (1, p+1); row(i) = 1; row(j) = 1;
-        inter_part = [inter_part; row];
-      endfor
-    endfor
-    terms = [linear_part; inter_part; quad_part];
-
-  elseif (ischar (modelspec) && strcmpi (modelspec, 'full'))
-    terms = zeros (1, p+1);
-    for k = 1:p
-      idx_mat = nchoosek (1:p, k);
-      for j = 1:rows (idx_mat)
-        row               = zeros (1, p+1);
-        row(idx_mat(j,:)) = 1;
-        terms             = [terms; row];
-      endfor
-    endfor
-
-  elseif (isnumeric (modelspec))
-    terms = double (modelspec);
-    if (size (terms, 2) == p)
-      terms = [terms, zeros(rows (terms), 1)];
-    elseif (size (terms, 2) == p + 1)
-      if (! all (terms(:, end) == 0))
-        error ("LinearModel: Last column of terms matrix must be all zeros.");
-      endif
-    else
-      error ("LinearModel: Terms matrix must have %d or %d columns.", p, p+1);
-    endif
-
-  else
-    error ("fitlm: Unknown model specification.");
-  endif
-
-  if (! intercept_nv)
-    int_rows = all (terms(:, 1:end-1) == 0, 2);
-    terms    = terms(! int_rows, :);
-  endif
-
-  has_intercept = any (all (terms(:, 1:end-1) == 0, 2));
-
-  n_terms    = rows (terms);
-  coef_names = cell (1, n_terms);
-  for t = 1:n_terms
-    term_row = terms(t, 1:end-1);
-    if (all (term_row == 0))
-      coef_names{t} = '(Intercept)';
-    else
-      parts_t = {};
-      for j = 1:numel (term_row)
-        if (term_row(j) != 0)
-          if (term_row(j) == 1)
-            parts_t{end+1} = pred_names{j};
-          else
-            parts_t{end+1} = sprintf ("%s^%d", pred_names{j}, term_row(j));
-          endif
-        endif
-      endfor
-      coef_names{t} = strjoin (parts_t, ':');
-    endif
-  endfor
-endfunction
-
-## expand categorical columns into L-1 dummy variables
-function [X_enc, enc_names, cat_info] = lm_encode_categorical ( ...
-    X_num, cat_cols, pred_names, cat_levels)
-
-  X_enc     = zeros (rows (X_num), 0);
-  enc_names = {};
-  cat_info.names  = {};
-  cat_info.levels = {};
-
-  for j = 1:numel (pred_names)
-    if (! cat_cols(j))
-      X_enc     = [X_enc, X_num(:, j)];
-      enc_names = [enc_names, pred_names{j}];
-    else
-      levels_j = cat_levels{j};
-      if (isempty (levels_j))
-        uvals    = sort (unique (X_num(isfinite (X_num(:,j)), j)));
-        levels_j = cellstr (num2str (uvals(:)));
-      endif
-      n_lev = numel (levels_j);
-      for L = 2:n_lev
-        dummy     = double (X_num(:, j) == L);
-        X_enc     = [X_enc, dummy];
-        enc_names = [enc_names, [pred_names{j}, '_', char(levels_j{L})]];
-      endfor
-      cat_info.names{end+1}  = pred_names{j};
-      cat_info.levels{end+1} = levels_j;
-    endif
-  endfor
 endfunction
 
 ## observation-level influence statistics; returns D struct

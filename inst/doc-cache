@@ -2,7 +2,7 @@
 # name: cache
 # type: cell
 # rows: 3
-# columns: 148
+# columns: 152
 # name: <cell-element>
 # type: sq_string
 # elements: 1
@@ -11320,6 +11320,318 @@ ztest2
 # elements: 1
 # length: 23
 Two proportions Z-test.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 9
+robustfit
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1898
+ -- statistics: B = robustfit (X, Y)
+ -- statistics: B = robustfit (X, Y, WFUN)
+ -- statistics: B = robustfit (X, Y, WFUN, TUNE)
+ -- statistics: B = robustfit (X, Y, WFUN, TUNE, CONST)
+ -- statistics: [B, STATS] = robustfit (...)
+
+     Robust linear regression.
+
+     ‘B = robustfit (X, Y)’ returns the coefficient vector B of a linear
+     regression of the response Y on the predictors X, fitted by robust
+     M-estimation (iteratively reweighted least squares) so that outlying
+     observations are downweighted.  A column of ones is added to X by default,
+     so ‘B(1)’ is the intercept.
+
+     ‘B = robustfit (X, Y, WFUN, TUNE, CONST)’ selects the weight function WFUN,
+     its tuning constant TUNE, and whether a constant term is included.  WFUN is
+     one of 'bisquare' (default), 'andrews', 'cauchy', 'fair', 'huber',
+     'logistic', 'ols', 'talwar', 'welsch', or a function handle ‘@(r)’ giving
+     the weights as a function of the scaled residual.  TUNE defaults to the
+     value that gives 95% efficiency for each weight function.  CONST is 'on'
+     (default) to include a constant term or 'off' to omit.
+
+     ‘[B, STATS] = robustfit (...)’ also returns a structure STATS with fields
+     ‘ols_s’, ‘robust_s’, ‘mad_s’, ‘s’, ‘se’, ‘covb’, ‘coeffcorr’, ‘t’, ‘p’,
+     ‘w’, ‘R’, ‘dfe’, ‘h’, and ‘resid’.  The coefficients and the fields
+     ‘ols_s’, ‘mad_s’, ‘dfe’, ‘h’, ‘w’, and ‘resid’ match MATLAB. The standard
+     errors and quantities derived from them (‘se’, ‘t’, ‘p’, ‘covb’) agree with
+     MATLAB to within a small fraction of a percent; ‘robust_s’ is the
+     Street-Carroll-Ruppert robust scale estimate, which may differ from
+     MATLAB's by a few percent (it has a negligible effect on the standard
+     errors).
+
+     See also: regress, fitlm.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 25
+Robust linear regression.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 5
+lasso
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3411
+ -- statistics: B = lasso (X, Y)
+ -- statistics: [B, FITINFO] = lasso (X, Y)
+ -- statistics: [...] = lasso (..., NAME, VALUE)
+
+     Lasso and elastic-net regularized least-squares regression.
+
+     ‘B = lasso (X, Y)’ fits a series of regularized linear models of the
+     response Y on the predictor matrix X by lasso, over a sequence of values of
+     the regularization parameter LAMBDA.  B is a P*L matrix whose column k
+     holds the coefficient estimates for the k-th LAMBDA, in ascending order of
+     LAMBDA.
+
+     ‘[B, FITINFO] = lasso (...)’ additionally returns a structure FITINFO with
+     fields ‘Intercept’, ‘Lambda’, ‘Alpha’, ‘DF’ (number of non-zero
+     coefficients), and ‘MSE’ (mean squared error), one entry per value of
+     LAMBDA.
+
+     The following Name-Value pairs are supported:
+
+     NAME           VALUE
+                    
+     ----------------------------------------------------------------------------------
+     'Alpha'        The elastic-net mixing parameter in (0, 1].  1 (default) is the
+                    lasso penalty; smaller values add a ridge penalty.
+                    
+     'Lambda'       A vector of non-negative regularization parameters.  By default
+                    a geometric sequence of 'NumLambda' values is used, from the
+                    smallest value that drives all coefficients to zero down to
+                    'LambdaRatio' times that value.
+                    
+     'NumLambda'    The number of LAMBDA values in the default sequence (default
+                    100).
+                    
+     'LambdaRatio'  The ratio of the smallest to the largest LAMBDA in the default
+                    sequence (default 1e-4, or 1e-2 when the number of observations
+                    is below the number of predictors).
+                    
+     'Standardize'  Whether to standardize X to zero mean and unit variance before
+                    fitting (default true).  Coefficients are always returned on the
+                    original scale.
+                    
+     'Weights'      A vector of non-negative observation weights.
+                    
+     'RelTol'       Convergence tolerance for the coordinate descent (default 1e-4).
+                    
+     'MaxIter'      Maximum number of coordinate-descent iterations (default 1e5).
+                    
+     'DFmax'        The maximum number of non-zero coefficients; the default
+                    sequence stops once this is exceeded.
+                    
+     'Intercept'    Whether to fit a constant term (default true).
+                    
+     'PredictorNames'A cell array of predictor names, kept in FITINFO.
+                    
+     'CV'           The number of folds K for K-fold cross-validation of the mean
+                    squared error, or a ‘cvpartition’ object.
+                    
+     'MCReps'       The number of Monte-Carlo repetitions of the cross-validation
+                    (default 1).
+
+     When 'CV' is used, FITINFO‘.MSE’ is the cross-validated error, plus ‘SE’,
+     ‘LambdaMinMSE’, ‘IndexMinMSE’, ‘Lambda1SE’, and ‘Index1SE’, which report
+     the LAMBDA with the lowest error and the largest LAMBDA within one standard
+     error of it.  The fold assignment is random, so these selections are not
+     reproducible without fixing the random seed.
+
+     See also: ridge, regress, lassoglm.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 59
+Lasso and elastic-net regularized least-squares regression.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+ansaribradley
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2914
+ -- statistics: H = ansaribradley (X, Y)
+ -- statistics: H = ansaribradley (X, Y, NAME, VALUE)
+ -- statistics: [H, P] = ansaribradley (...)
+ -- statistics: [H, P, STATS] = ansaribradley (...)
+
+     Ansari-Bradley two-sample test for equal dispersions.
+
+     ‘H = ansaribradley (X, Y)’ performs an Ansari-Bradley test of the
+     hypothesis that the two independent samples in the vectors X and Y come
+     from distributions with the same dispersion parameter, against the
+     alternative that they come from distributions with different dispersions.
+     The result is H = 0 if the null hypothesis of equal dispersions cannot be
+     rejected at the 5% significance level, or H = 1 if it can.
+
+     The Ansari-Bradley test is a nonparametric alternative to the two-sample F
+     test (‘vartest2’) that does not assume normality.  It assumes that the two
+     samples are independent and that they come from distributions with the same
+     median and shape, differing (under the alternative) only in dispersion.  If
+     the medians differ, the data should be recentred (e.g. by subtracting the
+     sample medians) before applying the test.
+
+     ‘ansaribradley’ treats NaNs in X or Y as missing values and ignores them.
+
+     ‘[H, P] = ansaribradley (...)’ returns the p-value of the test, that is the
+     probability, under the null hypothesis, of observing a value of the test
+     statistic as or more extreme than the one observed.
+
+     ‘[H, P, STATS] = ansaribradley (...)’ returns a structure with the
+     following fields:
+
+     W                the value of the Ansari-Bradley test statistic, the sum of
+                      the Ansari-Bradley scores of the sample X
+     Wstar            the value of the approximate normal (z) statistic
+
+     ‘[...] = ansaribradley (..., NAME, VALUE)’ specifies one or more of the
+     following name/value pairs:
+
+     Name             Value
+     ------------------------------------------------------------------------------
+     'alpha'          the significance level.  Default is 0.05.
+                      
+     'tail'           a string specifying the alternative hypothesis
+                      
+     'method'         a string selecting the p-value computation, either 'exact'
+                      to use the exact permutation distribution of the
+                      statistic, or 'approximate' to use the normal
+                      approximation.  The default is 'exact' when the total
+                      sample size is 25 or less, and 'approximate' otherwise.
+
+     The 'tail' option can take one of the following values:
+
+     'both'       dispersions are not equal (two-tailed, default)
+     'right'      dispersion of X is greater than dispersion of Y
+                  (right-tailed)
+     'left'       dispersion of X is less than dispersion of Y (left-tailed)
+
+     See also: vartest2, vartestn, kstest2, ranksum.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 53
+Ansari-Bradley two-sample test for equal dispersions.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 8
+lassoglm
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 4109
+ -- statistics: B = lassoglm (X, Y)
+ -- statistics: B = lassoglm (X, Y, DISTR)
+ -- statistics: B = lassoglm (X, Y, DISTR, NAME, VALUE)
+ -- statistics: [B, FITINFO] = lassoglm (...)
+
+     Lasso and elastic-net regularized generalized linear model regression.
+
+     ‘B = lassoglm (X, Y, DISTR)’ returns fitted least-squares regression
+     coefficients for a generalized linear model of the response Y on the
+     predictor data X, penalized by the lasso (L1) or elastic-net penalty.  X is
+     an n-by-p numeric matrix of p predictors at each of n observations, and Y
+     is a numeric vector of n responses.  DISTR names the distribution of the
+     response: 'normal' (default), 'binomial', 'poisson', 'gamma', or 'inverse
+     gaussian'.  The canonical link function of the chosen distribution is used
+     unless overridden by the 'Link' option.
+
+     B is a p-by-L matrix, where L is the number of regularization ('Lambda')
+     values used; column k holds the coefficients for the k-th value of lambda,
+     in order of ascending lambda.
+
+     ‘[B, FITINFO] = lassoglm (...)’ also returns a structure FITINFO with
+     information about the fitted models:
+
+     Intercept        a 1-by-L vector of intercept terms
+     Lambda           the 1-by-L vector of lambda values, in ascending order
+     Alpha            the elastic-net mixing value used
+     DF               the number of nonzero coefficients in each column of B
+     Deviance         the deviance of the fitted model at each lambda; when
+                      cross-validation is requested this is instead the
+                      cross-validated mean deviance
+
+     When cross-validation is requested (see 'CV' below), FITINFO additionally
+     contains SE (standard error of the cross-validated deviance),
+     LambdaMinDeviance and IndexMinDeviance (the lambda with minimum
+     cross-validated deviance and its index), and Lambda1SE and Index1SE (the
+     largest lambda within one standard error of that minimum).
+
+     ‘lassoglm’ accepts the following NAME/VALUE pairs:
+
+     Name             Value
+     ------------------------------------------------------------------------------
+     'Alpha'          the elastic-net mixing parameter, a scalar in (0, 1].
+                      'Alpha' = 1 is the lasso penalty (default); values towards
+                      0 approach ridge regression.
+     'Lambda'         a vector of non-negative lambda values.
+     'Standardize'    a logical value (default true) specifying whether the
+                      predictors are standardized before fitting.
+     'Weights'        a vector of non-negative observation weights.
+     'Size'           for the 'binomial' distribution, the number of trials (a
+                      scalar or a per-observation vector); Y holds the number of
+                      successes.  Default is 1 (Bernoulli responses).
+     'Link'           the link function to use instead of the family's canonical
+                      link.  Accepts any link name understood by ‘glmfit’ (e.g.
+                      'log', 'probit') or a numeric exponent for a power link.
+     'Offset'         a numeric vector, one value per observation, added as a
+                      fixed term to the linear predictor (not penalized or
+                      fitted).
+     'RelTol'         convergence tolerance for the coordinate descent.
+     'MaxIter'        maximum number of iterations.
+     'DFmax'          maximum number of nonzero coefficients.
+     'Intercept'      a logical value (default true) whether to fit an intercept
+                      term.
+     'PredictorNames' a cell array of predictor names.
+     'CV'             the number of folds K for K-fold cross-validation, or a
+                      ‘cvpartition’ object.  The fold assignment is random, so
+                      the selected lambda values are not reproducible without a
+                      fixed random seed.
+     'MCReps'         the number of Monte-Carlo repetitions of the
+                      cross-validation (default 1).
+
+     See also: lasso, glmfit, glmval, cvpartition.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 70
+Lasso and elastic-net regularized generalized linear model regression.
 
 
 
