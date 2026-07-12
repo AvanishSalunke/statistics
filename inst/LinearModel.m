@@ -140,6 +140,11 @@ classdef LinearModel
   ## is included, a scatter plot of the data with a fitted curve and 95%
   ## confidence bounds when exactly one predictor is included, or a
   ## histogram of the residuals when no predictors are included.
+  ##
+  ## @item @code{plotInteraction} @tab Plot the main and conditional effects
+  ## of two predictors, or the adjusted response as a function of one
+  ## predictor for several fixed values of the other, to visualize whether
+  ## the two predictors interact.
   ## @end multitable
   ##
   ## Create a @code{LinearModel} object by using the @code{fitlm} function or
@@ -3754,6 +3759,366 @@ classdef LinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {} plotInteraction (@var{mdl}, @var{var1}, @var{var2})
+    ## @deftypefnx {LinearModel} {} plotInteraction (@var{mdl}, @var{var1}, @var{var2}, @var{ptype})
+    ## @deftypefnx {LinearModel} {} plotInteraction (@var{ax}, @dots{})
+    ## @deftypefnx {LinearModel} {@var{h} =} plotInteraction (@dots{})
+    ##
+    ## Plot the interaction effects of two predictors in a fitted linear
+    ## regression model.
+    ##
+    ## @code{plotInteraction (@var{mdl}, @var{var1}, @var{var2})} creates a
+    ## plot of the main effects of @var{var1} and @var{var2} together with
+    ## their conditional effects, with horizontal lines through each effect
+    ## value indicating its 95% confidence interval.  @var{var1} and
+    ## @var{var2} are each a character vector or string naming a variable in
+    ## @code{mdl.VariableNames}, or a positive integer indexing into
+    ## @code{mdl.VariableNames}; neither may name the response variable, and
+    ## they must be different variables.
+    ##
+    ## The main effect of a predictor is the change in the adjusted response
+    ## between the two predictor values that produce the minimum and maximum
+    ## adjusted response, with the other predictor averaged over its own
+    ## observed values row by row.  For a numeric predictor these two values
+    ## are its observed minimum and maximum; for a categorical predictor
+    ## every level is evaluated and the levels producing the minimum and
+    ## maximum adjusted response are used, so the effect is always
+    ## nonnegative.
+    ##
+    ## The conditional effect of @var{var1} is its effect recomputed with
+    ## @var{var2} additionally held fixed at each of a small set of
+    ## conditioning values, and likewise the conditional effect of
+    ## @var{var2} holds @var{var1} fixed.  The conditioning values are the
+    ## observed minimum, mean of the minimum and maximum, and maximum for a
+    ## numeric predictor, or every level for a categorical predictor.  When
+    ## the main effect and conditional effect points for a predictor do not
+    ## align vertically, the model exhibits an interaction between
+    ## @var{var1} and @var{var2}.
+    ##
+    ## @code{plotInteraction (@var{mdl}, @var{var1}, @var{var2}, @var{ptype})}
+    ## selects the plot type.  @var{ptype} is @qcode{'effects'} (default), as
+    ## described above, or @qcode{'predictions'}, which instead plots the
+    ## adjusted response as a function of @var{var2} for each conditioning
+    ## value of @var{var1} held fixed, evaluated over 101 equally spaced
+    ## points spanning the observed range of @var{var2} when @var{var2} is
+    ## numeric, or at each level of @var{var2} when it is categorical.
+    ##
+    ## @code{plotInteraction (@var{ax}, @dots{})} plots into the axes object
+    ## @var{ax} instead of the current axes returned by @code{gca}.
+    ##
+    ## @code{@var{h} = plotInteraction (@dots{})} returns a vector of line
+    ## handles.  When @var{ptype} is @qcode{'effects'}, @code{h(1)} is the
+    ## marker line through the two main effect points, @code{h(2)} and
+    ## @code{h(3)} are the confidence interval lines for the main effects of
+    ## @var{var1} and @var{var2}, and the remaining entries are the
+    ## conditional effect points and their confidence intervals, tagged
+    ## @qcode{'conditional1'} for @var{var1} and @qcode{'conditional2'} for
+    ## @var{var2}.  The main effect line objects are tagged @qcode{'main'}.
+    ## When @var{ptype} is @qcode{'predictions'}, each entry in @var{h}
+    ## corresponds to one adjusted response curve, one per conditioning
+    ## value of @var{var1}.
+    ##
+    ## @end deftypefn
+    function h = plotInteraction (this, varargin)
+      [ax, mdl, args] = lm_plot_axes (this, varargin);
+
+      if (numel (args) < 2)
+        error ("plotInteraction: Not enough input arguments.");
+      endif
+
+      var1 = args{1};
+      var2 = args{2};
+      args = args(3:end);
+
+      ptype = 'effects';
+      if (! isempty (args) && (ischar (args{1}) || isstring (args{1})))
+        ptype = lower (char (args{1}));
+        args  = args(2:end);
+        if (! any (strcmp (ptype, {'effects', 'predictions'})))
+          error ("plotInteraction: PTYPE must be 'effects' or 'predictions'.");
+        endif
+      endif
+      if (! isempty (args))
+        error ("plotInteraction: Too many input arguments.");
+      endif
+
+      vnames = mdl.VariableNames;
+
+      if (ischar (var1) || isstring (var1))
+        v1name = char (var1);
+        if (isempty (find (strcmp (vnames, v1name))))
+          error ("plotInteraction: '%s' is not a variable for this fit.", v1name);
+        endif
+      elseif (isnumeric (var1) && isscalar (var1))
+        if (var1 != fix (var1) || var1 < 1)
+          error (strcat ("plotInteraction: Variable must be specified as a", " name or a positive integer."));
+        endif
+        if (var1 > numel (vnames))
+          error ("plotInteraction: This model only contains %d variables.", numel (vnames));
+        endif
+        v1name = vnames{var1};
+      else
+        error (strcat ("plotInteraction: Variable must be specified as a", " name or a positive integer."));
+      endif
+      if (strcmp (v1name, mdl.ResponseName))
+        error ("plotInteraction: The variable '%s' is the response in this model.", v1name);
+      endif
+
+      if (ischar (var2) || isstring (var2))
+        v2name = char (var2);
+        if (isempty (find (strcmp (vnames, v2name))))
+          error ("plotInteraction: '%s' is not a variable for this fit.", v2name);
+        endif
+      elseif (isnumeric (var2) && isscalar (var2))
+        if (var2 != fix (var2) || var2 < 1)
+          error (strcat ("plotInteraction: Variable must be specified as a", " name or a positive integer."));
+        endif
+        if (var2 > numel (vnames))
+          error ("plotInteraction: This model only contains %d variables.", numel (vnames));
+        endif
+        v2name = vnames{var2};
+      else
+        error (strcat ("plotInteraction: Variable must be specified as a", " name or a positive integer."));
+      endif
+      if (strcmp (v2name, mdl.ResponseName))
+        error ("plotInteraction: The variable '%s' is the response in this model.", v2name);
+      endif
+
+      if (strcmp (v1name, v2name))
+        error ("plotInteraction: VAR1 and VAR2 must be different variables.");
+      endif
+
+      pred   = mdl.PredictorNames;
+      cinfo  = mdl.CatLevelInfo;
+      ename  = mdl.EncPredictorNames;
+      terms  = mdl.TermsMatrix;
+      act    = mdl.ObservationInfo.Subset;
+      n_act  = sum (act);
+      p      = numel (pred);
+      beta   = mdl.Coefficients.Estimate;
+      V      = mdl.CoefficientCovariance;
+      t_crit = tinv (0.975, mdl.DFE);
+
+      X_act    = zeros (n_act, p);
+      is_cat   = false (1, p);
+      cat_lvls = cell (1, p);
+
+      for k = 1:p
+        ci = [];
+        if (! isempty (cinfo) && isfield (cinfo, 'names') ...
+            && ! isempty (cinfo.names))
+          ci = find (strcmp (cinfo.names, pred{k}));
+        endif
+        col = mdl.Variables{act, pred{k}};
+        if (! isempty (ci))
+          is_cat(k)   = true;
+          levels_k    = cinfo.levels{ci};
+          cat_lvls{k} = levels_k;
+          if (iscell (col))
+            col_str = col;
+          elseif (isa (col, 'categorical'))
+            col_str = cellstr (col);
+          else
+            col_str = cellstr (num2str (col(:)));
+          endif
+          codes = zeros (n_act, 1);
+          for L = 1:numel (levels_k)
+            codes(strcmp (col_str, char (levels_k{L}))) = L;
+          endfor
+          X_act(:,k) = codes;
+        else
+          X_act(:,k) = double (col(:));
+        endif
+      endfor
+
+      j1 = find (strcmp (pred, v1name));
+      j2 = find (strcmp (pred, v2name));
+
+      if (is_cat(j1))
+        levels_1 = cat_lvls{j1};
+        n_lv1    = numel (levels_1);
+        g_lv1    = zeros (n_lv1, 1);
+        for L = 1:n_lv1
+          c_row   = lm_interaction_row (X_act, j1, L, pred, cinfo, ename, terms);
+          g_lv1(L) = c_row * beta;
+        endfor
+        [~, i_lo1] = min (g_lv1);
+        [~, i_hi1] = max (g_lv1);
+        lo1 = i_lo1;  hi1 = i_hi1;
+        lbl1 = [v1name, ': ', char(levels_1{i_lo1}), ' to ', char(levels_1{i_hi1})];
+        grid1 = (1:n_lv1)';
+        grid1_lbls = cellfun (@(s) char (s), levels_1, 'UniformOutput', false);
+      else
+        lo1 = min (X_act(:,j1));
+        hi1 = max (X_act(:,j1));
+        lbl1 = [v1name, ': ', num2str(lo1), ' to ', num2str(hi1)];
+        grid1 = [lo1; (lo1+hi1)/2; hi1];
+        grid1_lbls = arrayfun (@(v) num2str(v,'%g'), grid1, 'UniformOutput', false);
+      endif
+
+      if (is_cat(j2))
+        levels_2 = cat_lvls{j2};
+        n_lv2    = numel (levels_2);
+        g_lv2    = zeros (n_lv2, 1);
+        for L = 1:n_lv2
+          c_row   = lm_interaction_row (X_act, j2, L, pred, cinfo, ename, terms);
+          g_lv2(L) = c_row * beta;
+        endfor
+        [~, i_lo2] = min (g_lv2);
+        [~, i_hi2] = max (g_lv2);
+        lo2 = i_lo2;  hi2 = i_hi2;
+        lbl2 = [v2name, ': ', char(levels_2{i_lo2}), ' to ', char(levels_2{i_hi2})];
+        grid2 = (1:n_lv2)';
+        grid2_lbls = cellfun (@(s) char (s), levels_2, 'UniformOutput', false);
+      else
+        lo2 = min (X_act(:,j2));
+        hi2 = max (X_act(:,j2));
+        lbl2 = [v2name, ': ', num2str(lo2), ' to ', num2str(hi2)];
+        grid2 = [lo2; (lo2+hi2)/2; hi2];
+        grid2_lbls = arrayfun (@(v) num2str(v,'%g'), grid2, 'UniformOutput', false);
+      endif
+
+      c_hi1 = lm_interaction_row (X_act, j1, hi1, pred, cinfo, ename, terms);
+      c_lo1 = lm_interaction_row (X_act, j1, lo1, pred, cinfo, ename, terms);
+      eff1  = (c_hi1 - c_lo1) * beta;
+      se1   = sqrt (max (0, (c_hi1 - c_lo1) * V * (c_hi1 - c_lo1)'));
+
+      c_hi2 = lm_interaction_row (X_act, j2, hi2, pred, cinfo, ename, terms);
+      c_lo2 = lm_interaction_row (X_act, j2, lo2, pred, cinfo, ename, terms);
+      eff2  = (c_hi2 - c_lo2) * beta;
+      se2   = sqrt (max (0, (c_hi2 - c_lo2) * V * (c_hi2 - c_lo2)'));
+
+      n2 = numel (grid2);
+      eff_c1 = zeros (n2, 1);
+      se_c1  = zeros (n2, 1);
+      for k = 1:n2
+        c_hi = lm_interaction_row (X_act, [j1, j2], [hi1, grid2(k)], pred, cinfo, ename, terms);
+        c_lo = lm_interaction_row (X_act, [j1, j2], [lo1, grid2(k)], pred, cinfo, ename, terms);
+        eff_c1(k) = (c_hi - c_lo) * beta;
+        se_c1(k)  = sqrt (max (0, (c_hi - c_lo) * V * (c_hi - c_lo)'));
+      endfor
+
+      n1 = numel (grid1);
+      eff_c2 = zeros (n1, 1);
+      se_c2  = zeros (n1, 1);
+      for k = 1:n1
+        c_hi = lm_interaction_row (X_act, [j2, j1], [hi2, grid1(k)], pred, cinfo, ename, terms);
+        c_lo = lm_interaction_row (X_act, [j2, j1], [lo2, grid1(k)], pred, cinfo, ename, terms);
+        eff_c2(k) = (c_hi - c_lo) * beta;
+        se_c2(k)  = sqrt (max (0, (c_hi - c_lo) * V * (c_hi - c_lo)'));
+      endfor
+
+      if (isempty (ax))
+        ax = gca ();
+      endif
+      cla (ax);
+
+      DEF_COLOR = [0.1490, 0.5490, 0.8660];
+      FIT_COLOR = [0.9600, 0.4660, 0.1600];
+
+      if (strcmp (ptype, 'effects'))
+
+        y_main1 = 1;
+        y_cond1 = (2:(1+n2))';
+        y_main2 = n2 + 4;
+        y_cond2 = ((n2+5):(n2+4+n1))';
+
+        hold (ax, 'on');
+        line ([0, 0], [0.5, n2 + n1 + 4.5], 'LineStyle', ':', 'Marker', 'none', ...
+              'Color', [0, 0, 0], 'Parent', ax);
+
+        h(1) = plot (ax, [eff1, eff2], [y_main1, y_main2], ...
+                     'LineStyle', 'none', 'Marker', 'o', 'Color', DEF_COLOR, ...
+                     'Tag', 'main');
+        h(2) = line ([eff1 - t_crit*se1, eff1 + t_crit*se1], [y_main1, y_main1], ...
+                     'LineStyle', '-', 'Marker', 'none', 'Color', DEF_COLOR, ...
+                     'Parent', ax, 'Tag', 'main');
+        h(3) = line ([eff2 - t_crit*se2, eff2 + t_crit*se2], [y_main2, y_main2], ...
+                     'LineStyle', '-', 'Marker', 'none', 'Color', DEF_COLOR, ...
+                     'Parent', ax, 'Tag', 'main');
+        h(4) = plot (ax, eff_c1, y_cond1, ...
+                     'LineStyle', 'none', 'Marker', 'o', 'Color', FIT_COLOR, ...
+                     'Tag', 'conditional1');
+        for k = 1:n2
+          h(4+k) = line ([eff_c1(k) - t_crit*se_c1(k), eff_c1(k) + t_crit*se_c1(k)], ...
+                         [y_cond1(k), y_cond1(k)], ...
+                         'LineStyle', '-', 'Marker', 'none', 'Color', FIT_COLOR, ...
+                         'Parent', ax, 'Tag', 'conditional1');
+        endfor
+        h(5+n2) = plot (ax, eff_c2, y_cond2, ...
+                        'LineStyle', 'none', 'Marker', 'o', 'Color', FIT_COLOR, ...
+                        'Tag', 'conditional2');
+        for k = 1:n1
+          h(5+n2+k) = line ([eff_c2(k) - t_crit*se_c2(k), eff_c2(k) + t_crit*se_c2(k)], ...
+                            [y_cond2(k), y_cond2(k)], ...
+                            'LineStyle', '-', 'Marker', 'none', 'Color', FIT_COLOR, ...
+                            'Parent', ax, 'Tag', 'conditional2');
+        endfor
+        hold (ax, 'off');
+
+        ytl = cell (2 + n1 + n2, 1);
+        ytl{1} = lbl1;
+        for k = 1:n2
+          ytl{1+k} = [v2name, '=', grid2_lbls{k}];
+        endfor
+        ytl{2+n2} = lbl2;
+        for k = 1:n1
+          ytl{2+n2+k} = [v1name, '=', grid1_lbls{k}];
+        endfor
+
+        set (ax, 'YTick', [y_main1; y_cond1; y_main2; y_cond2], ...
+                 'YTickLabel', ytl, 'YDir', 'reverse');
+        ylim  (ax, [0.5, n2 + n1 + 4.5]);
+        xlabel (ax, 'Effect');
+        ylabel (ax, '');
+        title  (ax, ['Interaction of ', v1name, ' and ', v2name]);
+
+      else ## 'predictions'
+
+        if (is_cat(j2))
+          x_grid2 = (1:n_lv2)';
+        else
+          x_grid2 = linspace (lo2, hi2, 101)';
+        endif
+
+        hold (ax, 'on');
+        line (NaN, NaN, 'Color', 'none', 'Parent', ax, 'DisplayName', v1name);
+
+        colors   = get (ax, 'ColorOrder');
+        n_colors = rows (colors);
+
+        for k = 1:n1
+          y_curve = zeros (numel (x_grid2), 1);
+          for m = 1:numel (x_grid2)
+            c_row = lm_interaction_row (X_act, [j1, j2], [grid1(k), x_grid2(m)], ...
+                                         pred, cinfo, ename, terms);
+            y_curve(m) = c_row * beta;
+          endfor
+          h(k) = line (x_grid2, y_curve, ...
+                       'Color', colors(mod(k-1, n_colors)+1, :), ...
+                       'LineStyle', '-', 'Marker', 'none', 'Parent', ax, ...
+                       'DisplayName', grid1_lbls{k});
+        endfor
+        hold (ax, 'off');
+
+        if (is_cat(j2))
+          set (ax, 'XTick', 1:n_lv2, 'XTickLabel', grid2_lbls);
+        endif
+
+        xlabel (ax, v2name);
+        ylabel (ax, ['Adjusted ', mdl.ResponseName]);
+        title  (ax, ['Interaction of ', v1name, ' and ', v2name]);
+        legend (ax, 'show');
+
+      endif
+
+      if (nargout == 0)
+        clear h;
+      endif
+
+    endfunction
+
   endmethods
 
   methods(Access = private, Static)
@@ -4140,6 +4505,16 @@ function loc = lm_legend_corner (xdata, ydata)
   locs = {'northeast', 'northwest', 'southeast', 'southwest'};
   [~, best_idx] = min (counts);
   loc = locs{best_idx};
+endfunction
+
+function c_row = lm_interaction_row (X_act, fix_cols, fix_vals, pred, cinfo, ename, terms)
+  X_rows = X_act;
+  for f = 1:numel (fix_cols)
+    X_rows(:, fix_cols(f)) = fix_vals(f);
+  endfor
+  X_enc = reencode_predictors (X_rows, pred, cinfo, ename);
+  D     = build_design (terms, X_enc);
+  c_row = mean (D, 1);
 endfunction
 
 function fit = lm_robust_fit (X, y, w, wgtfun, tune)
@@ -7138,6 +7513,193 @@ endfunction
 %! close (fig);
 
 %!test
+%! ## continuous by continuous, effects mode
+%! mi  = fitlm (X, y, 'y ~ x1*x2');
+%! fig = figure ('visible', 'off');
+%! h   = plotInteraction (mi, 'x1', 'x2');
+%! assert_equal (numel (h), 11);
+%! assert_equal (get (h(1), 'XData'), [1.76843380852813, -18.8740348676059], 1e-9);
+%! assert_equal (get (h(1), 'YData'), [1, 7]);
+%! assert_equal (get (h(2), 'XData'), [-2.25617028020123, 5.79303789725749], 1e-9);
+%! assert_equal (get (h(3), 'XData'), [-23.1321080641968, -14.615961671015], 1e-9);
+%! assert_equal (get (h(4), 'XData'), ...
+%!   [1.97967308209488, 1.68393809910143, 1.38820311610799], 1e-9);
+%! assert_equal (get (h(4), 'YData'), [2, 3, 4]);
+%! assert_equal (get (h(5), 'XData'), [-0.771057026434185, 4.73040319062394], 1e-9);
+%! assert_equal (get (h(6), 'XData'), [-2.86059582662229, 6.22847202482516], 1e-9);
+%! assert_equal (get (h(7), 'XData'), [-4.99614754441031, 7.77255377662629], 1e-9);
+%! assert_equal (get (h(8), 'XData'), ...
+%!   [-18.5782998846125, -18.8740348676059, -19.1697698505994], 1e-9);
+%! assert_equal (get (h(8), 'YData'), [8, 9, 10]);
+%! assert_equal (get (h(9), 'XData'), [-24.674318784563, -12.4822809846619], 1e-9);
+%! assert_equal (get (h(10), 'XData'), [-23.1321080641968, -14.615961671015], 1e-9);
+%! assert_equal (get (h(11), 'XData'), [-21.6439971135684, -16.6955425876303], 1e-9);
+%! assert_equal (get (h(1), 'Tag'), 'main');
+%! assert_equal (get (h(4), 'Tag'), 'conditional1');
+%! assert_equal (get (h(8), 'Tag'), 'conditional2');
+%! ax = gca ();
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Interaction of x1 and x2');
+%! assert_equal (get (get (ax, 'XLabel'), 'String'), 'Effect');
+%! assert_equal (get (ax, 'YTick'), [1, 2, 3, 4, 7, 8, 9, 10]);
+%! assert_equal (get (ax, 'YTickLabel'), ...
+%!   {'x1: 0.05 to 1'; 'x2=0.05'; 'x2=10.025'; 'x2=20'; ...
+%!    'x2: 0.05 to 20'; 'x1=0.05'; 'x1=0.525'; 'x1=1'});
+%! assert_equal (get (ax, 'YLim'), [0.5, 10.5]);
+%! close (fig);
+
+%!test
+%! ## continuous by continuous, predictions mode
+%! mi  = fitlm (X, y, 'y ~ x1*x2');
+%! fig = figure ('visible', 'off');
+%! h   = plotInteraction (mi, 'x1', 'x2', 'predictions');
+%! assert_equal (numel (h), 3);
+%! xd = get (h(1), 'XData');
+%! assert_equal (numel (xd), 101);
+%! assert_equal (xd(1:3), [0.05, 0.2495, 0.449], 1e-9);
+%! assert_equal (xd(end-2:end), [19.601, 19.8005, 20], 1e-9);
+%! yd1 = get (h(1), 'YData');
+%! assert_equal (yd1(1:3), ...
+%!   [0.215349913094656, 0.0295669142485309, -0.156216084597594], 1e-9);
+%! assert_equal (yd1(end-2:end), ...
+%!   [-17.9913839738256, -18.1771669726717, -18.3629499715178], 1e-9);
+%! yd2 = get (h(2), 'YData');
+%! assert_equal (yd2(1:3), [1.20518645414209, 1.01644610546604, 0.827705756789976], 1e-9);
+%! assert_equal (yd2(end-2:end), ...
+%!   [-17.2913677161117, -17.4801080647878, -17.6688484134638], 1e-9);
+%! yd3 = get (h(3), 'YData');
+%! assert_equal (yd3(1:3), [2.19502299518953, 2.00332529668354, 1.81162759817755], 1e-9);
+%! assert_equal (yd3(end-2:end), ...
+%!   [-16.5913514583978, -16.7830491569038, -16.9747468554098], 1e-9);
+%! assert_equal (get (h(1), 'DisplayName'), '0.05');
+%! assert_equal (get (h(2), 'DisplayName'), '0.525');
+%! assert_equal (get (h(3), 'DisplayName'), '1');
+%! ax = gca ();
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Interaction of x1 and x2');
+%! assert_equal (get (get (ax, 'XLabel'), 'String'), 'x2');
+%! assert_equal (get (get (ax, 'YLabel'), 'String'), 'Adjusted y');
+%! close (fig);
+
+%!test
+%! ## swapping var1/var2 order swaps roles and title
+%! mi  = fitlm (X, y, 'y ~ x1*x2');
+%! fig = figure ('visible', 'off');
+%! h   = plotInteraction (mi, 'x2', 'x1');
+%! assert_equal (numel (h), 11);
+%! assert_equal (get (h(1), 'XData'), [-18.8740348676059, 1.76843380852813], 1e-9);
+%! assert_equal (get (h(4), 'XData'), ...
+%!   [-18.5782998846125, -18.8740348676059, -19.1697698505994], 1e-9);
+%! assert_equal (get (h(8), 'XData'), ...
+%!   [1.97967308209488, 1.68393809910143, 1.38820311610799], 1e-9);
+%! ax = gca ();
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Interaction of x2 and x1');
+%! assert_equal (get (ax, 'YTickLabel'), ...
+%!   {'x2: 0.05 to 20'; 'x1=0.05'; 'x1=0.525'; 'x1=1'; ...
+%!    'x1: 0.05 to 1'; 'x2=0.05'; 'x2=10.025'; 'x2=20'});
+%! close (fig);
+
+%!test
+%! ## interaction effects: variables given as indices into VariableNames
+%! mi  = fitlm (X, y, 'y ~ x1*x2');
+%! fig = figure ('visible', 'off');
+%! h   = plotInteraction (mi, 1, 2);
+%! assert_equal (numel (h), 11);
+%! assert_equal (get (h(1), 'XData'), [1.76843380852813, -18.8740348676059], 1e-9);
+%! assert_equal (get (h(1), 'YData'), [1, 7]);
+%! ax = gca ();
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Interaction of x1 and x2');
+%! close (fig);
+
+%!test
+%! ## interaction effects: explicit axes argument is honored
+%! mi  = fitlm (X, y, 'y ~ x1*x2');
+%! fig = figure ('visible', 'off');
+%! axtarget = axes (fig);
+%! h   = plotInteraction (axtarget, mi, 'x1', 'x2');
+%! assert_equal (numel (h), 11);
+%! assert_equal (isequal (get (h(1), 'Parent'), axtarget), true);
+%! assert_equal (isequal (gca (), axtarget), true);
+%! close (fig);
+
+%!test
+%! ## no interaction term: conditional effects collapse to the main effect
+%! mn  = fitlm (X, y, 'y ~ x1 + x2');
+%! fig = figure ('visible', 'off');
+%! h   = plotInteraction (mn, 'x1', 'x2');
+%! xd1  = get (h(1), 'XData');
+%! eff1 = xd1(1);
+%! eff2 = xd1(2);
+%! assert_equal (eff1, 2.38302891604232, 1e-9);
+%! assert_equal (eff2, -19.5277648300125, 1e-9);
+%! assert_equal (get (h(4), 'XData'), [eff1, eff1, eff1], 1e-9);
+%! assert_equal (get (h(8), 'XData'), [eff2, eff2, eff2], 1e-9);
+%! close (fig);
+
+%!test
+%! ## categorical by continuous, effects mode
+%! xc   = (1:30)' / 30;
+%! grp  = categorical (repmat ({'A';'B';'C'}, 10, 1));
+%! yv   = 2*xc + 3*double (grp == 'B') - 1*double (grp == 'C') + ...
+%!        1.5*xc.*double (grp == 'B') + 0.3*sin ((1:30)');
+%! tblc = table (yv, xc, grp, 'VariableNames', {'Response','Xc','Group'});
+%! mdlc = fitlm (tblc, 'Response ~ Xc*Group');
+%! fig  = figure ('visible', 'off');
+%! h    = plotInteraction (mdlc, 'Group', 'Xc');
+%! assert_equal (numel (h), 11);
+%! assert_equal (get (h(1), 'XData'), [4.7896970899464, 2.32528157787528], 1e-9);
+%! assert_equal (get (h(2), 'XData'), [4.56862113373247, 5.01077304616034], 1e-9);
+%! assert_equal (get (h(3), 'XData'), [2.02254960835685, 2.62801354739371], 1e-9);
+%! assert_equal (get (h(4), 'XData'), ...
+%!   [4.08328517685389, 4.7896970899464, 5.49610900303892], 1e-9);
+%! assert_equal (get (h(5), 'XData'), [3.64076372661607, 4.52580662709171], 1e-9);
+%! assert_equal (get (h(6), 'XData'), [4.56862113373247, 5.01077304616034], 1e-9);
+%! assert_equal (get (h(7), 'XData'), [5.07555715247022, 5.91666085360761], 1e-9);
+%! assert_equal (get (h(8), 'XData'), ...
+%!   [1.88553612240401, 3.25156621870343, 1.8387423925184], 1e-9);
+%! assert_equal (get (h(9), 'XData'), [1.36118897012269, 2.40988327468532], 1e-9);
+%! assert_equal (get (h(10), 'XData'), [2.72721906642211, 3.77591337098474], 1e-9);
+%! assert_equal (get (h(11), 'XData'), [1.31439524023708, 2.36308954479972], 1e-9);
+%! ax = gca ();
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Interaction of Group and Xc');
+%! assert_equal (get (ax, 'YTick'), [1, 2, 3, 4, 7, 8, 9, 10]);
+%! assert_equal (get (ax, 'YTickLabel'), ...
+%!   {'Group: C to B'; 'Xc=0.0333333'; 'Xc=0.516667'; 'Xc=1'; ...
+%!    'Xc: 0.033333 to 1'; 'Group=A'; 'Group=B'; 'Group=C'});
+%! close (fig);
+
+%!test
+%! ## categorical by continuous, predictions mode
+%! xc   = (1:30)' / 30;
+%! grp  = categorical (repmat ({'A';'B';'C'}, 10, 1));
+%! yv   = 2*xc + 3*double (grp == 'B') - 1*double (grp == 'C') + ...
+%!        1.5*xc.*double (grp == 'B') + 0.3*sin ((1:30)');
+%! tblc = table (yv, xc, grp, 'VariableNames', {'Response','Xc','Group'});
+%! mdlc = fitlm (tblc, 'Response ~ Xc*Group');
+%! fig  = figure ('visible', 'off');
+%! h    = plotInteraction (mdlc, 'Group', 'Xc', 'predictions');
+%! assert_equal (numel (h), 3);
+%! xd = get (h(1), 'XData');
+%! assert_equal (numel (xd), 101);
+%! assert_equal (xd(1:3), [0.0333333333333333, 0.043, 0.0526666666666667], 1e-9);
+%! assert_equal (xd(end-2:end), [0.980666666666667, 0.990333333333333, 1], 1e-9);
+%! yd1 = get (h(1), 'YData');
+%! assert_equal (yd1(1:3), [0.107201421526318, 0.126056782750359, 0.144912143974399], 1e-9);
+%! assert_equal (yd1(end-2:end), [1.95502682148225, 1.97388218270629, 1.99273754393033], 1e-9);
+%! yd2 = get (h(2), 'YData');
+%! assert_equal (yd2(1:3), [3.18658823804771, 3.21910390023474, 3.25161956242178], 1e-9);
+%! assert_equal (yd2(end-2:end), [6.37312313237707, 6.4056387945641, 6.43815445675114], 1e-9);
+%! yd3 = get (h(3), 'YData');
+%! assert_equal (yd3(1:3), [-0.896696938806178, -0.878309514880994, -0.85992209095581], 1e-9);
+%! assert_equal (yd3(end-2:end), [0.905270605861853, 0.923658029787037, 0.942045453712221], 1e-9);
+%! assert_equal (get (h(1), 'DisplayName'), 'A');
+%! assert_equal (get (h(2), 'DisplayName'), 'B');
+%! assert_equal (get (h(3), 'DisplayName'), 'C');
+%! ax = gca ();
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Interaction of Group and Xc');
+%! assert_equal (get (get (ax, 'XLabel'), 'String'), 'Xc');
+%! assert_equal (get (get (ax, 'YLabel'), 'String'), 'Adjusted Response');
+%! close (fig);
+
+%!test
 %! load hald
 %! Xh = ingredients;
 %! yh = heat;
@@ -7410,4 +7972,15 @@ endfunction
 %!error <unrecognized property> plotAdded (mdl, 2, 'BadOpt', 5)
 %!error <Bad coefficient number> mdl0 = fitlm (ones (n, 1), y, 'Intercept', false); plotAdded (mdl0)
 %!error <Too many input arguments> plot (mdl, 'extra')
+%!error <Not enough input arguments> plotInteraction (mdl)
+%!error <Not enough input arguments> plotInteraction (mdl, 'x1')
+%!error <PTYPE must be> plotInteraction (mdl, 'x1', 'x2', 'badtype')
+%!error <Too many input arguments> plotInteraction (mdl, 'x1', 'x2', 'effects', 'extra')
+%!error <is not a variable for this fit> plotInteraction (mdl, 'z', 'x2')
+%!error <is not a variable for this fit> plotInteraction (mdl, 'x1', 'z')
+%!error <This model only contains> plotInteraction (mdl, 99, 'x2')
+%!error <Variable must be specified as a name or a positive integer> plotInteraction (mdl, 1.5, 'x2')
+%!error <is the response in this model> plotInteraction (mdl, 'y', 'x2')
+%!error <is the response in this model> plotInteraction (mdl, 'x1', 'y')
+%!error <VAR1 and VAR2 must be different variables> plotInteraction (mdl, 'x1', 'x1')
 
