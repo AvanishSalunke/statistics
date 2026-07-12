@@ -3029,13 +3029,7 @@ classdef LinearModel
           is_cat(j)   = true;
           levels_j    = cinfo.levels{ci};
           cat_lvls{j} = levels_j;
-          if (iscell (col))
-            col_str = col;
-          elseif (isa (col, 'categorical'))
-            col_str = cellstr (col);
-          else
-            col_str = cellstr (num2str (col(:)));
-          endif
+          col_str = lm_col_to_str (col);
           codes = zeros (n_act, 1);
           for L = 1:numel (levels_j)
             codes(strcmp (col_str, char (levels_j{L}))) = L;
@@ -3243,13 +3237,7 @@ classdef LinearModel
           is_cat(k)   = true;
           levels_k    = cinfo.levels{ci};
           cat_lvls{k} = levels_k;
-          if (iscell (col))
-            col_str = col;
-          elseif (isa (col, 'categorical'))
-            col_str = cellstr (col);
-          else
-            col_str = cellstr (num2str (col(:)));
-          endif
+          col_str = lm_col_to_str (col);
           codes = zeros (n_act, 1);
           for L = 1:numel (levels_k)
             codes(strcmp (col_str, char (levels_k{L}))) = L;
@@ -3499,13 +3487,7 @@ classdef LinearModel
         col = mdl.Variables{act, pred{k}};
         if (! isempty (ci))
           levels_k = cinfo.levels{ci};
-          if (iscell (col))
-            col_str = col;
-          elseif (isa (col, 'categorical'))
-            col_str = cellstr (col);
-          else
-            col_str = cellstr (num2str (col(:)));
-          endif
+          col_str = lm_col_to_str (col);
           codes = zeros (n_act, 1);
           for L = 1:numel (levels_k)
             codes(strcmp (col_str, char (levels_k{L}))) = L;
@@ -3693,13 +3675,7 @@ classdef LinearModel
         col = mdl.Variables{act, pred{j1}};
         if (! isempty (ci))
           levels_1 = cinfo.levels{ci};
-          if (iscell (col))
-            col_str = col;
-          elseif (isa (col, 'categorical'))
-            col_str = cellstr (col);
-          else
-            col_str = cellstr (num2str (col(:)));
-          endif
+          col_str = lm_col_to_str (col);
           x_act = zeros (n_act, 1);
           for L = 1:numel (levels_1)
             x_act(strcmp (col_str, char (levels_1{L}))) = L;
@@ -3915,13 +3891,7 @@ classdef LinearModel
           is_cat(k)   = true;
           levels_k    = cinfo.levels{ci};
           cat_lvls{k} = levels_k;
-          if (iscell (col))
-            col_str = col;
-          elseif (isa (col, 'categorical'))
-            col_str = cellstr (col);
-          else
-            col_str = cellstr (num2str (col(:)));
-          endif
+          col_str = lm_col_to_str (col);
           codes = zeros (n_act, 1);
           for L = 1:numel (levels_k)
             codes(strcmp (col_str, char (levels_k{L}))) = L;
@@ -4515,6 +4485,16 @@ function c_row = lm_interaction_row (X_act, fix_cols, fix_vals, pred, cinfo, ena
   X_enc = reencode_predictors (X_rows, pred, cinfo, ename);
   D     = build_design (terms, X_enc);
   c_row = mean (D, 1);
+endfunction
+
+function col_str = lm_col_to_str (col)
+  if (iscell (col))
+    col_str = col;
+  elseif (isa (col, 'categorical'))
+    col_str = cellstr (col);
+  else
+    col_str = cellstr (num2str (col(:)));
+  endif
 endfunction
 
 function fit = lm_robust_fit (X, y, w, wgtfun, tune)
