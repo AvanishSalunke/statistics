@@ -3014,31 +3014,7 @@ classdef LinearModel
       cinfo  = mdl.CatLevelInfo;
       ename  = mdl.EncPredictorNames;
 
-      X_act    = zeros (n_act, p);
-      is_cat   = false (1, p);
-      cat_lvls = cell (1, p);
-
-      for j = 1:p
-        ci = [];
-        if (! isempty (cinfo) && isfield (cinfo, 'names') ...
-            && ! isempty (cinfo.names))
-          ci = find (strcmp (cinfo.names, pred{j}));
-        endif
-        col = mdl.Variables{act, pred{j}};
-        if (! isempty (ci))
-          is_cat(j)   = true;
-          levels_j    = cinfo.levels{ci};
-          cat_lvls{j} = levels_j;
-          col_str = lm_col_to_str (col);
-          codes = zeros (n_act, 1);
-          for L = 1:numel (levels_j)
-            codes(strcmp (col_str, char (levels_j{L}))) = L;
-          endfor
-          X_act(:,j) = codes;
-        else
-          X_act(:,j) = double (col(:));
-        endif
-      endfor
+      [X_act, is_cat, cat_lvls] = lm_encode_active_predictors (mdl, act, pred, cinfo);
 
       effects = zeros (1, p);
       ci_lo   = zeros (1, p);
@@ -3222,31 +3198,7 @@ classdef LinearModel
       n_act = sum (act);
       p     = numel (pred);
 
-      X_act    = zeros (n_act, p);
-      is_cat   = false (1, p);
-      cat_lvls = cell (1, p);
-
-      for k = 1:p
-        ci = [];
-        if (! isempty (cinfo) && isfield (cinfo, 'names') ...
-            && ! isempty (cinfo.names))
-          ci = find (strcmp (cinfo.names, pred{k}));
-        endif
-        col = mdl.Variables{act, pred{k}};
-        if (! isempty (ci))
-          is_cat(k)   = true;
-          levels_k    = cinfo.levels{ci};
-          cat_lvls{k} = levels_k;
-          col_str = lm_col_to_str (col);
-          codes = zeros (n_act, 1);
-          for L = 1:numel (levels_k)
-            codes(strcmp (col_str, char (levels_k{L}))) = L;
-          endfor
-          X_act(:,k) = codes;
-        else
-          X_act(:,k) = double (col(:));
-        endif
-      endfor
+      [X_act, is_cat, cat_lvls] = lm_encode_active_predictors (mdl, act, pred, cinfo);
 
       props = lm_plot_props (args);
 
@@ -3477,26 +3429,7 @@ classdef LinearModel
       n_act = sum (act);
       p     = numel (pred);
 
-      X_act = zeros (n_act, p);
-      for k = 1:p
-        ci = [];
-        if (! isempty (cinfo) && isfield (cinfo, 'names') ...
-            && ! isempty (cinfo.names))
-          ci = find (strcmp (cinfo.names, pred{k}));
-        endif
-        col = mdl.Variables{act, pred{k}};
-        if (! isempty (ci))
-          levels_k = cinfo.levels{ci};
-          col_str = lm_col_to_str (col);
-          codes = zeros (n_act, 1);
-          for L = 1:numel (levels_k)
-            codes(strcmp (col_str, char (levels_k{L}))) = L;
-          endfor
-          X_act(:,k) = codes;
-        else
-          X_act(:,k) = double (col(:));
-        endif
-      endfor
+      [X_act, ~, ~] = lm_encode_active_predictors (mdl, act, pred, cinfo);
 
       D = reencode_predictors (X_act, pred, cinfo, mdl.EncPredictorNames);
       D = build_design (mdl.TermsMatrix, D);
@@ -3876,31 +3809,7 @@ classdef LinearModel
       V      = mdl.CoefficientCovariance;
       t_crit = tinv (0.975, mdl.DFE);
 
-      X_act    = zeros (n_act, p);
-      is_cat   = false (1, p);
-      cat_lvls = cell (1, p);
-
-      for k = 1:p
-        ci = [];
-        if (! isempty (cinfo) && isfield (cinfo, 'names') ...
-            && ! isempty (cinfo.names))
-          ci = find (strcmp (cinfo.names, pred{k}));
-        endif
-        col = mdl.Variables{act, pred{k}};
-        if (! isempty (ci))
-          is_cat(k)   = true;
-          levels_k    = cinfo.levels{ci};
-          cat_lvls{k} = levels_k;
-          col_str = lm_col_to_str (col);
-          codes = zeros (n_act, 1);
-          for L = 1:numel (levels_k)
-            codes(strcmp (col_str, char (levels_k{L}))) = L;
-          endfor
-          X_act(:,k) = codes;
-        else
-          X_act(:,k) = double (col(:));
-        endif
-      endfor
+      [X_act, is_cat, cat_lvls] = lm_encode_active_predictors (mdl, act, pred, cinfo);
 
       j1 = find (strcmp (pred, v1name));
       j2 = find (strcmp (pred, v2name));
@@ -4495,6 +4404,36 @@ function col_str = lm_col_to_str (col)
   else
     col_str = cellstr (num2str (col(:)));
   endif
+endfunction
+
+function [X_act, is_cat, cat_lvls] = lm_encode_active_predictors (mdl, act, pred, cinfo)
+  n_act    = sum (act);
+  p        = numel (pred);
+  X_act    = zeros (n_act, p);
+  is_cat   = false (1, p);
+  cat_lvls = cell (1, p);
+
+  for k = 1:p
+    ci = [];
+    if (! isempty (cinfo) && isfield (cinfo, 'names') ...
+        && ! isempty (cinfo.names))
+      ci = find (strcmp (cinfo.names, pred{k}));
+    endif
+    col = mdl.Variables{act, pred{k}};
+    if (! isempty (ci))
+      is_cat(k)   = true;
+      levels_k    = cinfo.levels{ci};
+      cat_lvls{k} = levels_k;
+      col_str = lm_col_to_str (col);
+      codes = zeros (n_act, 1);
+      for L = 1:numel (levels_k)
+        codes(strcmp (col_str, char (levels_k{L}))) = L;
+      endfor
+      X_act(:,k) = codes;
+    else
+      X_act(:,k) = double (col(:));
+    endif
+  endfor
 endfunction
 
 function fit = lm_robust_fit (X, y, w, wgtfun, tune)
