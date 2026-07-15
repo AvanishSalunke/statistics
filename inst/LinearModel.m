@@ -145,6 +145,11 @@ classdef LinearModel
   ## of two predictors, or the adjusted response as a function of one
   ## predictor for several fixed values of the other, to visualize whether
   ## the two predictors interact.
+  ##
+  ## @item @code{compact} @tab Return a @code{CompactLinearModel} that
+  ## discards the training data and per-observation diagnostics while
+  ## retaining the coefficient estimates and fit statistics needed for
+  ## prediction and inference.
   ## @end multitable
   ##
   ## Create a @code{LinearModel} object by using the @code{fitlm} function or
@@ -3996,6 +4001,39 @@ classdef LinearModel
         clear h;
       endif
 
+    endfunction
+
+    ## -*- texinfo -*-
+    ## @deftypefn {LinearModel} {@var{cmdl} =} compact (@var{mdl})
+    ##
+    ## Create a compact version of a fitted linear regression model.
+    ##
+    ## @code{@var{cmdl} = compact (@var{mdl})} returns a
+    ## @code{CompactLinearModel} object that retains the coefficient
+    ## estimates, coefficient covariance, fit statistics, model formula, and
+    ## fitting method information of @var{mdl}, but discards the training
+    ## data and everything derived from it.  Specifically, the following
+    ## properties of @var{mdl} are not carried over and are unavailable on
+    ## @var{cmdl}: @code{Fitted}, @code{Residuals}, @code{Diagnostics},
+    ## @code{ObservationInfo}, @code{ObservationNames}, @code{Variables},
+    ## @code{Steps}, and @code{ModelFitVsNullModel}.
+    ##
+    ## If @var{mdl} was fit using robust regression, the @code{Robust}
+    ## structure is retained on @var{cmdl} except for its @code{Weights}
+    ## field, which is always emptied; @code{RobustWgtFun} and @code{Tune}
+    ## are preserved unchanged.
+    ##
+    ## A @code{CompactLinearModel} object consumes less memory than a
+    ## @code{LinearModel} object and can still be used with @code{predict},
+    ## @code{feval}, @code{random}, @code{coefCI}, and @code{coefTest}, but
+    ## does not support methods that require the original training data or
+    ## refitting, such as @code{addTerms}, @code{removeTerms}, @code{step},
+    ## and @code{dwtest}.
+    ##
+    ## @seealso{LinearModel, CompactLinearModel}
+    ## @end deftypefn
+    function CVMdl = compact (this)
+      CVMdl = CompactLinearModel (this);
     endfunction
 
   endmethods
