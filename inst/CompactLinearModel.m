@@ -430,7 +430,49 @@ classdef CompactLinearModel
 
   methods(Access = public)
 
-    function this = CompactLinearModel ()
+    function this = CompactLinearModel (mdl = [])
+
+      if (isempty (mdl))
+        return;
+      elseif (! isa (mdl, 'LinearModel'))
+        error ("CompactLinearModel: invalid model object.");
+      endif
+
+      this.CoefficientCovariance    = mdl.CoefficientCovariance;
+      this.CoefficientNames         = mdl.CoefficientNames;
+      this.Coefficients             = mdl.Coefficients;
+      this.NumCoefficients          = mdl.NumCoefficients;
+      this.NumEstimatedCoefficients = mdl.NumEstimatedCoefficients;
+
+      this.DFE           = mdl.DFE;
+      this.LogLikelihood = mdl.LogLikelihood;
+      this.ModelCriterion = mdl.ModelCriterion;
+      this.MSE           = mdl.MSE;
+      this.RMSE          = mdl.RMSE;
+      this.Rsquared      = mdl.Rsquared;
+      this.SSE           = mdl.SSE;
+      this.SSR           = mdl.SSR;
+      this.SST           = mdl.SST;
+
+      this.Robust = mdl.Robust;
+      if (isstruct (this.Robust) && isfield (this.Robust, 'Weights'))
+        this.Robust.Weights = [];
+      endif
+
+      this.Formula         = mdl.Formula;
+      this.NumObservations = mdl.NumObservations;
+      this.NumPredictors   = mdl.NumPredictors;
+      this.NumVariables    = mdl.NumVariables;
+      this.PredictorNames  = mdl.PredictorNames;
+      this.ResponseName    = mdl.ResponseName;
+      this.VariableInfo    = mdl.VariableInfo;
+      this.VariableNames   = mdl.VariableNames;
+
+      this.TermsMatrix       = mdl.TermsMatrix;
+      this.CatLevelInfo      = mdl.CatLevelInfo;
+      this.EncPredictorNames = mdl.EncPredictorNames;
+      this.HasIntercept      = mdl.HasIntercept;
+
     endfunction
 
   endmethods
