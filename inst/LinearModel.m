@@ -7940,4 +7940,4 @@ endfunction
 %!error <is the response in this model> plotInteraction (mdl, 'y', 'x2')
 %!error <is the response in this model> plotInteraction (mdl, 'x1', 'y')
 %!error <VAR1 and VAR2 must be different variables> plotInteraction (mdl, 'x1', 'x1')
-
+%!error <too many inputs> compact (mdl, 'extra')
