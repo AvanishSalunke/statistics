@@ -478,3 +478,18 @@ classdef CompactLinearModel
   endmethods
 
 endclassdef
+
+%!shared mdl, cmdl
+%! n = 20;
+%! X = [(1:n); (1:n).^2]' / n;
+%! y = X * [3; -1] + 0.2 * sin ((1:n)');
+%! mdl = fitlm (X, y);
+%! cmdl = compact (mdl);
+
+%!error <CompactLinearModel: invalid model object.> CompactLinearModel (123)
+%!error <() indexing is not supported> cmdl(1)
+%!error <{} indexing is not supported> cmdl{1}
+%!error <unknown property> cmdl.NotAProperty
+%!error <unknown property> cmdl.Fitted
+%!error <unknown property> cmdl.ObservationInfo
+%!error <unknown property> cmdl.Steps
