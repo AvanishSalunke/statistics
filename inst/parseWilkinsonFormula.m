@@ -857,6 +857,35 @@ function [X, y, col_names] = run_model_matrix_builder (schema, data)
   req_vars = schema.VariableNames;
   table_vars = data.Properties.VariableNames;
 
+  if (! isempty (req_vars))
+    resp_name = [];
+    if (! isempty (schema.ResponseIdx))
+      resp_name = req_vars{schema.ResponseIdx};
+    endif
+    base_names = regexprep (req_vars, '\^.*$', '');
+    canon_idx  = [];
+    for k = 1:numel (table_vars)
+      canon_idx = [canon_idx, find(strcmp (base_names, table_vars{k}))];
+    endfor
+    if (numel (canon_idx) == numel (req_vars))
+      req_vars    = req_vars(canon_idx);
+      terms_reord = schema.Terms(:, canon_idx);
+      var_degree  = ones (1, numel (req_vars));
+      for v = 1:numel (req_vars)
+        tok = regexp (req_vars{v}, '\^(\d+)$', 'tokens');
+        if (! isempty (tok))
+          var_degree(v) = str2double (tok{1}{1});
+        endif
+      endfor
+      [~, sort_idx] = sortrows ([terms_reord * var_degree', -terms_reord]);
+      schema.Terms          = terms_reord(sort_idx, :);
+      schema.VariableNames  = req_vars;
+      if (! isempty (resp_name))
+        schema.ResponseIdx = find (strcmp (req_vars, resp_name), 1);
+      endif
+    endif
+  endif
+
   ## Data validation & masking
   if (isempty (req_vars))
     n_total = height (data);
@@ -1510,7 +1539,7 @@ endfunction
 %! C = {'lo'; 'hi'};
 %! d = table (y, N, C);
 %! [M, ~, names] = parseWilkinsonFormula ('~ N * C', 'model_matrix', d);
-%! assert_equal (any (strcmp (names, 'C_lo:N')), true);
+%! assert_equal (any (strcmp (names, 'N:C_lo')), true);
 %!test
 %! ## Test : Intercept Only Model
 %! y = [1; 2; 3];
