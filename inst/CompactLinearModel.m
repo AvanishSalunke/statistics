@@ -493,16 +493,193 @@ classdef CompactLinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {CompactLinearModel} {@var{ci} =} coefCI (@var{mdl})
+    ## @deftypefnx {CompactLinearModel} {@var{ci} =} coefCI (@var{mdl}, @var{alpha})
+    ##
+    ## Confidence intervals for the coefficient estimates of a fitted linear
+    ## regression model.
+    ##
+    ## @code{@var{ci} = coefCI (@var{mdl})} returns 95% confidence intervals
+    ## for every coefficient in @var{mdl} using a default significance level of
+    ## @code{0.05}.
+    ##
+    ## @code{@var{ci} = coefCI (@var{mdl}, @var{alpha})} uses the significance
+    ## level @var{alpha}, a scalar in @math{[0, 1]}.  The resulting intervals
+    ## have coverage @math{100(1-\alpha)\%}.  Setting @var{alpha} to @code{0}
+    ## produces intervals of infinite width; setting it to @code{1} collapses
+    ## each interval to the corresponding point estimate.
+    ##
+    ## The output @var{ci} is a @math{k}-by-2 numeric matrix where
+    ## @math{k = } @code{@var{mdl}.NumCoefficients}.  Row @math{j} contains
+    ## the interval for the @math{j}-th coefficient, whose name is stored in
+    ## @code{@var{mdl}.CoefficientNames@{j@}}.  Column 1 is the lower bound and
+    ## column 2 is the upper bound.  The midpoint of each interval equals the
+    ## corresponding point estimate in @code{@var{mdl}.Coefficients.Estimate}.
+    ##
+    ## Intervals use the Wald method:
+    ## @math{b_j \pm t_{(1-\alpha/2,\,\mathrm{DFE})}\,\mathrm{SE}(b_j)},
+    ## where @math{b_j} is the coefficient estimate, @math{\mathrm{SE}(b_j)} is
+    ## its standard error from @code{@var{mdl}.Coefficients.SE}, and the
+    ## critical value is the @math{1-\alpha/2} quantile of the
+    ## @math{t}-distribution with @code{@var{mdl}.DFE} degrees of freedom.
+    ## In rank-deficient models, aliased coefficients have
+    ## @math{\mathrm{SE} = 0} and their row in @var{ci} is @code{[0, 0]}.
+    ##
+    ## @end deftypefn
+    function ci = coefCI (mdl, alpha)
+      if (nargin > 2)
+        error ("coefCI: Too many input arguments.");
+      endif
+      if (nargin < 2)
+        alpha = 0.05;
+      endif
+      if (! isscalar (alpha))
+        error (strcat ("coefCI: Invalid argument at position 2.", " Value must be a scalar."));
+      endif
+      if (! (alpha >= 0))
+        error (strcat ("coefCI: Invalid argument at position 2.", " Value must be greater than or equal to 0."));
+      endif
+      if (alpha > 1)
+        error (strcat ("coefCI: Invalid argument at position 2.", " Value must be less than or equal to 1."));
+      endif
+
+      t  = tinv (1 - alpha / 2, mdl.DFE);
+      b  = mdl.Coefficients.Estimate;
+      se = mdl.Coefficients.SE;
+      ci = [b - t .* se, b + t .* se];
+
+    endfunction
+
   endmethods
 
 endclassdef
 
-%!shared mdl, cmdl
+%!shared mdl, cmdl, X, y, n
 %! n = 20;
 %! X = [(1:n); (1:n).^2]' / n;
 %! y = X * [3; -1] + 0.2 * sin ((1:n)');
 %! mdl = fitlm (X, y);
 %! cmdl = compact (mdl);
+
+%!test
+%! ci = coefCI (cmdl);
+%! assert_equal (size (ci), [3, 2]);
+%! assert_equal (class (ci), 'double');
+%! assert_equal (all (ci(:,1) < ci(:,2)), true);
+%! assert_equal (ci(1,1), -0.120502736154050, 1e-10);
+%! assert_equal (ci(1,2),  0.352880091734465, 1e-10);
+%! assert_equal (ci(2,1),  1.470249604061007, 1e-10);
+%! assert_equal (ci(2,2),  3.546653377080718, 1e-10);
+%! assert_equal (ci(3,1), -1.026857022014626, 1e-10);
+%! assert_equal (ci(3,2), -0.930813637635746, 1e-10);
+
+%!test
+%! ci = coefCI (cmdl);
+%! t  = tinv (0.975, cmdl.DFE);
+%! assert_equal ((ci(:,1) + ci(:,2)) / 2, cmdl.Coefficients.Estimate, 1e-10);
+%! assert_equal (ci(:,2) - ci(:,1), 2 * t * cmdl.Coefficients.SE, 1e-10);
+%! assert_equal (coefCI (cmdl, 0.05), ci);
+
+%!test
+%! ci = coefCI (cmdl, 0.01);
+%! assert_equal (size (ci), [3, 2]);
+%! assert_equal (ci(1,1), -0.208951721610638, 1e-10);
+%! assert_equal (ci(1,2),  0.441329077191052, 1e-10);
+%! assert_equal (ci(2,1),  1.082284945644892, 1e-10);
+%! assert_equal (ci(2,2),  3.934618035496833, 1e-10);
+%! assert_equal (ci(3,1), -1.044802201703589, 1e-10);
+%! assert_equal (ci(3,2), -0.912868457946783, 1e-10);
+
+%!test
+%! ## a zero alpha gives an infinite interval and a full alpha collapses it to the estimate
+%! ci = coefCI (cmdl, 0);
+%! assert_equal (all (ci(:,1) == -Inf), true);
+%! assert_equal (all (ci(:,2) == +Inf), true);
+%! ci = coefCI (cmdl, 1);
+%! assert_equal (ci(:,1), cmdl.Coefficients.Estimate, 1e-10);
+%! assert_equal (ci(:,2), cmdl.Coefficients.Estimate, 1e-10);
+
+%!test
+%! m  = fitlm (X, y, 'Intercept', false);
+%! cm = compact (m);
+%! ci = coefCI (cm);
+%! assert_equal (size (ci), [2, 2]);
+%! assert_equal (ci(1,1), 2.486679110991696, 1e-10);
+%! assert_equal (ci(1,2), 3.436164115360526, 1e-10);
+%! assert_equal (ci(2,1), -1.027166590567854, 1e-10);
+%! assert_equal (ci(2,2), -0.967330908318718, 1e-10);
+
+%!test
+%! m  = fitlm (X, y, 'Weights', (1:n)' / sum (1:n));
+%! cm = compact (m);
+%! ci = coefCI (cm);
+%! assert_equal (size (ci), [3, 2]);
+%! assert_equal (ci(1,1), -0.355978167660141, 1e-10);
+%! assert_equal (ci(1,2),  0.516619434992026, 1e-10);
+%! assert_equal (ci(2,1),  1.142016390035618, 1e-10);
+%! assert_equal (ci(2,2),  4.154555017558383, 1e-10);
+%! assert_equal (ci(3,1), -1.044530853341675, 1e-10);
+%! assert_equal (ci(3,2), -0.924508441530335, 1e-10);
+
+%!test
+%! m    = fitlm ([ones(n,1), X, X(:,1)+X(:,2)], y);
+%! cm   = compact (m);
+%! ci   = coefCI (cm);
+%! drop = find (cm.Coefficients.SE == 0);
+%! keep = setdiff (1:5, drop');
+%! assert_equal (size (ci), [5, 2]);
+%! assert_equal (numel (drop), 2);
+%! assert_equal (all (all (ci(drop, :) == 0)), true);
+%! assert_equal (all (all (isfinite (ci(keep, :)))), true);
+%! assert_equal ((ci(keep,1) + ci(keep,2)) / 2, cm.Coefficients.Estimate(keep), 1e-10);
+%! assert_equal (cm.DFE, 17);
+%! assert_equal (m.SSE, 0.386545331386824, 1e-10);
+%! assert_equal (m.Rsquared.Ordinary, 0.999338005765704, 1e-10);
+%! assert_equal (m.Rsquared.Adjusted, 0.999260124091081, 1e-10);
+
+%!test
+%! m  = fitlm ([1;1;1;2;2;2;3;3;3], [2.1;2.3;1.9;4.1;3.9;4.2;6.3;5.8;6.1], ...
+%!             'linear', 'CategoricalVars', 1);
+%! cm = compact (m);
+%! ci = coefCI (cm);
+%! assert_equal (size (ci), [3, 2]);
+%! assert_equal (ci(1,1), 1.809712563216694, 1e-10);
+%! assert_equal (ci(1,2), 2.390287436783304, 1e-10);
+%! assert_equal (ci(2,1), 1.556138236581195, 1e-10);
+%! assert_equal (ci(2,2), 2.377195096752140, 1e-10);
+%! assert_equal (ci(3,1), 3.556138236581195, 1e-10);
+%! assert_equal (ci(3,2), 4.377195096752140, 1e-10);
+
+%!test
+%! m  = fitlm (X, y, 'RobustOpts', 'bisquare');
+%! cm = compact (m);
+%! ci = coefCI (cm);
+%! assert_equal (cm.DFE, 17);
+%! assert_equal (ci(1,1), -0.136385388374896, 1e-10);
+%! assert_equal (ci(1,2),  0.378422288262478, 1e-10);
+%! assert_equal (ci(2,1),  1.359092508160098, 1e-10);
+%! assert_equal (ci(2,2),  3.617198504352038, 1e-10);
+%! assert_equal (ci(3,1), -1.030210688187146, 1e-10);
+%! assert_equal (ci(3,2), -0.925762726293341, 1e-10);
+%! ci = coefCI (cm, 0.1);
+%! assert_equal (ci(1,1), -0.091218796364050, 1e-10);
+%! assert_equal (ci(1,2),  0.333255696251631, 1e-10);
+%! assert_equal (ci(2,1),  1.557207176755238, 1e-10);
+%! assert_equal (ci(2,2),  3.419083835756898, 1e-10);
+%! assert_equal (ci(3,1), -1.021046958321974, 1e-10);
+%! assert_equal (ci(3,2), -0.934926456158514, 1e-10);
+
+%!test
+%! m  = fitlm (X, y, 'constant');
+%! cm = compact (m);
+%! ci = coefCI (cm);
+%! t  = tinv (0.975, cm.DFE);
+%! assert_equal (size (ci), [1, 2]);
+%! assert_equal (ci(1,1), -8.184528886493887, 1e-10);
+%! assert_equal (ci(1,2), -2.995506675817716, 1e-10);
+%! assert_equal ((ci(1,1) + ci(1,2)) / 2, cm.Coefficients.Estimate, 1e-10);
+%! assert_equal (ci(1,2) - ci(1,1), 2 * t * cm.Coefficients.SE, 1e-10);
 
 %!error <CompactLinearModel: invalid model object.> CompactLinearModel (123)
 %!error <() indexing is not supported> cmdl(1)
@@ -511,3 +688,9 @@ endclassdef
 %!error <unknown property> cmdl.Fitted
 %!error <unknown property> cmdl.ObservationInfo
 %!error <unknown property> cmdl.Steps
+%!error <too many inputs> coefCI (cmdl, 0.05, 'extra')
+%!error <Value must be less than or equal to 1> coefCI (cmdl, 1.5)
+%!error <Value must be greater than or equal to 0> coefCI (cmdl, -0.1)
+%!error <Value must be greater than or equal to 0> coefCI (cmdl, NaN)
+%!error <Value must be a scalar> coefCI (cmdl, [0.01 0.05])
+%!error <Value must be a scalar> coefCI (cmdl, 'abc')
