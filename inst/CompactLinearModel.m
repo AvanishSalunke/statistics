@@ -563,6 +563,50 @@ endclassdef
 %! cmdl = compact (mdl);
 
 %!test
+%! assert_equal (cmdl.NumObservations,          20);
+%! assert_equal (cmdl.NumCoefficients,           3);
+%! assert_equal (cmdl.NumVariables,              3);
+%! assert_equal (cmdl.NumPredictors,             2);
+%! assert_equal (cmdl.NumEstimatedCoefficients,  3);
+%! assert_equal (cmdl.DFE,                      17);
+%! assert_equal (cmdl.SSE,  0.386545331386823,   1e-9);
+%! assert_equal (cmdl.SSR,  583.523874670959,    1e-6);
+%! assert_equal (cmdl.SST,  583.910420002346,    1e-6);
+%! assert_equal (cmdl.MSE,  0.0227379606698351,  1e-10);
+%! assert_equal (cmdl.RMSE, 0.150791116017606,   1e-10);
+%! assert_equal (cmdl.Rsquared.Ordinary, 0.999338005765704, 1e-10);
+%! assert_equal (cmdl.Rsquared.Adjusted, 0.999260124091081, 1e-10);
+%! assert_equal (cmdl.LogLikelihood, 11.0836133807695, 1e-6);
+%! assert_equal (cmdl.ModelCriterion.AIC,  -16.1672267615389, 1e-6);
+%! assert_equal (cmdl.ModelCriterion.AICc, -14.6672267615389, 1e-6);
+%! assert_equal (cmdl.ModelCriterion.BIC,  -13.180029940877,  1e-6);
+%! assert_equal (cmdl.ModelCriterion.CAIC, -10.180029940877,  1e-6);
+
+%!test
+%! assert_equal (cmdl.Coefficients.Estimate, [0.1161886778; 2.508451491; -0.9788353298], 1e-7);
+%! assert_equal (cmdl.Coefficients.SE,       [0.112185831;  0.4920818186; 0.02276108523], 1e-8);
+%! assert_equal (cmdl.Coefficients.tStat,    [1.035680502;  5.097630913; -43.00477415],   1e-6);
+%! assert_equal (all (cmdl.Coefficients.pValue >= 0 & cmdl.Coefficients.pValue <= 1), true);
+%! assert_equal (isequal (cmdl.CoefficientNames, {'(Intercept)', 'x1', 'x2'}), true);
+%! assert_equal (isequal (cmdl.CoefficientNames, cmdl.Coefficients.Properties.RowNames(:)'), true);
+%! assert_equal (size (cmdl.CoefficientCovariance), [3, 3]);
+%! assert_equal (diag (cmdl.CoefficientCovariance), [0.0125857; 0.242145; 0.000518067], 1e-6);
+%! assert_equal (width (cmdl.Coefficients), 4);
+%! assert_equal (isequal (cmdl.Coefficients.Properties.VariableNames, ...
+%!                  {'Estimate','SE','tStat','pValue'}), true);
+
+%!test
+%! assert_equal (cmdl.Formula.LinearPredictor, '1 + x1 + x2');
+%! assert_equal (cmdl.Formula.HasIntercept, true);
+%! assert_equal (cmdl.PredictorNames, {'x1', 'x2'});
+%! assert_equal (cmdl.ResponseName, 'y');
+%! assert_equal (cmdl.VariableNames, {'x1', 'x2', 'y'});
+%! assert_equal (cmdl.VariableInfo.Range{1}, [0.05, 1],  1e-10);
+%! assert_equal (cmdl.VariableInfo.Range{2}, [0.05, 20], 1e-10);
+%! assert_equal (cmdl.VariableInfo.InModel, [true; true; false]);
+%! assert_equal (cmdl.Robust, []);
+
+%!test
 %! ci = coefCI (cmdl);
 %! assert_equal (size (ci), [3, 2]);
 %! assert_equal (class (ci), 'double');
