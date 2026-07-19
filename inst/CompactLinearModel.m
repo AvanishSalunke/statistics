@@ -346,10 +346,20 @@ classdef CompactLinearModel
 
   properties(Access = private, Hidden)
 
+    ## Terms matrix from modelspec or parse_modelspec
     TermsMatrix = [];
+
+    ## Categorical level info for re-encoding in predict
     CatLevelInfo = [];
+
+    ## Predictor names after categorical dummy expansion
     EncPredictorNames = {};
+
+    ## Whether the model includes an intercept term
     HasIntercept = true;
+
+    ## F-statistic of the fitted model vs. the intercept-only model
+    ModelFitVsNullModel = [];
 
   endproperties
 
@@ -393,6 +403,13 @@ classdef CompactLinearModel
       if (! isempty (this.Rsquared) && isstruct (this.Rsquared))
         fprintf ("R-squared: %g,  Adjusted R-Squared: %g\n", ...
                  this.Rsquared.Ordinary, this.Rsquared.Adjusted);
+      endif
+      if (! isempty (this.ModelFitVsNullModel) ...
+          && isstruct (this.ModelFitVsNullModel) ...
+          && isfield (this.ModelFitVsNullModel, 'Fstat'))
+        fprintf ("F-statistic vs. constant model: %g, p-value = %g\n", ...
+                 this.ModelFitVsNullModel.Fstat, ...
+                 this.ModelFitVsNullModel.Pvalue);
       endif
     endfunction
 
@@ -472,6 +489,7 @@ classdef CompactLinearModel
       this.CatLevelInfo      = mdl.CatLevelInfo;
       this.EncPredictorNames = mdl.EncPredictorNames;
       this.HasIntercept      = mdl.HasIntercept;
+      this.ModelFitVsNullModel  = mdl.ModelFitVsNullModel;
 
     endfunction
 
