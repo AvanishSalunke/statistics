@@ -663,6 +663,150 @@ classdef CompactLinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {CompactLinearModel} {@var{ypred} =} predict (@var{mdl}, @var{Xnew})
+    ## @deftypefnx {CompactLinearModel} {[@var{ypred}, @var{yci}] =} predict (@var{mdl}, @var{Xnew})
+    ## @deftypefnx {CompactLinearModel} {[@var{ypred}, @var{yci}] =} predict (@var{mdl}, @var{Xnew}, @var{Name}, @var{Value})
+    ##
+    ## Predict responses from a fitted linear regression model.
+    ##
+    ## @code{@var{ypred} = predict (@var{mdl}, @var{Xnew})} returns the fitted
+    ## response values at the new predictor locations in @var{Xnew}.  @var{Xnew}
+    ## can be a numeric matrix with one column per predictor in the same order
+    ## as the training data, or a table whose column names match
+    ## @code{@var{mdl}.PredictorNames}.  Rows containing @code{NaN} are returned
+    ## as @code{NaN} without error.  Unlike @code{LinearModel}, @var{Xnew} is
+    ## required: a @code{CompactLinearModel} object does not store the
+    ## training data, so there is no default to fall back on when it is
+    ## omitted.
+    ##
+    ## @code{[@var{ypred}, @var{yci}] = predict (@dots{})} also returns
+    ## @var{yci}, an @math{n}-by-2 matrix of confidence bounds where column 1 is
+    ## the lower bound and column 2 is the upper bound.  By default these are
+    ## 95% pointwise confidence intervals on the mean response.
+    ##
+    ## Name-Value pair arguments:
+    ##
+    ## @multitable @columnfractions 0.2 0.78
+    ## @headitem @var{Name} @tab @var{Value}
+    ##
+    ## @item @qcode{'Alpha'} @tab Significance level for the confidence
+    ## interval, specified as a scalar in @math{[0,1]}.  The interval has
+    ## coverage @math{100(1-\alpha)\%}.  Default is @code{0.05}, giving a 95%
+    ## interval.
+    ##
+    ## @item @qcode{'Prediction'} @tab Type of interval to compute.
+    ## @code{"curve"} (default) gives a confidence interval on the mean response
+    ## @math{f(x)}.  @code{"observation"} gives a wider prediction interval for
+    ## a single future observation @math{y = f(x) + \varepsilon}, which accounts
+    ## for both estimation uncertainty and irreducible noise; it adds
+    ## @code{@var{mdl}.MSE} to the variance before computing the half-width.
+    ##
+    ## @item @qcode{'Simultaneous'} @tab Logical flag controlling whether
+    ## the bounds are simultaneous or pointwise.  When @code{true},
+    ## Scheff@'{e}'s method is used so the entire predicted curve lies within
+    ## the band with @math{100(1-\alpha)\%} confidence; these bands are always
+    ## wider than pointwise ones.  Default is @code{false}.
+    ## @end multitable
+    ##
+    ## @end deftypefn
+    function [ypred, yci] = predict (mdl, Xnew, varargin)
+      if (nargin < 2)
+        error ("predict: Not enough input arguments.");
+      endif
+
+      alpha    = 0.05;
+      pred_obs = false;
+      simultan = false;
+
+      i = 1;
+      while (i <= numel (varargin))
+        if (strcmpi (varargin{i}, 'Alpha'))
+          alpha = varargin{i+1};
+          if (! isscalar (alpha) || ! isnumeric (alpha) || alpha < 0 || alpha > 1)
+            error ("predict: Alpha must be a scalar in [0,1].");
+          endif
+          i += 2;
+        elseif (strcmpi (varargin{i}, 'Prediction'))
+          pred_str = lower (char (varargin{i+1}));
+          if (! any (strcmp (pred_str, {'curve', 'observation'})))
+            error ("predict: Prediction must be 'curve' or 'observation'.");
+          endif
+          pred_obs = strcmp (pred_str, 'observation');
+          i += 2;
+        elseif (strcmpi (varargin{i}, 'Simultaneous'))
+          simultan = logical (varargin{i+1});
+          i += 2;
+        else
+          error ("predict: unknown option '%s'.", varargin{i});
+        endif
+      endwhile
+
+      pred_names = mdl.PredictorNames;
+      p_raw      = mdl.NumPredictors;
+
+      if (istable (Xnew))
+        n_new = height (Xnew);
+        X_raw = zeros (n_new, p_raw);
+        for j = 1:p_raw
+          if (! ismember (pred_names{j}, Xnew.Properties.VariableNames))
+            error ("predict: Xnew table is missing predictor '%s'.", pred_names{j});
+          endif
+          col = Xnew.(pred_names{j});
+          if (iscell (col))
+            cat_idx = [];
+            if (! isempty (mdl.CatLevelInfo.names))
+              cat_idx = find (strcmp (mdl.CatLevelInfo.names, pred_names{j}));
+            endif
+            if (! isempty (cat_idx))
+              levels_j = mdl.CatLevelInfo.levels{cat_idx};
+              codes    = zeros (n_new, 1);
+              for k = 1:numel (levels_j)
+                codes(strcmp (col, levels_j{k})) = k;
+              endfor
+              X_raw(:, j) = codes;
+            endif
+          else
+            X_raw(:, j) = double (col);
+          endif
+        endfor
+      else
+        X_raw = double (Xnew);
+        if (columns (X_raw) != p_raw)
+          error ("predict: Xnew must have %d columns.", p_raw);
+        endif
+        n_new = rows (X_raw);
+      endif
+
+      nan_rows     = any (isnan (X_raw), 2);
+      X_enc_new    = reencode_predictors (X_raw, pred_names, mdl.CatLevelInfo, mdl.EncPredictorNames);
+      X_design_new = build_design (mdl.TermsMatrix, X_enc_new);
+
+      beta            = mdl.Coefficients.Estimate;
+      ypred           = X_design_new * beta;
+      ypred(nan_rows) = NaN;
+
+      if (nargout > 1)
+        CovB   = mdl.CoefficientCovariance;
+        var_cv = sum ((X_design_new * CovB) .* X_design_new, 2);
+        if (pred_obs)
+          var_ci = var_cv + mdl.MSE;
+        else
+          var_ci = var_cv;
+        endif
+        p_est = mdl.NumEstimatedCoefficients;
+        if (simultan)
+          mult = sqrt (p_est * finv (1 - alpha, p_est, mdl.DFE));
+        else
+          mult = tinv (1 - alpha / 2, mdl.DFE);
+        endif
+        hw              = mult * sqrt (max (var_ci, 0));
+        yci             = [ypred - hw, ypred + hw];
+        yci(nan_rows,:) = NaN;
+      endif
+
+    endfunction
+
   endmethods
 
 endclassdef
@@ -974,6 +1118,115 @@ endclassdef
 %! assert_equal (F, 38.417457909307693, -1e-8);
 %! assert_equal (r, 1);
 
+%!test
+%! yp = predict (cmdl, [0.5 0.25; 1.0 1.0; 0.2 0.04]);
+%! assert_equal (class (yp), 'double');
+%! assert_equal (size (yp), [3, 1]);
+%! assert_equal (yp(1), 1.125705590619342, 1e-10);
+%! assert_equal (yp(2), 1.645804838535884, 1e-10);
+%! assert_equal (yp(3), 0.578725562711373, 1e-10);
+
+%!test
+%! [yp, yci] = predict (cmdl, [0.5 0.25; 1.0 1.0; 0.2 0.04]);
+%! assert_equal (size (yci), [3, 2]);
+%! assert_equal (all (yci(:,1) < yci(:,2)), true);
+%! assert_equal (yci(1,1), 0.810180780547058, 1e-9);
+%! assert_equal (yci(1,2), 1.441230400691626, 1e-9);
+%! assert_equal (yci(2,1), 0.858229321851332, 1e-9);
+%! assert_equal (yci(2,2), 2.433380355220436, 1e-9);
+%! assert_equal (yci(3,1), 0.470499753577336, 1e-9);
+%! assert_equal (yci(3,2), 0.686951371845409, 1e-9);
+
+%!test
+%! [~, yci] = predict (cmdl, [0.5 0.25; 1.0 1.0; 0.2 0.04], 'Alpha', 0.01);
+%! assert_equal (yci(1,1), 0.692272619569794, 1e-9);
+%! assert_equal (yci(1,2), 1.559138561668890, 1e-9);
+%! assert_equal (yci(2,1), 0.563920989071667, 1e-9);
+%! assert_equal (yci(2,2), 2.727688688000101, 1e-9);
+%! assert_equal (yci(3,1), 0.430056955680247, 1e-9);
+%! assert_equal (yci(3,2), 0.727394169742498, 1e-9);
+
+%!test
+%! [~, yci] = predict (cmdl, [0.5 0.25; 1.0 1.0; 0.2 0.04], 'Simultaneous', true);
+%! assert_equal (yci(1,1), 0.662572505689110, 1e-9);
+%! assert_equal (yci(1,2), 1.588838675549574, 1e-9);
+%! assert_equal (yci(2,1), 0.489787095987915, 1e-9);
+%! assert_equal (yci(2,2), 2.801822581083853, 1e-9);
+%! assert_equal (yci(3,1), 0.419869741383617, 1e-9);
+%! assert_equal (yci(3,2), 0.737581384039129, 1e-9);
+
+%!test
+%! [~, yci] = predict (cmdl, [0.5 0.25; 1.0 1.0; 0.2 0.04], 'Prediction', 'observation');
+%! assert_equal (yci(1,1), 0.677632064105876, 1e-9);
+%! assert_equal (yci(1,2), 1.573779117132808, 1e-9);
+%! assert_equal (yci(2,1), 0.796399650258815, 1e-9);
+%! assert_equal (yci(2,2), 2.495210026812952, 1e-9);
+%! assert_equal (yci(3,1), 0.242679724835377, 1e-9);
+%! assert_equal (yci(3,2), 0.914771400587368, 1e-9);
+
+%!test
+%! [~, yci] = predict (cmdl, [0.5 0.25; 1.0 1.0; 0.2 0.04], ...
+%!                      'Alpha', 0.1, 'Simultaneous', true, 'Prediction', 'observation');
+%! assert_equal (yci(1,1), 0.551414812037842, 1e-9);
+%! assert_equal (yci(1,2), 1.699996369200842, 1e-9);
+%! assert_equal (yci(2,1), 0.557131801540151, 1e-9);
+%! assert_equal (yci(2,2), 2.734477875531617, 1e-9);
+%! assert_equal (yci(3,1), 0.148019407463707, 1e-9);
+%! assert_equal (yci(3,2), 1.009431717959039, 1e-9);
+
+%!test
+%! [yp, yci] = predict (cmdl, [0.5 0.25; NaN 1.0; 1.0 1.0]);
+%! assert_equal (isnan (yp(2)), true);
+%! assert_equal (all (isnan (yci(2,:))), true);
+%! assert_equal (yp(1), 1.125705590619342, 1e-10);
+%! assert_equal (yp(3), 1.645804838535884, 1e-10);
+%! assert_equal (yci(1,1), 0.810180780547058, 1e-9);
+%! assert_equal (yci(3,2), 2.433380355220436, 1e-9);
+
+%!test
+%! Xt = table (0.5, 0.25, 'VariableNames', {'x1', 'x2'});
+%! yp = predict (cmdl, Xt);
+%! assert_equal (yp, 1.125705590619342, 1e-10);
+
+%!test
+%! m  = fitlm ([1;1;1;2;2;2;3;3;3], [2.1;2.3;1.9;4.1;3.9;4.2;6.3;5.8;6.1], ...
+%!             'linear', 'CategoricalVars', 1);
+%! cm = compact (m);
+%! yp = predict (cm, table ([1;2;3], 'VariableNames', {'x1'}));
+%! assert_equal (yp(1), 2.099999999999999, 1e-10);
+%! assert_equal (yp(2), 4.066666666666666, 1e-10);
+%! assert_equal (yp(3), 6.066666666666666, 1e-10);
+
+%!test
+%! m  = fitlm (X, y, 'Weights', (1:n)' / sum (1:n));
+%! cm = compact (m);
+%! [yp, yci] = predict (cm, [0.5 0.25; 1.0 1.0; 0.2 0.04], 'Alpha', 0.05);
+%! assert_equal (yp(1), 1.158333573705442, 1e-10);
+%! assert_equal (yp(2), 1.744086690026939, 1e-10);
+%! assert_equal (yp(3), 0.570596988527903, 1e-10);
+%! assert_equal (yci(1,1), 0.802165170771357, 1e-9);
+%! assert_equal (yci(2,2), 2.788483587522537, 1e-9);
+
+%!test
+%! m  = fitlm (X, y, 'RobustOpts', 'bisquare');
+%! cm = compact (m);
+%! [yp, yci] = predict (cm, [0.5 0.25; 1.0 1.0; 0.2 0.04], 'Simultaneous', true, 'Alpha', 0.1);
+%! assert_equal (yp(1), 1.120594526261764, 1e-10);
+%! assert_equal (yp(2), 1.631177248959615, 1e-10);
+%! assert_equal (yp(3), 0.579528082905394, 1e-10);
+%! assert_equal (yci(1,1), 0.680801249227337, 1e-9);
+%! assert_equal (yci(2,2), 2.728936938016809, 1e-9);
+
+%!test
+%! m  = fitlm (X, y, 'quadratic');
+%! cm = compact (m);
+%! [yp, yci] = predict (cm, [0.5 0.25; 1.0 1.0; 0.2 0.04]);
+%! assert_equal (yp(1), -0.948865258803113, 1e-9);
+%! assert_equal (yp(2), -3.349087980348939, 1e-9);
+%! assert_equal (yp(3), -0.053659932832480, 1e-9);
+%! assert_equal (yci(1,1), -3.431959757763334, 1e-9);
+%! assert_equal (yci(1,2), 1.534229240157108, 1e-9);
+
 %!error <CompactLinearModel: invalid model object.> CompactLinearModel (123)
 %!error <() indexing is not supported> cmdl(1)
 %!error <{} indexing is not supported> cmdl{1}
@@ -994,3 +1247,9 @@ endclassdef
 %!error <H is not full rank> coefTest (cmdl, [0 NaN 0])
 %!error <Too many input arguments> coefTest (cmdl, [0 1 0], 0, 'extra')
 %!error <too many outputs> [a, b, c, d] = coefTest (cmdl)
+%!error <Not enough input arguments> predict (cmdl)
+%!error <unknown option> predict (cmdl, [0.5 0.25], 'BadOption', 1)
+%!error <Prediction must be> predict (cmdl, [0.5 0.25], 'Prediction', 'bad')
+%!error <Xnew must have 2 columns> predict (cmdl, ones (3, 5))
+%!error <Xnew must have 2 columns> predict (cmdl, ones (3, 1))
+%!error <missing predictor> predict (cmdl, table ([1;2], 'VariableNames', {'z'}))
