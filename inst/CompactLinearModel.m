@@ -807,6 +807,48 @@ classdef CompactLinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn {CompactLinearModel} {@var{ysim} =} random (@var{mdl}, @var{Xnew})
+    ##
+    ## Simulate responses with random noise from a fitted linear regression
+    ## model.
+    ##
+    ## @code{@var{ysim} = random (@var{mdl}, @var{Xnew})} computes the fitted
+    ## response at each row of @var{Xnew} and then adds independent Gaussian
+    ## noise to each value.  The noise is drawn from @math{N(0, \sigma^2)} where
+    ## @math{\sigma^2} is the estimated error variance @code{@var{mdl}.MSE}
+    ## (mean squared error of the fit).  The result is a column vector of the
+    ## same length as the number of rows in @var{Xnew}.
+    ##
+    ## @var{Xnew} is required and must be non-empty.  It can be a numeric
+    ## matrix with one column per predictor in the same order as the training
+    ## data, or a table whose column names match
+    ## @code{@var{mdl}.PredictorNames}.
+    ##
+    ## Because the added noise is drawn freshly on every call, two calls with
+    ## the same @var{Xnew} will generally produce different output.  To get
+    ## reproducible results, set the random seed with @code{rand ('state', s)}
+    ## before calling @code{random}.
+    ##
+    ## For deterministic predictions without noise, use @code{predict} or
+    ## @code{feval}.  @code{predict} also provides confidence intervals on the
+    ## mean response.
+    ##
+    ## @end deftypefn
+    function ysim = random (mdl, Xnew, varargin)
+      if (nargin < 2)
+        error ("random: Not enough input arguments.");
+      endif
+      if (nargin > 2)
+        error ("random: Too many input arguments.");
+      endif
+      if (isempty (Xnew))
+        error ("random: Xnew must have %d columns.", mdl.NumPredictors);
+      endif
+      ypred = predict (mdl, Xnew);
+      ysim  = ypred + sqrt (mdl.MSE) .* randn (numel (ypred), 1);
+    endfunction
+
   endmethods
 
 endclassdef
@@ -1227,6 +1269,45 @@ endclassdef
 %! assert_equal (yci(1,1), -3.431959757763334, 1e-9);
 %! assert_equal (yci(1,2), 1.534229240157108, 1e-9);
 
+%!test
+%! ysim = random (cmdl, [0.5 0.25; 1.0 1.0]);
+%! assert_equal (size (ysim), [2, 1]);
+%! assert_equal (class (ysim), 'double');
+%! assert_equal (iscolumn (ysim), true);
+%! ypred = predict (cmdl, [0.5 0.25; 1.0 1.0]);
+%! assert_equal (ypred(1), 1.125705590619342, 1e-10);
+%! assert_equal (ypred(2), 1.645804838535884, 1e-10);
+%! assert_equal (all (isfinite (ysim - ypred)), true);
+
+%!test
+%! assert_equal (size (random (cmdl, [0.5 0.25])), [1, 1]);
+
+%!test
+%! ysim = random (cmdl, [0.5 0.25; NaN 1.0; 1.0 1.0]);
+%! assert_equal (size (ysim), [3, 1]);
+%! assert_equal (isfinite (ysim(1)), true);
+%! assert_equal (isnan (ysim(2)), true);
+%! assert_equal (isfinite (ysim(3)), true);
+
+%!test
+%! ya = random (cmdl, [0.5 0.25]);
+%! yb = random (cmdl, [0.5 0.25]);
+%! assert_equal (isequal (ya, yb), false);
+
+%!test
+%! Xt = table (0.5, 0.25, 'VariableNames', {'x1', 'x2'});
+%! assert_equal (size (random (cmdl, Xt)), [1, 1]);
+%! assert_equal (all (isfinite (random (cmdl, Xt))), true);
+%! ysim = random (cmdl, X);
+%! assert_equal (size (ysim), [20, 1]);
+%! assert_equal (sum (isnan (ysim)), 0);
+
+%!test
+%! mw  = compact (fitlm (X, y, 'Weights', (1:n)' / sum (1:n)));
+%! mni = compact (fitlm (X, y, 'Intercept', false));
+%! assert_equal (all (isfinite (random (mw, [0.5 0.25; 1.0 1.0]))), true);
+%! assert_equal (all (isfinite (random (mni, [0.5 0.25; 1.0 1.0]))), true);
+
 %!error <CompactLinearModel: invalid model object.> CompactLinearModel (123)
 %!error <() indexing is not supported> cmdl(1)
 %!error <{} indexing is not supported> cmdl{1}
@@ -1253,3 +1334,7 @@ endclassdef
 %!error <Xnew must have 2 columns> predict (cmdl, ones (3, 5))
 %!error <Xnew must have 2 columns> predict (cmdl, ones (3, 1))
 %!error <missing predictor> predict (cmdl, table ([1;2], 'VariableNames', {'z'}))
+%!error <Not enough input arguments> random (cmdl)
+%!error <Too many input arguments> random (cmdl, [0.5 0.25], 'extra')
+%!error <Xnew must have 2 columns> random (cmdl, ones (3, 5))
+%!error <Xnew must have 2 columns> random (cmdl, [])
