@@ -551,6 +551,118 @@ classdef CompactLinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {CompactLinearModel} {@var{p} =} coefTest (@var{mdl})
+    ## @deftypefnx {CompactLinearModel} {@var{p} =} coefTest (@var{mdl}, @var{H})
+    ## @deftypefnx {CompactLinearModel} {@var{p} =} coefTest (@var{mdl}, @var{H}, @var{C})
+    ## @deftypefnx {CompactLinearModel} {[@var{p}, @var{F}] =} coefTest (@dots{})
+    ## @deftypefnx {CompactLinearModel} {[@var{p}, @var{F}, @var{r}] =} coefTest (@dots{})
+    ##
+    ## Linear hypothesis test on the coefficients of a fitted linear regression
+    ## model.
+    ##
+    ## @code{coefTest} tests whether one or more linear combinations of the
+    ## fitted coefficients equal specified constants.  Each linear combination
+    ## is encoded as a row of the contrast matrix @var{H}, and the right-hand
+    ## side is given by @var{C}.
+    ##
+    ## @code{@var{p} = coefTest (@var{mdl})} performs the overall model F-test:
+    ## it tests the joint null hypothesis that every coefficient except the
+    ## intercept is zero.  The returned p-value matches the F-statistic line
+    ## printed at the bottom of the model display.
+    ##
+    ## @code{@var{p} = coefTest (@var{mdl}, @var{H})} tests the null hypothesis
+    ## @math{H \beta = 0}, where @math{\beta} is the full coefficient vector
+    ## of length @math{k = } @code{@var{mdl}.NumCoefficients}.  @var{H} must be
+    ## a full-rank numeric matrix with @math{k} columns; each row specifies one
+    ## linear constraint.  To test a single coefficient, use a row vector with a
+    ## @code{1} in that coefficient's position and zeros elsewhere; the
+    ## resulting F-statistic equals the square of the corresponding t-statistic
+    ## in @code{@var{mdl}.Coefficients}.  To test a categorical predictor that
+    ## expands to multiple indicator columns, include one row per indicator in
+    ## @var{H}.
+    ##
+    ## @code{@var{p} = coefTest (@var{mdl}, @var{H}, @var{C})} tests
+    ## @math{H \beta = C} instead of zero.  @var{C} must be a numeric vector
+    ## with the same number of elements as rows of @var{H}; both row and column
+    ## vectors are accepted.
+    ##
+    ## The second output @var{F} is the value of the F-statistic:
+    ## @math{F = (H\hat{\beta} - C)^\prime (H V H^\prime)^{-1}
+    ## (H\hat{\beta} - C) / r}, where @math{V} is
+    ## @code{@var{mdl}.CoefficientCovariance} and @math{r} is the number of
+    ## rows of @var{H}.  The third output @var{r} is that numerator degrees of
+    ## freedom; the denominator degrees of freedom is @code{@var{mdl}.DFE}.
+    ## Under the null hypothesis @math{F} follows an @math{F(r, \mathrm{DFE})}
+    ## distribution and the p-value is the upper-tail probability.  When
+    ## @var{H} is rank-deficient but contains no @code{NaN}, both @var{p} and
+    ## @var{F} are returned as @code{NaN} without an error.
+    ##
+    ## @end deftypefn
+    function [p, F, r] = coefTest (mdl, varargin)
+      if (nargout > 3)
+        error ("coefTest: Too many output arguments.");
+      endif
+      if (numel (varargin) > 2)
+        error ("coefTest: Too many input arguments.");
+      endif
+
+      k = mdl.NumCoefficients;
+
+      if (numel (varargin) >= 1 && ! isempty (varargin{1}))
+
+        H = varargin{1};
+        if (! isnumeric (H))
+          error ("coefTest: H must be a %d-by-%d numeric matrix.", size (H, 1), k);
+        endif
+        if (size (H, 2) != k)
+          error ("coefTest: H must be a %d-by-%d numeric matrix.", size (H, 1), k);
+        endif
+        if (any (any (isnan (H))))
+          error (strcat ("coefTest: H is not full rank and hypotheses", " are not consistent."));
+        endif
+        r = size (H, 1);
+
+        if (numel (varargin) == 2)
+          C = varargin{2};
+          if (! isnumeric (C))
+            error ("coefTest: C must be a numeric vector.");
+          endif
+          C = C(:);
+          if (numel (C) != r)
+            error ("coefTest: H must be a %d-by-%d numeric matrix.", numel (C), k);
+          endif
+        else
+          C = zeros (r, 1);
+        endif
+
+      else
+
+        if (mdl.HasIntercept && k > 1)
+          H = [zeros(k-1, 1), eye(k-1)];
+          r = k - 1;
+        else
+          H = eye (k);
+          r = k;
+        endif
+        C = zeros (r, 1);
+
+      endif
+
+      b    = mdl.Coefficients.Estimate;
+      V    = mdl.CoefficientCovariance;
+      HVH  = H * V * H';
+      Hb_c = H * b - C;
+      if (rcond (HVH) < eps (class (HVH)))
+        F = NaN;
+        p = NaN;
+      else
+        F = (Hb_c' * (HVH \ Hb_c)) / r;
+        p = betainc (mdl.DFE / (mdl.DFE + r * F), mdl.DFE / 2, r / 2);
+      endif
+
+    endfunction
+
   endmethods
 
 endclassdef
@@ -725,6 +837,143 @@ endclassdef
 %! assert_equal ((ci(1,1) + ci(1,2)) / 2, cm.Coefficients.Estimate, 1e-10);
 %! assert_equal (ci(1,2) - ci(1,1), 2 * t * cm.Coefficients.SE, 1e-10);
 
+%!test
+%! [p, F, r] = coefTest (cmdl);
+%! assert_equal (size (p), [1, 1]);
+%! assert_equal (class (p), 'double');
+%! assert_equal (p >= 0 && p <= 1, true);
+%! assert_equal (F >= 0, true);
+%! assert_equal (p, 9.489880832170599e-28, -1e-8);
+%! assert_equal (F, 1.283149098426142e+04, -1e-8);
+%! assert_equal (r, 2);
+
+%!test
+%! k = cmdl.NumCoefficients;
+%! H = [zeros(k-1, 1), eye(k-1)];
+%! [p, F, r] = coefTest (cmdl, H);
+%! assert_equal (p, 9.489880832170599e-28, -1e-8);
+%! assert_equal (F, 1.283149098426142e+04, -1e-8);
+%! assert_equal (r, 2);
+
+%!test
+%! [p, F, r] = coefTest (cmdl, [1 0 0]);
+%! assert_equal (size (r), [1, 1]);
+%! assert_equal (p, 0.314859866747774, -1e-8);
+%! assert_equal (F, 1.072634101844537, -1e-8);
+%! assert_equal (r, 1);
+%! [p, F, r] = coefTest (cmdl, [0 1 0]);
+%! assert_equal (p, 8.937794169018252e-05, -1e-8);
+%! assert_equal (F, 25.985840929474932, -1e-8);
+%! assert_equal (r, 1);
+%! [p, F, r] = coefTest (cmdl, [0 0 1]);
+%! assert_equal (p, 8.656938305821102e-19, -1e-8);
+%! assert_equal (F, 1.849410599855684e+03, -1e-8);
+%! assert_equal (r, 1);
+%! [p, F, r] = coefTest (cmdl, [0 1 0; 0 0 1]);
+%! assert_equal (p, 9.489880832170599e-28, -1e-8);
+%! assert_equal (F, 1.283149098426142e+04, -1e-8);
+%! assert_equal (r, 2);
+
+%!test
+%! b = cmdl.Coefficients.Estimate;
+%! [p, F] = coefTest (cmdl, [0 1 0], b(2));
+%! assert_equal (p, 1, 1e-10);
+%! assert_equal (F, 0, 1e-10);
+%! [p, F] = coefTest (cmdl, [0 1 0], 0);
+%! assert_equal (p, 8.937794169018252e-05, -1e-8);
+%! assert_equal (F, 25.985840929474932, -1e-8);
+
+%!test
+%! [p, F, r] = coefTest (cmdl, [0 1 0; 0 0 1], [1.5; -1.0]);
+%! assert_equal (p, 2.833788304242915e-09, -1e-8);
+%! assert_equal (F, 77.603887650386312, -1e-8);
+%! assert_equal (r, 2);
+%! [p, F] = coefTest (cmdl, [0 1 0], 1.5);
+%! assert_equal (p, 0.056184159363707, -1e-8);
+%! assert_equal (F, 4.199865537706047, -1e-8);
+
+%!test
+%! m  = fitlm (X, y, 'Intercept', false);
+%! cm = compact (m);
+%! [p, F, r] = coefTest (cm);
+%! assert_equal (r, cm.NumCoefficients);
+%! assert_equal (p, 6.060655830723051e-32, -1e-8);
+%! assert_equal (F, 2.646694317541346e+04, -1e-8);
+
+%!test
+%! m  = fitlm (X, y, 'interactions');
+%! cm = compact (m);
+%! [p, F, r] = coefTest (cm);
+%! assert_equal (r, cm.NumCoefficients - 1);
+%! assert_equal (r != cm.NumPredictors, true);
+%! assert_equal (p, 1.164196605688161e-25, -1e-8);
+%! assert_equal (F, 8.107508574885546e+03, -1e-8);
+
+%!test
+%! m  = fitlm (X, y, 'Weights', (1:n)' / sum (1:n));
+%! cm = compact (m);
+%! [p, F, r] = coefTest (cm);
+%! assert_equal (p, 1.481920976389473e-27, -1e-8);
+%! assert_equal (F, 1.217557180481257e+04, -1e-8);
+%! assert_equal (r, 2);
+
+%!test
+%! m  = fitlm ([1;1;1;2;2;2;3;3;3], [2.1;2.3;1.9;4.1;3.9;4.2;6.3;5.8;6.1], ...
+%!             'linear', 'CategoricalVars', 1);
+%! cm = compact (m);
+%! [p, F, r] = coefTest (cm);
+%! assert_equal (p, 1.197590680415813e-06, -1e-8);
+%! assert_equal (F, 2.795000000000035e+02, -1e-8);
+%! assert_equal (r, 2);
+%! [p, F] = coefTest (cm, [1 0 0]);
+%! assert_equal (p, 2.087464608380450e-06, -1e-8);
+%! assert_equal (F, 3.133421052631613e+02, -1e-8);
+%! [p, F] = coefTest (cm, [0 1 0]);
+%! assert_equal (p, 2.325514143662469e-05, -1e-8);
+%! assert_equal (F, 1.374078947368438e+02, -1e-8);
+%! [p, F] = coefTest (cm, [0 0 1]);
+%! assert_equal (p, 3.757733067786492e-07, -1e-8);
+%! assert_equal (F, 5.589868421052698e+02, -1e-8);
+
+%!test
+%! m  = fitlm (X, y, 'constant');
+%! cm = compact (m);
+%! [p, F, r] = coefTest (cm);
+%! assert_equal (p, 2.399364086950727e-04, -1e-8);
+%! assert_equal (F, 20.335916494750592, -1e-8);
+%! assert_equal (r, 1);
+
+%!test
+%! m    = fitlm ([ones(n,1), X, X(:,1)+X(:,2)], y);
+%! cm   = compact (m);
+%! [p, F] = coefTest (cm);
+%! assert_equal (size (p), [1, 1]);
+%! assert_equal (class (p), 'double');
+%! assert_equal (isnan (p), true);
+%! assert_equal (isnan (F), true);
+%! drop = find (cm.Coefficients.SE == 0);
+%! keep = setdiff (2:cm.NumCoefficients, drop');
+%! H    = zeros (numel (keep), cm.NumCoefficients);
+%! for i = 1:numel (keep)
+%!   H(i, keep(i)) = 1;
+%! endfor
+%! [p, F, r] = coefTest (cm, H);
+%! assert_equal (r, numel (keep));
+%! assert_equal (p, 6.706570586430847e-30, -1e-8);
+%! assert_equal (F, 1.771618642634559e+04, -1e-8);
+
+%!test
+%! m  = fitlm (X, y, 'RobustOpts', 'bisquare');
+%! cm = compact (m);
+%! [p, F, r] = coefTest (cm);
+%! assert_equal (p, 3.941715170923545e-27, -1e-8);
+%! assert_equal (F, 1.085097669445008e+04, -1e-8);
+%! assert_equal (r, 2);
+%! [p, F, r] = coefTest (cm, [0 1 -1]);
+%! assert_equal (p, 9.729154060050210e-06, -1e-8);
+%! assert_equal (F, 38.417457909307693, -1e-8);
+%! assert_equal (r, 1);
+
 %!error <CompactLinearModel: invalid model object.> CompactLinearModel (123)
 %!error <() indexing is not supported> cmdl(1)
 %!error <{} indexing is not supported> cmdl{1}
@@ -738,3 +987,10 @@ endclassdef
 %!error <Value must be greater than or equal to 0> coefCI (cmdl, NaN)
 %!error <Value must be a scalar> coefCI (cmdl, [0.01 0.05])
 %!error <Value must be a scalar> coefCI (cmdl, 'abc')
+%!error <H must be a 1-by-3 numeric matrix> coefTest (cmdl, [1 0])
+%!error <H must be a 1-by-3 numeric matrix> coefTest (cmdl, 'abc')
+%!error <C must be a numeric vector> coefTest (cmdl, [0 1 0], 'abc')
+%!error <H must be a 1-by-3 numeric matrix> coefTest (cmdl, [0 1 0; 0 0 1], [1])
+%!error <H is not full rank> coefTest (cmdl, [0 NaN 0])
+%!error <Too many input arguments> coefTest (cmdl, [0 1 0], 0, 'extra')
+%!error <too many outputs> [a, b, c, d] = coefTest (cmdl)
