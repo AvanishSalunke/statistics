@@ -909,6 +909,29 @@ classdef CompactLinearModel
 
       elseif (n_extra == p_raw)
 
+        for i = 1:n_extra
+          if (ischar (varargin{i}) || iscategorical (varargin{i}))
+            if (iscategorical (varargin{i}))
+              lvl_str = char (varargin{i});
+            else
+              lvl_str = varargin{i};
+            endif
+            ci = [];
+            if (! isempty (mdl.CatLevelInfo.names))
+              ci = find (strcmp (mdl.CatLevelInfo.names, mdl.PredictorNames{i}));
+            endif
+            if (isempty (ci))
+              error ("feval: predictor '%s' is not categorical.", mdl.PredictorNames{i});
+            endif
+            levels_i = mdl.CatLevelInfo.levels{ci};
+            code     = find (strcmp (levels_i, lvl_str), 1);
+            if (isempty (code))
+              code = NaN;
+            endif
+            varargin{i} = code;
+          endif
+        endfor
+
         ref_size = [];
         for i = 1:n_extra
           if (! isscalar (varargin{i}))
@@ -1466,6 +1489,24 @@ endclassdef
 %! assert_equal (yfw(2), 1.744086690026939, 1e-10);
 %! assert_equal (feval (mw, [0.5; 1.0], [0.25; 1.0]), yfw, 1e-10);
 
+%!test
+%! Weight = [2000;2100;2200;2300;2400;2500;2600;2700;2800;2900;3000; ...
+%!           3100;3200;3300;3400;3500;3600;3700;3800;3900];
+%! Year   = categorical ([70;70;70;70;70;76;76;76;76;76;76;76;82;82; ...
+%!                        82;82;82;82;82;82]);
+%! MPG    = [30;29;28;27;26;25;24;23;22;21;20;19;18;17;16;15;14;13;12;11];
+%! m  = fitlm (table (MPG, Weight, Year), 'MPG ~ Weight + Year');
+%! cm = compact (m);
+%! yf = feval (cm, [2500;3000], '76');
+%! assert_equal (yf(1), 25.000000000000000, 1e-9);
+%! assert_equal (yf(2), 20.000000000000004, 1e-9);
+%! assert_equal (yf, feval (m, [2500;3000], '76'), 1e-10);
+%! yf2 = feval (cm, [2500;3000], categorical (70));
+%! assert_equal (yf2(1), 24.999999999999996, 1e-9);
+%! assert_equal (yf2(2), 20.000000000000000, 1e-9);
+%! assert_equal (feval (cm, 2800, '82'), 21.999999999999996, 1e-9);
+%! assert_equal (isnan (feval (cm, 2500, '99')), true);
+
 %!error <CompactLinearModel: invalid model object.> CompactLinearModel (123)
 %!error <() indexing is not supported> cmdl(1)
 %!error <{} indexing is not supported> cmdl{1}
@@ -1502,3 +1543,4 @@ endclassdef
 %!error <All input arguments must be the same size> feval (cmdl, [0.5;1.0;0.2], [0.25;1.0])
 %!error <X does not contain one or more predictor> feval (cmdl, table ([1;2], 'VariableNames', {'z'}))
 %!error <Predictor data matrix must have 2 columns> feval (cmdl, [])
+%!error <is not categorical> feval (cmdl, '2500', 0.25)

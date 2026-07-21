@@ -1661,6 +1661,29 @@ classdef LinearModel
 
       elseif (n_extra == p_raw)
 
+        for i = 1:n_extra
+          if (ischar (varargin{i}) || iscategorical (varargin{i}))
+            if (iscategorical (varargin{i}))
+              lvl_str = char (varargin{i});
+            else
+              lvl_str = varargin{i};
+            endif
+            ci = [];
+            if (! isempty (mdl.CatLevelInfo.names))
+              ci = find (strcmp (mdl.CatLevelInfo.names, mdl.PredictorNames{i}));
+            endif
+            if (isempty (ci))
+              error ("feval: predictor '%s' is not categorical.", mdl.PredictorNames{i});
+            endif
+            levels_i = mdl.CatLevelInfo.levels{ci};
+            code     = find (strcmp (levels_i, lvl_str), 1);
+            if (isempty (code))
+              code = NaN;
+            endif
+            varargin{i} = code;
+          endif
+        endfor
+
         ref_size = [];
         for i = 1:n_extra
           if (! isscalar (varargin{i}))
