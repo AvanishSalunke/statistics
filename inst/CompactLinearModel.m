@@ -849,6 +849,102 @@ classdef CompactLinearModel
       ysim  = ypred + sqrt (mdl.MSE) .* randn (numel (ypred), 1);
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {CompactLinearModel} {@var{ypred} =} feval (@var{mdl}, @var{X})
+    ## @deftypefnx {CompactLinearModel} {@var{ypred} =} feval (@var{mdl}, @var{x1}, @var{x2}, @dots{}, @var{xp})
+    ##
+    ## Predict responses of a fitted linear regression model using separate
+    ## predictor inputs.
+    ##
+    ## @code{@var{ypred} = feval (@var{mdl}, @var{X})} accepts a single
+    ## numeric matrix @var{X} with one column per predictor in the same order
+    ## as the training data, or a table whose column names match
+    ## @code{@var{mdl}.PredictorNames}.  The output is an @math{n}-by-1 column
+    ## vector.  Rows that contain @code{NaN} in any predictor column are
+    ## returned as @code{NaN}.
+    ##
+    ## @code{@var{ypred} = feval (@var{mdl}, @var{x1}, @var{x2}, @dots{},
+    ## @var{xp})} accepts exactly @code{@var{mdl}.NumPredictors} separate
+    ## arguments, one per predictor variable.  All non-scalar arguments must
+    ## have the same size; a scalar argument is broadcast to that size
+    ## automatically.  The output shape follows the shape of the non-scalar
+    ## inputs: column vector inputs give a column vector output, row vector
+    ## inputs give a row vector output, and all-scalar inputs give a scalar.
+    ## This form is convenient when predictor data is already stored in separate
+    ## vectors rather than a combined matrix.
+    ##
+    ## @code{feval} gives the same numerical predictions as @code{predict} but
+    ## does not support confidence intervals.  Use @code{predict} when you also
+    ## need bounds on the response.  Because a @code{CompactLinearModel} object
+    ## behaves like a function through @code{feval}, it can be passed directly
+    ## to routines that accept a function handle, such as @code{fminsearch} or
+    ## @code{integral}.
+    ##
+    ## @end deftypefn
+    function ypred = feval (mdl, varargin)
+      p_raw   = mdl.NumPredictors;
+      n_extra = nargin - 1;
+
+      if (n_extra < 1)
+        error ("feval: Not enough input arguments.");
+      endif
+
+      if (n_extra == 1)
+
+        Xnew = varargin{1};
+
+        if (istable (Xnew))
+          for j = 1:p_raw
+            if (! ismember (mdl.PredictorNames{j}, Xnew.Properties.VariableNames))
+              error (strcat ("feval: X does not contain one or more predictor", " variables needed for this model."));
+            endif
+          endfor
+        else
+          if (columns (double (Xnew)) != p_raw)
+            error ("feval: Predictor data matrix must have %d columns.", p_raw);
+          endif
+        endif
+
+        ypred = predict (mdl, Xnew);
+
+      elseif (n_extra == p_raw)
+
+        ref_size = [];
+        for i = 1:n_extra
+          if (! isscalar (varargin{i}))
+            s_i = size (varargin{i});
+            if (isempty (ref_size))
+              ref_size = s_i;
+            elseif (! isequal (s_i, ref_size))
+              error ("feval: All input arguments must be the same size.");
+            endif
+          endif
+        endfor
+        if (isempty (ref_size))
+          ref_size = [1, 1];
+        endif
+
+        n_pts = prod (ref_size);
+        Xmat  = zeros (n_pts, p_raw);
+        for i = 1:n_extra
+          ai = varargin{i};
+          if (isscalar (ai))
+            Xmat(:, i) = ai;
+          else
+            Xmat(:, i) = ai(:);
+          endif
+        endfor
+
+        ypred = reshape (predict (mdl, Xmat), ref_size);
+
+      else
+
+        error (strcat ("feval: Incorrect number of input arguments. You must provide", " either %d separate predictor variable arguments, or one", " predictor matrix with %d columns."), p_raw, p_raw);
+
+      endif
+
+    endfunction
+
   endmethods
 
 endclassdef
@@ -1308,6 +1404,68 @@ endclassdef
 %! assert_equal (all (isfinite (random (mw, [0.5 0.25; 1.0 1.0]))), true);
 %! assert_equal (all (isfinite (random (mni, [0.5 0.25; 1.0 1.0]))), true);
 
+%!test
+%! yf = feval (cmdl, [0.5 0.25; 1.0 1.0; 0.2 0.04]);
+%! assert_equal (yf(1), 1.125705590619342, 1e-10);
+%! assert_equal (yf(2), 1.645804838535884, 1e-10);
+%! assert_equal (yf(3), 0.578725562711373, 1e-10);
+%! assert_equal (feval (cmdl, [0.5; 1.0; 0.2], [0.25; 1.0; 0.04]), yf, 1e-10);
+
+%!test
+%! yf3 = feval (cmdl, [0.5, 1.0, 0.2], [0.25, 1.0, 0.04]);
+%! assert_equal (size (yf3), [1, 3]);
+%! assert_equal (yf3(1), 1.125705590619342, 1e-10);
+%! assert_equal (yf3(2), 1.645804838535884, 1e-10);
+%! assert_equal (yf3(3), 0.578725562711373, 1e-10);
+
+%!test
+%! assert_equal (feval (cmdl, 0.5, 0.25), 1.125705590619342, 1e-10);
+%! yf5 = feval (cmdl, 0.5, [0.1; 0.2; 0.3]);
+%! assert_equal (yf5(1), 1.272530890093120, 1e-10);
+%! assert_equal (yf5(2), 1.174647357110602, 1e-10);
+%! assert_equal (yf5(3), 1.076763824128083, 1e-10);
+%! yf6 = feval (cmdl, [0.1; 0.5; 0.9], 0.25);
+%! assert_equal (yf6(1), 0.122324994390997, 1e-10);
+%! assert_equal (yf6(2), 1.125705590619342, 1e-10);
+%! assert_equal (yf6(3), 2.129086186847688, 1e-10);
+
+%!test
+%! ms = compact (fitlm (X(:,1), y));
+%! assert_equal (size (feval (ms, 0.5)), [1, 1]);
+%! assert_equal (size (feval (ms, [0.3; 0.5; 0.9])), [3, 1]);
+%! assert_equal (feval (ms, 0.5), predict (ms, 0.5), 1e-10);
+%! assert_equal (feval (ms, [0.3; 0.5; 0.9]), predict (ms, [0.3; 0.5; 0.9]), 1e-10);
+%! yf14 = feval (ms, [1; 2; 3]);
+%! assert_equal (yf14(1), -14.162385738140875, 1e-9);
+%! assert_equal (yf14(2), -32.209476173898921, 1e-9);
+%! assert_equal (yf14(3), -50.256566609656964, 1e-9);
+
+%!test
+%! Xt = table (0.5, 0.25, 'VariableNames', {'x1', 'x2'});
+%! assert_equal (feval (cmdl, Xt), 1.125705590619342, 1e-10);
+
+%!test
+%! yf9 = feval (cmdl, [0.5 0.25; NaN 1.0; 1.0 1.0]);
+%! assert_equal (isnan (yf9(2)), true);
+%! assert_equal (yf9(1), 1.125705590619342, 1e-10);
+%! assert_equal (yf9(3), 1.645804838535884, 1e-10);
+%! yf10 = feval (cmdl, [0.5; NaN; 1.0], [0.25; 1.0; 1.0]);
+%! assert_equal (isnan (yf10(2)), true);
+%! yf11 = feval (cmdl, [0.5; 1.0; 1.0], [0.25; NaN; 1.0]);
+%! assert_equal (isnan (yf11(2)), true);
+
+%!test
+%! yf12 = feval (cmdl, X);
+%! assert_equal (size (yf12), [20, 1]);
+%! assert_equal (sum (isnan (yf12)), 0);
+
+%!test
+%! mw  = compact (fitlm (X, y, 'Weights', (1:n)' / sum (1:n)));
+%! yfw = feval (mw, [0.5 0.25; 1.0 1.0]);
+%! assert_equal (yfw(1), 1.158333573705442, 1e-10);
+%! assert_equal (yfw(2), 1.744086690026939, 1e-10);
+%! assert_equal (feval (mw, [0.5; 1.0], [0.25; 1.0]), yfw, 1e-10);
+
 %!error <CompactLinearModel: invalid model object.> CompactLinearModel (123)
 %!error <() indexing is not supported> cmdl(1)
 %!error <{} indexing is not supported> cmdl{1}
@@ -1338,3 +1496,9 @@ endclassdef
 %!error <Too many input arguments> random (cmdl, [0.5 0.25], 'extra')
 %!error <Xnew must have 2 columns> random (cmdl, ones (3, 5))
 %!error <Xnew must have 2 columns> random (cmdl, [])
+%!error <Not enough input arguments> feval (cmdl)
+%!error <Incorrect number of input arguments> feval (cmdl, [0.5;1.0], [0.25;1.0], [0.1;0.2])
+%!error <Predictor data matrix must have 2 columns> feval (cmdl, ones (3, 1))
+%!error <All input arguments must be the same size> feval (cmdl, [0.5;1.0;0.2], [0.25;1.0])
+%!error <X does not contain one or more predictor> feval (cmdl, table ([1;2], 'VariableNames', {'z'}))
+%!error <Predictor data matrix must have 2 columns> feval (cmdl, [])
