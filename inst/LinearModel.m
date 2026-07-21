@@ -5410,6 +5410,22 @@ endfunction
 %! assert_equal (yf, predict (mdl, [0.1 0.25; 0.5 0.25; 0.9 0.25]), 1e-10);
 
 %!test
+%! Weight = [2000;2100;2200;2300;2400;2500;2600;2700;2800;2900;3000; ...
+%!           3100;3200;3300;3400;3500;3600;3700;3800;3900];
+%! Year   = categorical ([70;70;70;70;70;76;76;76;76;76;76;76;82;82; ...
+%!                        82;82;82;82;82;82]);
+%! MPG    = [30;29;28;27;26;25;24;23;22;21;20;19;18;17;16;15;14;13;12;11];
+%! m  = fitlm (table (MPG, Weight, Year), 'MPG ~ Weight + Year');
+%! yf = feval (m, [2500;3000], '76');
+%! assert_equal (yf(1), 25.000000000000000, 1e-9);
+%! assert_equal (yf(2), 20.000000000000004, 1e-9);
+%! yf2 = feval (m, [2500;3000], categorical (70));
+%! assert_equal (yf2(1), 24.999999999999996, 1e-9);
+%! assert_equal (yf2(2), 20.000000000000000, 1e-9);
+%! assert_equal (feval (m, 2800, '82'), 21.999999999999996, 1e-9);
+%! assert_equal (isnan (feval (m, 2500, '99')), true);
+
+%!test
 %! m = fitlm ((1:n)' / n, 2 * (1:n)' / n + 0.1 * sin ((1:n)'));
 %! assert_equal (size (feval (m, 0.5)), [1, 1]);
 %! assert_equal (size (feval (m, [0.3; 0.5; 0.9])), [3, 1]);
@@ -7900,6 +7916,7 @@ endfunction
 %!error <All input arguments must be the same size> feval (mdl, [0.5; 1.0; 0.2], [0.25; 1.0])
 %!error <X does not contain one or more predictor> feval (mdl, table ([1; 2], 'VariableNames', {'z'}))
 %!error <Predictor data matrix must have 2 columns> feval (mdl, [])
+%!error <is not categorical> feval (mdl, '0.5', 0.25)
 %!error <too many inputs> coefCI (mdl, 0.05, 'extra')
 %!error <Value must be less than or equal to 1> coefCI (mdl, 1.5)
 %!error <Value must be greater than or equal to 0> coefCI (mdl, -0.1)
