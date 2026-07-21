@@ -388,7 +388,7 @@ classdef CompactLinearModel
       endif
 
       if (! isempty (this.Coefficients))
-        fprintf ("\n  Coefficients:\n\n");
+        fprintf ("\n  Estimated Coefficients:\n\n");
         disp (this.Coefficients);
       endif
 
