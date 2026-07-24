@@ -678,6 +678,9 @@ classdef LinearModel
     ## Predictor names after categorical dummy expansion
     EncPredictorNames = {};
 
+    ## Cached per-predictor design contrasts used by plotEffects
+    EffectContrasts = [];
+
     ## Encoded predictor matrix (Path B only), cached for refit
     EncodedPredMatrix = [];
 
@@ -1401,6 +1404,7 @@ classdef LinearModel
       this.TermsMatrix              = terms;
       this.CatLevelInfo             = cat_info;
       this.EncPredictorNames        = enc_names;
+      this.EffectContrasts          = lm_effects_contrasts (this);
       this.OrigOpts                 = opts;
       if (! is_formula)
         this.EncodedPredMatrix      = X_enc_sub;
@@ -3033,43 +3037,20 @@ classdef LinearModel
 
       DEF_COLOR = [0.1490, 0.5490, 0.8660];
 
-      act    = mdl.ObservationInfo.Subset;
       pred   = mdl.PredictorNames;
       V      = mdl.CoefficientCovariance;
       beta   = mdl.Coefficients.Estimate;
       t_crit = tinv (0.975, mdl.DFE);
-      n_act  = sum (act);
       cinfo  = mdl.CatLevelInfo;
-      ename  = mdl.EncPredictorNames;
-
-      [X_act, is_cat, cat_lvls] = lm_encode_active_predictors (mdl, act, pred, cinfo);
+      C      = mdl.EffectContrasts;
 
       effects = zeros (1, p);
       ci_lo   = zeros (1, p);
       ci_hi   = zeros (1, p);
-      x_lo_v  = zeros (1, p);
-      x_hi_v  = zeros (1, p);
 
       for j = 1:p
-        if (is_cat(j))
-          x_lo_v(j) = 1;
-          x_hi_v(j) = numel (cat_lvls{j});
-        else
-          x_lo_v(j) = min (X_act(:,j));
-          x_hi_v(j) = max (X_act(:,j));
-        endif
-
-        X_hi_rows = X_act;  X_hi_rows(:,j) = x_hi_v(j);
-        X_lo_rows = X_act;  X_lo_rows(:,j) = x_lo_v(j);
-
-        X_hi_enc = reencode_predictors (X_hi_rows, pred, cinfo, ename);
-        X_lo_enc = reencode_predictors (X_lo_rows, pred, cinfo, ename);
-        D_hi     = build_design (mdl.TermsMatrix, X_hi_enc);
-        D_lo     = build_design (mdl.TermsMatrix, X_lo_enc);
-
-        c_bar      = mean (D_hi - D_lo, 1);
-        effects(j) = c_bar * beta;
-        SE         = sqrt (max (0, c_bar * V * c_bar'));
+        effects(j) = C(j,:) * beta;
+        SE         = sqrt (max (0, C(j,:) * V * C(j,:)'));
 
         ci_lo(j) = effects(j) - t_crit * SE;
         ci_hi(j) = effects(j) + t_crit * SE;
@@ -3090,14 +3071,24 @@ classdef LinearModel
       endfor
       hold (ax, 'off');
 
+      rn  = mdl.VariableInfo.Properties.RowNames;
       ytl = cell (p, 1);
       for j = 1:p
-        if (is_cat(j))
-          lo_str = char (cat_lvls{j}{x_lo_v(j)});
-          hi_str = char (cat_lvls{j}{x_hi_v(j)});
+        ci = [];
+        if (! isempty (cinfo) && isfield (cinfo, 'names') && ! isempty (cinfo.names))
+          ci = find (strcmp (cinfo.names, pred{j}));
+        endif
+
+        vidx = find (strcmp (rn, pred{j}));
+        rng  = mdl.VariableInfo.Range{vidx};
+
+        if (! isempty (ci))
+          levels_j = cinfo.levels{ci};
+          lo_str = char (levels_j{1});
+          hi_str = char (levels_j{end});
         else
-          lo_str = num2str (x_lo_v(j), '%g');
-          hi_str = num2str (x_hi_v(j), '%g');
+          lo_str = num2str (rng(1), '%g');
+          hi_str = num2str (rng(2), '%g');
         endif
         ytl{j} = [pred{j}, ': ', lo_str, ' to ', hi_str];
       endfor
@@ -4494,6 +4485,43 @@ function [X_act, is_cat, cat_lvls] = lm_encode_active_predictors (mdl, act, pred
     else
       X_act(:,k) = double (col(:));
     endif
+  endfor
+endfunction
+
+function C = lm_effects_contrasts (mdl)
+  if (! any (any (mdl.TermsMatrix(:, 1:end-1) != 0)))
+    C = [];
+    return;
+  endif
+
+  p     = mdl.NumPredictors;
+  act   = mdl.ObservationInfo.Subset;
+  pred  = mdl.PredictorNames;
+  cinfo = mdl.CatLevelInfo;
+  ename = mdl.EncPredictorNames;
+
+  [X_act, is_cat, cat_lvls] = lm_encode_active_predictors (mdl, act, pred, cinfo);
+
+  C = zeros (p, mdl.NumCoefficients);
+
+  for j = 1:p
+    if (is_cat(j))
+      x_lo = 1;
+      x_hi = numel (cat_lvls{j});
+    else
+      x_lo = min (X_act(:,j));
+      x_hi = max (X_act(:,j));
+    endif
+
+    X_hi_rows = X_act;  X_hi_rows(:,j) = x_hi;
+    X_lo_rows = X_act;  X_lo_rows(:,j) = x_lo;
+
+    X_hi_enc = reencode_predictors (X_hi_rows, pred, cinfo, ename);
+    X_lo_enc = reencode_predictors (X_lo_rows, pred, cinfo, ename);
+    D_hi     = build_design (mdl.TermsMatrix, X_hi_enc);
+    D_lo     = build_design (mdl.TermsMatrix, X_lo_enc);
+
+    C(j,:) = mean (D_hi - D_lo, 1);
   endfor
 endfunction
 
