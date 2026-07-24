@@ -355,6 +355,9 @@ classdef CompactLinearModel
     ## Predictor names after categorical dummy expansion
     EncPredictorNames = {};
 
+    ## Cached per-predictor design contrasts used by plotEffects
+    EffectContrasts = [];
+
     ## Whether the model includes an intercept term
     HasIntercept = true;
 
@@ -488,6 +491,7 @@ classdef CompactLinearModel
       this.TermsMatrix       = mdl.TermsMatrix;
       this.CatLevelInfo      = mdl.CatLevelInfo;
       this.EncPredictorNames = mdl.EncPredictorNames;
+      this.EffectContrasts   = mdl.EffectContrasts;
       this.HasIntercept      = mdl.HasIntercept;
       this.ModelFitVsNullModel  = mdl.ModelFitVsNullModel;
 
@@ -968,9 +972,149 @@ classdef CompactLinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {CompactLinearModel} {} plotEffects (@var{mdl})
+    ## @deftypefnx {CompactLinearModel} {} plotEffects (@var{ax}, @var{mdl})
+    ## @deftypefnx {CompactLinearModel} {@var{h} =} plotEffects (@dots{})
+    ##
+    ## Plot the main effects of each predictor in a compact linear regression
+    ## model.
+    ##
+    ## @code{plotEffects (@var{mdl})} creates a horizontal dot-and-line plot
+    ## with one row per predictor.  Each dot shows the estimated main effect on
+    ## the response from changing that predictor from its minimum observed value
+    ## to its maximum observed value, while holding all other predictors fixed
+    ## at their observed means.  A horizontal line through each dot shows the
+    ## 95% confidence interval for that effect.
+    ##
+    ## The main effect for predictor @var{xs} is defined as
+    ## @math{g(x_{s,\max}) - g(x_{s,\min})}, where the adjusted response
+    ## function @math{g} evaluates the model at the specified value of
+    ## @var{xs} with all other predictors set to their observed means.
+    ## For numeric predictors the sign of the effect can be positive or
+    ## negative depending on the direction of the relationship.  Because a
+    ## @code{CompactLinearModel} does not retain the training data, these
+    ## values come from a summary computed once when the model was fitted,
+    ## rather than recomputed from the original observations.
+    ##
+    ## @code{plotEffects (@var{ax}, @var{mdl})} creates the plot in the axes
+    ## object @var{ax} instead of the current axes returned by @code{gca}.
+    ##
+    ## @code{@var{h} = plotEffects (@dots{})} returns a vector of
+    ## @math{p+1} graphics handles where @math{p} is the number of predictors.
+    ## @code{h(1)} is the line object containing the effect estimate markers
+    ## (one circle per predictor, plotted as a single line object with
+    ## @code{XData} of length @math{p} and @code{YData = 1:p}).
+    ## @code{h(j+1)} is the confidence interval line for predictor @math{j},
+    ## with @code{XData = [ci_lo, ci_hi]} and @code{YData = [j, j]}.
+    ##
+    ## The y-axis tick labels follow the format
+    ## @qcode{'varname: min to max'}, showing the predictor name and the
+    ## minimum and maximum observed values used to compute the effect.
+    ##
+    ## @end deftypefn
+    function h = plotEffects (this, varargin)
+      [ax, mdl, args] = cm_plot_axes (this, varargin);
+
+      if (! isempty (args))
+        error ("plotEffects: Wrong number of arguments.");
+      endif
+
+      p = mdl.NumPredictors;
+      if (! any (any (mdl.TermsMatrix(:, 1:end-1) != 0)))
+        error ("plotEffects: Model has no predictors.");
+      endif
+
+      if (isempty (ax))
+        ax = gca ();
+      endif
+
+      DEF_COLOR = [0.1490, 0.5490, 0.8660];
+
+      pred   = mdl.PredictorNames;
+      V      = mdl.CoefficientCovariance;
+      beta   = mdl.Coefficients.Estimate;
+      t_crit = tinv (0.975, mdl.DFE);
+      cinfo  = mdl.CatLevelInfo;
+      C      = mdl.EffectContrasts;
+
+      effects = zeros (1, p);
+      ci_lo   = zeros (1, p);
+      ci_hi   = zeros (1, p);
+
+      for j = 1:p
+        effects(j) = C(j,:) * beta;
+        SE         = sqrt (max (0, C(j,:) * V * C(j,:)'));
+
+        ci_lo(j) = effects(j) - t_crit * SE;
+        ci_hi(j) = effects(j) + t_crit * SE;
+      endfor
+
+      hold (ax, 'on');
+      h(1) = plot (ax, effects, 1:p, ...
+                   'LineStyle', 'none', ...
+                   'Marker', 'o', ...
+                   'MarkerSize', 6, ...
+                   'Color', DEF_COLOR);
+      for j = 1:p
+        h(j+1) = line ([ci_lo(j), ci_hi(j)], [j, j], ...
+                        'LineStyle', '-', ...
+                        'Marker', 'none', ...
+                        'Color', DEF_COLOR, ...
+                        'Parent', ax);
+      endfor
+      hold (ax, 'off');
+
+      rn  = mdl.VariableInfo.Properties.RowNames;
+      ytl = cell (p, 1);
+      for j = 1:p
+        ci = [];
+        if (! isempty (cinfo) && isfield (cinfo, 'names') && ! isempty (cinfo.names))
+          ci = find (strcmp (cinfo.names, pred{j}));
+        endif
+
+        vidx = find (strcmp (rn, pred{j}));
+        rng  = mdl.VariableInfo.Range{vidx};
+
+        if (! isempty (ci))
+          levels_j = cinfo.levels{ci};
+          lo_str = char (levels_j{1});
+          hi_str = char (levels_j{end});
+        else
+          lo_str = num2str (rng(1), '%g');
+          hi_str = num2str (rng(2), '%g');
+        endif
+        ytl{j} = [pred{j}, ': ', lo_str, ' to ', hi_str];
+      endfor
+
+      set (ax, 'YTick', 1:p, 'YTickLabel', ytl, 'YDir', 'reverse');
+      ylim  (ax, [0.5, p + 0.5]);
+      xlabel (ax, 'Main Effect');
+      ylabel (ax, '');
+      title (ax, 'Main Effects Plot');
+
+      if (nargout == 0)
+        clear h;
+      endif
+
+    endfunction
+
   endmethods
 
 endclassdef
+
+function [ax, mdl, args] = cm_plot_axes (this, rest)
+
+  if (isscalar (this) && isgraphics (this, 'axes'))
+    ax   = this;
+    mdl  = rest{1};
+    args = rest(2:end);
+  else
+    ax   = [];
+    mdl  = this;
+    args = rest;
+  endif
+endfunction
 
 %!shared mdl, cmdl, X, y, n
 %! n = 20;
@@ -1507,6 +1651,193 @@ endclassdef
 %! assert_equal (feval (cm, 2800, '82'), 21.999999999999996, 1e-9);
 %! assert_equal (isnan (feval (cm, 2500, '99')), true);
 
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotEffects (ax, cmdl);
+%! xd1 = get (h(1), 'XData');
+%! yd1 = get (h(1), 'YData');
+%! xd2 = get (h(2), 'XData');
+%! yd2 = get (h(2), 'YData');
+%! xd3 = get (h(3), 'XData');
+%! yd3 = get (h(3), 'YData');
+%! ytl = get (ax, 'YTickLabel');
+%! assert_equal (numel (h), 3);
+%! assert_equal (xd1(1), 2.38302891604232, -1e-10);
+%! assert_equal (xd1(2), -19.5277648300125, -1e-10);
+%! assert_equal (yd1, [1 2]);
+%! assert_equal (xd2(1), 1.39673712385796, -1e-10);
+%! assert_equal (xd2(2), 3.36932070822668, -1e-10);
+%! assert_equal (yd2, [1 1]);
+%! assert_equal (xd3(1), -20.4857975891918, -1e-10);
+%! assert_equal (xd3(2), -18.5697320708331, -1e-10);
+%! assert_equal (yd3, [2 2]);
+%! assert_equal (get (h(1), 'Color'), [0.1490 0.5490 0.8660], 1e-4);
+%! assert_equal (get (h(2), 'Color'), [0.1490 0.5490 0.8660], 1e-4);
+%! assert_equal (get (h(3), 'Color'), [0.1490 0.5490 0.8660], 1e-4);
+%! assert_equal (get (h(1), 'Marker'), 'o');
+%! assert_equal (get (h(1), 'LineStyle'), 'none');
+%! assert_equal (get (h(2), 'LineStyle'), '-');
+%! assert_equal (get (h(2), 'Marker'), 'none');
+%! assert_equal (get (h(3), 'LineStyle'), '-');
+%! assert_equal (get (h(3), 'Marker'), 'none');
+%! assert_equal (mean (xd2), xd1(1), 1e-10);
+%! assert_equal (mean (xd3), xd1(2), 1e-10);
+%! assert_equal (get (get (ax, 'xlabel'), 'string'), 'Main Effect');
+%! assert_equal (get (get (ax, 'ylabel'), 'string'), '');
+%! assert_equal (get (get (ax, 'title'), 'string'), 'Main Effects Plot');
+%! assert_equal (get (ax, 'YTick'), [1 2]);
+%! assert_equal (ytl{1}, 'x1: 0.05 to 1');
+%! assert_equal (ytl{2}, 'x2: 0.05 to 20');
+%! close (fig);
+
+%!test
+%! ## 3-predictor model
+%! X3 = [X, sin((1:n)' * pi / n)];
+%! y3 = X3 * [3; -1; 2] + 0.1 * cos ((1:n)' * pi / 7);
+%! cm3 = compact (fitlm (X3, y3));
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotEffects (ax, cm3);
+%! xd1 = get (h(1), 'XData');
+%! yd1 = get (h(1), 'YData');
+%! xd2 = get (h(2), 'XData');
+%! yd2 = get (h(2), 'YData');
+%! xd3 = get (h(3), 'XData');
+%! yd3 = get (h(3), 'YData');
+%! xd4 = get (h(4), 'XData');
+%! yd4 = get (h(4), 'YData');
+%! ytl = get (ax, 'YTickLabel');
+%! assert_equal (numel (h), 4);
+%! assert_equal (xd1(1), 8.10687671732127, -1e-10);
+%! assert_equal (xd1(2), -25.4487243632125, -1e-10);
+%! assert_equal (xd1(3), 0.661302203942261, -1e-10);
+%! assert_equal (yd1, [1 2 3]);
+%! assert_equal (xd2(1), 0.565266595687836, -1e-10);
+%! assert_equal (xd2(2), 15.6484868389547, -1e-10);
+%! assert_equal (yd2, [1 1]);
+%! assert_equal (xd3(1), -33.3368582824351, -1e-10);
+%! assert_equal (xd3(2), -17.5605904439899, -1e-10);
+%! assert_equal (yd3, [2 2]);
+%! assert_equal (xd4(1), -1.25582490831999, -1e-10);
+%! assert_equal (xd4(2), 2.57842931620451, -1e-10);
+%! assert_equal (yd4, [3 3]);
+%! assert_equal (get (ax, 'YTick'), [1 2 3]);
+%! assert_equal (ytl{1}, 'x1: 0.05 to 1');
+%! assert_equal (ytl{2}, 'x2: 0.05 to 20');
+%! assert_equal (ytl{3}, 'x3: 1.22465e-16 to 1');
+%! assert_equal (mean (xd2), xd1(1), 1e-10);
+%! assert_equal (mean (xd3), xd1(2), 1e-10);
+%! assert_equal (mean (xd4), xd1(3), 1e-10);
+%! close (fig);
+
+%!test
+%! cme = compact (fitlm (X, y, 'Exclude', [2, 7]));
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotEffects (ax, cme);
+%! xd1 = get (h(1), 'XData');
+%! yd1 = get (h(1), 'YData');
+%! xd2 = get (h(2), 'XData');
+%! yd2 = get (h(2), 'YData');
+%! xd3 = get (h(3), 'XData');
+%! yd3 = get (h(3), 'YData');
+%! ytl = get (ax, 'YTickLabel');
+%! assert_equal (numel (h), 3);
+%! assert_equal (xd1(1), 2.50035744908398, -1e-10);
+%! assert_equal (xd1(2), -19.5912988214488, -1e-10);
+%! assert_equal (yd1, [1 2]);
+%! assert_equal (xd2(1), 1.40421088339552, -1e-10);
+%! assert_equal (xd2(2), 3.59650401477245, -1e-10);
+%! assert_equal (yd2, [1 1]);
+%! assert_equal (xd3(1), -20.6333076647782, -1e-10);
+%! assert_equal (xd3(2), -18.5492899781194, -1e-10);
+%! assert_equal (yd3, [2 2]);
+%! assert_equal (ytl{1}, 'x1: 0.05 to 1');
+%! assert_equal (ytl{2}, 'x2: 0.05 to 20');
+%! assert_equal (mean (xd2), xd1(1), 1e-10);
+%! assert_equal (mean (xd3), xd1(2), 1e-10);
+%! close (fig);
+
+%!test
+%! cmw = compact (fitlm (X, y, 'Weights', (1:n)' / sum (1:n)));
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotEffects (ax, cmw);
+%! xd1 = get (h(1), 'XData');
+%! yd1 = get (h(1), 'YData');
+%! xd2 = get (h(2), 'XData');
+%! yd2 = get (h(2), 'YData');
+%! xd3 = get (h(3), 'XData');
+%! yd3 = get (h(3), 'YData');
+%! ytl = get (ax, 'YTickLabel');
+%! assert_equal (numel (h), 3);
+%! assert_equal (xd1(1), 2.51587141860715, -1e-10);
+%! assert_equal (xd1(2), -19.6411669663483, -1e-10);
+%! assert_equal (yd1, [1 2]);
+%! assert_equal (xd2(1), 1.08491557053384, -1e-10);
+%! assert_equal (xd2(2), 3.94682726668046, -1e-10);
+%! assert_equal (yd2, [1 1]);
+%! assert_equal (xd3(1), -20.8383905241664, -1e-10);
+%! assert_equal (xd3(2), -18.4439434085302, -1e-10);
+%! assert_equal (yd3, [2 2]);
+%! assert_equal (ytl{1}, 'x1: 0.05 to 1');
+%! assert_equal (ytl{2}, 'x2: 0.05 to 20');
+%! assert_equal (mean (xd2), xd1(1), 1e-10);
+%! assert_equal (mean (xd3), xd1(2), 1e-10);
+%! close (fig);
+
+%!test
+%! cmni = compact (fitlm (X, y, 'Intercept', false));
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotEffects (ax, cmni);
+%! xd1 = get (h(1), 'XData');
+%! yd1 = get (h(1), 'YData');
+%! xd2 = get (h(2), 'XData');
+%! yd2 = get (h(2), 'YData');
+%! xd3 = get (h(3), 'XData');
+%! yd3 = get (h(3), 'YData');
+%! ytl = get (ax, 'YTickLabel');
+%! assert_equal (numel (h), 3);
+%! assert_equal (xd1(1), 2.81335053251731, -1e-10);
+%! assert_equal (xd1(2), -19.8951125513936, -1e-10);
+%! assert_equal (yd1, [1 2]);
+%! assert_equal (xd2(1), 2.36234515544211, -1e-10);
+%! assert_equal (xd2(2), 3.26435590959250, -1e-10);
+%! assert_equal (yd2, [1 1]);
+%! assert_equal (xd3(1), -20.4919734818287, -1e-10);
+%! assert_equal (xd3(2), -19.2982516209584, -1e-10);
+%! assert_equal (yd3, [2 2]);
+%! assert_equal (ytl{1}, 'x1: 0.05 to 1');
+%! assert_equal (ytl{2}, 'x2: 0.05 to 20');
+%! assert_equal (mean (xd2), xd1(1), 1e-10);
+%! assert_equal (mean (xd3), xd1(2), 1e-10);
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! ax = axes (fig);
+%! h = plotEffects (ax, cmdl);
+%! assert_equal (isequal (get (h(1), 'Parent'), ax), true);
+%! assert_equal (get (h(1), 'XData'), [2.38302891604232, -19.5277648300125], -1e-10);
+%! close (fig);
+
+%!test
+%! fig = figure ('visible', 'off');
+%! h = plotEffects (cmdl);
+%! assert_equal (isequal (get (h(1), 'Parent'), gca ()), true);
+%! assert_equal (get (h(1), 'XData'), [2.38302891604232, -19.5277648300125], -1e-10);
+%! close (fig);
+
+%!test
+%! h1 = plotEffects (mdl);
+%! h2 = plotEffects (cmdl);
+%! assert_equal (get (h1(1), 'XData'), get (h2(1), 'XData'), 1e-10);
+%! assert_equal (get (h1(2), 'XData'), get (h2(2), 'XData'), 1e-10);
+%! assert_equal (get (h1(3), 'XData'), get (h2(3), 'XData'), 1e-10);
+%! close all;
+
 %!error <CompactLinearModel: invalid model object.> CompactLinearModel (123)
 %!error <() indexing is not supported> cmdl(1)
 %!error <{} indexing is not supported> cmdl{1}
@@ -1544,3 +1875,6 @@ endclassdef
 %!error <X does not contain one or more predictor> feval (cmdl, table ([1;2], 'VariableNames', {'z'}))
 %!error <Predictor data matrix must have 2 columns> feval (cmdl, [])
 %!error <is not categorical> feval (cmdl, '2500', 0.25)
+%!error <Wrong number of arguments> plotEffects (cmdl, 'extra')
+%!error <Wrong number of arguments> plotEffects (cmdl, 'a', 'b')
+%!error <Model has no predictors> plotEffects (compact (fitlm (X(:,1), y, 'constant')))
