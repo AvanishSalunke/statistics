@@ -1330,13 +1330,13 @@ classdef LinearModel
             col_d = y_full;
           endif
           vi_class{j} = 'double';
-          fv = col_d(isfinite (col_d));
+          fv = col_d(subset_mask & isfinite (col_d));
           vi_range{j} = ifelse (isempty (fv), [NaN, NaN], [min(fv), max(fv)]);
         else
           col_d = tbl.(vname);
           vi_class{j} = class (col_d);
           if (isnumeric (col_d))
-            fv = col_d(isfinite (col_d));
+            fv = col_d(subset_mask & isfinite (col_d));
             vi_range{j} = ifelse (isempty (fv), [NaN, NaN], [min(fv), max(fv)]);
           elseif (iscell (col_d))
             vi_range{j} = unique (col_d);
