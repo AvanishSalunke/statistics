@@ -2198,12 +2198,13 @@ endfunction
 %! close (fig);
 
 %!test
+%! fig = figure ('visible', 'off');
 %! h1 = plotEffects (mdl);
 %! h2 = plotEffects (cmdl);
 %! assert_equal (get (h1(1), 'XData'), get (h2(1), 'XData'), 1e-10);
 %! assert_equal (get (h1(2), 'XData'), get (h2(2), 'XData'), 1e-10);
 %! assert_equal (get (h1(3), 'XData'), get (h2(3), 'XData'), 1e-10);
-%! close all;
+%! close (fig);
 
 %!error <CompactLinearModel: invalid model object.> CompactLinearModel (123)
 %!error <() indexing is not supported> cmdl(1)
