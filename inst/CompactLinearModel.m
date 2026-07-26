@@ -358,6 +358,9 @@ classdef CompactLinearModel
     ## Cached per-predictor design contrasts used by plotEffects
     EffectContrasts = [];
 
+    ## Cached per-predictor-pair design contrasts used by plotInteraction
+    InteractionContrasts = [];
+
     ## Whether the model includes an intercept term
     HasIntercept = true;
 
@@ -492,6 +495,7 @@ classdef CompactLinearModel
       this.CatLevelInfo      = mdl.CatLevelInfo;
       this.EncPredictorNames = mdl.EncPredictorNames;
       this.EffectContrasts   = mdl.EffectContrasts;
+      this.InteractionContrasts = mdl.InteractionContrasts;
       this.HasIntercept      = mdl.HasIntercept;
       this.ModelFitVsNullModel  = mdl.ModelFitVsNullModel;
 
@@ -1092,6 +1096,369 @@ classdef CompactLinearModel
       xlabel (ax, 'Main Effect');
       ylabel (ax, '');
       title (ax, 'Main Effects Plot');
+
+      if (nargout == 0)
+        clear h;
+      endif
+
+    endfunction
+
+    ## -*- texinfo -*-
+    ## @deftypefn  {CompactLinearModel} {} plotInteraction (@var{mdl}, @var{var1}, @var{var2})
+    ## @deftypefnx {CompactLinearModel} {} plotInteraction (@var{mdl}, @var{var1}, @var{var2}, @var{ptype})
+    ## @deftypefnx {CompactLinearModel} {} plotInteraction (@var{ax}, @dots{})
+    ## @deftypefnx {CompactLinearModel} {@var{h} =} plotInteraction (@dots{})
+    ##
+    ## Plot the interaction effects of two predictors in a compact linear
+    ## regression model.
+    ##
+    ## @code{plotInteraction (@var{mdl}, @var{var1}, @var{var2})} creates a
+    ## plot of the main effects of @var{var1} and @var{var2} together with
+    ## their conditional effects, with horizontal lines through each effect
+    ## value indicating its 95% confidence interval.  @var{var1} and
+    ## @var{var2} are each a character vector or string naming a variable in
+    ## @code{mdl.VariableNames}, or a positive integer indexing into
+    ## @code{mdl.VariableNames}; neither may name the response variable, and
+    ## they must be different variables.
+    ##
+    ## The main effect of a predictor is the change in the adjusted response
+    ## between the two predictor values that produce the minimum and maximum
+    ## adjusted response, with the other predictor averaged over its own
+    ## observed values row by row.  For a numeric predictor these two values
+    ## are its observed minimum and maximum; for a categorical predictor
+    ## every level is evaluated and the levels producing the minimum and
+    ## maximum adjusted response are used, so the effect is always
+    ## nonnegative.
+    ##
+    ## The conditional effect of @var{var1} is its effect recomputed with
+    ## @var{var2} additionally held fixed at each of a small set of
+    ## conditioning values, and likewise the conditional effect of
+    ## @var{var2} holds @var{var1} fixed.  The conditioning values are the
+    ## observed minimum, mean of the minimum and maximum, and maximum for a
+    ## numeric predictor, or every level for a categorical predictor.  When
+    ## the main effect and conditional effect points for a predictor do not
+    ## align vertically, the model exhibits an interaction between
+    ## @var{var1} and @var{var2}.  Because a @code{CompactLinearModel} does
+    ## not retain the training data, these values come from a summary
+    ## computed once when the model was fitted, rather than recomputed from
+    ## the original observations.
+    ##
+    ## @code{plotInteraction (@var{mdl}, @var{var1}, @var{var2}, @var{ptype})}
+    ## selects the plot type.  @var{ptype} is @qcode{'effects'} (default), as
+    ## described above, or @qcode{'predictions'}, which instead plots the
+    ## adjusted response as a function of @var{var2} for each conditioning
+    ## value of @var{var1} held fixed, evaluated over 101 equally spaced
+    ## points spanning the observed range of @var{var2} when @var{var2} is
+    ## numeric, or at each level of @var{var2} when it is categorical.
+    ##
+    ## @code{plotInteraction (@var{ax}, @dots{})} plots into the axes object
+    ## @var{ax} instead of the current axes returned by @code{gca}.
+    ##
+    ## @code{@var{h} = plotInteraction (@dots{})} returns a vector of line
+    ## handles.  When @var{ptype} is @qcode{'effects'}, @code{h(1)} is the
+    ## marker line through the two main effect points, @code{h(2)} and
+    ## @code{h(3)} are the confidence interval lines for the main effects of
+    ## @var{var1} and @var{var2}, and the remaining entries are the
+    ## conditional effect points and their confidence intervals, tagged
+    ## @qcode{'conditional1'} for @var{var1} and @qcode{'conditional2'} for
+    ## @var{var2}.  The main effect line objects are tagged @qcode{'main'}.
+    ## When @var{ptype} is @qcode{'predictions'}, each entry in @var{h}
+    ## corresponds to one adjusted response curve, one per conditioning
+    ## value of @var{var1}.
+    ##
+    ## @end deftypefn
+    function h = plotInteraction (this, varargin)
+      [ax, mdl, args] = cm_plot_axes (this, varargin);
+
+      if (numel (args) < 2)
+        error ("plotInteraction: Not enough input arguments.");
+      endif
+
+      var1 = args{1};
+      var2 = args{2};
+      args = args(3:end);
+
+      ptype = 'effects';
+      if (! isempty (args) && (ischar (args{1}) || isstring (args{1})))
+        ptype = lower (char (args{1}));
+        args  = args(2:end);
+        if (! any (strcmp (ptype, {'effects', 'predictions'})))
+          error ("plotInteraction: PTYPE must be 'effects' or 'predictions'.");
+        endif
+      endif
+      if (! isempty (args))
+        error ("plotInteraction: Too many input arguments.");
+      endif
+
+      vnames = mdl.VariableNames;
+
+      if (ischar (var1) || isstring (var1))
+        v1name = char (var1);
+        if (isempty (find (strcmp (vnames, v1name))))
+          error ("plotInteraction: '%s' is not a variable for this fit.", v1name);
+        endif
+      elseif (isnumeric (var1) && isscalar (var1))
+        if (var1 != fix (var1) || var1 < 1)
+          error (strcat ("plotInteraction: Variable must be specified as a", " name or a positive integer."));
+        endif
+        if (var1 > numel (vnames))
+          error ("plotInteraction: This model only contains %d variables.", numel (vnames));
+        endif
+        v1name = vnames{var1};
+      else
+        error (strcat ("plotInteraction: Variable must be specified as a", " name or a positive integer."));
+      endif
+      if (strcmp (v1name, mdl.ResponseName))
+        error ("plotInteraction: The variable '%s' is the response in this model.", v1name);
+      endif
+
+      if (ischar (var2) || isstring (var2))
+        v2name = char (var2);
+        if (isempty (find (strcmp (vnames, v2name))))
+          error ("plotInteraction: '%s' is not a variable for this fit.", v2name);
+        endif
+      elseif (isnumeric (var2) && isscalar (var2))
+        if (var2 != fix (var2) || var2 < 1)
+          error (strcat ("plotInteraction: Variable must be specified as a", " name or a positive integer."));
+        endif
+        if (var2 > numel (vnames))
+          error ("plotInteraction: This model only contains %d variables.", numel (vnames));
+        endif
+        v2name = vnames{var2};
+      else
+        error (strcat ("plotInteraction: Variable must be specified as a", " name or a positive integer."));
+      endif
+      if (strcmp (v2name, mdl.ResponseName))
+        error ("plotInteraction: The variable '%s' is the response in this model.", v2name);
+      endif
+
+      if (strcmp (v1name, v2name))
+        error ("plotInteraction: VAR1 and VAR2 must be different variables.");
+      endif
+
+      pred   = mdl.PredictorNames;
+      cinfo  = mdl.CatLevelInfo;
+      beta   = mdl.Coefficients.Estimate;
+      V      = mdl.CoefficientCovariance;
+      t_crit = tinv (0.975, mdl.DFE);
+      C      = mdl.EffectContrasts;
+      IC     = mdl.InteractionContrasts;
+      rn     = mdl.VariableInfo.Properties.RowNames;
+
+      j1 = find (strcmp (pred, v1name));
+      j2 = find (strcmp (pred, v2name));
+
+      is_cat1 = ! isempty (cinfo) && isfield (cinfo, 'names') ...
+                && any (strcmp (cinfo.names, v1name));
+      is_cat2 = ! isempty (cinfo) && isfield (cinfo, 'names') ...
+                && any (strcmp (cinfo.names, v2name));
+
+      if (is_cat1)
+        ci1      = find (strcmp (cinfo.names, v1name));
+        levels_1 = cinfo.levels{ci1};
+        n_lv1    = numel (levels_1);
+        g_lv1    = IC.OwnGridRows{j1} * beta;
+        [~, i_lo1] = min (g_lv1);
+        [~, i_hi1] = max (g_lv1);
+        lbl1 = [v1name, ': ', char(levels_1{i_lo1}), ' to ', char(levels_1{i_hi1})];
+        grid1 = (1:n_lv1)';
+        grid1_lbls = cellfun (@(s) char (s), levels_1, 'UniformOutput', false);
+        eff1 = g_lv1(i_hi1) - g_lv1(i_lo1);
+        c_diff1 = IC.OwnGridRows{j1}(i_hi1,:) - IC.OwnGridRows{j1}(i_lo1,:);
+        se1  = sqrt (max (0, c_diff1 * V * c_diff1'));
+        hi1v = i_hi1;  lo1v = i_lo1;
+      else
+        vidx1 = find (strcmp (rn, v1name));
+        rng1  = mdl.VariableInfo.Range{vidx1};
+        lo1 = rng1(1);  hi1 = rng1(2);
+        lbl1 = [v1name, ': ', num2str(lo1), ' to ', num2str(hi1)];
+        grid1 = [lo1; (lo1+hi1)/2; hi1];
+        grid1_lbls = arrayfun (@(v) num2str(v,'%g'), grid1, 'UniformOutput', false);
+        eff1 = C(j1,:) * beta;
+        se1  = sqrt (max (0, C(j1,:) * V * C(j1,:)'));
+        hi1v = hi1;  lo1v = lo1;
+      endif
+
+      if (is_cat2)
+        ci2      = find (strcmp (cinfo.names, v2name));
+        levels_2 = cinfo.levels{ci2};
+        n_lv2    = numel (levels_2);
+        g_lv2    = IC.OwnGridRows{j2} * beta;
+        [~, i_lo2] = min (g_lv2);
+        [~, i_hi2] = max (g_lv2);
+        lbl2 = [v2name, ': ', char(levels_2{i_lo2}), ' to ', char(levels_2{i_hi2})];
+        grid2 = (1:n_lv2)';
+        grid2_lbls = cellfun (@(s) char (s), levels_2, 'UniformOutput', false);
+        eff2 = g_lv2(i_hi2) - g_lv2(i_lo2);
+        c_diff2 = IC.OwnGridRows{j2}(i_hi2,:) - IC.OwnGridRows{j2}(i_lo2,:);
+        se2  = sqrt (max (0, c_diff2 * V * c_diff2'));
+        hi2v = i_hi2;  lo2v = i_lo2;
+      else
+        vidx2 = find (strcmp (rn, v2name));
+        rng2  = mdl.VariableInfo.Range{vidx2};
+        lo2 = rng2(1);  hi2 = rng2(2);
+        lbl2 = [v2name, ': ', num2str(lo2), ' to ', num2str(hi2)];
+        grid2 = [lo2; (lo2+hi2)/2; hi2];
+        grid2_lbls = arrayfun (@(v) num2str(v,'%g'), grid2, 'UniformOutput', false);
+        eff2 = C(j2,:) * beta;
+        se2  = sqrt (max (0, C(j2,:) * V * C(j2,:)'));
+        hi2v = hi2;  lo2v = lo2;
+      endif
+
+      P12 = IC.Pairs{j1,j2};
+      n2  = numel (grid2);
+      if (isempty (P12))
+        eff_c1 = repmat (eff1, n2, 1);
+        se_c1  = repmat (se1, n2, 1);
+      else
+        n2c = numel (P12.grid2);
+        eff_c1 = zeros (n2, 1);
+        se_c1  = zeros (n2, 1);
+        for k = 1:n2
+          idx1_hi = find (P12.grid1 == hi1v, 1);
+          idx1_lo = find (P12.grid1 == lo1v, 1);
+          idx2_k  = find (P12.grid2 == grid2(k), 1);
+          c_hi = P12.rows((idx1_hi-1)*n2c + idx2_k, :);
+          c_lo = P12.rows((idx1_lo-1)*n2c + idx2_k, :);
+          eff_c1(k) = (c_hi - c_lo) * beta;
+          se_c1(k)  = sqrt (max (0, (c_hi - c_lo) * V * (c_hi - c_lo)'));
+        endfor
+      endif
+
+      P21 = IC.Pairs{j2,j1};
+      n1  = numel (grid1);
+      if (isempty (P21))
+        eff_c2 = repmat (eff2, n1, 1);
+        se_c2  = repmat (se2, n1, 1);
+      else
+        n2c = numel (P21.grid2);
+        eff_c2 = zeros (n1, 1);
+        se_c2  = zeros (n1, 1);
+        for k = 1:n1
+          idx1_hi = find (P21.grid1 == hi2v, 1);
+          idx1_lo = find (P21.grid1 == lo2v, 1);
+          idx2_k  = find (P21.grid2 == grid1(k), 1);
+          c_hi = P21.rows((idx1_hi-1)*n2c + idx2_k, :);
+          c_lo = P21.rows((idx1_lo-1)*n2c + idx2_k, :);
+          eff_c2(k) = (c_hi - c_lo) * beta;
+          se_c2(k)  = sqrt (max (0, (c_hi - c_lo) * V * (c_hi - c_lo)'));
+        endfor
+      endif
+
+      if (isempty (ax))
+        ax = gca ();
+      endif
+      cla (ax);
+
+      DEF_COLOR = [0.1490, 0.5490, 0.8660];
+      FIT_COLOR = [0.9600, 0.4660, 0.1600];
+
+      if (strcmp (ptype, 'effects'))
+
+        y_main1 = 1;
+        y_cond1 = (2:(1+n2))';
+        y_main2 = n2 + 4;
+        y_cond2 = ((n2+5):(n2+4+n1))';
+
+        hold (ax, 'on');
+        line ([0, 0], [0.5, n2 + n1 + 4.5], 'LineStyle', ':', 'Marker', 'none', ...
+              'Color', [0, 0, 0], 'Parent', ax);
+
+        h(1) = plot (ax, [eff1, eff2], [y_main1, y_main2], ...
+                     'LineStyle', 'none', 'Marker', 'o', 'Color', DEF_COLOR, ...
+                     'Tag', 'main');
+        h(2) = line ([eff1 - t_crit*se1, eff1 + t_crit*se1], [y_main1, y_main1], ...
+                     'LineStyle', '-', 'Marker', 'none', 'Color', DEF_COLOR, ...
+                     'Parent', ax, 'Tag', 'main');
+        h(3) = line ([eff2 - t_crit*se2, eff2 + t_crit*se2], [y_main2, y_main2], ...
+                     'LineStyle', '-', 'Marker', 'none', 'Color', DEF_COLOR, ...
+                     'Parent', ax, 'Tag', 'main');
+        h(4) = plot (ax, eff_c1, y_cond1, ...
+                     'LineStyle', 'none', 'Marker', 'o', 'Color', FIT_COLOR, ...
+                     'Tag', 'conditional1');
+        for k = 1:n2
+          h(4+k) = line ([eff_c1(k) - t_crit*se_c1(k), eff_c1(k) + t_crit*se_c1(k)], ...
+                         [y_cond1(k), y_cond1(k)], ...
+                         'LineStyle', '-', 'Marker', 'none', 'Color', FIT_COLOR, ...
+                         'Parent', ax, 'Tag', 'conditional1');
+        endfor
+        h(5+n2) = plot (ax, eff_c2, y_cond2, ...
+                        'LineStyle', 'none', 'Marker', 'o', 'Color', FIT_COLOR, ...
+                        'Tag', 'conditional2');
+        for k = 1:n1
+          h(5+n2+k) = line ([eff_c2(k) - t_crit*se_c2(k), eff_c2(k) + t_crit*se_c2(k)], ...
+                            [y_cond2(k), y_cond2(k)], ...
+                            'LineStyle', '-', 'Marker', 'none', 'Color', FIT_COLOR, ...
+                            'Parent', ax, 'Tag', 'conditional2');
+        endfor
+        hold (ax, 'off');
+
+        ytl = cell (2 + n1 + n2, 1);
+        ytl{1} = lbl1;
+        for k = 1:n2
+          ytl{1+k} = [v2name, '=', grid2_lbls{k}];
+        endfor
+        ytl{2+n2} = lbl2;
+        for k = 1:n1
+          ytl{2+n2+k} = [v1name, '=', grid1_lbls{k}];
+        endfor
+
+        set (ax, 'YTick', [y_main1; y_cond1; y_main2; y_cond2], ...
+                 'YTickLabel', ytl, 'YDir', 'reverse');
+        ylim  (ax, [0.5, n2 + n1 + 4.5]);
+        xlabel (ax, 'Effect');
+        ylabel (ax, '');
+        title  (ax, ['Interaction of ', v1name, ' and ', v2name]);
+
+      else ## 'predictions'
+
+        if (is_cat2)
+          x_grid2 = (1:n_lv2)';
+        else
+          x_grid2 = linspace (lo2, hi2, 101)';
+        endif
+
+        hold (ax, 'on');
+        line (NaN, NaN, 'Color', 'none', 'Parent', ax, 'DisplayName', v1name);
+
+        colors   = get (ax, 'ColorOrder');
+        n_colors = rows (colors);
+
+        n2c = numel (P12.grid2);
+
+        for k = 1:n1
+          idx1_k = find (P12.grid1 == grid1(k), 1);
+          row_lo = (idx1_k - 1) * n2c + 1;
+          row_hi = idx1_k * n2c;
+          rows_k = P12.rows(row_lo:row_hi, :);
+
+          if (is_cat2)
+            y_curve = rows_k * beta;
+          else
+            deg   = n2c - 1;
+            Vm    = (P12.grid2(:)) .^ (0:deg);
+            coefs = Vm \ rows_k;
+            Vq    = (x_grid2(:)) .^ (0:deg);
+            y_curve = Vq * coefs * beta;
+          endif
+
+          h(k) = line (x_grid2, y_curve, ...
+                       'Color', colors(mod(k-1, n_colors)+1, :), ...
+                       'LineStyle', '-', 'Marker', 'none', 'Parent', ax, ...
+                       'DisplayName', grid1_lbls{k});
+        endfor
+        hold (ax, 'off');
+
+        if (is_cat2)
+          set (ax, 'XTick', 1:n_lv2, 'XTickLabel', grid2_lbls);
+        endif
+
+        xlabel (ax, v2name);
+        ylabel (ax, ['Adjusted ', mdl.ResponseName]);
+        title  (ax, ['Interaction of ', v1name, ' and ', v2name]);
+        legend (ax, 'show');
+
+      endif
 
       if (nargout == 0)
         clear h;
@@ -1878,3 +2245,14 @@ endfunction
 %!error <Wrong number of arguments> plotEffects (cmdl, 'extra')
 %!error <Wrong number of arguments> plotEffects (cmdl, 'a', 'b')
 %!error <Model has no predictors> plotEffects (compact (fitlm (X(:,1), y, 'constant')))
+%!error <Not enough input arguments> plotInteraction (cmdl)
+%!error <Not enough input arguments> plotInteraction (cmdl, 'x1')
+%!error <PTYPE must be> plotInteraction (cmdl, 'x1', 'x2', 'badtype')
+%!error <Too many input arguments> plotInteraction (cmdl, 'x1', 'x2', 'effects', 'extra')
+%!error <is not a variable for this fit> plotInteraction (cmdl, 'z', 'x2')
+%!error <is not a variable for this fit> plotInteraction (cmdl, 'x1', 'z')
+%!error <This model only contains> plotInteraction (cmdl, 99, 'x2')
+%!error <Variable must be specified as a name or a positive integer> plotInteraction (cmdl, 1.5, 'x2')
+%!error <is the response in this model> plotInteraction (cmdl, 'y', 'x2')
+%!error <is the response in this model> plotInteraction (cmdl, 'x1', 'y')
+%!error <VAR1 and VAR2 must be different variables> plotInteraction (cmdl, 'x1', 'x1')
