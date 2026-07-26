@@ -2206,6 +2206,202 @@ endfunction
 %! assert_equal (get (h1(3), 'XData'), get (h2(3), 'XData'), 1e-10);
 %! close (fig);
 
+%!test
+%! ## continuous by continuous, effects mode
+%! cmi = compact (fitlm (X, y, 'y ~ x1*x2'));
+%! fig = figure ('visible', 'off');
+%! h   = plotInteraction (cmi, 'x1', 'x2');
+%! assert_equal (numel (h), 11);
+%! assert_equal (get (h(1), 'XData'), [1.76843380852813, -18.8740348676059], 1e-9);
+%! assert_equal (get (h(1), 'YData'), [1, 7]);
+%! assert_equal (get (h(2), 'XData'), [-2.25617028020123, 5.79303789725749], 1e-9);
+%! assert_equal (get (h(3), 'XData'), [-23.1321080641968, -14.615961671015], 1e-9);
+%! assert_equal (get (h(4), 'XData'), ...
+%!   [1.97967308209488, 1.68393809910143, 1.38820311610799], 1e-9);
+%! assert_equal (get (h(4), 'YData'), [2, 3, 4]);
+%! assert_equal (get (h(5), 'XData'), [-0.771057026434185, 4.73040319062394], 1e-9);
+%! assert_equal (get (h(6), 'XData'), [-2.86059582662229, 6.22847202482516], 1e-9);
+%! assert_equal (get (h(7), 'XData'), [-4.99614754441031, 7.77255377662629], 1e-9);
+%! assert_equal (get (h(8), 'XData'), ...
+%!   [-18.5782998846125, -18.8740348676059, -19.1697698505994], 1e-9);
+%! assert_equal (get (h(8), 'YData'), [8, 9, 10]);
+%! assert_equal (get (h(9), 'XData'), [-24.674318784563, -12.4822809846619], 1e-9);
+%! assert_equal (get (h(10), 'XData'), [-23.1321080641968, -14.615961671015], 1e-9);
+%! assert_equal (get (h(11), 'XData'), [-21.6439971135684, -16.6955425876303], 1e-9);
+%! assert_equal (get (h(1), 'Tag'), 'main');
+%! assert_equal (get (h(4), 'Tag'), 'conditional1');
+%! assert_equal (get (h(8), 'Tag'), 'conditional2');
+%! ax = gca ();
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Interaction of x1 and x2');
+%! assert_equal (get (get (ax, 'XLabel'), 'String'), 'Effect');
+%! assert_equal (get (ax, 'YTick'), [1, 2, 3, 4, 7, 8, 9, 10]);
+%! assert_equal (get (ax, 'YTickLabel'), ...
+%!   {'x1: 0.05 to 1'; 'x2=0.05'; 'x2=10.025'; 'x2=20'; ...
+%!    'x2: 0.05 to 20'; 'x1=0.05'; 'x1=0.525'; 'x1=1'});
+%! assert_equal (get (ax, 'YLim'), [0.5, 10.5]);
+%! close (fig);
+
+%!test
+%! ## continuous by continuous, predictions mode
+%! cmi = compact (fitlm (X, y, 'y ~ x1*x2'));
+%! fig = figure ('visible', 'off');
+%! h   = plotInteraction (cmi, 'x1', 'x2', 'predictions');
+%! assert_equal (numel (h), 3);
+%! xd = get (h(1), 'XData');
+%! assert_equal (numel (xd), 101);
+%! assert_equal (xd(1:3), [0.05, 0.2495, 0.449], 1e-9);
+%! assert_equal (xd(end-2:end), [19.601, 19.8005, 20], 1e-9);
+%! yd1 = get (h(1), 'YData');
+%! assert_equal (yd1(1:3), ...
+%!   [0.215349913094656, 0.0295669142485309, -0.156216084597594], 1e-9);
+%! assert_equal (yd1(end-2:end), ...
+%!   [-17.9913839738256, -18.1771669726717, -18.3629499715178], 1e-9);
+%! yd2 = get (h(2), 'YData');
+%! assert_equal (yd2(1:3), [1.20518645414209, 1.01644610546604, 0.827705756789976], 1e-9);
+%! assert_equal (yd2(end-2:end), ...
+%!   [-17.2913677161117, -17.4801080647878, -17.6688484134638], 1e-9);
+%! yd3 = get (h(3), 'YData');
+%! assert_equal (yd3(1:3), [2.19502299518953, 2.00332529668354, 1.81162759817755], 1e-9);
+%! assert_equal (yd3(end-2:end), ...
+%!   [-16.5913514583978, -16.7830491569038, -16.9747468554098], 1e-9);
+%! assert_equal (get (h(1), 'DisplayName'), '0.05');
+%! assert_equal (get (h(2), 'DisplayName'), '0.525');
+%! assert_equal (get (h(3), 'DisplayName'), '1');
+%! ax = gca ();
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Interaction of x1 and x2');
+%! assert_equal (get (get (ax, 'XLabel'), 'String'), 'x2');
+%! assert_equal (get (get (ax, 'YLabel'), 'String'), 'Adjusted y');
+%! close (fig);
+
+%!test
+%! ## swapping var1/var2 order swaps roles and title
+%! cmi = compact (fitlm (X, y, 'y ~ x1*x2'));
+%! fig = figure ('visible', 'off');
+%! h   = plotInteraction (cmi, 'x2', 'x1');
+%! assert_equal (numel (h), 11);
+%! assert_equal (get (h(1), 'XData'), [-18.8740348676059, 1.76843380852813], 1e-9);
+%! assert_equal (get (h(4), 'XData'), ...
+%!   [-18.5782998846125, -18.8740348676059, -19.1697698505994], 1e-9);
+%! assert_equal (get (h(8), 'XData'), ...
+%!   [1.97967308209488, 1.68393809910143, 1.38820311610799], 1e-9);
+%! ax = gca ();
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Interaction of x2 and x1');
+%! assert_equal (get (ax, 'YTickLabel'), ...
+%!   {'x2: 0.05 to 20'; 'x1=0.05'; 'x1=0.525'; 'x1=1'; ...
+%!    'x1: 0.05 to 1'; 'x2=0.05'; 'x2=10.025'; 'x2=20'});
+%! close (fig);
+
+%!test
+%! ## interaction effects: variables given as indices into VariableNames
+%! cmi = compact (fitlm (X, y, 'y ~ x1*x2'));
+%! fig = figure ('visible', 'off');
+%! h   = plotInteraction (cmi, 1, 2);
+%! assert_equal (numel (h), 11);
+%! assert_equal (get (h(1), 'XData'), [1.76843380852813, -18.8740348676059], 1e-9);
+%! assert_equal (get (h(1), 'YData'), [1, 7]);
+%! ax = gca ();
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Interaction of x1 and x2');
+%! close (fig);
+
+%!test
+%! ## interaction effects: explicit axes argument is honored
+%! cmi = compact (fitlm (X, y, 'y ~ x1*x2'));
+%! fig = figure ('visible', 'off');
+%! axtarget = axes (fig);
+%! h   = plotInteraction (axtarget, cmi, 'x1', 'x2');
+%! assert_equal (numel (h), 11);
+%! assert_equal (isequal (get (h(1), 'Parent'), axtarget), true);
+%! assert_equal (isequal (gca (), axtarget), true);
+%! close (fig);
+
+%!test
+%! ## no interaction term: conditional effects collapse to the main effect
+%! cmn = compact (fitlm (X, y, 'y ~ x1 + x2'));
+%! fig = figure ('visible', 'off');
+%! h   = plotInteraction (cmn, 'x1', 'x2');
+%! xd1  = get (h(1), 'XData');
+%! eff1 = xd1(1);
+%! eff2 = xd1(2);
+%! assert_equal (eff1, 2.38302891604232, 1e-9);
+%! assert_equal (eff2, -19.5277648300125, 1e-9);
+%! assert_equal (get (h(4), 'XData'), [eff1, eff1, eff1], 1e-9);
+%! assert_equal (get (h(8), 'XData'), [eff2, eff2, eff2], 1e-9);
+%! close (fig);
+
+%!test
+%! ## categorical by continuous, effects mode
+%! xc   = (1:30)' / 30;
+%! grp  = categorical (repmat ({'A';'B';'C'}, 10, 1));
+%! yv   = 2*xc + 3*double (grp == 'B') - 1*double (grp == 'C') + ...
+%!        1.5*xc.*double (grp == 'B') + 0.3*sin ((1:30)');
+%! tblc = table (yv, xc, grp, 'VariableNames', {'Response','Xc','Group'});
+%! cmdlc = compact (fitlm (tblc, 'Response ~ Xc*Group'));
+%! fig  = figure ('visible', 'off');
+%! h    = plotInteraction (cmdlc, 'Group', 'Xc');
+%! assert_equal (numel (h), 11);
+%! assert_equal (get (h(1), 'XData'), [4.7896970899464, 2.32528157787528], 1e-9);
+%! assert_equal (get (h(2), 'XData'), [4.56862113373247, 5.01077304616034], 1e-9);
+%! assert_equal (get (h(3), 'XData'), [2.02254960835685, 2.62801354739371], 1e-9);
+%! assert_equal (get (h(4), 'XData'), ...
+%!   [4.08328517685389, 4.7896970899464, 5.49610900303892], 1e-9);
+%! assert_equal (get (h(5), 'XData'), [3.64076372661607, 4.52580662709171], 1e-9);
+%! assert_equal (get (h(6), 'XData'), [4.56862113373247, 5.01077304616034], 1e-9);
+%! assert_equal (get (h(7), 'XData'), [5.07555715247022, 5.91666085360761], 1e-9);
+%! assert_equal (get (h(8), 'XData'), ...
+%!   [1.88553612240401, 3.25156621870343, 1.8387423925184], 1e-9);
+%! assert_equal (get (h(9), 'XData'), [1.36118897012269, 2.40988327468532], 1e-9);
+%! assert_equal (get (h(10), 'XData'), [2.72721906642211, 3.77591337098474], 1e-9);
+%! assert_equal (get (h(11), 'XData'), [1.31439524023708, 2.36308954479972], 1e-9);
+%! ax = gca ();
+%! assert_equal (get (get (ax, 'Title'), 'String'), 'Interaction of Group and Xc');
+%! assert_equal (get (ax, 'YTick'), [1, 2, 3, 4, 7, 8, 9, 10]);
+%! assert_equal (get (ax, 'YTickLabel'), ...
+%!   {'Group: C to B'; 'Xc=0.0333333'; 'Xc=0.516667'; 'Xc=1'; ...
+%!    'Xc: 0.033333 to 1'; 'Group=A'; 'Group=B'; 'Group=C'});
+%! close (fig);
+
+%!test
+%! ## categorical by continuous, predictions mode
+%! xc   = (1:30)' / 30;
+%! grp  = categorical (repmat ({'A';'B';'C'}, 10, 1));
+%! yv   = 2*xc + 3*double (grp == 'B') - 1*double (grp == 'C') + ...
+%!        1.5*xc.*double (grp == 'B') + 0.3*sin ((1:30)');
+%! tblc = table (yv, xc, grp, 'VariableNames', {'Response','Xc','Group'});
+%! cmdlc = compact (fitlm (tblc, 'Response ~ Xc*Group'));
+%! fig  = figure ('visible', 'off');
+%! h    = plotInteraction (cmdlc, 'Group', 'Xc', 'predictions');
+%! assert_equal (numel (h), 3);
+%! xd = get (h(1), 'XData');
+%! assert_equal (numel (xd), 101);
+%! assert_equal (xd(1:3), [0.0333333333333333, 0.043, 0.0526666666666667], 1e-9);
+%! assert_equal (xd(end-2:end), [0.980666666666667, 0.990333333333333, 1], 1e-9);
+%! yd1 = get (h(1), 'YData');
+%! assert_equal (yd1(1:3), [0.107201421526318, 0.126056782750359, 0.144912143974399], 1e-9);
+%! assert_equal (yd1(end-2:end), [1.95502682148225, 1.97388218270629, 1.99273754393033], 1e-9);
+%! yd2 = get (h(2), 'YData');
+%! assert_equal (yd2(1:3), [3.18658823804771, 3.21910390023474, 3.25161956242178], 1e-9);
+%! assert_equal (yd2(end-2:end), [6.37312313237707, 6.4056387945641, 6.43815445675114], 1e-9);
+%! yd3 = get (h(3), 'YData');
+%! assert_equal (yd3(1:3), [-0.896696938806178, -0.878309514880994, -0.85992209095581], 1e-9);
+%! assert_equal (yd3(end-2:end), [0.905270605861853, 0.923658029787037, 0.942045453712221], 1e-9);
+%! assert_equal (get (h(1), 'DisplayName'), 'A');
+%! close (fig);
+
+%!test
+%! mi  = fitlm (X, y, 'y ~ x1*x2');
+%! cmi = compact (mi);
+%! fig1 = figure ('visible', 'off');
+%! ax1  = axes (fig1);
+%! h1   = plotInteraction (ax1, mi, 'x1', 'x2');
+%! fig2 = figure ('visible', 'off');
+%! ax2  = axes (fig2);
+%! h2   = plotInteraction (ax2, cmi, 'x1', 'x2');
+%! for k = 1:numel (h1)
+%!   assert_equal (get (h1(k), 'XData'), get (h2(k), 'XData'), 1e-10);
+%! endfor
+%! close (fig1);
+%! close (fig2);
+
 %!error <CompactLinearModel: invalid model object.> CompactLinearModel (123)
 %!error <() indexing is not supported> cmdl(1)
 %!error <{} indexing is not supported> cmdl{1}
