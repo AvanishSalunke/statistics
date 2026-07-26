@@ -681,6 +681,9 @@ classdef LinearModel
     ## Cached per-predictor design contrasts used by plotEffects
     EffectContrasts = [];
 
+    ## Cached per-predictor-pair design contrasts used by plotInteraction
+    InteractionContrasts = [];
+
     ## Encoded predictor matrix (Path B only), cached for refit
     EncodedPredMatrix = [];
 
@@ -1405,6 +1408,7 @@ classdef LinearModel
       this.CatLevelInfo             = cat_info;
       this.EncPredictorNames        = enc_names;
       this.EffectContrasts          = lm_effects_contrasts (this);
+      this.InteractionContrasts     = lm_interaction_contrasts (this);
       this.OrigOpts                 = opts;
       if (! is_formula)
         this.EncodedPredMatrix      = X_enc_sub;
@@ -4522,6 +4526,85 @@ function C = lm_effects_contrasts (mdl)
     D_lo     = build_design (mdl.TermsMatrix, X_lo_enc);
 
     C(j,:) = mean (D_hi - D_lo, 1);
+  endfor
+endfunction
+
+function IC = lm_interaction_contrasts (mdl)
+  p  = mdl.NumPredictors;
+  IC = struct ('OwnGridRows', {cell(1, p)}, 'Pairs', {cell(p, p)});
+  if (p < 2)
+    return;
+  endif
+
+  act   = mdl.ObservationInfo.Subset;
+  pred  = mdl.PredictorNames;
+  cinfo = mdl.CatLevelInfo;
+  ename = mdl.EncPredictorNames;
+  terms = mdl.TermsMatrix;
+  tpred = terms(:, 1:p);
+
+  [X_act, is_cat, cat_lvls] = lm_encode_active_predictors (mdl, act, pred, cinfo);
+
+  grids = cell (1, p);
+  for j = 1:p
+    if (is_cat(j))
+      n_lv = numel (cat_lvls{j});
+      grids{j} = (1:n_lv)';
+      rows_j = zeros (n_lv, mdl.NumCoefficients);
+      for L = 1:n_lv
+        rows_j(L,:) = lm_interaction_row (X_act, j, L, pred, cinfo, ename, terms);
+      endfor
+      IC.OwnGridRows{j} = rows_j;
+    else
+      lo = min (X_act(:,j));
+      hi = max (X_act(:,j));
+      grids{j} = [lo; (lo + hi) / 2; hi];
+    endif
+  endfor
+
+  for j1 = 1:p
+    for j2 = 1:p
+      if (j1 == j2)
+        continue;
+      endif
+
+      shared = tpred(:,j1) > 0 & tpred(:,j2) > 0;
+      if (! any (shared))
+        continue;
+      endif
+
+      grid1 = grids{j1};
+
+      if (is_cat(j2))
+        grid2 = grids{j2};
+      else
+        lo2  = min (X_act(:,j2));
+        hi2  = max (X_act(:,j2));
+        mid2 = (lo2 + hi2) / 2;
+        deg2 = max (tpred(shared, j2));
+        extra_n = max (0, deg2 + 1 - 3);
+        if (extra_n > 0)
+          q = linspace (lo2, hi2, extra_n + 2);
+          grid2 = sort ([lo2; mid2; hi2; q(2:end-1)']);
+        else
+          grid2 = [lo2; mid2; hi2];
+        endif
+      endif
+
+      n1   = numel (grid1);
+      n2   = numel (grid2);
+      rows = zeros (n1 * n2, mdl.NumCoefficients);
+      idx  = 0;
+      for a = 1:n1
+        for b = 1:n2
+          idx = idx + 1;
+          rows(idx,:) = lm_interaction_row (X_act, [j1, j2], [grid1(a), grid2(b)], ...
+                                             pred, cinfo, ename, terms);
+        endfor
+      endfor
+
+      IC.Pairs{j1,j2} = struct ('grid1', grid1, 'grid2', grid2, 'rows', rows);
+    endfor
   endfor
 endfunction
 
