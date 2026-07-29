@@ -1014,14 +1014,8 @@ function [X, y, col_names] = run_model_matrix_builder (schema, data)
         ## Categorical
         n_lev = length (info.levels);
 
-        ## Drop first level if intercept exists to avoid rank deficiency
-        if (has_intercept)
-          start_lev = 2;
-          n_cols = n_lev - 1;
-        else
-          start_lev = 1;
-          n_cols = n_lev;
-        endif
+        start_lev = 2;
+        n_cols = n_lev - 1;
 
         dummies = zeros (n_rows, n_cols);
         dum_names = {};
