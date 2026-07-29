@@ -684,6 +684,9 @@ classdef LinearModel
     ## Cached per-predictor-pair design contrasts used by plotInteraction
     InteractionContrasts = [];
 
+    ## Cached conceptual-term name and design-column grouping used by anova
+    TermGroups = {};
+
     ## Encoded predictor matrix (Path B only), cached for refit
     EncodedPredMatrix = [];
 
@@ -1264,19 +1267,21 @@ classdef LinearModel
       for ci = 1:numel (cat_info.names)
         base_nm  = cat_info.names{ci};
         levels_c = cat_info.levels{ci};
-        for L = 2:numel (levels_c)
+        for L = 1:numel (levels_c)
           dummy_names{end+1} = [base_nm, '_', char(levels_c{L})];
           dummy_bases{end+1} = base_nm;
         endfor
       endfor
 
       if (has_intercept)
-        non_int = coef_names(! strcmp (coef_names, '(Intercept)'));
+        orig_idx = find (! strcmp (coef_names, '(Intercept)'));
       else
-        non_int = coef_names;
+        orig_idx = 1:numel (coef_names);
       endif
+      non_int = coef_names(orig_idx);
 
       disp_terms = {};
+      term_cols  = {};
       for t = 1:numel (non_int)
         factors_t = strsplit (non_int{t}, ':');
         for f = 1:numel (factors_t)
@@ -1286,8 +1291,12 @@ classdef LinearModel
           endif
         endfor
         nm = strjoin (factors_t, ':');
-        if (! any (strcmp (disp_terms, nm)))
+        k = find (strcmp (disp_terms, nm), 1);
+        if (isempty (k))
           disp_terms{end+1} = nm;
+          term_cols{end+1}  = orig_idx(t);
+        else
+          term_cols{k}(end+1) = orig_idx(t);
         endif
       endfor
 
@@ -1409,6 +1418,7 @@ classdef LinearModel
       this.EncPredictorNames        = enc_names;
       this.EffectContrasts          = lm_effects_contrasts (this);
       this.InteractionContrasts     = lm_interaction_contrasts (this);
+      this.TermGroups               = struct ('Name', disp_terms, 'Cols', term_cols);
       this.OrigOpts                 = opts;
       if (! is_formula)
         this.EncodedPredMatrix      = X_enc_sub;
@@ -4054,6 +4064,174 @@ classdef LinearModel
       CVMdl = CompactLinearModel (this);
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {@var{tbl} =} anova (@var{mdl})
+    ## @deftypefnx {LinearModel} {@var{tbl} =} anova (@var{mdl}, @var{anovatype})
+    ## @deftypefnx {LinearModel} {@var{tbl} =} anova (@var{mdl}, @qcode{"components"}, @var{sstype})
+    ##
+    ## Analysis of variance for a linear regression model.
+    ##
+    ## @code{anova (@var{mdl})} returns a table @var{tbl} with component
+    ## ANOVA statistics for every term in @var{mdl} except the constant
+    ## term, computed with hierarchical (@qcode{"h"}) sums of squares.  Each
+    ## row gives @code{SumSq}, @code{DF}, @code{MeanSq}, @code{F}, and
+    ## @code{pValue} for the corresponding term; the trailing @qcode{Error}
+    ## row gives @code{SumSq = @var{mdl}.SSE}, @code{DF = @var{mdl}.DFE},
+    ## @code{MeanSq = @var{mdl}.MSE}, and @code{NaN} for @code{F} and
+    ## @code{pValue}.
+    ##
+    ## @code{anova (@var{mdl}, @var{anovatype})} selects
+    ## @qcode{"components"} (default) or @qcode{"summary"}.  For
+    ## @qcode{"summary"}, @var{tbl} always contains rows @qcode{Total},
+    ## @qcode{Model}, and @qcode{Residual}, and additionally @qcode{. Linear}
+    ## and @qcode{. Nonlinear} whenever @var{mdl} contains an interaction
+    ## term or a continuous term of degree greater than 1.  @qcode{Total}
+    ## reports @code{@var{mdl}.SST} with @code{DF = NumObservations - 1};
+    ## @qcode{Model} reports @code{@var{mdl}.SSR} with @code{DF =
+    ## NumCoefficients - HasIntercept}; @qcode{Residual} reports
+    ## @code{@var{mdl}.SSE} with @code{DF = @var{mdl}.DFE}.
+    ##
+    ## @code{anova (@var{mdl}, @qcode{"components"}, @var{sstype})} selects
+    ## the sum of squares used for the component table: @code{1} (sequential,
+    ## reduction from adding each term in formula order), @code{2} (reduction
+    ## from adding the term to a model containing every term that does not
+    ## contain it), or @qcode{"h"} (default; as Type 2, but a higher-degree
+    ## term in the same continuous variable, such as a squared term, is also
+    ## treated as containing the lower-degree term).  Type 3 sums of squares
+    ## are not yet supported and raise an error.
+    ##
+    ## @end deftypefn
+    function tbl = anova (mdl, varargin)
+      if (numel (varargin) > 2)
+        error ("anova: too many input arguments.");
+      endif
+
+      anovatype = "components";
+      if (numel (varargin) >= 1)
+        anovatype = varargin{1};
+        if (! ischar (anovatype) ...
+            || ! any (strcmpi (anovatype, {"summary", "components"})))
+          error ("anova: ANOVATYPE must be 'summary' or 'components'.");
+        endif
+      endif
+
+      sstype = "h";
+      if (numel (varargin) == 2)
+        if (! strcmpi (anovatype, "components"))
+          error ("anova: SSTYPE can only be specified with ANOVATYPE 'components'.");
+        endif
+        sstype  = varargin{2};
+        valid_n = isnumeric (sstype) && isscalar (sstype) && any (sstype == [1, 2, 3]);
+        valid_h = ischar (sstype) && strcmpi (sstype, "h");
+        if (! valid_n && ! valid_h)
+          error ("anova: SSTYPE must be 1, 2, or 3.");
+        endif
+        if (valid_n && sstype == 3)
+          error ("anova: type 3 sums of squares are not yet supported.");
+        endif
+      endif
+
+      groups = mdl.TermGroups;
+      nterm  = numel (groups);
+      term_cols = {groups.Cols};
+      term_name = {groups.Name};
+
+      if (mdl.HasIntercept)
+        icol = find (strcmp (mdl.CoefficientNames, '(Intercept)'));
+      else
+        icol = [];
+      endif
+
+      X = mdl.DesignMatrix;
+      y = mdl.ResponseVector (mdl.SubsetMask);
+      w = mdl.WeightVector (mdl.SubsetMask);
+      all_cols = 1:columns (X);
+
+      if (strcmpi (anovatype, "summary"))
+
+        is_nonlinear = false (nterm, 1);
+        for k = 1:nterm
+          parts = strsplit (term_name{k}, ':');
+          is_nonlinear(k) = (numel (parts) > 1) || ! isempty (strfind (parts{1}, '^'));
+        endfor
+
+        SumSq = [mdl.SST; mdl.SSR];
+        DF    = [mdl.NumObservations - 1; mdl.NumCoefficients - mdl.HasIntercept];
+        RowNm = {"Total", "Model"};
+
+        if (any (is_nonlinear))
+          lin_cols = union (icol, cell2mat (term_cols(! is_nonlinear)));
+          SS_nl    = LinearModel.anova_delta_sse (X, y, w, lin_cols, all_cols);
+          DF_nl    = numel (all_cols) - numel (lin_cols);
+          SumSq    = [SumSq; SumSq(2) - SS_nl; SS_nl];
+          DF       = [DF; DF(2) - DF_nl; DF_nl];
+          RowNm    = [RowNm, {". Linear", ". Nonlinear"}];
+        endif
+
+        SumSq = [SumSq; mdl.SSE];
+        DF    = [DF; mdl.DFE];
+        RowNm = [RowNm, {"Residual"}];
+
+        MeanSq = SumSq ./ DF;
+        F      = NaN (numel (SumSq), 1);
+        pValue = NaN (numel (SumSq), 1);
+        for r = 2:(numel (SumSq) - 1)
+          F(r)      = MeanSq(r) / mdl.MSE;
+          pValue(r) = betainc (mdl.DFE / (mdl.DFE + DF(r) * F(r)), mdl.DFE / 2, DF(r) / 2);
+        endfor
+
+        tbl = table (SumSq, DF, MeanSq, F, pValue, ...
+          'VariableNames', {'SumSq', 'DF', 'MeanSq', 'F', 'pValue'}, ...
+          'RowNames', RowNm(:));
+
+      else
+
+        use_seq  = isnumeric (sstype) && sstype == 1;
+        extended = ischar (sstype) && strcmpi (sstype, "h");
+
+        if (! use_seq)
+          contain_mx = LinearModel.anova_containment (groups, extended);
+        endif
+
+        SumSq = zeros (nterm, 1);
+        DF    = zeros (nterm, 1);
+        for k = 1:nterm
+          if (use_seq)
+            cmp_cols = union (icol, cell2mat (term_cols(1:k-1)));
+          else
+            keep = true (1, nterm);
+            keep(k) = false;
+            for j = 1:nterm
+              if (j != k && contain_mx(k, j))
+                keep(j) = false;
+              endif
+            endfor
+            cmp_cols = union (icol, cell2mat (term_cols(keep)));
+          endif
+          full_cols = union (cmp_cols, term_cols{k});
+          SumSq(k)  = LinearModel.anova_delta_sse (X, y, w, cmp_cols, full_cols);
+          DF(k)     = numel (term_cols{k});
+        endfor
+
+        MeanSq = SumSq ./ DF;
+        F      = MeanSq / mdl.MSE;
+        pValue = betainc (mdl.DFE ./ (mdl.DFE + DF .* F), mdl.DFE / 2, DF / 2);
+
+        SumSq(end+1)  = mdl.SSE;
+        DF(end+1)     = mdl.DFE;
+        MeanSq(end+1) = mdl.MSE;
+        F(end+1)      = NaN;
+        pValue(end+1) = NaN;
+        RowNm         = [term_name, {"Error"}];
+
+        tbl = table (SumSq, DF, MeanSq, F, pValue, ...
+          'VariableNames', {'SumSq', 'DF', 'MeanSq', 'F', 'pValue'}, ...
+          'RowNames', RowNm(:));
+
+      endif
+
+    endfunction
+
   endmethods
 
   methods(Access = private, Static)
@@ -4153,6 +4331,62 @@ classdef LinearModel
       fit.active_cols = active_cols;
       fit.Fitted      = Fitted;
       fit.Raw         = Raw;
+    endfunction
+
+    function delta = anova_delta_sse (X, y, w, cols_reduced, cols_full)
+      fit_r = LinearModel.lm_fit (X(:, cols_reduced), y, w, false);
+      fit_f = LinearModel.lm_fit (X(:, cols_full), y, w, false);
+      delta = fit_r.SSE - fit_f.SSE;
+    endfunction
+
+    function contain_mx = anova_containment (groups, extended)
+      nterm = numel (groups);
+      factor_list = cell (nterm, 1);
+      for k = 1:nterm
+        parts = strsplit (groups(k).Name, ':');
+        fl = struct ('var', {}, 'exp', {});
+        for f = 1:numel (parts)
+          p = strsplit (parts{f}, '^');
+          if (numel (p) == 2)
+            fl(end+1) = struct ('var', p{1}, 'exp', str2double (p{2}));
+          else
+            fl(end+1) = struct ('var', p{1}, 'exp', 1);
+          endif
+        endfor
+        factor_list{k} = fl;
+      endfor
+
+      contain_mx = false (nterm, nterm);
+      for i = 1:nterm
+        for j = 1:nterm
+          if (i == j)
+            continue;
+          endif
+          fi = factor_list{i};
+          fj = factor_list{j};
+          ok = true;
+          for f = 1:numel (fi)
+            match = false;
+            for g = 1:numel (fj)
+              if (strcmp (fi(f).var, fj(g).var))
+                if (extended)
+                  match = (fj(g).exp >= fi(f).exp);
+                else
+                  match = (fj(g).exp == fi(f).exp);
+                endif
+                if (match)
+                  break;
+                endif
+              endif
+            endfor
+            if (! match)
+              ok = false;
+              break;
+            endif
+          endfor
+          contain_mx(i, j) = ok;
+        endfor
+      endfor
     endfunction
 
     function crit = lm_criteria (fit, n_obs, has_intercept)
@@ -7807,6 +8041,230 @@ endfunction
 %! close (fig);
 
 %!test
+%! ## default h on shared fixture, no polynomial hierarchy present
+%! t = anova (mdl);
+%! assert_equal (t.Properties.RowNames, {'x1'; 'x2'; 'Error'});
+%! assert_equal (t.SumSq(1), 0.590865029026992, -1e-9);
+%! assert_equal (t.DF(1), 1);
+%! assert_equal (t.MeanSq(1), 0.590865029026992, -1e-9);
+%! assert_equal (t.F(1), 25.9858409295, -1e-8);
+%! assert_equal (t.pValue(1), 8.93779416897245e-05, -1e-8);
+%! assert_equal (t.SumSq(2), 42.0518254818947, -1e-9);
+%! assert_equal (t.DF(2), 1);
+%! assert_equal (t.MeanSq(2), 42.0518254818947, -1e-9);
+%! assert_equal (t.F(2), 1849.41059985747, -1e-7);
+%! assert_equal (t.pValue(2), 8.65693830575066e-19, -1e-8);
+%! assert_equal (t.SumSq(3), 0.386545331386823, -1e-9);
+%! assert_equal (t.DF(3), 17);
+%! assert_equal (t.MeanSq(3), 0.0227379606698131, -1e-9);
+%! assert (isnan (t.F(3)));
+%! assert (isnan (t.pValue(3)));
+
+%!test
+%! ## explicit Type 2 on shared fixture reaches the identical result as h
+%! t = anova (mdl, 'components', 2);
+%! assert_equal (t.SumSq(1), 0.590865029026992, -1e-9);
+%! assert_equal (t.MeanSq(1), 0.590865029026992, -1e-9);
+%! assert_equal (t.F(1), 25.9858409295, -1e-8);
+%! assert_equal (t.pValue(1), 8.93779416897245e-05, -1e-8);
+%! assert_equal (t.SumSq(2), 42.0518254818947, -1e-9);
+%! assert_equal (t.MeanSq(2), 42.0518254818947, -1e-9);
+%! assert_equal (t.F(2), 1849.41059985747, -1e-7);
+%! assert_equal (t.pValue(2), 8.65693830575066e-19, -1e-8);
+%! assert_equal (t.SumSq(3), 0.386545331386823, -1e-9);
+%! assert_equal (t.MeanSq(3), 0.0227379606698131, -1e-9);
+
+%!test
+%! ## explicit Type 1 on shared fixture, order-dependent x1 row differs from h
+%! t = anova (mdl, 'components', 1);
+%! assert_equal (t.SumSq(1), 541.472049189064, -1e-9);
+%! assert_equal (t.MeanSq(1), 541.472049189064, -1e-9);
+%! assert_equal (t.F(1), 23813.5713686901, -1e-7);
+%! assert_equal (t.pValue(1), 3.41699381539186e-28, -1e-8);
+%! assert_equal (t.SumSq(2), 42.0518254818947, -1e-9);
+%! assert_equal (t.F(2), 1849.41059985747, -1e-7);
+%! assert_equal (t.SumSq(3), 0.386545331386823, -1e-9);
+%! assert_equal (t.DF(3), 17);
+
+%!test
+%! ## summary table on shared fixture, no Linear/Nonlinear split
+%! t = anova (mdl, 'summary');
+%! assert_equal (t.Properties.RowNames, {'Total'; 'Model'; 'Residual'});
+%! assert_equal (t.SumSq(1), 583.910420002346, -1e-9);
+%! assert_equal (t.DF(1), 19);
+%! assert_equal (t.MeanSq(1), 30.7321273685445, -1e-9);
+%! assert (isnan (t.F(1)));
+%! assert_equal (t.SumSq(2), 583.523874670959, -1e-9);
+%! assert_equal (t.DF(2), 2);
+%! assert_equal (t.MeanSq(2), 291.761937335479, -1e-9);
+%! assert_equal (t.F(2), 12831.4909842738, -1e-7);
+%! assert_equal (t.pValue(2), 9.48988083209278e-28, -1e-8);
+%! assert_equal (t.SumSq(3), 0.386545331386823, -1e-9);
+%! assert_equal (t.DF(3), 17);
+%! assert_equal (t.MeanSq(3), 0.0227379606698131, -1e-9);
+
+%!test
+%! ## polynomial hierarchy, h and Type 2 diverge only on the Age row
+%! Age = [25;31;42;29;55;38;46;33;27;50;41;36;48;30;44];
+%! Sex = categorical ({'M';'F';'F';'M';'M';'F';'M';'F';'F';'M';'F';'M';'F';'M';'F'});
+%! BP  = [118;122;135;120;150;128;140;124;119;145;130;126;138;121;136];
+%! T = table (Age, Sex, BP);
+%! m = fitlm (T, 'BP ~ Sex + Age^2');
+%! t  = anova (m);
+%! t2 = anova (m, 'components', 2);
+%! assert_equal (t.Properties.RowNames, {'Age'; 'Sex'; 'Age^2'; 'Error'});
+%! assert_equal (t.SumSq(1), 1363.92365918468, -1e-9);
+%! assert_equal (t.DF(1), 1);
+%! assert_equal (t.MeanSq(1), 1363.92365918468, -1e-9);
+%! assert_equal (t.F(1), 707.420098987802, -1e-7);
+%! assert_equal (t.pValue(1), 2.46488912775244e-11, -1e-8);
+%! assert_equal (t.SumSq(2), 1.90509548061236, -1e-9);
+%! assert_equal (t.F(2), 0.988107233422164, -1e-9);
+%! assert_equal (t.pValue(2), 0.341568882808456, -1e-9);
+%! assert_equal (t.SumSq(3), 8.58235117456131, -1e-9);
+%! assert_equal (t.F(3), 4.45136916320193, -1e-8);
+%! assert_equal (t.pValue(3), 0.0585944334523874, -1e-9);
+%! assert_equal (t.SumSq(4), 21.2082753550521, -1e-9);
+%! assert_equal (t.DF(4), 11);
+%! assert_equal (t.MeanSq(4), 1.92802503227746, -1e-9);
+%! assert_equal (t2.SumSq(1), 0.209727728295816, -1e-8);
+%! assert_equal (t2.F(1), 0.108778529731057, -1e-9);
+%! assert_equal (t2.pValue(1), 0.747734511582268, -1e-9);
+%! assert_equal (t2.SumSq(2), 1.90509548061236, -1e-9);
+%! assert_equal (t2.SumSq(3), 8.58235117456131, -1e-9);
+%! assert_equal (t2.SumSq(4), 21.2082753550521, -1e-9);
+
+%!test
+%! ## summary table with Linear/Nonlinear split, same polynomial model
+%! Age = [25;31;42;29;55;38;46;33;27;50;41;36;48;30;44];
+%! Sex = categorical ({'M';'F';'F';'M';'M';'F';'M';'F';'F';'M';'F';'M';'F';'M';'F'});
+%! BP  = [118;122;135;120;150;128;140;124;119;145;130;126;138;121;136];
+%! T = table (Age, Sex, BP);
+%! m = fitlm (T, 'BP ~ Sex + Age^2');
+%! t = anova (m, 'summary');
+%! assert_equal (t.Properties.RowNames, ...
+%!   {'Total'; 'Model'; '. Linear'; '. Nonlinear'; 'Residual'});
+%! assert_equal (t.SumSq(1), 1415.73333333333, -1e-9);
+%! assert_equal (t.DF(1), 14);
+%! assert_equal (t.MeanSq(1), 101.12380952381, -1e-9);
+%! assert_equal (t.SumSq(2), 1394.52505797828, -1e-9);
+%! assert_equal (t.DF(2), 3);
+%! assert_equal (t.F(2), 241.097329241452, -1e-7);
+%! assert_equal (t.pValue(2), 2.58928117898032e-10, -1e-8);
+%! assert_equal (t.SumSq(3), 1385.94270680372, -1e-9);
+%! assert_equal (t.DF(3), 2);
+%! assert_equal (t.F(3), 359.420309280577, -1e-7);
+%! assert_equal (t.pValue(3), 9.54785035758658e-11, -1e-8);
+%! assert_equal (t.SumSq(4), 8.58235117456131, -1e-9);
+%! assert_equal (t.DF(4), 1);
+%! assert_equal (t.F(4), 4.45136916320193, -1e-8);
+%! assert_equal (t.pValue(4), 0.0585944334523874, -1e-9);
+%! assert_equal (t.SumSq(5), 21.2082753550521, -1e-9);
+%! assert_equal (t.DF(5), 11);
+%! assert_equal (t.MeanSq(5), 1.92802503227746, -1e-9);
+
+%!test
+%! ## unbalanced categorical interaction, hierarchical model, default h
+%! grpA = categorical ([1;1;2;1;2;1;1;2;1;1;2;1;2;2;1;1;2;1;1;2]);
+%! grpB = categorical ([1;2;1;1;2;2;1;1;2;1;1;2;2;1;2;1;1;2;2;1]);
+%! xv   = (1:20)' / 10;
+%! yv   = 2*(grpA=='2') + 1.5*(grpB=='2') + 0.7*xv + ...
+%!        0.9*(grpA=='2').*(grpB=='2') + ...
+%!        [0.1;-0.2;0.05;0.15;-0.1;0.2;-0.05;0.1;0.0;-0.15; ...
+%!         0.1;0.05;-0.2;0.15;0.0;-0.1;0.05;0.2;-0.05;0.1];
+%! T = table (grpA, grpB, xv, yv);
+%! m  = fitlm (T, 'yv ~ grpA*grpB');
+%! t  = anova (m);
+%! t2 = anova (m, 'components', 1);
+%! assert_equal (t.Properties.RowNames, {'grpA'; 'grpB'; 'grpA:grpB'; 'Error'});
+%! assert_equal (t.SumSq(1), 26.0224323327616, -1e-9);
+%! assert_equal (t.F(1), 138.504723473419, -1e-8);
+%! assert_equal (t.pValue(1), 2.72592668860896e-09, -1e-8);
+%! assert_equal (t.SumSq(2), 15.2365308176101, -1e-9);
+%! assert_equal (t.F(2), 81.0966269640544, -1e-8);
+%! assert_equal (t.pValue(2), 1.15578182042777e-07, -1e-8);
+%! assert_equal (t.SumSq(3), 0.0142868014375564, -1e-8);
+%! assert_equal (t.F(3), 0.0760416803903897, -1e-8);
+%! assert_equal (t.pValue(3), 0.786264832724038, -1e-9);
+%! assert_equal (t.SumSq(4), 3.00609904761905, -1e-9);
+%! assert_equal (t.DF(4), 16);
+%! assert_equal (t.MeanSq(4), 0.18788119047619, -1e-9);
+%! assert_equal (t2.SumSq(1), 16.3540833333333, -1e-9);
+%! assert_equal (t2.F(1), 87.0448142886652, -1e-8);
+%! assert_equal (t2.pValue(1), 7.14746180184104e-08, -1e-8);
+%! assert_equal (t2.SumSq(2), 15.2365308176101, -1e-9);
+%! assert_equal (t2.SumSq(3), 0.0142868014375564, -1e-8);
+
+%!test
+%! ## non-hierarchical model, missing grpB main effect, h still succeeds
+%! grpA = categorical ([1;1;2;1;2;1;1;2;1;1;2;1;2;2;1;1;2;1;1;2]);
+%! grpB = categorical ([1;2;1;1;2;2;1;1;2;1;1;2;2;1;2;1;1;2;2;1]);
+%! xv   = (1:20)' / 10;
+%! yv   = 2*(grpA=='2') + 1.5*(grpB=='2') + 0.7*xv + ...
+%!        0.9*(grpA=='2').*(grpB=='2') + ...
+%!        [0.1;-0.2;0.05;0.15;-0.1;0.2;-0.05;0.1;0.0;-0.15; ...
+%!         0.1;0.05;-0.2;0.15;0.0;-0.1;0.05;0.2;-0.05;0.1];
+%! T = table (grpA, grpB, xv, yv);
+%! m = fitlm (T, 'yv ~ grpA + grpA:grpB');
+%! t = anova (m);
+%! assert_equal (t.Properties.RowNames, {'grpA'; 'grpA:grpB'; 'Error'});
+%! assert_equal (t.SumSq(1), 16.3540833333333, -1e-9);
+%! assert_equal (t.F(1), 22.0110535802411, -1e-8);
+%! assert_equal (t.pValue(1), 0.000209917579961884, -1e-8);
+%! assert_equal (t.SumSq(2), 5.62601666666667, -1e-9);
+%! assert_equal (t.F(2), 7.57208776360619, -1e-8);
+%! assert_equal (t.pValue(2), 0.0136181560209473, -1e-9);
+%! assert_equal (t.SumSq(3), 12.6309, -1e-9);
+%! assert_equal (t.DF(3), 17);
+%! assert_equal (t.MeanSq(3), 0.742994117647059, -1e-9);
+
+%!test
+%! ## no-intercept model
+%! grpA = categorical ([1;1;2;1;2;1;1;2;1;1;2;1;2;2;1;1;2;1;1;2]);
+%! grpB = categorical ([1;2;1;1;2;2;1;1;2;1;1;2;2;1;2;1;1;2;2;1]);
+%! xv   = (1:20)' / 10;
+%! yv   = 2*(grpA=='2') + 1.5*(grpB=='2') + 0.7*xv + ...
+%!        0.9*(grpA=='2').*(grpB=='2') + ...
+%!        [0.1;-0.2;0.05;0.15;-0.1;0.2;-0.05;0.1;0.0;-0.15; ...
+%!         0.1;0.05;-0.2;0.15;0.0;-0.1;0.05;0.2;-0.05;0.1];
+%! T = table (grpA, grpB, xv, yv);
+%! m = fitlm (T, 'yv ~ grpA + grpB - 1');
+%! t = anova (m);
+%! assert_equal (t.SumSq(1), 61.8268470588235, -1e-9);
+%! assert_equal (t.F(1), 243.623106253276, -1e-7);
+%! assert_equal (t.pValue(1), 6.61500434697668e-12, -1e-8);
+%! assert_equal (t.SumSq(2), 43.7088970588235, -1e-9);
+%! assert_equal (t.F(2), 172.230960803226, -1e-7);
+%! assert_equal (t.pValue(2), 1.17906623624869e-10, -1e-8);
+%! assert_equal (t.SumSq(3), 4.56805294117647, -1e-9);
+%! assert_equal (t.DF(3), 18);
+%! assert_equal (t.MeanSq(3), 0.253780718954248, -1e-9);
+
+%!test
+%! ## weighted fit
+%! grpA = categorical ([1;1;2;1;2;1;1;2;1;1;2;1;2;2;1;1;2;1;1;2]);
+%! grpB = categorical ([1;2;1;1;2;2;1;1;2;1;1;2;2;1;2;1;1;2;2;1]);
+%! xv   = (1:20)' / 10;
+%! yv   = 2*(grpA=='2') + 1.5*(grpB=='2') + 0.7*xv + ...
+%!        0.9*(grpA=='2').*(grpB=='2') + ...
+%!        [0.1;-0.2;0.05;0.15;-0.1;0.2;-0.05;0.1;0.0;-0.15; ...
+%!         0.1;0.05;-0.2;0.15;0.0;-0.1;0.05;0.2;-0.05;0.1];
+%! T = table (grpA, grpB, xv, yv);
+%! w = [1.2;0.8;1.5;1.0;0.9;1.1;1.3;0.7;1.0;1.4; ...
+%!      0.8;1.2;1.0;1.1;0.9;1.3;0.7;1.5;1.0;1.2];
+%! m = fitlm (T, 'yv ~ grpA + grpB', 'Weights', w);
+%! t = anova (m);
+%! assert_equal (t.SumSq(1), 26.6364861423312, -1e-9);
+%! assert_equal (t.F(1), 134.770391630163, -1e-8);
+%! assert_equal (t.pValue(1), 1.66729622333192e-09, -1e-8);
+%! assert_equal (t.SumSq(2), 17.4880599694593, -1e-9);
+%! assert_equal (t.F(2), 88.4828681359069, -1e-8);
+%! assert_equal (t.pValue(2), 3.76674631526712e-08, -1e-8);
+%! assert_equal (t.SumSq(3), 3.35993877395756, -1e-9);
+%! assert_equal (t.DF(3), 17);
+%! assert_equal (t.MeanSq(3), 0.197643457291621, -1e-9);
+
+%!test
 %! load hald
 %! Xh = ingredients;
 %! yh = heat;
@@ -8092,3 +8550,8 @@ endfunction
 %!error <is the response in this model> plotInteraction (mdl, 'x1', 'y')
 %!error <VAR1 and VAR2 must be different variables> plotInteraction (mdl, 'x1', 'x1')
 %!error <too many inputs> compact (mdl, 'extra')
+%!error <anova: too many input arguments.> anova (mdl, 'components', 'h', 'extra')
+%!error <anova: ANOVATYPE must be 'summary' or 'components'.> anova (mdl, 'bogus')
+%!error <anova: SSTYPE can only be specified with ANOVATYPE 'components'.> anova (mdl, 'summary', 2)
+%!error <anova: SSTYPE must be 1, 2, or 3.> anova (mdl, 'components', 4)
+%!error <anova: type 3 sums of squares are not yet supported.> anova (mdl, 'components', 3)
