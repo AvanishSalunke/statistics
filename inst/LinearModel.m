@@ -4217,12 +4217,12 @@ classdef LinearModel
         F      = MeanSq / mdl.MSE;
         pValue = betainc (mdl.DFE ./ (mdl.DFE + DF .* F), mdl.DFE / 2, DF / 2);
 
-        SumSq(end+1)  = mdl.SSE;
-        DF(end+1)     = mdl.DFE;
-        MeanSq(end+1) = mdl.MSE;
-        F(end+1)      = NaN;
-        pValue(end+1) = NaN;
-        RowNm         = [term_name, {"Error"}];
+        SumSq  = [SumSq; mdl.SSE];
+        DF     = [DF; mdl.DFE];
+        MeanSq = [MeanSq; mdl.MSE];
+        F      = [F; NaN];
+        pValue = [pValue; NaN];
+        RowNm  = [term_name, {"Error"}];
 
         tbl = table (SumSq, DF, MeanSq, F, pValue, ...
           'VariableNames', {'SumSq', 'DF', 'MeanSq', 'F', 'pValue'}, ...
@@ -8263,6 +8263,23 @@ endfunction
 %! assert_equal (t.SumSq(3), 3.35993877395756, -1e-9);
 %! assert_equal (t.DF(3), 17);
 %! assert_equal (t.MeanSq(3), 0.197643457291621, -1e-9);
+
+%!test
+%! grp3 = categorical ([1;1;1;1;1;2;2;2;2;2;2;2;2;2;3;3;3;3;3;3]);
+%! yy   = [2.1;1.9;2.3;2.0;1.8;4.1;4.3;3.9;4.0;4.2; ...
+%!         4.4;3.8;4.1;4.0;6.1;5.9;6.3;6.0;5.8;6.2];
+%! T = table (grp3, yy);
+%! m = fitlm (T, 'yy ~ grp3');
+%! t = anova (m);
+%! assert_equal (t.Properties.RowNames, {'grp3'; 'Error'});
+%! assert_equal (t.DF(1), 2);
+%! assert_equal (t.SumSq(1), 44.3761111111111, -1e-9);
+%! assert_equal (t.MeanSq(1), 22.1880555555556, -1e-9);
+%! assert_equal (t.F(1), 616.446794988197, -1e-7);
+%! assert_equal (t.pValue(1), 1.36582477075565e-16, -1e-8);
+%! assert_equal (t.SumSq(2), 0.611888888888889, -1e-9);
+%! assert_equal (t.DF(2), 17);
+%! assert_equal (t.MeanSq(2), 0.0359934640522876, -1e-9);
 
 %!test
 %! load hald
