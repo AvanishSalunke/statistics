@@ -4234,7 +4234,7 @@ classdef LinearModel
 
   endmethods
 
-  methods(Access = private, Static)
+  methods (Access = public, Static, Hidden)
 
     ## weighted least-squares via pivoted QR; returns fit struct
     function fit = lm_fit (X, y, w, compute_H)
@@ -4333,6 +4333,65 @@ classdef LinearModel
       fit.Raw         = Raw;
     endfunction
 
+    function crit = lm_criteria (fit, n_obs, has_intercept)
+      p   = fit.rank_X;
+      SSE = fit.SSE;
+      SSR = fit.SSR;
+      SST = fit.SST;
+      DFE = fit.DFE;
+      MSE = fit.MSE;
+
+      LogLikelihood = -(n_obs / 2) * (1 + log (2 * pi * SSE / n_obs));
+
+      AIC  = -2 * LogLikelihood + 2 * p;
+      dAIC = n_obs - p - 1;
+      if (dAIC > 0)
+        AICc = AIC + (2 * p * (p + 1)) / dAIC;
+      else
+        AICc = Inf;
+      endif
+      BIC  = -2 * LogLikelihood + p * log (n_obs);
+      CAIC = BIC + p;
+
+      R2_ord = SSR / max (SST, eps);
+      if (n_obs > 1 && DFE > 0)
+        R2_adj = 1 - (SSE / DFE) / (SST / (n_obs - 1));
+      else
+        R2_adj = NaN;
+      endif
+
+      if (has_intercept && p > 1)
+        df1   = p - 1;
+        Fstat = (SSR / df1) / max (MSE, eps);
+      elseif (! has_intercept && p > 0)
+        df1   = p;
+        Fstat = (SSR / df1) / max (MSE, eps);
+      else
+        df1   = 0;
+        Fstat = NaN;
+      endif
+
+      if (df1 > 0 && DFE > 0 && Fstat >= 0)
+        Fpval = betainc (DFE / (DFE + df1 * Fstat), DFE / 2, df1 / 2);
+      else
+        Fpval = NaN;
+      endif
+
+      crit.LogLikelihood = LogLikelihood;
+      crit.AIC           = AIC;
+      crit.AICc          = AICc;
+      crit.BIC           = BIC;
+      crit.CAIC          = CAIC;
+      crit.Rsquared      = R2_ord;
+      crit.AdjRsquared   = R2_adj;
+      crit.Fstat         = Fstat;
+      crit.Fpval         = Fpval;
+    endfunction
+
+  endmethods
+
+  methods(Access = private, Static)
+
     function delta = anova_delta_sse (X, y, w, cols_reduced, cols_full)
       fit_r = LinearModel.lm_fit (X(:, cols_reduced), y, w, false);
       fit_f = LinearModel.lm_fit (X(:, cols_full), y, w, false);
@@ -4387,61 +4446,6 @@ classdef LinearModel
           contain_mx(i, j) = ok;
         endfor
       endfor
-    endfunction
-
-    function crit = lm_criteria (fit, n_obs, has_intercept)
-      p   = fit.rank_X;
-      SSE = fit.SSE;
-      SSR = fit.SSR;
-      SST = fit.SST;
-      DFE = fit.DFE;
-      MSE = fit.MSE;
-
-      LogLikelihood = -(n_obs / 2) * (1 + log (2 * pi * SSE / n_obs));
-
-      AIC  = -2 * LogLikelihood + 2 * p;
-      dAIC = n_obs - p - 1;
-      if (dAIC > 0)
-        AICc = AIC + (2 * p * (p + 1)) / dAIC;
-      else
-        AICc = Inf;
-      endif
-      BIC  = -2 * LogLikelihood + p * log (n_obs);
-      CAIC = BIC + p;
-
-      R2_ord = SSR / max (SST, eps);
-      if (n_obs > 1 && DFE > 0)
-        R2_adj = 1 - (SSE / DFE) / (SST / (n_obs - 1));
-      else
-        R2_adj = NaN;
-      endif
-
-      if (has_intercept && p > 1)
-        df1   = p - 1;
-        Fstat = (SSR / df1) / max (MSE, eps);
-      elseif (! has_intercept && p > 0)
-        df1   = p;
-        Fstat = (SSR / df1) / max (MSE, eps);
-      else
-        df1   = 0;
-        Fstat = NaN;
-      endif
-
-      if (df1 > 0 && DFE > 0 && Fstat >= 0)
-        Fpval = betainc (DFE / (DFE + df1 * Fstat), DFE / 2, df1 / 2);
-      else
-        Fpval = NaN;
-      endif
-
-      crit.LogLikelihood = LogLikelihood;
-      crit.AIC           = AIC;
-      crit.AICc          = AICc;
-      crit.BIC           = BIC;
-      crit.CAIC          = CAIC;
-      crit.Rsquared      = R2_ord;
-      crit.AdjRsquared   = R2_adj;
-      crit.Fstat         = Fstat;
-      crit.Fpval         = Fpval;
     endfunction
 
   endmethods
