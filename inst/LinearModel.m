@@ -968,15 +968,17 @@ classdef LinearModel
         n_vars        = width (tbl);
         var_names_all = col_names;
 
-        if (ischar (resp_input) && ! isempty (resp_input))
+        if (! isempty (opts.ResponseVar))
+          resp_name = opts.ResponseVar;
+          if (isnumeric (resp_input) && ! isempty (resp_input))
+            y_ext = double (resp_input(:));
+          endif
+        elseif (ischar (resp_input) && ! isempty (resp_input))
           resp_name = resp_input;
         elseif (isstring (resp_input) && ! isempty (resp_input))
           resp_name = char (resp_input);
         elseif (isnumeric (resp_input) && ! isempty (resp_input))
           resp_name = 'y';
-          if (! isempty (opts.ResponseVar))
-            resp_name = opts.ResponseVar;
-          endif
           y_ext = double (resp_input(:));
         elseif (is_formula)
           tparts    = strsplit (modelspec, '~');
@@ -985,8 +987,13 @@ classdef LinearModel
           resp_name = col_names{end};
         endif
 
-        if (! isempty (opts.PredictorVars))
-          pred_names_raw = opts.PredictorVars;
+        if (opts.PredictorVarsGiven)
+          pv = opts.PredictorVars;
+          if (isnumeric (pv) || islogical (pv))
+            pred_names_raw = col_names(pv);
+          else
+            pred_names_raw = pv;
+          endif
         else
           pred_names_raw = col_names(! strcmp (col_names, resp_name));
         endif
@@ -1081,7 +1088,7 @@ classdef LinearModel
             if (cat_logical(j))
               col = tbl_sub.(pred_names_raw{j});
               if (iscell (col))
-                levels_j = unique (col);
+                levels_j = unique (col, 'stable');
               elseif (isa (col, 'categorical'))
                 levels_j = categories (col);
               else
@@ -1129,7 +1136,7 @@ classdef LinearModel
           if (istable (data))
             col = tbl.(pred_names_raw{j});
             if (iscell (col))
-              [cat_str_levels{j}, ~, ic] = unique (col);
+              [cat_str_levels{j}, ~, ic] = unique (col, 'stable');
               X_num_full(:, j) = ic;
             elseif (isa (col, 'categorical'))
               cat_str_levels{j} = categories (col);
@@ -1383,9 +1390,14 @@ classdef LinearModel
       this.LogLikelihood            = LogLikelihood;
       this.ModelCriterion           = struct ('AIC',  AIC, 'AICc', AICc, ...
                                              'BIC',  BIC, 'CAIC', CAIC);
+      if (isnan (Fstat))
+        NullModelName = NaN;
+      else
+        NullModelName = 'constant';
+      endif
       this.ModelFitVsNullModel      = struct ('Fstat',     Fstat, ...
                                              'Pvalue',    Fpval, ...
-                                             'NullModel', 'constant');
+                                             'NullModel', NullModelName);
       this.MSE                      = MSE;
       this.Residuals                = ResidTable;
       this.RMSE                     = RMSE;
@@ -4232,6 +4244,82 @@ classdef LinearModel
 
     endfunction
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {LinearModel} {@var{NewMdl} =} step (@var{mdl})
+    ## @deftypefnx {LinearModel} {@var{NewMdl} =} step (@var{mdl}, @var{Name}, @var{Value})
+    ##
+    ## Improve a fitted linear regression model by one or more steps of
+    ## stepwise term selection.
+    ##
+    ## @code{step} examines whether adding or removing a single term from
+    ## @var{mdl} improves the fit, and returns the resulting model as
+    ## @var{NewMdl}.  The original model @var{mdl} is never modified.  Unlike
+    ## @code{stepwiselm}, @code{step} performs only one such improvement step
+    ## by default; pass @code{'NSteps'} to allow more.
+    ##
+    ## @code{step} accepts the same @code{'Criterion'}, @code{'PEnter'},
+    ## @code{'PRemove'}, @code{'NSteps'}, @code{'Verbose'}, @code{'Lower'},
+    ## and @code{'Upper'} Name-Value options as @code{stepwiselm}, with the
+    ## same defaults, except @code{'NSteps'} defaults to @code{1} rather than
+    ## unlimited.  @var{mdl}'s own predictors, weights, excluded observations,
+    ## and categorical variable settings are carried over automatically as
+    ## the starting point for the search.
+    ##
+    ## @code{step} is not available for a model fitted with robust
+    ## regression.
+    ##
+    ## @seealso{stepwiselm, addTerms, removeTerms}
+    ## @end deftypefn
+    function NewMdl = step (mdl, varargin)
+      if (nargin < 1)
+        error ("step: Not enough input arguments.");
+      endif
+      if (! isempty (mdl.Robust))
+        error ("step: The STEP method is not available with a robust fit.");
+      endif
+      if (mod (numel (varargin), 2) != 0)
+        error ("step: Name-Value arguments must be in pairs.");
+      endif
+
+      has_nsteps = false;
+      for i = 1:2:numel (varargin) - 1
+        if ((ischar (varargin{i}) || isstring (varargin{i})) ...
+            && strcmpi (char (varargin{i}), 'NSteps'))
+          has_nsteps = true;
+        endif
+      endfor
+      extra = varargin;
+      if (! has_nsteps)
+        extra = [extra, {'NSteps', 1}];
+      endif
+
+      cat_vars = {};
+      if (! isempty (mdl.CatLevelInfo) && isfield (mdl.CatLevelInfo, 'names'))
+        cat_vars = mdl.CatLevelInfo.names;
+      endif
+
+      nv_list = {'PredictorVars', mdl.PredictorNames};
+      if (! isempty (mdl.OrigOpts.Weights))
+        nv_list = [nv_list, {'Weights', mdl.OrigOpts.Weights}];
+      endif
+      if (! isempty (mdl.OrigOpts.Exclude))
+        nv_list = [nv_list, {'Exclude', mdl.OrigOpts.Exclude}];
+      endif
+      if (! isempty (cat_vars))
+        nv_list = [nv_list, {'CategoricalVars', cat_vars}];
+      endif
+
+      if (mdl.HasIntercept)
+        formula_str = [mdl.ResponseName, ' ~ ', mdl.Formula.LinearPredictor];
+      elseif (isempty (mdl.Formula.LinearPredictor))
+        formula_str = [mdl.ResponseName, ' ~ -1'];
+      else
+        formula_str = [mdl.ResponseName, ' ~ ', mdl.Formula.LinearPredictor, ' - 1'];
+      endif
+
+      NewMdl = stepwiselm (mdl.Variables, formula_str, nv_list{:}, extra{:});
+    endfunction
+
   endmethods
 
   methods (Access = public, Static, Hidden)
@@ -4278,11 +4366,12 @@ classdef LinearModel
       Fitted = X * beta;
       Raw    = y - Fitted;
 
-      n_eff = sum (w > 0);
-      SSE   = sum (w .* Raw.^2);
-      wmean = sum (w .* y) / max (sum (w), eps);
-      SST   = sum (w .* (y - wmean).^2);
-      SSR   = SST - SSE;
+      n_eff   = sum (w > 0);
+      SumLogW = sum (log (w(w > 0)));
+      SSE     = sum (w .* Raw.^2);
+      wmean   = sum (w .* y) / max (sum (w), eps);
+      SST     = sum (w .* (y - wmean).^2);
+      SSR     = SST - SSE;
 
       DFE = n_eff - rank_X;
       if (DFE > 0)
@@ -4331,6 +4420,7 @@ classdef LinearModel
       fit.active_cols = active_cols;
       fit.Fitted      = Fitted;
       fit.Raw         = Raw;
+      fit.SumLogW     = SumLogW;
     endfunction
 
     function crit = lm_criteria (fit, n_obs, has_intercept)
@@ -4341,7 +4431,7 @@ classdef LinearModel
       DFE = fit.DFE;
       MSE = fit.MSE;
 
-      LogLikelihood = -(n_obs / 2) * (1 + log (2 * pi * SSE / n_obs));
+      LogLikelihood = -(n_obs / 2) * (1 + log (2 * pi * SSE / n_obs)) + 0.5 * fit.SumLogW;
 
       AIC  = -2 * LogLikelihood + 2 * p;
       dAIC = n_obs - p - 1;
@@ -4386,6 +4476,56 @@ classdef LinearModel
       crit.AdjRsquared   = R2_adj;
       crit.Fstat         = Fstat;
       crit.Fpval         = Fpval;
+    endfunction
+
+    function info = sw_extract (mdl0)
+      pred_names = mdl0.PredictorNames;
+      p_raw      = mdl0.NumPredictors;
+      cat_info   = mdl0.CatLevelInfo;
+      enc_names  = mdl0.EncPredictorNames;
+
+      y_sub = mdl0.ResponseVector (mdl0.SubsetMask);
+      w_sub = mdl0.WeightVector (mdl0.SubsetMask);
+
+      if (! isempty (mdl0.EncodedPredMatrix))
+        X_enc_sub = mdl0.EncodedPredMatrix;
+      else
+        tbl_sub = mdl0.Variables (mdl0.SubsetMask, :);
+        X_raw   = zeros (rows (tbl_sub), p_raw);
+        for j = 1:p_raw
+          col = tbl_sub.(pred_names{j});
+          if (iscell (col))
+            ci       = find (strcmp (cat_info.names, pred_names{j}));
+            levels_j = cat_info.levels{ci};
+            codes    = zeros (rows (tbl_sub), 1);
+            for k = 1:numel (levels_j)
+              codes(strcmp (col, levels_j{k})) = k;
+            endfor
+            X_raw(:, j) = codes;
+          elseif (isa (col, 'categorical'))
+            ci       = find (strcmp (cat_info.names, pred_names{j}));
+            levels_j = cat_info.levels{ci};
+            [~, X_raw(:, j)] = ismember (cellstr (col), levels_j);
+          else
+            X_raw(:, j) = double (col);
+          endif
+        endfor
+        X_enc_sub = reencode_predictors (X_raw, pred_names, cat_info, enc_names);
+      endif
+
+      info.terms_enc     = mdl0.TermsMatrix;
+      info.cat_info      = cat_info;
+      info.enc_names     = enc_names;
+      info.pred_names    = pred_names;
+      info.p_raw         = p_raw;
+      info.X_enc         = X_enc_sub;
+      info.y             = y_sub;
+      info.w             = w_sub;
+      info.has_intercept = mdl0.HasIntercept;
+      info.n_obs         = mdl0.NumObservations;
+      info.orig_opts     = mdl0.OrigOpts;
+      info.variables     = mdl0.Variables;
+      info.response_name = mdl0.ResponseName;
     endfunction
 
   endmethods
@@ -4459,6 +4599,14 @@ function opts = lm_parse_nv (nv_args)
   def_vals  = {true, [], [], [], {}, [], '', {}};
   [intercept, weights, exclude, robustopts, varnames, catvars, ...
    respvar, predvars, rem_args] = parsePairedArguments (opt_names, def_vals, nv_args);
+
+  opts.PredictorVarsGiven = false;
+  for i = 1:2:numel (nv_args)
+    if ((ischar (nv_args{i}) || isstring (nv_args{i})) ...
+        && strcmpi (char (nv_args{i}), 'PredictorVars'))
+      opts.PredictorVarsGiven = true;
+    endif
+  endfor
 
   if (! isempty (rem_args))
     error ("LinearModel: Unknown option '%s'.", rem_args{1});
@@ -4549,8 +4697,10 @@ function opts = lm_parse_nv (nv_args)
 
   if (isempty (predvars))
     opts.PredictorVars = {};
-  else
+  elseif (ischar (predvars) || iscellstr (predvars) || isstring (predvars))
     opts.PredictorVars = cellstr (predvars);
+  else
+    opts.PredictorVars = predvars;
   endif
 
 endfunction
@@ -4730,17 +4880,40 @@ function [X_act, is_cat, cat_lvls] = lm_encode_active_predictors (mdl, act, pred
   endfor
 endfunction
 
+function used = lm_predictors_in_model (pred_all, cinfo, ename)
+  n    = numel (pred_all);
+  used = false (1, n);
+  for k = 1:n
+    ci = [];
+    if (! isempty (cinfo) && ! isempty (cinfo.names))
+      ci = find (strcmp (cinfo.names, pred_all{k}));
+    endif
+    if (isempty (ci))
+      used(k) = any (strcmp (ename, pred_all{k}));
+    else
+      levels_k = cinfo.levels{ci};
+      for L = 2:numel (levels_k)
+        nm = sprintf ("%s_%s", pred_all{k}, char (levels_k{L}));
+        if (any (strcmp (ename, nm)))
+          used(k) = true;
+        endif
+      endfor
+    endif
+  endfor
+endfunction
+
 function C = lm_effects_contrasts (mdl)
   if (! any (any (mdl.TermsMatrix(:, 1:end-1) != 0)))
     C = [];
     return;
   endif
 
-  p     = mdl.NumPredictors;
-  act   = mdl.ObservationInfo.Subset;
-  pred  = mdl.PredictorNames;
-  cinfo = mdl.CatLevelInfo;
-  ename = mdl.EncPredictorNames;
+  pred_all = mdl.PredictorNames;
+  cinfo    = mdl.CatLevelInfo;
+  ename    = mdl.EncPredictorNames;
+  pred     = pred_all (lm_predictors_in_model (pred_all, cinfo, ename));
+  p        = numel (pred);
+  act      = mdl.ObservationInfo.Subset;
 
   [X_act, is_cat, cat_lvls] = lm_encode_active_predictors (mdl, act, pred, cinfo);
 
@@ -4768,16 +4941,18 @@ function C = lm_effects_contrasts (mdl)
 endfunction
 
 function IC = lm_interaction_contrasts (mdl)
-  p  = mdl.NumPredictors;
+  pred_all = mdl.PredictorNames;
+  cinfo    = mdl.CatLevelInfo;
+  ename    = mdl.EncPredictorNames;
+  pred     = pred_all (lm_predictors_in_model (pred_all, cinfo, ename));
+  p        = numel (pred);
+
   IC = struct ('OwnGridRows', {cell(1, p)}, 'Pairs', {cell(p, p)});
   if (p < 2)
     return;
   endif
 
   act   = mdl.ObservationInfo.Subset;
-  pred  = mdl.PredictorNames;
-  cinfo = mdl.CatLevelInfo;
-  ename = mdl.EncPredictorNames;
   terms = mdl.TermsMatrix;
   tpred = terms(:, 1:p);
 
@@ -4848,10 +5023,11 @@ endfunction
 
 function fit = lm_robust_fit (X, y, w, wgtfun, tune)
 
-  n  = rows (X);
-  p  = columns (X);
-  w  = w(:);
-  sw = sqrt (w);
+  n       = rows (X);
+  p       = columns (X);
+  w       = w(:);
+  sw      = sqrt (w);
+  SumLogW = sum (log (w(w > 0)));
 
   Xw   = X .* sw;
   yw   = y .* sw;
@@ -4879,6 +5055,7 @@ function fit = lm_robust_fit (X, y, w, wgtfun, tune)
     fit.Fitted        = X * beta;
     fit.Raw           = y - fit.Fitted;
     fit.RobustWeights = ones (n, 1);
+    fit.SumLogW       = SumLogW;
     return;
   endif
   ols_s = norm (y - X * beta) / sqrt (DFE);
@@ -4967,6 +5144,7 @@ function fit = lm_robust_fit (X, y, w, wgtfun, tune)
   fit.Fitted        = Fitted;
   fit.Raw           = Raw;
   fit.RobustWeights = wts;
+  fit.SumLogW       = SumLogW;
 
 endfunction
 
@@ -8286,6 +8464,41 @@ endfunction
 %! assert_equal (t.MeanSq(2), 0.0359934640522876, -1e-9);
 
 %!test
+%! w = (1:n)';
+%! mdl0 = fitlm (X, y, 'Weights', w);
+%! m = step (mdl0, 'Upper', 'quadratic', 'Verbose', 0);
+%! assert_equal (m.NumObservations, 20);
+%! assert_equal (m.NumCoefficients, 3);
+%! assert_equal (m.DFE, 17);
+%! assert_equal (m.SSE, 4.16523310465, 1e-8);
+%! assert_equal (m.CoefficientNames, {'(Intercept)','x1','x2'});
+%! assert_equal (m.Coefficients.Estimate, [0.080321; 2.6483; -0.98452], 1e-4);
+%! assert_equal (m.Formula.LinearPredictor, '1 + x1 + x2');
+
+%!test
+%! mdl0 = fitlm (X, y, 'Exclude', [3 7 15]);
+%! m = step (mdl0, 'Upper', 'quadratic', 'Verbose', 0);
+%! assert_equal (m.NumObservations, 17);
+%! assert_equal (m.NumCoefficients, 3);
+%! assert_equal (m.DFE, 14);
+%! assert_equal (m.SSE, 0.340968585251, 1e-8);
+%! assert_equal (m.CoefficientNames, {'(Intercept)','x1','x2'});
+%! assert_equal (m.Coefficients.Estimate, [0.13263; 2.3566; -0.97211], 1e-4);
+%! assert_equal (m.Formula.LinearPredictor, '1 + x1 + x2');
+
+%!test
+%! mdl0 = fitlm (X, y, 'Intercept', false);
+%! m = step (mdl0, 'Upper', 'quadratic', 'Verbose', 0);
+%! assert_equal (m.NumObservations, 20);
+%! assert_equal (m.NumCoefficients, 2);
+%! assert_equal (m.DFE, 18);
+%! assert_equal (m.SSE, 0.410934843408, 1e-8);
+%! assert_equal (m.Formula.HasIntercept, false);
+%! assert_equal (m.CoefficientNames, {'x1','x2'});
+%! assert_equal (m.Coefficients.Estimate, [2.9614; -0.99725], 1e-4);
+%! assert_equal (m.Formula.LinearPredictor, 'x1 + x2');
+
+%!test
 %! load hald
 %! Xh = ingredients;
 %! yh = heat;
@@ -8576,3 +8789,7 @@ endfunction
 %!error <anova: SSTYPE can only be specified with ANOVATYPE 'components'.> anova (mdl, 'summary', 2)
 %!error <anova: SSTYPE must be 1, 2, or 3.> anova (mdl, 'components', 4)
 %!error <anova: type 3 sums of squares are not yet supported.> anova (mdl, 'components', 3)
+%!error <The STEP method is not available with a robust fit> ...
+%! mdl0 = fitlm (X, y, 'RobustOpts', 'on'); step (mdl0)
+%!error <Name-Value arguments must be in pairs> step (mdl, 'Verbose')
+
