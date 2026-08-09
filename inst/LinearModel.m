@@ -4101,16 +4101,26 @@ classdef LinearModel
     ## reports @code{@var{mdl}.SST} with @code{DF = NumObservations - 1};
     ## @qcode{Model} reports @code{@var{mdl}.SSR} with @code{DF =
     ## NumCoefficients - HasIntercept}; @qcode{Residual} reports
-    ## @code{@var{mdl}.SSE} with @code{DF = @var{mdl}.DFE}.
+    ## @code{@var{mdl}.SSE} with @code{DF = @var{mdl}.DFE}.  Whenever the
+    ## data contains two or more observations sharing identical predictor
+    ## values, @var{tbl} additionally contains @qcode{. Lack of fit} and
+    ## @qcode{. Pure error}, splitting @qcode{Residual} into the part
+    ## explained by replicated observations and the remainder.
     ##
     ## @code{anova (@var{mdl}, @qcode{"components"}, @var{sstype})} selects
     ## the sum of squares used for the component table: @code{1} (sequential,
     ## reduction from adding each term in formula order), @code{2} (reduction
     ## from adding the term to a model containing every term that does not
-    ## contain it), or @qcode{"h"} (default; as Type 2, but a higher-degree
+    ## contain it), @qcode{"h"} (default; as Type 2, but a higher-degree
     ## term in the same continuous variable, such as a squared term, is also
-    ## treated as containing the lower-degree term).  Type 3 sums of squares
-    ## are not yet supported and raise an error.
+    ## treated as containing the lower-degree term), or @code{3} (reduction
+    ## from adding the term to a model containing every other term, with
+    ## categorical predictors recoded using sum-to-zero deviation contrasts
+    ## instead of @var{mdl}'s reference-level coding).  Because Type 3 uses a
+    ## different coding, its @qcode{Error} row can differ from @var{mdl}.SSE
+    ## and @var{mdl}.DFE when @var{mdl} is missing a lower-order relative of
+    ## one of its terms (e.g. an interaction without one of its main
+    ## effects, or a categorical predictor fit without an intercept).
     ##
     ## @end deftypefn
     function tbl = anova (mdl, varargin)
@@ -4137,9 +4147,6 @@ classdef LinearModel
         valid_h = ischar (sstype) && strcmpi (sstype, "h");
         if (! valid_n && ! valid_h)
           error ("anova: SSTYPE must be 1, 2, or 3.");
-        endif
-        if (valid_n && sstype == 3)
-          error ("anova: type 3 sums of squares are not yet supported.");
         endif
       endif
 
@@ -4173,7 +4180,7 @@ classdef LinearModel
 
         if (any (is_nonlinear))
           lin_cols = union (icol, cell2mat (term_cols(! is_nonlinear)));
-          SS_nl    = LinearModel.anova_delta_sse (X, y, w, lin_cols, all_cols);
+          SS_nl    = anova_delta_sse (X, y, w, lin_cols, all_cols);
           DF_nl    = numel (all_cols) - numel (lin_cols);
           SumSq    = [SumSq; SumSq(2) - SS_nl; SS_nl];
           DF       = [DF; DF(2) - DF_nl; DF_nl];
@@ -4189,58 +4196,183 @@ classdef LinearModel
         pValue = NaN (numel (SumSq), 1);
         for r = 2:(numel (SumSq) - 1)
           F(r)      = MeanSq(r) / mdl.MSE;
-          pValue(r) = betainc (mdl.DFE / (mdl.DFE + DF(r) * F(r)), mdl.DFE / 2, DF(r) / 2);
+          pValue(r) = f_pvalue (mdl.DFE, DF(r), F(r));
         endfor
 
-        tbl = table (SumSq, DF, MeanSq, F, pValue, ...
-          'VariableNames', {'SumSq', 'DF', 'MeanSq', 'F', 'pValue'}, ...
-          'RowNames', RowNm(:));
+        pred_names = mdl.PredictorNames;
+        cat_info   = mdl.CatLevelInfo;
+        p_raw      = mdl.NumPredictors;
+        tbl_sub    = mdl.Variables (mdl.SubsetMask, :);
+        X_raw      = anova_decode_raw (tbl_sub, pred_names, cat_info);
+
+        [~, ~, gidx] = unique (X_raw, 'rows');
+        pe_ss = 0;
+        pe_df = 0;
+        for g = 1:max (gidx)
+          rows_g = (gidx == g);
+          w_g    = w(rows_g);
+          y_g    = y(rows_g);
+          wmean  = sum (w_g .* y_g) / sum (w_g);
+          pe_ss  = pe_ss + sum (w_g .* (y_g - wmean).^2);
+          pe_df  = pe_df + sum (rows_g) - 1;
+        endfor
+
+        if (pe_df > 0)
+          lof_ss = mdl.SSE - pe_ss;
+          lof_df = mdl.DFE - pe_df;
+          lof_ms = lof_ss / lof_df;
+          pe_ms  = pe_ss / pe_df;
+          lof_F  = lof_ms / pe_ms;
+          lof_p  = f_pvalue (pe_df, lof_df, lof_F);
+
+          SumSq  = [SumSq; lof_ss; pe_ss];
+          DF     = [DF; lof_df; pe_df];
+          MeanSq = [MeanSq; lof_ms; pe_ms];
+          F      = [F; lof_F; NaN];
+          pValue = [pValue; lof_p; NaN];
+          RowNm  = [RowNm, {". Lack of fit", ". Pure error"}];
+        endif
 
       else
 
-        use_seq  = isnumeric (sstype) && sstype == 1;
-        extended = ischar (sstype) && strcmpi (sstype, "h");
+        use_seq   = isnumeric (sstype) && sstype == 1;
+        use_type3 = isnumeric (sstype) && sstype == 3;
+        extended  = ischar (sstype) && strcmpi (sstype, "h");
 
-        if (! use_seq)
-          contain_mx = LinearModel.anova_containment (groups, extended);
+        if (use_type3)
+
+          pred_names = mdl.PredictorNames;
+          cat_info   = mdl.CatLevelInfo;
+          enc_names  = mdl.EncPredictorNames;
+          p_raw      = mdl.NumPredictors;
+
+          if (! isempty (mdl.EncodedPredMatrix))
+            X_enc = mdl.EncodedPredMatrix;
+          else
+            tbl_sub = mdl.Variables (mdl.SubsetMask, :);
+            X_raw   = anova_decode_raw (tbl_sub, pred_names, cat_info);
+            X_enc   = reencode_predictors (X_raw, pred_names, cat_info, enc_names);
+          endif
+
+          ## deviation (effects) coding: reference level becomes -1
+          enc_pos = 0;
+          for j = 1:p_raw
+            ci = find (strcmp (cat_info.names, pred_names{j}));
+            if (isempty (ci))
+              enc_pos = enc_pos + 1;
+            else
+              n_lev  = numel (cat_info.levels{ci});
+              block  = enc_pos + (1:(n_lev - 1));
+              is_ref = 1 - sum (X_enc(:, block), 2);
+              X_enc(:, block) = X_enc(:, block) - is_ref;
+              enc_pos = enc_pos + n_lev - 1;
+            endif
+          endfor
+
+          D_eff   = build_design (mdl.TermsMatrix, X_enc);
+          Mm      = X \ D_eff;
+          is_hier = (max (max (abs (D_eff - X * Mm))) < 1e-8 * max (max (abs (D_eff)))) ...
+                    && (rcond (Mm) > eps);
+
+          if (is_hier)
+
+            Hinv = inv (Mm);
+            b    = mdl.Coefficients.Estimate;
+            V    = mdl.CoefficientCovariance;
+
+            SumSq  = zeros (nterm, 1);
+            DF     = zeros (nterm, 1);
+            F      = zeros (nterm, 1);
+            pValue = zeros (nterm, 1);
+            for k = 1:nterm
+              Hk        = Hinv(term_cols{k}, :);
+              Hb        = Hk * b;
+              HVH       = Hk * V * Hk';
+              DF(k)     = numel (term_cols{k});
+              F(k)      = (Hb' * (HVH \ Hb)) / DF(k);
+              SumSq(k)  = F(k) * DF(k) * mdl.MSE;
+              pValue(k) = f_pvalue (mdl.DFE, DF(k), F(k));
+            endfor
+            MeanSq = SumSq ./ DF;
+
+            errSumSq  = mdl.SSE;
+            errDF     = mdl.DFE;
+            errMeanSq = mdl.MSE;
+
+          else
+
+            fit_eff  = LinearModel.lm_fit (D_eff, y, w, false);
+            all_cols = 1:columns (D_eff);
+
+            SumSq = zeros (nterm, 1);
+            DF    = zeros (nterm, 1);
+            for k = 1:nterm
+              cmp_cols = setdiff (all_cols, term_cols{k});
+              [SumSq(k), ~, fit_r] = anova_delta_sse ( ...
+                D_eff, y, w, cmp_cols, all_cols, fit_eff);
+              DF(k) = fit_eff.rank_X - fit_r.rank_X;
+            endfor
+
+            errSumSq  = fit_eff.SSE;
+            errDF     = fit_eff.DFE;
+            errMeanSq = fit_eff.MSE;
+            MeanSq    = SumSq ./ DF;
+            F         = MeanSq / errMeanSq;
+            pValue    = NaN (nterm, 1);
+            ok        = DF > 0;
+            pValue(ok) = f_pvalue (errDF, DF(ok), F(ok));
+
+          endif
+
+          SumSq  = [SumSq; errSumSq];
+          DF     = [DF; errDF];
+          MeanSq = [MeanSq; errMeanSq];
+
+        else
+
+          if (! use_seq)
+            contain_mx = anova_containment (groups, extended);
+          endif
+
+          SumSq = zeros (nterm, 1);
+          DF    = zeros (nterm, 1);
+          for k = 1:nterm
+            if (use_seq)
+              cmp_cols = union (icol, cell2mat (term_cols(1:k-1)));
+            else
+              keep = true (1, nterm);
+              keep(k) = false;
+              for j = 1:nterm
+                if (j != k && contain_mx(k, j))
+                  keep(j) = false;
+                endif
+              endfor
+              cmp_cols = union (icol, cell2mat (term_cols(keep)));
+            endif
+            full_cols = union (cmp_cols, term_cols{k});
+            SumSq(k)  = anova_delta_sse (X, y, w, cmp_cols, full_cols);
+            DF(k)     = numel (term_cols{k});
+          endfor
+
+          MeanSq = SumSq ./ DF;
+          F      = MeanSq / mdl.MSE;
+          pValue = f_pvalue (mdl.DFE, DF, F);
+
+          SumSq  = [SumSq; mdl.SSE];
+          DF     = [DF; mdl.DFE];
+          MeanSq = [MeanSq; mdl.MSE];
+
         endif
 
-        SumSq = zeros (nterm, 1);
-        DF    = zeros (nterm, 1);
-        for k = 1:nterm
-          if (use_seq)
-            cmp_cols = union (icol, cell2mat (term_cols(1:k-1)));
-          else
-            keep = true (1, nterm);
-            keep(k) = false;
-            for j = 1:nterm
-              if (j != k && contain_mx(k, j))
-                keep(j) = false;
-              endif
-            endfor
-            cmp_cols = union (icol, cell2mat (term_cols(keep)));
-          endif
-          full_cols = union (cmp_cols, term_cols{k});
-          SumSq(k)  = LinearModel.anova_delta_sse (X, y, w, cmp_cols, full_cols);
-          DF(k)     = numel (term_cols{k});
-        endfor
-
-        MeanSq = SumSq ./ DF;
-        F      = MeanSq / mdl.MSE;
-        pValue = betainc (mdl.DFE ./ (mdl.DFE + DF .* F), mdl.DFE / 2, DF / 2);
-
-        SumSq  = [SumSq; mdl.SSE];
-        DF     = [DF; mdl.DFE];
-        MeanSq = [MeanSq; mdl.MSE];
         F      = [F; NaN];
         pValue = [pValue; NaN];
         RowNm  = [term_name, {"Error"}];
 
-        tbl = table (SumSq, DF, MeanSq, F, pValue, ...
-          'VariableNames', {'SumSq', 'DF', 'MeanSq', 'F', 'pValue'}, ...
-          'RowNames', RowNm(:));
-
       endif
+
+      tbl = table (SumSq, DF, MeanSq, F, pValue, ...
+        'VariableNames', {'SumSq', 'DF', 'MeanSq', 'F', 'pValue'}, ...
+        'RowNames', RowNm(:));
 
     endfunction
 
@@ -4526,66 +4658,6 @@ classdef LinearModel
       info.orig_opts     = mdl0.OrigOpts;
       info.variables     = mdl0.Variables;
       info.response_name = mdl0.ResponseName;
-    endfunction
-
-  endmethods
-
-  methods(Access = private, Static)
-
-    function delta = anova_delta_sse (X, y, w, cols_reduced, cols_full)
-      fit_r = LinearModel.lm_fit (X(:, cols_reduced), y, w, false);
-      fit_f = LinearModel.lm_fit (X(:, cols_full), y, w, false);
-      delta = fit_r.SSE - fit_f.SSE;
-    endfunction
-
-    function contain_mx = anova_containment (groups, extended)
-      nterm = numel (groups);
-      factor_list = cell (nterm, 1);
-      for k = 1:nterm
-        parts = strsplit (groups(k).Name, ':');
-        fl = struct ('var', {}, 'exp', {});
-        for f = 1:numel (parts)
-          p = strsplit (parts{f}, '^');
-          if (numel (p) == 2)
-            fl(end+1) = struct ('var', p{1}, 'exp', str2double (p{2}));
-          else
-            fl(end+1) = struct ('var', p{1}, 'exp', 1);
-          endif
-        endfor
-        factor_list{k} = fl;
-      endfor
-
-      contain_mx = false (nterm, nterm);
-      for i = 1:nterm
-        for j = 1:nterm
-          if (i == j)
-            continue;
-          endif
-          fi = factor_list{i};
-          fj = factor_list{j};
-          ok = true;
-          for f = 1:numel (fi)
-            match = false;
-            for g = 1:numel (fj)
-              if (strcmp (fi(f).var, fj(g).var))
-                if (extended)
-                  match = (fj(g).exp >= fi(f).exp);
-                else
-                  match = (fj(g).exp == fi(f).exp);
-                endif
-                if (match)
-                  break;
-                endif
-              endif
-            endfor
-            if (! match)
-              ok = false;
-              break;
-            endif
-          endfor
-          contain_mx(i, j) = ok;
-        endfor
-      endfor
     endfunction
 
   endmethods
@@ -5146,6 +5218,91 @@ function fit = lm_robust_fit (X, y, w, wgtfun, tune)
   fit.RobustWeights = wts;
   fit.SumLogW       = SumLogW;
 
+endfunction
+
+function [delta, fit_f, fit_r] = anova_delta_sse (X, y, w, cols_reduced, cols_full, fit_f)
+  if (nargin < 6 || isempty (fit_f))
+    fit_f = LinearModel.lm_fit (X(:, cols_full), y, w, false);
+  endif
+  fit_r = LinearModel.lm_fit (X(:, cols_reduced), y, w, false);
+  delta = fit_r.SSE - fit_f.SSE;
+endfunction
+
+function contain_mx = anova_containment (groups, extended)
+  nterm = numel (groups);
+  factor_list = cell (nterm, 1);
+  for k = 1:nterm
+    parts = strsplit (groups(k).Name, ':');
+    fl = struct ('var', {}, 'exp', {});
+    for f = 1:numel (parts)
+      p = strsplit (parts{f}, '^');
+      if (numel (p) == 2)
+        fl(end+1) = struct ('var', p{1}, 'exp', str2double (p{2}));
+      else
+        fl(end+1) = struct ('var', p{1}, 'exp', 1);
+      endif
+    endfor
+    factor_list{k} = fl;
+  endfor
+
+  contain_mx = false (nterm, nterm);
+  for i = 1:nterm
+    for j = 1:nterm
+      if (i == j)
+        continue;
+      endif
+      fi = factor_list{i};
+      fj = factor_list{j};
+      ok = true;
+      for f = 1:numel (fi)
+        match = false;
+        for g = 1:numel (fj)
+          if (strcmp (fi(f).var, fj(g).var))
+            if (extended)
+              match = (fj(g).exp >= fi(f).exp);
+            else
+              match = (fj(g).exp == fi(f).exp);
+            endif
+            if (match)
+              break;
+            endif
+          endif
+        endfor
+        if (! match)
+          ok = false;
+          break;
+        endif
+      endfor
+      contain_mx(i, j) = ok;
+    endfor
+  endfor
+endfunction
+
+function X_raw = anova_decode_raw (tbl_sub, pred_names, cat_info)
+  p_raw = numel (pred_names);
+  X_raw = zeros (rows (tbl_sub), p_raw);
+  for j = 1:p_raw
+    col = tbl_sub.(pred_names{j});
+    if (iscell (col))
+      ci       = find (strcmp (cat_info.names, pred_names{j}));
+      levels_j = cat_info.levels{ci};
+      codes    = zeros (rows (tbl_sub), 1);
+      for k = 1:numel (levels_j)
+        codes(strcmp (col, levels_j{k})) = k;
+      endfor
+      X_raw(:, j) = codes;
+    elseif (isa (col, 'categorical'))
+      ci       = find (strcmp (cat_info.names, pred_names{j}));
+      levels_j = cat_info.levels{ci};
+      [~, X_raw(:, j)] = ismember (cellstr (col), levels_j);
+    else
+      X_raw(:, j) = double (col);
+    endif
+  endfor
+endfunction
+
+function p = f_pvalue (dfe, df, Fstat)
+  p = betainc (dfe ./ (dfe + df .* Fstat), dfe / 2, df / 2);
 endfunction
 
 %!demo
@@ -8464,6 +8621,132 @@ endfunction
 %! assert_equal (t.MeanSq(2), 0.0359934640522876, -1e-9);
 
 %!test
+%! ## type 3 gives different numbers than type 2 here
+%! G3 = categorical ([1;1;1;1;2;2;2;3;3;3;3;1;2;3]);
+%! G2 = categorical ([1;1;2;2;1;2;2;1;1;2;2;2;1;1]);
+%! y1  = [10;12;15;14;9;11;13;16;18;20;22;17;10;19];
+%! T1 = table (G3, G2, y1);
+%! mdl1 = fitlm (T1, 'y1 ~ G3*G2');
+%! t1 = anova (mdl1, 'components', 3);
+%! assert_equal (t1.Properties.RowNames, {'G3'; 'G2'; 'G3:G2'; 'Error'});
+%! assert_equal (t1.SumSq(1), 176.678431372549, -1e-9);
+%! assert_equal (t1.F(1), 44.6345510835913, -1e-8);
+%! assert_equal (t1.pValue(1), 4.57572925304662e-05, -1e-8);
+%! assert_equal (t1.SumSq(2), 38.7604166666666, -1e-9);
+%! assert_equal (t1.F(2), 19.5842105263158, -1e-8);
+%! assert_equal (t1.pValue(2), 0.00221050293676794, -1e-9);
+%! assert_equal (t1.SumSq(3), 1.85490196078431, -1e-9);
+%! assert_equal (t1.SumSq(4), 15.8333333333333, -1e-9);
+%! assert_equal (t1.DF(4), 8);
+%! assert_equal (t1.MeanSq(4), 1.97916666666667, -1e-9);
+
+%!test
+%! ## no intercept, so the error row is not the same as mdl.SSE
+%! G = categorical ([1;1;1;2;2;2;3;3;3;3]);
+%! y1 = [10;12;11;20;22;19;15;17;16;14];
+%! T = table (G, y1);
+%! mdl1 = fitlm (T, 'y1 ~ G - 1');
+%! t = anova (mdl1, 'components', 3);
+%! assert_equal (mdl1.SSE, 374.666666666667, -1e-9);
+%! assert_equal (t.SumSq(1), 171.575757575758, -1e-9);
+%! assert_equal (t.DF(1), 2);
+%! assert_equal (t.F(1), 0.285433418193734, -1e-9);
+%! assert_equal (t.pValue(1), 0.759033523681649, -1e-9);
+%! assert_equal (t.SumSq(2), 2404.42424242424, -1e-8);
+%! assert_equal (t.DF(2), 8);
+%! assert_equal (t.MeanSq(2), 300.55303030303, -1e-8);
+
+%!test
+%! ## duplicate group column, so type 3 should show zero DF
+%! G1 = categorical ([1;1;1;2;2;2;3;3;3;3]);
+%! G2 = G1;
+%! y1  = [10;12;11;20;22;19;15;17;16;14];
+%! T = table (G1, G2, y1);
+%! mdl1 = fitlm (T, 'y1 ~ G1 + G2');
+%! t = anova (mdl1, 'components', 3);
+%! assert_equal (t.Properties.RowNames, {'G1'; 'G2'; 'Error'});
+%! assert_equal (t.SumSq(1), 0, -1e-9);
+%! assert_equal (t.DF(1), 0);
+%! assert (isnan (t.F(1)));
+%! assert (isnan (t.pValue(1)));
+%! assert_equal (t.SumSq(2), 0, -1e-9);
+%! assert_equal (t.DF(2), 0);
+%! assert_equal (t.SumSq(3), 11.6666666666667, -1e-9);
+%! assert_equal (t.DF(3), 7);
+%! assert_equal (t.MeanSq(3), 1.66666666666667, -1e-9);
+
+%!test
+%! ## just an intercept, so only the error row shows up
+%! y1 = [5.1;4.9;5.2;4.8;5.1;4.9;5.2;4.8;5.1;4.9];
+%! T = table (y1);
+%! mdl1 = fitlm (T, 'y1 ~ 1');
+%! t = anova (mdl1, 'components', 3);
+%! assert_equal (t.Properties.RowNames, {'Error'});
+%! assert_equal (t.SumSq(1), 0.22, -1e-9);
+%! assert_equal (t.DF(1), 9);
+%! assert_equal (t.MeanSq(1), 0.0244444444444444, -1e-9);
+
+%!test
+%! ## type 3 with a robust fit
+%! G = categorical ([1;1;1;1;2;2;2;2;3;3;3;3]);
+%! x = (1:12)' / 2;
+%! y1 = 5 + 2*(G=='2') + 4*(G=='3') + 0.3*x;
+%! y1(10) = y1(10) + 20;
+%! T = table (G, x, y1);
+%! mdl1 = fitlm (T, 'y1 ~ G + x', 'RobustOpts', 'on');
+%! t = anova (mdl1, 'components', 3);
+%! assert_equal (t.SumSq(1), 3.35664335664336, -1e-8);
+%! assert_equal (t.F(1), 0.0801017164653529, -1e-8);
+%! assert_equal (t.pValue(1), 0.923753304031669, -1e-9);
+%! assert_equal (t.SumSq(2), 0.337499999999999, -1e-8);
+%! assert_equal (t.F(2), 0.0161079545454545, -1e-8);
+%! assert_equal (t.pValue(2), 0.902138027698746, -1e-9);
+%! assert_equal (t.SumSq(3), 167.619047619048, -1e-7);
+%! assert_equal (t.DF(3), 8);
+%! assert_equal (t.MeanSq(3), 20.9523809523809, -1e-8);
+
+%!test
+%! ## repeated x values, so lack of fit rows should show up
+%! x = [1;1;1;2;3;3;4;5;5;5;6;7];
+%! y1 = [10.1;9.9;10.3;12.0;15.2;14.8;17.5;20.1;19.9;20.3;22.0;25.5];
+%! mdl1 = fitlm (x, y1);
+%! t = anova (mdl1, 'summary');
+%! assert_equal (t.Properties.RowNames, ...
+%!   {'Total'; 'Model'; 'Residual'; '. Lack of fit'; '. Pure error'});
+%! assert_equal (t.SumSq(3), 1.03026642984015, -1e-9);
+%! assert_equal (t.DF(3), 10);
+%! assert_equal (t.SumSq(4), 0.790266429840146, -1e-9);
+%! assert_equal (t.DF(4), 5);
+%! assert_equal (t.F(4), 3.2927767910006, -1e-9);
+%! assert_equal (t.pValue(4), 0.108434644423991, -1e-9);
+%! assert_equal (t.SumSq(5), 0.24, -1e-9);
+%! assert_equal (t.DF(5), 5);
+%! assert_equal (t.MeanSq(5), 0.0480000000000001, -1e-9);
+
+%!test
+%! ## same as above but weighted
+%! x = repmat ((1:4)', 6, 1);
+%! G = categorical (repmat ([1;1;2;2], 6, 1));
+%! y1 = 3 + 0.7*x + 2*(G=='2') + ...
+%!     [0.1;-0.1;0.2;-0.2;0.15;-0.15;0.1;-0.1;-0.05;0.05;0.2;-0.2; ...
+%!      0.1;-0.1;-0.15;0.15;0.2;-0.2;0.05;-0.05;-0.1;0.1;0.15;-0.15];
+%! w = 1 + mod ((0:23)', 3);
+%! T = table (x, G, y1);
+%! mdl1 = fitlm (T, 'y1 ~ x + G', 'Weights', w);
+%! t = anova (mdl1, 'summary');
+%! assert_equal (t.Properties.RowNames, ...
+%!   {'Total'; 'Model'; 'Residual'; '. Lack of fit'; '. Pure error'});
+%! assert_equal (t.SumSq(3), 0.626927083333335, -1e-9);
+%! assert_equal (t.DF(3), 21);
+%! assert_equal (t.SumSq(4), 0.00880208333333332, -1e-9);
+%! assert_equal (t.DF(4), 1);
+%! assert_equal (t.F(4), 0.284799460734748, -1e-9);
+%! assert_equal (t.pValue(4), 0.599454252702211, -1e-9);
+%! assert_equal (t.SumSq(5), 0.618125000000001, -1e-9);
+%! assert_equal (t.DF(5), 20);
+%! assert_equal (t.MeanSq(5), 0.0309062500000001, -1e-9);
+
+%!test
 %! w = (1:n)';
 %! mdl0 = fitlm (X, y, 'Weights', w);
 %! m = step (mdl0, 'Upper', 'quadratic', 'Verbose', 0);
@@ -8788,7 +9071,6 @@ endfunction
 %!error <anova: ANOVATYPE must be 'summary' or 'components'.> anova (mdl, 'bogus')
 %!error <anova: SSTYPE can only be specified with ANOVATYPE 'components'.> anova (mdl, 'summary', 2)
 %!error <anova: SSTYPE must be 1, 2, or 3.> anova (mdl, 'components', 4)
-%!error <anova: type 3 sums of squares are not yet supported.> anova (mdl, 'components', 3)
 %!error <The STEP method is not available with a robust fit> ...
 %! mdl0 = fitlm (X, y, 'RobustOpts', 'on'); step (mdl0)
 %!error <Name-Value arguments must be in pairs> step (mdl, 'Verbose')
