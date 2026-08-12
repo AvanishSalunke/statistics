@@ -10,8 +10,7 @@
 ## This program is distributed in the hope that it will be useful, but WITHOUT
 ## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 ## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-## details.T_initial = [0 0 0]
-
+## details.
 ##
 ## You should have received a copy of the GNU General Public License along with
 ## this program; if not, see <http://www.gnu.org/licenses/>.
@@ -1837,5 +1836,3 @@ endfunction
 %! stepwiselm (X, y, 'Upper', {1, 2})
 %!error <the number of digits in a 'polyijk'> stepwiselm (X, y, 'Upper', 'poly1')
 %!error <is not a valid model specification> stepwiselm (X, y, 'Upper', 'bogusmodel')
-
-
