@@ -1581,7 +1581,7 @@ classdef LinearModel
     endfunction
 
     ## -*- texinfo -*-
-    ## @deftypefn {LinearModel} {@var{ysim} =} random (@var{mdl}, @var{Xnew})
+    ## @deftypefn  {CompactLinearModel} {@var{ysim} =} random (@var{mdl}, @var{Xnew})
     ##
     ## Simulate responses with random noise from a fitted linear regression
     ## model.
@@ -1992,7 +1992,7 @@ classdef LinearModel
     endfunction
 
     ## -*- texinfo -*-
-    ## @deftypefn {LinearModel} {@var{NewMdl} =} addTerms (@var{mdl}, @var{terms})
+    ## @deftypefn  {LinearModel} {@var{NewMdl} =} addTerms (@var{mdl}, @var{terms})
     ##
     ## Add terms to a fitted linear regression model.
     ##
@@ -2173,7 +2173,7 @@ classdef LinearModel
     endfunction
 
     ## -*- texinfo -*-
-    ## @deftypefn {LinearModel} {@var{NewMdl} =} removeTerms (@var{mdl}, @var{terms})
+    ## @deftypefn  {LinearModel} {@var{NewMdl} =} removeTerms (@var{mdl}, @var{terms})
     ##
     ## Remove terms from a fitted linear regression model.
     ##
@@ -4037,7 +4037,7 @@ classdef LinearModel
     endfunction
 
     ## -*- texinfo -*-
-    ## @deftypefn {LinearModel} {@var{cmdl} =} compact (@var{mdl})
+    ## @deftypefn  {LinearModel} {@var{cmdl} =} compact (@var{mdl})
     ##
     ## Create a compact version of a fitted linear regression model.
     ##
@@ -9188,4 +9188,3 @@ endfunction
 %! m = fitlm (t, 'resp ~ 1 + u + g');
 %! assert_equal (class (m.VariableInfo.Range{2}), 'categorical');
 %! assert_equal (cellstr (m.VariableInfo.Range{2}), {'hi', 'lo'});
-
