@@ -20,6 +20,12 @@
 ## @deftypefnx {statistics} {[@var{r}, @var{tieadj}] =} tiedrank (@var{x}, @var{tieflag})
 ## @deftypefnx {statistics} {[@var{r}, @var{tieadj}] =} tiedrank (@var{x}, @var{tieflag}, @var{bidir})
 ##
+## @var{x} may be a vector or an array.  An array is ranked along its first
+## dimension, so a matrix is ranked column by column, and @var{tieadj} then
+## carries one entry per column: its first dimension has length 1 by default,
+## or 3 when @var{tieflag} is set, and its higher dimensions are those of
+## @var{x}.
+##
 ## Compute rank adjusted for ties.
 ##
 ## @code{[@var{r}, @var{tieadj}] = tiedrank (@var{x})} computes the ranks of the
@@ -45,9 +51,7 @@ function [r, tieadj] = tiedrank (x, tieflag, bidir)
   if (nargin < 1 || nargin > 3)
     print_usage ();
   endif
-  if (! isvector (x))
-    error ("tiedrank: X must be a vector.");
-  endif
+
   if (nargin < 2)
     tieflag = false;
   elseif (! isscalar (tieflag) || ! (isnumeric (tieflag) || isbool (tieflag)))
@@ -58,6 +62,34 @@ function [r, tieadj] = tiedrank (x, tieflag, bidir)
   elseif (! isscalar (bidir) || ! (isnumeric (bidir) || isbool (bidir)))
     error ("tiedrank: BIDIR must be a numeric or boolean scalar.");
   endif
+
+  ## A matrix is ranked column by column, as MATLAB does; a vector keeps its
+  ## own orientation
+  if (! isvector (x))
+    ## Rank along the first dimension, as MATLAB does: every higher dimension
+    ## is folded into columns and unfolded again afterwards
+    sz = size (x);
+    xm = reshape (x, sz(1), prod (sz(2:end)));
+    rm = zeros (size (xm), class (x));
+    tieadj = [];
+    for j = 1:columns (xm)
+      [rj, tj] = rank_vector (xm(:,j), tieflag, bidir);
+      rm(:,j) = rj;
+      tieadj = [tieadj, tj];
+    endfor
+    r = reshape (rm, sz);
+    if (numel (sz) > 2 && ! isempty (tieadj))
+      tieadj = reshape (tieadj, [rows(tieadj), sz(2:end)]);
+    endif
+    return;
+  endif
+
+  [r, tieadj] = rank_vector (x, tieflag, bidir);
+
+endfunction
+
+## Rank one vector, leaving NaNs at the end
+function [r, tieadj] = rank_vector (x, tieflag, bidir)
 
   ## Sort X and leave NaNs at the end of vector
   [sx, idx] = sort (x(:));
@@ -143,7 +175,41 @@ endfunction
 %! assert_equal (tieadj, [1; 0; 18]);
 
 ## Test input validation
-%!error <tiedrank: X must be a vector.> tiedrank (ones (2))
+%!test
+%! ## A matrix is ranked column by column, as MATLAB does, and TIEADJ carries
+%! ## one entry per column.
+%! x = [3, 1; 1, 4; 4, 1; 1, 5; 5, 9];
+%! [r, tieadj] = tiedrank (x);
+%! assert_equal (r, [3, 1.5; 1.5, 3; 4, 1.5; 1.5, 4; 5, 5]);
+%! assert_equal (tieadj, [3, 3]);
+%! [r1, t1] = tiedrank (x(:,1));
+%! [r2, t2] = tiedrank (x(:,2));
+%! assert_equal (r, [r1, r2]);
+%! assert_equal (tieadj, [t1, t2]);
+
+%!test
+%! ## With the tie flag TIEADJ gains its three rows per column
+%! x = [3, 1; 1, 4; 4, 1; 1, 5; 5, 9];
+%! [r, tieadj] = tiedrank (x, 1);
+%! assert_equal (size (tieadj), [3, 2]);
+%! [~, t1] = tiedrank (x(:,1), 1);
+%! assert_equal (tieadj(:,1), t1);
+
+%!test
+%! ## An empty matrix is ranked, not refused
+%! [r, tieadj] = tiedrank (zeros (0, 2));
+%! assert_equal (size (r), [0, 2]);
+%! assert_equal (size (tieadj), [1, 2]);
+
+%!test
+%! ## An N-D array is ranked along its first dimension, as MATLAB does, and
+%! ## TIEADJ keeps the higher dimensions of X.  Verified against R2024a.
+%! y = cat (3, [1, 2; 3, 4], [5, 6; 7, 8]);
+%! [r, tieadj] = tiedrank (y);
+%! assert_equal (r(:,:,1), [1, 1; 2, 2]);
+%! assert_equal (r(:,:,2), [1, 1; 2, 2]);
+%! assert_equal (size (tieadj), [1, 2, 2]);
+
 %!error <tiedrank: TIEFLAG must be a numeric or boolean scalar.> ...
 %! tiedrank ([1, 2, 3, 4, 5], [1, 1])
 %!error <tiedrank: TIEFLAG must be a numeric or boolean scalar.> ...

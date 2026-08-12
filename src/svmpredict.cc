@@ -141,19 +141,17 @@ void predict(int nlhs, octave_value_list &plhs, const octave_value_list &args,
 	}
 
 	ColumnVector cv_predictions(testing_instance_number);
-	tplhs(0) = cv_predictions;
+	Matrix m_pe;
 	if(predict_probability)
 	{
 		// prob estimates are in plhs[2]
 		if(svm_type == C_SVC || svm_type == NU_SVC || svm_type == ONE_CLASS)
     {
-			Matrix m_pe(testing_instance_number, nr_class);
-			tplhs(2) = m_pe;
+			m_pe = Matrix(testing_instance_number, nr_class);
 		}
     else
     {
-			Matrix m_pe(0,0);
-			tplhs(2) = m_pe;
+			m_pe = Matrix(0,0);
 		}
 	}
 	else
@@ -164,19 +162,24 @@ void predict(int nlhs, octave_value_list &plhs, const octave_value_list &args,
 		   svm_type == NU_SVR ||
 		   nr_class == 1)
     {
-			 Matrix m_pe(testing_instance_number, 1);
-			 tplhs(2) = m_pe;
+			m_pe = Matrix(testing_instance_number, 1);
 		}
     else
     {
-			Matrix m_pe(testing_instance_number, nr_class*(nr_class-1)/2);
-			tplhs(2) = m_pe;
+			m_pe = Matrix(testing_instance_number, nr_class*(nr_class-1)/2);
 		}
 	}
 
-	ptr_predict_label = (double*)tplhs(0).column_vector_value().data();
-	ptr_prob_estimates = (double*)tplhs(2).matrix_value().data();
-	ptr_dec_values = (double*)tplhs(2).matrix_value().data();
+	// Write through the local arrays, not through a pointer taken from an
+	// octave_value.  tplhs(N).column_vector_value() and .matrix_value() return
+	// by value, and Octave stores a 1x1 array as a scalar, so for a single
+	// testing instance they have to materialise a fresh array instead of
+	// sharing one.  data() then pointed into a temporary that was freed before
+	// the loop below wrote to it, corrupting the heap.  The results are moved
+	// into tplhs once the loop is done.
+	ptr_predict_label = cv_predictions.fortran_vec();
+	ptr_prob_estimates = m_pe.fortran_vec();
+	ptr_dec_values = m_pe.fortran_vec();
 	x = (struct svm_node*)malloc((feature_number+1)*sizeof(struct svm_node));
 	for(instance_index=0;instance_index<testing_instance_number;instance_index++)
 	{
@@ -258,6 +261,8 @@ void predict(int nlhs, octave_value_list &plhs, const octave_value_list &args,
 		sumpt += predict_label*target_label;
 		++total;
 	}
+	tplhs(0) = cv_predictions;
+	tplhs(2) = m_pe;
 	if(svm_type==NU_SVR || svm_type==EPSILON_SVR)
 	{
 		info("Mean squared error = %g (regression)\n",error/total);
@@ -272,7 +277,7 @@ void predict(int nlhs, octave_value_list &plhs, const octave_value_list &args,
   }
 	// return accuracy, mean squared error, squared correlation coefficient
 	ColumnVector cv_acc(3);
-	ptr = (double*)cv_acc.data();
+	ptr = cv_acc.fortran_vec();
 	ptr[0] = (double)correct/total*100;
 	ptr[1] = error/total;
 	ptr[2] = ((total*sumpt-sump*sumt)*(total*sumpt-sump*sumt))/
@@ -481,30 +486,43 @@ probability of the instance being an inlier. \n\
 %! [L, D] = libsvmread (file_in_loadpath ("heart_scale.dat"));
 %! model = svmtrain (L, D, '-c 1 -g 0.07');
 %! [predict_label, accuracy, dec_values] = svmpredict (L, D, model);
-%! assert (size (predict_label), size (dec_values));
-%! assert (accuracy, [86.666, 0.533, 0.533]', [1e-3, 1e-3, 1e-3]');
-%! assert (dec_values(1), 1.225836001973273, 1e-14);
-%! assert (dec_values(2), -0.3212992933043805, 1e-14);
-%! assert (predict_label(1), 1);
+%! assert_equal (size (predict_label), size (dec_values));
+%! assert_equal (accuracy, [86.666, 0.533, 0.533]', [1e-3, 1e-3, 1e-3]');
+%! assert_equal (dec_values(1), 1.225836001973273, 1e-14);
+%! assert_equal (dec_values(2), -0.3212992933043805, 1e-14);
+%! assert_equal (predict_label(1), 1);
+%!
+%!test
+%! # A single testing instance used to write through a freed pointer, since
+%! # Octave stores a 1x1 result as a scalar and matrix_value() then returns a
+%! # temporary.  Every single-row query must match the batch answer.
+%! [L, D] = libsvmread (file_in_loadpath ("heart_scale.dat"));
+%! model = svmtrain (L, D, '-c 1 -g 0.07');
+%! [bl, ~, bd] = svmpredict (L, D, model);
+%! for i = [1, 2, 7, 130, numel(L)]
+%!   [l, ~, d] = svmpredict (L(i), D(i,:), model);
+%!   assert_equal (size (l), [1, 1]);
+%!   assert_equal (l, bl(i));
+%!   assert_equal (d, bd(i), 1e-12);
+%! endfor
 %!
 %!test
 %! # Test 2: One-Class Probability (NEW LIBSVM 3.36 FEATURE)
 %! [L, D] = libsvmread (file_in_loadpath ("heart_scale.dat"));
 %! # Train One-Class (-s 2) with Probability (-b 1)
 %! model_oc = svmtrain (L, D, '-s 2 -n 0.1 -g 0.07 -b 1');
-%! # FIX: Changed // to # below to fix syntax error
-%! assert (isstruct(model_oc), true, "svmtrain failed to return a valid struct model."); # <-- FIXED COMMENT HERE
+%! assert_equal (isstruct (model_oc), true);
 %! # Predict with Probability (-b 1)
 %! [pred, acc, probs] = svmpredict (L, D, model_oc, '-b 1');
 %!
 %! # Detail Check A: Output must be N x 2 (Column 1: Normal, Column 2: Outlier)
-%! assert (size (probs), [length(L), 2]);
+%! assert_equal (size (probs), [length(L), 2]);
 %!
 %! # Detail Check B: Probabilities must sum to 1.0 for every instance
-%! assert (sum (probs, 2), ones (length(L), 1), 1e-5);
+%! assert_equal (sum (probs, 2), ones (length(L), 1), 1e-5);
 %!
 %! # Detail Check C: Values must be valid probabilities [0, 1]
-%! assert (all (all (probs >= 0 & probs <= 1)));
+%! assert_equal (all (probs >= 0 & probs <= 1, 'all'), true);
 %! clear model_oc
 %!
 %!test
@@ -514,7 +532,7 @@ probability of the instance being an inlier. \n\
 %! model_oc = svmtrain (L, D, '-s 2 -n 0.1 -g 0.07');
 %! [pred, acc, dec] = svmpredict (L, D, model_oc);
 %! # Standard One-Class output is N x 1 (Scalar decision values)
-%! assert (size (dec), [length(L), 1]);
+%! assert_equal (size (dec), [length(L), 1]);
 %! clear model_oc
 %!
 %!shared L, D, model

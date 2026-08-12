@@ -78,6 +78,22 @@
 ## Note: calling @code{fitdist} without any input arguments will return a cell
 ## array of character vectors listing all supported distributions.
 ##
+## Distribution names are matched ignoring case, spaces and hyphens, so that
+## @qcode{'Extreme Value'}, @qcode{'ExtremeValue'} and @qcode{'extreme-value'}
+## all select the same distribution, and the same set of names is accepted by
+## @code{cdf}, @code{pdf}, @code{icdf}, @code{random}, @code{makedist},
+## @code{fitdist} and @code{mle}.
+##
+## This accepts more names than MATLAB.  MATLAB takes the spaced and the
+## squashed spelling but refuses the hyphenated one, so
+## @qcode{'Birnbaum-Saunders'} and @qcode{'Log-Logistic'} are errors there;
+## Octave has always accepted them and continues to.  MATLAB also accepts
+## @qcode{'tLocationScale'} in @code{makedist} while refusing it in
+## @code{cdf} for the same distribution; Octave accepts it, and
+## @qcode{'location-scale T'}, everywhere.  Code written against MATLAB's
+## names therefore runs unchanged, but code relying on these names will not
+## port back.
+##
 ## @seealso{makedist}
 ## @end deftypefn
 
@@ -125,6 +141,9 @@ function [varargout] = fitdist (varargin)
   ntrials = 1;
   mu = 0;
   theta = 1;
+  kernel = 'normal';
+  ksupport = 'unbounded';
+  kwidth = [];
   options.Display = 'off';
   options.MaxFunEvals = 400;
   options.MaxIter = 200;
@@ -183,8 +202,12 @@ function [varargout] = fitdist (varargin)
                          " structure compatible for 'fminsearch'."));
         endif
 
-      case {'kernel', 'support', 'width'}
-        warning ("fitdist: parameter not supported yet.");
+      case 'kernel'
+        kernel = varargin{2};
+      case 'support'
+        ksupport = varargin{2};
+      case 'width'
+        kwidth = varargin{2};
       otherwise
         error ("fitdist: unknown parameter name.");
     endswitch
@@ -219,11 +242,11 @@ function [varargout] = fitdist (varargin)
   msg = 'fitdist: no data in group ''%s'' to fit a ''%s'' distribution.';
 
   ## Switch to selected distribution
-  switch (tolower (distname))
+  switch (__distname_key__ (distname))
 
     case 'beta'
       if (isempty (groupvar))
-        varargout{1} = BetaDistribution.fit (x, alpha, freq, options);
+        varargout{1} = prob.BetaDistribution.fit (x, alpha, freq, options);
       else
         pd = cell (1, groups);
         for i = 1:groups
@@ -233,7 +256,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = BetaDistribution.fit (x_i, alpha, f_i, options);
+            pd{i} = prob.BetaDistribution.fit (x_i, alpha, f_i, options);
           endif
         endfor
         varargout{1} = pd;
@@ -246,7 +269,7 @@ function [varargout] = fitdist (varargin)
         error ("fitdist: invalid NTRIALS value for Binomial distribution.")
       endif
       if (isempty (groupvar))
-        varargout{1} = BinomialDistribution.fit (x, ntrials, alpha, freq);
+        varargout{1} = prob.BinomialDistribution.fit (x, ntrials, alpha, freq);
       else
         pd = cell (1, groups);
         for i = 1:groups
@@ -256,7 +279,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = BinomialDistribution.fit (x_i, ntrials, alpha, f_i);
+            pd{i} = prob.BinomialDistribution.fit (x_i, ntrials, alpha, f_i);
           endif
         endfor
         varargout{1} = pd;
@@ -266,7 +289,7 @@ function [varargout] = fitdist (varargin)
 
     case {'birnbaumsaunders', 'bisa'}
       if (isempty (groupvar))
-        varargout{1} = BirnbaumSaundersDistribution.fit ...
+        varargout{1} = prob.BirnbaumSaundersDistribution.fit ...
                        (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
@@ -278,7 +301,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = BirnbaumSaundersDistribution.fit ...
+            pd{i} = prob.BirnbaumSaundersDistribution.fit ...
                     (x_i, alpha, c_i, f_i, options);
           endif
         endfor
@@ -289,7 +312,7 @@ function [varargout] = fitdist (varargin)
 
     case 'burr'
       if (isempty (groupvar))
-        varargout{1} = BurrDistribution.fit (x, alpha, censor, freq, options);
+        varargout{1} = prob.BurrDistribution.fit (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
         for i = 1:groups
@@ -300,7 +323,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = BurrDistribution.fit (x_i, alpha, c_i, f_i, options);
+            pd{i} = prob.BurrDistribution.fit (x_i, alpha, c_i, f_i, options);
           endif
         endfor
         varargout{1} = pd;
@@ -310,7 +333,7 @@ function [varargout] = fitdist (varargin)
 
     case 'exponential'
       if (isempty (groupvar))
-        varargout{1} = ExponentialDistribution.fit (x, alpha, censor, freq);
+        varargout{1} = prob.ExponentialDistribution.fit (x, alpha, censor, freq);
       else
         pd = cell (1, groups);
         for i = 1:groups
@@ -321,7 +344,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = ExponentialDistribution.fit (x_i, alpha, c_i, f_i);
+            pd{i} = prob.ExponentialDistribution.fit (x_i, alpha, c_i, f_i);
           endif
         endfor
         varargout{1} = pd;
@@ -331,7 +354,7 @@ function [varargout] = fitdist (varargin)
 
     case {'extremevalue', 'ev'}
       if (isempty (groupvar))
-        varargout{1} = ExtremeValueDistribution.fit ...
+        varargout{1} = prob.ExtremeValueDistribution.fit ...
                        (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
@@ -343,7 +366,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = ExtremeValueDistribution.fit (x_i, alpha, c_i, f_i, options);
+            pd{i} = prob.ExtremeValueDistribution.fit (x_i, alpha, c_i, f_i, options);
           endif
         endfor
         varargout{1} = pd;
@@ -353,7 +376,7 @@ function [varargout] = fitdist (varargin)
 
     case 'gamma'
       if (isempty (groupvar))
-        varargout{1} = GammaDistribution.fit (x, alpha, censor, freq, options);
+        varargout{1} = prob.GammaDistribution.fit (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
         for i = 1:groups
@@ -364,7 +387,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = GammaDistribution.fit (x_i, alpha, c_i, f_i, options);
+            pd{i} = prob.GammaDistribution.fit (x_i, alpha, c_i, f_i, options);
           endif
         endfor
         varargout{1} = pd;
@@ -374,7 +397,7 @@ function [varargout] = fitdist (varargin)
 
     case {'generalizedextremevalue', 'gev'}
       if (isempty (groupvar))
-        varargout{1} = GeneralizedExtremeValueDistribution.fit ...
+        varargout{1} = prob.GeneralizedExtremeValueDistribution.fit ...
                        (x, alpha, freq, options);
       else
         pd = cell (1, groups);
@@ -385,7 +408,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = GeneralizedExtremeValueDistribution.fit ...
+            pd{i} = prob.GeneralizedExtremeValueDistribution.fit ...
                     (x_i, alpha, f_i, options);
           endif
         endfor
@@ -400,7 +423,7 @@ function [varargout] = fitdist (varargin)
                        " Pareto distribution."));
       endif
       if (isempty (groupvar))
-        varargout{1} = GeneralizedParetoDistribution.fit ...
+        varargout{1} = prob.GeneralizedParetoDistribution.fit ...
                        (x, theta, alpha, freq, options);
       else
         pd = cell (1, groups);
@@ -411,7 +434,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = GeneralizedParetoDistribution.fit ...
+            pd{i} = prob.GeneralizedParetoDistribution.fit ...
                     (x_i, theta, alpha, f_i, options);
           endif
         endfor
@@ -425,7 +448,7 @@ function [varargout] = fitdist (varargin)
         error ("fitdist: invalid MU value for half-normal distribution.");
       endif
       if (isempty (groupvar))
-        varargout{1} = HalfNormalDistribution.fit (x, mu, alpha, freq);
+        varargout{1} = prob.HalfNormalDistribution.fit (x, mu, alpha, freq);
       else
         pd = cell (1, groups);
         for i = 1:groups
@@ -435,7 +458,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = HalfNormalDistribution.fit (x_i, mu, alpha, f_i);
+            pd{i} = prob.HalfNormalDistribution.fit (x_i, mu, alpha, f_i);
           endif
         endfor
         varargout{1} = pd;
@@ -445,7 +468,7 @@ function [varargout] = fitdist (varargin)
 
     case {'inversegaussian', 'invg'}
       if (isempty (groupvar))
-        varargout{1} = InverseGaussianDistribution.fit ...
+        varargout{1} = prob.InverseGaussianDistribution.fit ...
                        (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
@@ -457,7 +480,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = InverseGaussianDistribution.fit ...
+            pd{i} = prob.InverseGaussianDistribution.fit ...
                     (x_i, alpha, c_i, f_i, options);
           endif
         endfor
@@ -467,18 +490,33 @@ function [varargout] = fitdist (varargin)
       endif
 
     case 'kernel'
-      warning ("fitdist: 'Kernel' distribution not supported yet.");
+      if (any (censor != 0))
+        error ("fitdist: censoring is not supported for a 'Kernel' distribution.");
+      endif
       if (isempty (groupvar))
-        varargout{1} = [];
+        varargout{1} = prob.KernelDistribution.fit ...
+                       (x, kernel, ksupport, kwidth, freq);
       else
-        varargout{1} = [];
+        pd = cell (1, groups);
+        for i = 1:groups
+          x_i = x(g == i);
+          f_i = freq(g == i);
+          if (isempty (x_i))
+            pd{i} = [];
+            warning (msg, gn{i}, distname);
+          else
+            pd{i} = prob.KernelDistribution.fit ...
+                    (x_i, kernel, ksupport, kwidth, f_i);
+          endif
+        endfor
+        varargout{1} = pd;
         varargout{2} = gn;
         varargout{3} = gl;
       endif
 
     case 'logistic'
       if (isempty (groupvar))
-        varargout{1} = LogisticDistribution.fit ...
+        varargout{1} = prob.LogisticDistribution.fit ...
                        (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
@@ -490,7 +528,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = LogisticDistribution.fit (x_i, alpha, c_i, f_i, options);
+            pd{i} = prob.LogisticDistribution.fit (x_i, alpha, c_i, f_i, options);
           endif
         endfor
         varargout{1} = pd;
@@ -500,7 +538,7 @@ function [varargout] = fitdist (varargin)
 
     case 'loglogistic'
       if (isempty (groupvar))
-        varargout{1} = LoglogisticDistribution.fit ...
+        varargout{1} = prob.LoglogisticDistribution.fit ...
                        (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
@@ -512,7 +550,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = LoglogisticDistribution.fit (x_i, alpha, c_i, f_i, options);
+            pd{i} = prob.LoglogisticDistribution.fit (x_i, alpha, c_i, f_i, options);
           endif
         endfor
         varargout{1} = pd;
@@ -522,7 +560,7 @@ function [varargout] = fitdist (varargin)
 
     case 'lognormal'
       if (isempty (groupvar))
-        varargout{1} = LognormalDistribution.fit ...
+        varargout{1} = prob.LognormalDistribution.fit ...
                        (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
@@ -534,7 +572,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = LognormalDistribution.fit (x_i, alpha, c_i, f_i, options);
+            pd{i} = prob.LognormalDistribution.fit (x_i, alpha, c_i, f_i, options);
           endif
         endfor
         varargout{1} = pd;
@@ -544,7 +582,7 @@ function [varargout] = fitdist (varargin)
 
     case 'nakagami'
       if (isempty (groupvar))
-        varargout{1} = NakagamiDistribution.fit ...
+        varargout{1} = prob.NakagamiDistribution.fit ...
                        (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
@@ -556,7 +594,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = NakagamiDistribution.fit (x_i, alpha, c_i, f_i, options);
+            pd{i} = prob.NakagamiDistribution.fit (x_i, alpha, c_i, f_i, options);
           endif
         endfor
         varargout{1} = pd;
@@ -566,7 +604,7 @@ function [varargout] = fitdist (varargin)
 
     case {'negativebinomial', 'nbin'}
       if (isempty (groupvar))
-        varargout{1} = NegativeBinomialDistribution.fit ...
+        varargout{1} = prob.NegativeBinomialDistribution.fit ...
                        (x, alpha, freq, options);
       else
         pd = cell (1, groups);
@@ -577,7 +615,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = NegativeBinomialDistribution.fit (x_i, alpha, f_i, options);
+            pd{i} = prob.NegativeBinomialDistribution.fit (x_i, alpha, f_i, options);
           endif
         endfor
         varargout{1} = pd;
@@ -587,7 +625,7 @@ function [varargout] = fitdist (varargin)
 
     case 'normal'
       if (isempty (groupvar))
-        varargout{1} = NormalDistribution.fit (x, alpha, censor, freq, options);
+        varargout{1} = prob.NormalDistribution.fit (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
         for i = 1:groups
@@ -598,7 +636,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = NormalDistribution.fit (x_i, alpha, c_i, f_i, options);
+            pd{i} = prob.NormalDistribution.fit (x_i, alpha, c_i, f_i, options);
           endif
         endfor
         varargout{1} = pd;
@@ -608,7 +646,7 @@ function [varargout] = fitdist (varargin)
 
     case 'poisson'
       if (isempty (groupvar))
-        varargout{1} = PoissonDistribution.fit (x, alpha, freq);
+        varargout{1} = prob.PoissonDistribution.fit (x, alpha, freq);
       else
         pd = cell (1, groups);
         for i = 1:groups
@@ -618,7 +656,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = PoissonDistribution.fit (x_i, alpha, f_i);
+            pd{i} = prob.PoissonDistribution.fit (x_i, alpha, f_i);
           endif
         endfor
         varargout{1} = pd;
@@ -628,7 +666,7 @@ function [varargout] = fitdist (varargin)
 
     case 'rayleigh'
       if (isempty (groupvar))
-        varargout{1} = RayleighDistribution.fit (x, alpha, censor, freq);
+        varargout{1} = prob.RayleighDistribution.fit (x, alpha, censor, freq);
       else
         pd = cell (1, groups);
         for i = 1:groups
@@ -639,7 +677,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = RayleighDistribution.fit (x_i, alpha, c_i, f_i);
+            pd{i} = prob.RayleighDistribution.fit (x_i, alpha, c_i, f_i);
           endif
         endfor
         varargout{1} = pd;
@@ -649,7 +687,7 @@ function [varargout] = fitdist (varargin)
 
     case 'rician'
       if (isempty (groupvar))
-        varargout{1} = RicianDistribution.fit (x, alpha, censor, freq, options);
+        varargout{1} = prob.RicianDistribution.fit (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
         for i = 1:groups
@@ -660,7 +698,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = RicianDistribution.fit (x_i, alpha, c_i, f_i, options);
+            pd{i} = prob.RicianDistribution.fit (x_i, alpha, c_i, f_i, options);
           endif
         endfor
         varargout{1} = pd;
@@ -669,18 +707,31 @@ function [varargout] = fitdist (varargin)
       endif
 
     case 'stable'
-      warning ("fitdist: 'Stable' distribution not supported yet.");
+      if (any (censor != 0))
+        error ("fitdist: censoring is not supported for a 'Stable' distribution.");
+      endif
       if (isempty (groupvar))
-        varargout{1} = [];
+        varargout{1} = prob.StableDistribution.fit (x, alpha, freq, options);
       else
-        varargout{1} = [];
+        pd = cell (1, groups);
+        for i = 1:groups
+          x_i = x(g == i);
+          f_i = freq(g == i);
+          if (isempty (x_i))
+            pd{i} = [];
+            warning (msg, gn{i}, distname);
+          else
+            pd{i} = prob.StableDistribution.fit (x_i, alpha, f_i, options);
+          endif
+        endfor
+        varargout{1} = pd;
         varargout{2} = gn;
         varargout{3} = gl;
       endif
 
     case {'tlocationscale', 'tls'}
       if (isempty (groupvar))
-        varargout{1} = tLocationScaleDistribution.fit ...
+        varargout{1} = prob.tLocationScaleDistribution.fit ...
                        (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
@@ -692,7 +743,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = tLocationScaleDistribution.fit ...
+            pd{i} = prob.tLocationScaleDistribution.fit ...
                     (x_i, alpha, c_i, f_i, options);
           endif
         endfor
@@ -703,7 +754,7 @@ function [varargout] = fitdist (varargin)
 
     case 'weibull'
       if (isempty (groupvar))
-        varargout{1} = WeibullDistribution.fit (x, alpha, censor, freq, options);
+        varargout{1} = prob.WeibullDistribution.fit (x, alpha, censor, freq, options);
       else
         pd = cell (1, groups);
         for i = 1:groups
@@ -714,7 +765,7 @@ function [varargout] = fitdist (varargin)
             pd{i} = [];
             warning (msg, gn{i}, distname);
           else
-            pd{i} = WeibullDistribution.fit (x_i, alpha, c_i, f_i, options);
+            pd{i} = prob.WeibullDistribution.fit (x_i, alpha, c_i, f_i, options);
           endif
         endfor
         varargout{1} = pd;
@@ -727,6 +778,19 @@ function [varargout] = fitdist (varargin)
 endfunction
 
 ## Test output
+%!test  ## fitdist returns a fitted prob.KernelDistribution object
+%! x = [2.1 0.3 1.2 -0.7 0.9 1.5 2.8 0.1 0.4 1.1 3.2 0.6 2.0 0.9 1.7]';
+%! pd = fitdist (x, 'Kernel');
+%! assert_equal (class (pd), 'prob.KernelDistribution');
+%! assert_equal (pd.Kernel, 'normal');
+%! assert_equal (pd.Bandwidth, 0.639566, 1e-4);
+%! assert_equal (pd.InputData.data, x);
+%!test  ## grouped kernel fit returns a cell of prob.KernelDistribution objects
+%! x = [2.1 0.3 1.2 -0.7 0.9 1.5 2.8 0.1 0.4 1.1 3.2 0.6 2.0 0.9 1.7]';
+%! [pd, gn] = fitdist (x, 'Kernel', 'By', [ones(8, 1); 2*ones(7, 1)]);
+%! assert_equal (numel (pd), 2);
+%! assert_equal (class (pd{1}), 'prob.KernelDistribution');
+%! assert_equal (class (pd{2}), 'prob.KernelDistribution');
 %!test
 %! x = betarnd (1, 1, 100, 1);
 %! pd = fitdist (x, 'Beta');
@@ -752,14 +816,14 @@ endfunction
 %! pd = fitdist (x, 'binomial');
 %! [phat, pci] = binofit (sum (x), numel (x));
 %! assert_equal ([pd.N, pd.p], [N, phat]);
-%! assert_equal (paramci (pd), pci);
+%! assert_equal (paramci (pd), [N, pci(1); N, pci(2)]);
 %!test
 %! N = 3;
 %! x = binornd (N, 0.4, 100, 1);
 %! pd = fitdist (x, 'binomial', 'ntrials', N);
 %! [phat, pci] = binofit (sum (x), numel (x) * N);
 %! assert_equal ([pd.N, pd.p], [N, phat]);
-%! assert_equal (paramci (pd), pci);
+%! assert_equal (paramci (pd), [N, pci(1); N, pci(2)]);
 %!test
 %! N = 1;
 %! x1 = binornd (N, 0.5, 100, 1);
@@ -767,10 +831,10 @@ endfunction
 %! pd = fitdist ([x1; x2], 'binomial', 'By', [ones(100, 1); 2*ones(100, 1)]);
 %! [phat, pci] = binofit (sum (x1), numel (x1));
 %! assert_equal ([pd{1}.N, pd{1}.p], [N, phat]);
-%! assert_equal (paramci (pd{1}), pci);
+%! assert_equal (paramci (pd{1}), [N, pci(1); N, pci(2)]);
 %! [phat, pci] = binofit (sum (x2), numel (x2));
 %! assert_equal ([pd{2}.N, pd{2}.p], [N, phat]);
-%! assert_equal (paramci (pd{2}), pci);
+%! assert_equal (paramci (pd{2}), [N, pci(1); N, pci(2)]);
 %!warning <fitdist: no data in group '2' to fit a 'binomial' distribution.> ...
 %! fitdist ([binornd(1, 0.5, 100, 1); nan(100, 1)], 'binomial', ...
 %!          'By', [ones(100, 1); 2*ones(100, 1)]);
@@ -782,10 +846,10 @@ endfunction
 %!               'By', [ones(100, 1); 2*ones(100, 1)]);
 %! [phat, pci] = binofit (sum (x1), numel (x1) * N);
 %! assert_equal ([pd{1}.N, pd{1}.p], [N, phat]);
-%! assert_equal (paramci (pd{1}), pci);
+%! assert_equal (paramci (pd{1}), [N, pci(1); N, pci(2)]);
 %! [phat, pci] = binofit (sum (x2), numel (x2) * N);
 %! assert_equal ([pd{2}.N, pd{2}.p], [N, phat]);
-%! assert_equal (paramci (pd{2}), pci);
+%! assert_equal (paramci (pd{2}), [N, pci(1); N, pci(2)]);
 %!warning <fitdist: no data in group '2' to fit a 'binomial' distribution.> ...
 %! fitdist ([binornd(5, 0.5, 100, 1); nan(100, 1)], 'binomial', 'ntrials', 5, ...
 %!          'By', [ones(100, 1); 2*ones(100, 1)]);
@@ -1182,8 +1246,15 @@ endfunction
 %!warning <fitdist: no data in group '2' to fit a 'rician' distribution.> ...
 %! fitdist ([ricernd(1, 1, 100, 1); nan(100, 1)], 'rician', ...
 %!          'By', [ones(100, 1); 2*ones(100, 1)]);
-%!warning <fitdist: 'Stable' distribution not supported yet.> ...
-%! fitdist ([1 2 3 4 5], 'Stable');
+%!test  ## fitdist returns a fitted prob.StableDistribution object
+%! rand ("seed", 2718);
+%! randn ("seed", 2718);
+%! x = stblrnd (1.5, 0.5, 2, 1, 150, 1);
+%! pd = fitdist (x, 'Stable');
+%! assert_equal (class (pd), 'prob.StableDistribution');
+%! assert_equal (! any (pd.ParameterIsFixed, 'all'), true);
+%! assert_equal (pd.alpha, 1.5, 0.4);
+%! assert_equal (pd.gam, 2, 0.5);
 %!test
 %! x = tlsrnd (0, 1, 1, 100, 1);
 %! pd = fitdist (x, 'tlocationscale');
@@ -1257,9 +1328,10 @@ endfunction
 %! fitdist ([1, 2, 3], 'normal', 'options', 0)
 %!error <fitdist: 'options' argument must be a structure compatible for 'fminsearch'.> ...
 %! fitdist ([1, 2, 3], 'normal', 'options', struct ('options', 1))
-%!warning fitdist ([1, 2, 3], 'kernel', 'kernel', 'normal');
-%!warning fitdist ([1, 2, 3], 'kernel', 'support', 'positive');
-%!warning fitdist ([1, 2, 3], 'kernel', 'width', 1);
+%!error <fitdist: censoring is not supported for a 'Kernel' distribution.> ...
+%! fitdist ([1, 2, 3]', 'kernel', 'Censoring', [1, 0, 0]');
+%!error <fitdist: censoring is not supported for a 'Stable' distribution.> ...
+%! fitdist ([1, 2, 3]', 'Stable', 'Censoring', [1, 0, 0]');
 %!error <fitdist: unknown parameter name.> ...
 %! fitdist ([1, 2, 3], 'normal', 'param', struct ('options', 1))
 %!error <fitdist: no data in X to fit a 'normal' distribution.> ...

@@ -17,7 +17,7 @@
 ## You should have received a copy of the GNU General Public License along with
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
-classdef ClusterCriterion < handle
+classdef (Abstract) ClusterCriterion
   ## -*- texinfo -*-
   ## @deftp {statistics} ClusterCriterion
   ##
@@ -141,6 +141,13 @@ classdef ClusterCriterion < handle
     OptimalIndex = 0; # index of the optimal K
   endproperties
 
+  ## Every subclass must define an 'evaluate' method: this class provides
+  ## the data, the K list and the shared bookkeeping, but never computes a
+  ## criterion itself.  MATLAB declares that method abstract; Octave cannot,
+  ## because a bodyless signature in a 'methods (Abstract)' block is read as
+  ## an external method and rejected outside an @-folder, so a subclass that
+  ## omits 'evaluate' is caught when it is called rather than when it is
+  ## defined.  All four subclasses shipped here define it.
   methods(Access = public)
 
     ## -*- texinfo -*-
@@ -161,8 +168,9 @@ classdef ClusterCriterion < handle
       this.X = x;
       this.N = rows (this.X);
       this.P = columns (this.X);
-      ## look for missing values
-      this.Missing = any (isnan (x), 2)';
+      ## look for missing values, one flag per observation and shaped like
+      ## the observations themselves
+      this.Missing = any (isnan (x), 2);
       ## number of usable observations
       this.NumObservations = sum (this.Missing == false);
 
@@ -178,7 +186,9 @@ classdef ClusterCriterion < handle
       elseif (ismatrix (clust))
         if (isnumeric (clust)  && (length (size (clust)) == 2) && ...
             (rows (clust) == this.N))
-          this.ClusteringFunction = '';
+          ## Nothing clustered the data, the caller did, so there is no
+          ## clustering function to report
+          this.ClusteringFunction = [];
           this.ClusteringSolutions = clust(find (this.Missing == false), :);
         else
           error ("ClusterCriterion: invalid matrix of clustering solutions.");
@@ -201,6 +211,12 @@ classdef ClusterCriterion < handle
     ##
     ## @end deftypefn
     function this = addK (this, k)
+
+      ## A compacted object has no observations left to cluster
+      if (isempty (this.X))
+        error (strcat ("ClusterCriterion.addK: this method can only be", ...
+                       " called when the X property is not empty."));
+      endif
 
       ## if there is not a clustering function, then we are using a predefined
       ## set of clustering solutions, hence we cannot redefine the number of
@@ -273,11 +289,29 @@ classdef ClusterCriterion < handle
     ##
     ## Create a compact clustering evaluation object.
     ##
-    ## This method is not yet implemented.
+    ## @code{@var{obj} = compact (@var{obj})} returns an object of the same
+    ## class holding the results of the evaluation but none of the data it was
+    ## computed from, which is useful when the evaluation is kept and the
+    ## sample is large.
+    ##
+    ## @var{X}, @var{Missing} and @var{OptimalY} are emptied; @var{InspectedK},
+    ## @var{CriterionValues}, @var{OptimalK}, @var{NumObservations},
+    ## @var{CriterionName} and @var{ClusteringFunction} are kept.  The object
+    ## compacted from is not changed.
+    ##
+    ## A compacted object can still be displayed and plotted, and compacting
+    ## one again does nothing, but @code{addK} raises: there are no
+    ## observations left to cluster.
     ##
     ## @end deftypefn
     function this = compact (this)
-      warning ("ClusterCriterion.compact: this method is not yet implemented.");
+      ## Drop everything held per observation and keep every result, as
+      ## MATLAB does.  The object is a value, so the caller's own copy is
+      ## untouched: only the returned one is compacted.
+      this.X = [];
+      this.Missing = [];
+      this.OptimalY = [];
+      this.ClusteringSolutions = [];
     endfunction
 
   endmethods
@@ -297,11 +331,60 @@ classdef ClusterCriterion < handle
 endclassdef
 
 ## Test input validation
+%!test
+%! ## compact drops everything held per observation and keeps every
+%! ## result, returning an object of the same class.  Verified against
+%! ## R2024a.
+%! X = [1, 1; 1.2, 1.1; 3, 3; 3.2, 3.1; 6, 6; 6.1, 6.2; 1.1, 1.3; 3.1, 3.2];
+%! e = evalclusters (X, 'kmeans', 'CalinskiHarabasz', 'KList', 2:3);
+%! c = compact (e);
+%! assert_equal (class (c), class (e));
+%! assert_equal (isempty (c.X), true);
+%! assert_equal (isempty (c.Missing), true);
+%! assert_equal (isempty (c.OptimalY), true);
+%! ## the results survive
+%! assert_equal (c.NumObservations, e.NumObservations);
+%! assert_equal (c.InspectedK, e.InspectedK);
+%! assert_equal (c.CriterionValues, e.CriterionValues);
+%! assert_equal (c.OptimalK, e.OptimalK);
+
+%!test
+%! ## the object compacted from is left alone: these are value classes,
+%! ## as MATLAB's are, so compact hands back a compacted copy
+%! X = [1, 1; 1.2, 1.1; 3, 3; 3.2, 3.1; 6, 6; 6.1, 6.2; 1.1, 1.3; 3.1, 3.2];
+%! e = evalclusters (X, 'kmeans', 'CalinskiHarabasz', 'KList', 2:3);
+%! c = compact (e);
+%! assert_equal (size (e.X), [8, 2]);
+%! ## and compacting twice is harmless
+%! assert_equal (isempty (getfield (compact (c), 'X')), true);
+
+%!test
+%! ## a compacted object still plots, since plotting needs no observations
+%! X = [1, 1; 1.2, 1.1; 3, 3; 3.2, 3.1; 6, 6; 6.1, 6.2; 1.1, 1.3; 3.1, 3.2];
+%! c = compact (evalclusters (X, 'kmeans', 'CalinskiHarabasz', 'KList', 2:3));
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   h = plot (c);
+%!   assert_equal (all (isaxes (h), 'all'), true);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!error <ClusterCriterion.addK: this method can only be called when the X property is not empty.> ...
+%! addK (compact (evalclusters ([1, 1; 1.2, 1.1; 3, 3; 3.2, 3.1; 6, 6; ...
+%!       6.1, 6.2; 1.1, 1.3; 3.1, 3.2], 'kmeans', 'CalinskiHarabasz', ...
+%!       'KList', 2:3)), 4)
+
+## This class is abstract, so its input validation is reached through a
+## subclass, which is the only way a user can reach it either.
 %!error <ClusterCriterion: X must be a numeric matrix.> ...
-%! ClusterCriterion ('1', 'kmeans', [1:6])
+%! CalinskiHarabaszEvaluation ('1', 'kmeans', [1:6])
 %!error <ClusterCriterion: unknown clustering algorithm 'k'.> ...
-%! ClusterCriterion ([1, 2, 1, 3, 2, 4, 3], 'k', [1:6])
+%! CalinskiHarabaszEvaluation ([1, 2, 1, 3, 2, 4, 3], 'k', [1:6])
 %!error <ClusterCriterion: invalid matrix of clustering solutions.> ...
-%! ClusterCriterion ([1, 2, 1; 3, 2, 4], 1, [1:6])
+%! CalinskiHarabaszEvaluation ([1, 2, 1; 3, 2, 4], 1, [1:6])
 %!error <ClusterCriterion: invalid argument.> ...
-%! ClusterCriterion ([1, 2, 1; 3, 2, 4], ones (2, 2, 2), [1:6])
+%! CalinskiHarabaszEvaluation ([1, 2, 1; 3, 2, 4], ones (2, 2, 2), [1:6])
+
+%!error <cannot instantiate object for abstract class 'ClusterCriterion'> ...
+%! ClusterCriterion ([1, 2, 1; 3, 2, 4], 'kmeans', [1:6])

@@ -283,30 +283,42 @@ function cc = evalclusters (x, clust, criterion, varargin)
                    " only when 'clust' is a matrix"));
   endif
 
+  ## When 'clust' is a matrix of solutions and no 'KList' was given, each
+  ## column is a solution in its own right, so the number of clusters it holds
+  ## is the number of distinct labels in it -- not the column's position.
+  ## Numbering by position evaluated column j as k = j, which mislabelled every
+  ## result and, because the criteria loop over the labels 1 : k, silently left
+  ## out every cluster past the j-th.
+  if (isempty (klist) && isnumeric (clust))
+    klist = arrayfun (@(j) numel (unique (clust(! isnan (clust(:, j)), j))), ...
+                      1 : columns (clust));
+    if (numel (unique (klist)) != numel (klist))
+      error (strcat ("evalclusters: two or more columns of 'clust' propose", ...
+                     " the same number of clusters, so 'KList' cannot be", ...
+                     " inferred from them."));
+    endif
+    ## The evaluation classes sort and de-duplicate the cluster sizes they are
+    ## given, so the columns have to be put in the same order; otherwise a
+    ## solution would be scored against another column's number of clusters.
+    [klist, korder] = sort (klist);
+    clust = clust(:, korder);
+  endif
+
   ## main
   switch (lower (criterion))
     case 'calinskiharabasz'
       ## further compatibility checks between the chosen parameters are
       ## delegated to the class constructor
-      if (isempty (klist))
-        klist = 1 : columns (clust);
-      endif
       cc = CalinskiHarabaszEvaluation (x, clust, klist);
 
     case 'daviesbouldin'
       ## further compatibility checks between the chosen parameters are
       ## delegated to the class constructor
-      if (isempty (klist))
-        klist = 1 : columns (clust);
-      endif
       cc = DaviesBouldinEvaluation (x, clust, klist);
 
     case 'silhouette'
       ## further compatibility checks between the chosen parameters are
       ## delegated to the class constructor
-      if (isempty (klist))
-        klist = 1 : columns (clust);
-      endif
       cc = SilhouetteEvaluation (x, clust, klist, distance, clusterpriors);
 
     case 'gap'
@@ -372,3 +384,109 @@ endfunction
 %! assert_equal (eva.NumObservations, 150);
 %! assert_equal (eva.OptimalK, 3);
 %! assert_equal (eva.InspectedK, [1 2 3 4 5 6]);
+
+## A matrix of solutions with no 'KList' takes the number of clusters from the
+## labels in each column, not from the column's position.  Numbering by
+## position evaluated column j as k = j, so the first criterion was always NaN
+## and the rest were computed for the wrong k, over only the first j clusters.
+%!test
+%! x = [randn(20,2); 6 + randn(20,2); [12, 0] + randn(20,2)];
+%! k2 = [ones(30,1); 2*ones(30,1)];
+%! k3 = [ones(20,1); 2*ones(20,1); 3*ones(20,1)];
+%! k4 = [ones(15,1); 2*ones(15,1); 3*ones(15,1); 4*ones(15,1)];
+%! sols = [k2, k3, k4];
+%! for crit = {'CalinskiHarabasz', 'DaviesBouldin', 'silhouette'}
+%!   eva = evalclusters (x, sols, crit{1});
+%!   assert_equal (eva.InspectedK, [2, 3, 4]);
+%!   assert_equal (any (isnan (eva.CriterionValues)), false);
+%!   ## an explicit KList naming the same sizes must give the same answer
+%!   ref = evalclusters (x, sols, crit{1}, 'KList', [2, 3, 4]);
+%!   assert_equal (eva.CriterionValues, ref.CriterionValues);
+%!   assert_equal (eva.OptimalK, ref.OptimalK);
+%! endfor
+
+## Columns need not be given in ascending order of size.  The evaluation
+## classes sort the cluster sizes, so the columns are reordered to match and
+## each solution is still scored against its own k.
+%!test
+%! x = [randn(20,2); 6 + randn(20,2); [12, 0] + randn(20,2)];
+%! k4 = [ones(15,1); 2*ones(15,1); 3*ones(15,1); 4*ones(15,1)];
+%! k2 = [ones(30,1); 2*ones(30,1)];
+%! fwd = evalclusters (x, [k2, k4], 'CalinskiHarabasz');
+%! rev = evalclusters (x, [k4, k2], 'CalinskiHarabasz');
+%! assert_equal (rev.InspectedK, [2, 4]);
+%! assert_equal (rev.CriterionValues, fwd.CriterionValues);
+%! assert_equal (rev.OptimalK, fwd.OptimalK);
+
+## Two columns proposing the same number of clusters cannot be told apart by
+## the cluster sizes alone.
+%!error <two or more columns of 'clust' propose the same number of clusters> ...
+%! evalclusters ([randn(20,2); 6 + randn(20,2)], ...
+%!               [[ones(20,1); 2*ones(20,1)], [2*ones(20,1); ones(20,1)]], ...
+%!               'CalinskiHarabasz')
+
+## Shape and naming of the returned object, verified against MATLAB R2024a.
+
+%!shared X, sols
+%! randn ("seed", 11);
+%! X = [randn(20, 2); 6 + randn(20, 2); [12, 0] + randn(20, 2)];
+%! sols = [[ones(30,1); 2*ones(30,1)], ...
+%!         [ones(20,1); 2*ones(20,1); 3*ones(20,1)], ...
+%!         [ones(15,1); 2*ones(15,1); 3*ones(15,1); 4*ones(15,1)]];
+
+%!test  # given the clusterings, the object does not echo them back
+%! e = evalclusters (X, sols, "CalinskiHarabasz");
+%! assert_equal (isempty (e.OptimalY), true);
+%! assert_equal (isempty (e.ClusteringFunction), true);
+%! assert_equal (class (e.ClusteringFunction), "double");
+
+%!test  # asked to cluster, it reports both the solution and the function
+%! e = evalclusters (X, "kmeans", "CalinskiHarabasz", "KList", 2:4);
+%! assert_equal (size (e.OptimalY), [60, 1]);
+%! assert_equal (e.ClusteringFunction, "kmeans");
+
+%!test  # Missing carries one flag per observation, shaped like the observations
+%! e = evalclusters (X, sols, "CalinskiHarabasz");
+%! assert_equal (size (e.Missing), [60, 1]);
+%! assert_equal (class (e.Missing), "logical");
+%! Xn = X;  Xn(5,1) = NaN;
+%! e = evalclusters (Xn, sols, "CalinskiHarabasz");
+%! assert_equal (find (e.Missing), 5);
+%! assert_equal (e.NumObservations, 59);
+
+%!test  # a criterion that is undefined everywhere leaves no optimal K
+%! e = evalclusters (X, ones (60, 1), "CalinskiHarabasz");
+%! assert_equal (isnan (e.CriterionValues), true);
+%! assert_equal (isnan (e.OptimalK), true);
+%! assert_equal (isempty (e.OptimalY), true);
+
+%!test  # criterion and option names are reported as MATLAB spells them
+%! assert_equal (evalclusters (X, sols, "CalinskiHarabasz").CriterionName, ...
+%!               "CalinskiHarabasz");
+%! assert_equal (evalclusters (X, sols, "DaviesBouldin").CriterionName, ...
+%!               "DaviesBouldin");
+%! assert_equal (evalclusters (X, sols, "silhouette").CriterionName, ...
+%!               "Silhouette");
+%! e = evalclusters (X, sols, "silhouette", "Distance", "sqeuclidean");
+%! assert_equal (e.Distance, "sqEuclidean");
+%! e = evalclusters (X, sols, "silhouette", "Distance", "cityblock");
+%! assert_equal (e.Distance, "cityblock");
+
+%!test  # ClusterSilhouettes holds one mean per cluster, not one per observation
+%! e = evalclusters (X, sols, "silhouette");
+%! assert_equal (numel (e.ClusterSilhouettes), 3);
+%! assert_equal (size (e.ClusterSilhouettes{1}), [2, 1]);
+%! assert_equal (size (e.ClusterSilhouettes{2}), [3, 1]);
+%! assert_equal (size (e.ClusterSilhouettes{3}), [4, 1]);
+
+%!test  # the silhouette criterion honours the metric it was given
+%! a = evalclusters (X, sols, "silhouette", "Distance", "sqeuclidean");
+%! b = evalclusters (X, sols, "silhouette", "Distance", "cityblock");
+%! c = evalclusters (X, sols, "silhouette", "Distance", "cosine");
+%! assert_equal (isequal (a.CriterionValues, b.CriterionValues), false);
+%! assert_equal (isequal (b.CriterionValues, c.CriterionValues), false);
+%! ## each cluster mean is the mean of that cluster's silhouette values
+%! si = silhouette (X, sols(:,2), "cityblock", "DoNotPlot");
+%! m = [mean(si(sols(:,2) == 1)); mean(si(sols(:,2) == 2)); ...
+%!      mean(si(sols(:,2) == 3))];
+%! assert_equal (b.ClusterSilhouettes{2}, m, 1e-12);

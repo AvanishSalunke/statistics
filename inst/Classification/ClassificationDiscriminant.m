@@ -1459,6 +1459,12 @@ classdef ClassificationDiscriminant
     ## @seealso{loadmodel, fitcdiscr, ClassificationDiscriminant}
     ## @end deftypefn
     function savemodel (this, fname)
+      if (nargin < 2)
+        error ("ClassificationDiscriminant.savemodel: too few input arguments.");
+      endif
+      if (! (ischar (fname) && isrow (fname) && ! isempty (fname)))
+        error ("ClassificationDiscriminant.savemodel: FNAME must be a character vector.");
+      endif
       ## Generate variable for class name
       classdef_name = 'ClassificationDiscriminant';
 
@@ -1501,17 +1507,20 @@ classdef ClassificationDiscriminant
       ## Create a ClassificationDiscriminant object
       mdl = ClassificationDiscriminant (1, 1);
 
-      ## Check that fieldnames in DATA match properties in ClassificationDiscriminant
+      ## Copy the saved data into the object.  Iterate over what was
+      ## saved rather than over fieldnames (mdl): a private property such
+      ## as STname is written out by savemodel but is not reported by
+      ## fieldnames, so comparing the two sets could never match and every
+      ## load failed.  Assignment is legal here because this is a method of
+      ## the class itself.
       names = fieldnames (data);
-      props = fieldnames (mdl);
-      if (! isequal (sort (names), sort (props)))
-        msg = 'ClassificationDiscriminant.load_model: invalid model in ''%s''.';
-        error (msg, filename);
-      endif
-
-      ## Copy data into object
-      for i = 1:numel (props)
-        mdl.(props{i}) = data.(props{i});
+      for i = 1:numel (names)
+        try
+          mdl.(names{i}) = data.(names{i});
+        catch
+          msg = 'ClassificationDiscriminant.load_model: invalid model in ''%s''.';
+          error (msg, filename);
+        end_try_catch
       endfor
     endfunction
 
@@ -1955,3 +1964,9 @@ endclassdef
 %! crossval (obj, 'leaveout', 1)
 %!error<ClassificationDiscriminant.crossval: 'CVPartition' must be a 'cvpartition' object.> ...
 %! crossval (obj, 'cvpartition', 1)
+%!error <ClassificationDiscriminant.savemodel: too few input arguments.> ...
+%! savemodel (ClassificationDiscriminant ([1, 2; 2, 3; 3, 4; 4, 5], [1; 1; 2; 2]))
+%!error <ClassificationDiscriminant.savemodel: FNAME must be a character vector.> ...
+%! savemodel (ClassificationDiscriminant ([1, 2; 2, 3; 3, 4; 4, 5], [1; 1; 2; 2]), 1)
+%!error <ClassificationDiscriminant.savemodel: FNAME must be a character vector.> ...
+%! savemodel (ClassificationDiscriminant ([1, 2; 2, 3; 3, 4; 4, 5], [1; 1; 2; 2]), ['ab'; 'cd'])

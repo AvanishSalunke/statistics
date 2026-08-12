@@ -1003,7 +1003,10 @@ classdef ClassificationKNN
       if (isempty (NumNeighbors))
         this.NumNeighbors = 1;
       else
-        this.NumNeighbors = NumNeighbors;
+        ## There are only as many neighbors available as there are training
+        ## samples, so a larger request is capped at that.  Asking for more
+        ## raised an internal nonconformant operator error at prediction.
+        this.NumNeighbors = min (NumNeighbors, rows (X));
       endif
 
       ## Get distance metric
@@ -2061,6 +2064,12 @@ classdef ClassificationKNN
     ## @end deftypefn
 
     function savemodel (this, fname)
+      if (nargin < 2)
+        error ("ClassificationKNN.savemodel: too few input arguments.");
+      endif
+      if (! (ischar (fname) && isrow (fname) && ! isempty (fname)))
+        error ("ClassificationKNN.savemodel: FNAME must be a character vector.");
+      endif
       ## Generate variable for class name
       classdef_name = 'ClassificationKNN';
 
@@ -2106,16 +2115,19 @@ classdef ClassificationKNN
       ## Create a ClassificationKNN object
       mdl = ClassificationKNN (1, 1);
 
-      ## Check that fieldnames in DATA match properties in ClassificationKNN
+      ## Copy the saved data into the object.  Iterate over what was
+      ## saved rather than over fieldnames (mdl): a private property such
+      ## as STname is written out by savemodel but is not reported by
+      ## fieldnames, so comparing the two sets could never match and every
+      ## load failed.  Assignment is legal here because this is a method of
+      ## the class itself.
       names = fieldnames (data);
-      props = fieldnames (mdl);
-      if (! isequal (sort (names), sort (props)))
-        error ("ClassificationKNN.load_model: invalid model in '%s'.", filename)
-      endif
-
-      ## Copy data into object
-      for i = 1:numel (props)
-        mdl.(props{i}) = data.(props{i});
+      for i = 1:numel (names)
+        try
+          mdl.(names{i}) = data.(names{i});
+        catch
+          error ("ClassificationKNN.load_model: invalid model in '%s'.", filename)
+        end_try_catch
       endfor
     endfunction
 
@@ -2296,7 +2308,7 @@ endfunction
 %! k = 10;
 %! a = ClassificationKNN (x, y, 'NumNeighbors' ,k);
 %! assert_equal (class (a), "ClassificationKNN");
-%! assert_equal ({a.X, a.Y, a.NumNeighbors}, {x, y, 10})
+%! assert_equal ({a.X, a.Y, a.NumNeighbors}, {x, y, 4})
 %! assert_equal ({a.NSMethod, a.Distance}, {'kdtree', 'euclidean'})
 %! assert_equal ({a.BucketSize}, {50})
 %!test
@@ -2305,7 +2317,7 @@ endfunction
 %! k = 10;
 %! a = ClassificationKNN (x, y, 'NumNeighbors' ,k);
 %! assert_equal (class (a), "ClassificationKNN");
-%! assert_equal ({a.X, a.Y, a.NumNeighbors}, {x, y, 10})
+%! assert_equal ({a.X, a.Y, a.NumNeighbors}, {x, y, 4})
 %! assert_equal ({a.NSMethod, a.Distance}, {'exhaustive', 'euclidean'})
 %! assert_equal ({a.BucketSize}, {50})
 %!test
@@ -2314,7 +2326,7 @@ endfunction
 %! k = 10;
 %! a = ClassificationKNN (x, y, 'NumNeighbors' ,k, 'NSMethod', 'exhaustive');
 %! assert_equal (class (a), "ClassificationKNN");
-%! assert_equal ({a.X, a.Y, a.NumNeighbors}, {x, y, 10})
+%! assert_equal ({a.X, a.Y, a.NumNeighbors}, {x, y, 4})
 %! assert_equal ({a.NSMethod, a.Distance}, {'exhaustive', 'euclidean'})
 %! assert_equal ({a.BucketSize}, {50})
 %!test
@@ -2323,7 +2335,7 @@ endfunction
 %! k = 10;
 %! a = ClassificationKNN (x, y, 'NumNeighbors' ,k, 'Distance', 'hamming');
 %! assert_equal (class (a), "ClassificationKNN");
-%! assert_equal ({a.X, a.Y, a.NumNeighbors}, {x, y, 10})
+%! assert_equal ({a.X, a.Y, a.NumNeighbors}, {x, y, 4})
 %! assert_equal ({a.NSMethod, a.Distance}, {'exhaustive', 'hamming'})
 %! assert_equal ({a.BucketSize}, {50})
 
@@ -3174,3 +3186,21 @@ endfunction
 %! crossval (ClassificationKNN (ones (4,2), ones (4,1)), 'leaveout', 1)
 %!error<ClassificationKNN.crossval: 'CVPartition' must be a 'cvpartition' object.> ...
 %! crossval (ClassificationKNN (ones (4,2), ones (4,1)), 'cvpartition', 1)
+%!error <ClassificationKNN.savemodel: too few input arguments.> ...
+%! savemodel (ClassificationKNN ([1, 2; 2, 3; 3, 4; 4, 5], [1; 1; 2; 2]))
+%!error <ClassificationKNN.savemodel: FNAME must be a character vector.> ...
+%! savemodel (ClassificationKNN ([1, 2; 2, 3; 3, 4; 4, 5], [1; 1; 2; 2]), 1)
+%!error <ClassificationKNN.savemodel: FNAME must be a character vector.> ...
+%! savemodel (ClassificationKNN ([1, 2; 2, 3; 3, 4; 4, 5], [1; 1; 2; 2]), ['ab'; 'cd'])
+
+## There are only as many neighbors as training samples, so a larger
+## NumNeighbors is capped at that.  It used to be stored as requested and then
+## fail at prediction with a nonconformant operator error.
+%!test
+%! x = [1, 2; 3, 4; 5, 6; 7, 8; 2, 3];
+%! y = [1; 2; 1; 2; 1];
+%! for k = [5, 6, 20]
+%!   a = fitcknn (x, y, 'NumNeighbors', k);
+%!   assert_equal (a.NumNeighbors, 5);
+%!   assert_equal (predict (a, [2, 2; 6, 6]), [1; 1]);
+%! endfor

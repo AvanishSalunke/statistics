@@ -585,6 +585,12 @@ classdef CompactClassificationGAM
     ## @seealso{loadmodel, fitcgam, ClassificationGAM, CompactClassificationGAM}
     ## @end deftypefn
     function savemodel (this, fname)
+      if (nargin < 2)
+        error ("CompactClassificationGAM.savemodel: too few input arguments.");
+      endif
+      if (! (ischar (fname) && isrow (fname) && ! isempty (fname)))
+        error ("CompactClassificationGAM.savemodel: FNAME must be a character vector.");
+      endif
       ## Generate variable for class name
       classdef_name = 'CompactClassificationGAM';
 
@@ -624,17 +630,20 @@ classdef CompactClassificationGAM
       ## Create a CompactClassificationGAM object
       mdl = CompactClassificationGAM ();
 
-      ## Check that fieldnames in DATA match properties in CompactClassificationGAM
+      ## Copy the saved data into the object.  Iterate over what was
+      ## saved rather than over fieldnames (mdl): a private property such
+      ## as STname is written out by savemodel but is not reported by
+      ## fieldnames, so comparing the two sets could never match and every
+      ## load failed.  Assignment is legal here because this is a method of
+      ## the class itself.
       names = fieldnames (data);
-      props = fieldnames (mdl);
-      if (! isequal (sort (names), sort (props)))
-        error ("CompactClassificationGAM.load_model: invalid model in '%s'.", ...
-               filename)
-      endif
-
-      ## Copy data into object
-      for i = 1:numel (props)
-        mdl.(props{i}) = data.(props{i});
+      for i = 1:numel (names)
+        try
+          mdl.(names{i}) = data.(names{i});
+        catch
+          error ("CompactClassificationGAM.load_model: invalid model in '%s'.", ...
+                 filename)
+        end_try_catch
       endfor
     endfunction
 
@@ -782,3 +791,9 @@ endfunction
 %! predict (CMdl, [])
 %!error<CompactClassificationGAM.predict: XC must have the same number of features as the trained model.> ...
 %! predict (CMdl, 1)
+%!error <CompactClassificationGAM.savemodel: too few input arguments.> ...
+%! savemodel (CompactClassificationGAM ())
+%!error <CompactClassificationGAM.savemodel: FNAME must be a character vector.> ...
+%! savemodel (CompactClassificationGAM (), 1)
+%!error <CompactClassificationGAM.savemodel: FNAME must be a character vector.> ...
+%! savemodel (CompactClassificationGAM (), ['ab'; 'cd'])

@@ -387,10 +387,8 @@ classdef CompactLinearModel
       else
         fprintf ("\n  Compact linear regression model (robust fit):\n");
       endif
-      if (! isempty (this.Formula) && isstruct (this.Formula) ...
-          && isfield (this.Formula, 'LinearPredictor'))
-        fprintf ("      %s ~ %s\n", this.ResponseName, ...
-                 this.Formula.LinearPredictor);
+      if (! isempty (this.Formula) && isa (this.Formula, 'LinearFormula'))
+        fprintf ("      %s\n", char (this.Formula));
       endif
 
       if (! isempty (this.Coefficients))
@@ -2919,11 +2917,11 @@ endfunction
 %! t2 = table (a, b, z, w);
 %! c = compact (fitlm (t2, 'w ~ a + b - 1'));
 %! t = anova (c);
-%! assert_equal (t.SumSq(1), 61.8268470588237, -1e-8);
-%! assert_equal (t.F(1), 243.623106253276, -1e-7);
-%! assert_equal (t.SumSq(2), 43.7088970588236, -1e-8);
-%! assert_equal (t.SumSq(3), 4.56805294117647, -1e-8);
-%! assert_equal (t.DF(3), 18);
+%! assert_equal (t.SumSq(1), 63.3745141509434, -1e-8);
+%! assert_equal (t.F(1), 178.349190204051, -1e-7);
+%! assert_equal (t.SumSq(2), 15.2365308176101, -1e-8);
+%! assert_equal (t.SumSq(3), 3.02038584905660, -1e-8);
+%! assert_equal (t.DF(3), 17);
 
 %!test
 %! a = categorical ([1;1;2;1;2;1;1;2;1;1;2;1;2;2;1;1;2;1;1;2]);

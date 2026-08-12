@@ -48,7 +48,7 @@ classdef DaviesBouldinEvaluation < ClusterCriterion
       this@ClusterCriterion (x, clust, KList);
 
       this.CriterionName = 'DaviesBouldin';
-      this.evaluate(this.InspectedK); # evaluate the list of cluster numbers
+      this = this.evaluate (this.InspectedK);
     endfunction
 
     ## -*- texinfo -*-
@@ -58,7 +58,7 @@ classdef DaviesBouldinEvaluation < ClusterCriterion
     ##
     ## @end deftypefn
     function this = addK (this, K)
-      addK@ClusterCriterion (this, K);
+      this = addK@ClusterCriterion (this, K);
 
       ## if we have new data, we need a new evaluation
       if (this.OptimalK == 0)
@@ -73,7 +73,7 @@ classdef DaviesBouldinEvaluation < ClusterCriterion
           endif
         endfor
         this.Centroids = Centroids_tmp;
-        this.evaluate(K); # evaluate just the new cluster numbers
+        this = this.evaluate (K);
       endif
     endfunction
 
@@ -105,11 +105,6 @@ classdef DaviesBouldinEvaluation < ClusterCriterion
     ## Return a compact DaviesBouldinEvaluation object (not implemented).
     ##
     ## @end deftypefn
-    function this = compact (this)
-      warning (strcat ("DaviesBouldinEvaluation.compact:", ...
-                       " this method is not yet implemented."));
-    endfunction
-
   endmethods
 
   methods(Access = protected)
@@ -222,9 +217,22 @@ classdef DaviesBouldinEvaluation < ClusterCriterion
         endif
       endfor
 
-      [~, this.OptimalIndex] = min (this.CriterionValues);
-      this.OptimalK = this.InspectedK(this.OptimalIndex(1));
-      this.OptimalY = this.ClusteringSolutions(:, this.OptimalIndex(1));
+      ## A criterion that came out undefined everywhere leaves no optimum to
+      ## report, and the solutions are echoed back only when this object built
+      ## them: given a matrix of clusterings the caller already has them.
+      if (all (isnan (this.CriterionValues)))
+        this.OptimalIndex = [];
+        this.OptimalK = NaN;
+        this.OptimalY = [];
+      else
+        [~, this.OptimalIndex] = min (this.CriterionValues);
+        this.OptimalK = this.InspectedK(this.OptimalIndex(1));
+        if (isempty (this.ClusteringFunction))
+          this.OptimalY = [];
+        else
+          this.OptimalY = this.ClusteringSolutions(:, this.OptimalIndex(1));
+        endif
+      endif
     endfunction
   endmethods
 

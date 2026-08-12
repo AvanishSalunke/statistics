@@ -896,6 +896,12 @@ classdef CompactClassificationDiscriminant
     ## @seealso{loadmodel, fitcdiscr, ClassificationDiscriminant}
     ## @end deftypefn
     function savemodel (this, fname)
+      if (nargin < 2)
+        error ("CompactClassificationDiscriminant.savemodel: too few input arguments.");
+      endif
+      if (! (ischar (fname) && isrow (fname) && ! isempty (fname)))
+        error ("CompactClassificationDiscriminant.savemodel: FNAME must be a character vector.");
+      endif
       ## Generate variable for class name
       classdef_name = 'CompactClassificationDiscriminant';
 
@@ -932,19 +938,21 @@ classdef CompactClassificationDiscriminant
       ## Create a CompactClassificationDiscriminant object
       mdl = CompactClassificationDiscriminant ();
 
-      ## Check that fieldnames in DATA match properties in
-      ## CompactClassificationDiscriminant
+      ## Copy the saved data into the object.  Iterate over what was
+      ## saved rather than over fieldnames (mdl): a private property such
+      ## as STname is written out by savemodel but is not reported by
+      ## fieldnames, so comparing the two sets could never match and every
+      ## load failed.  Assignment is legal here because this is a method of
+      ## the class itself.
       names = fieldnames (data);
-      props = fieldnames (mdl);
-      if (! isequal (sort (names), sort (props)))
-        msg = strcat ("CompactClassificationDiscriminant.load_model:", ...
-                      " invalid model in '%s'.");
-        error (msg, filename);
-      endif
-
-      ## Copy data into object
-      for i = 1:numel (props)
-        mdl.(props{i}) = data.(props{i});
+      for i = 1:numel (names)
+        try
+          mdl.(names{i}) = data.(names{i});
+        catch
+          msg = strcat ("CompactClassificationDiscriminant.load_model:", ...
+                        " invalid model in '%s'.");
+          error (msg, filename);
+        end_try_catch
       endfor
     endfunction
 
@@ -1174,3 +1182,9 @@ endclassdef
 %! margin (MODEL, ones (4,2))
 %!error<CompactClassificationDiscriminant.margin: Y must have the same number of rows as X.> ...
 %! margin (MODEL, ones (4,2), ones (3,1))
+%!error <CompactClassificationDiscriminant.savemodel: too few input arguments.> ...
+%! savemodel (CompactClassificationDiscriminant ())
+%!error <CompactClassificationDiscriminant.savemodel: FNAME must be a character vector.> ...
+%! savemodel (CompactClassificationDiscriminant (), 1)
+%!error <CompactClassificationDiscriminant.savemodel: FNAME must be a character vector.> ...
+%! savemodel (CompactClassificationDiscriminant (), ['ab'; 'cd'])

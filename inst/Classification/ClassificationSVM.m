@@ -1574,6 +1574,12 @@ classdef ClassificationSVM
     ## @seealso{loadmodel, fitcsvm, ClassificationSVM}
     ## @end deftypefn
     function savemodel (this, fname)
+      if (nargin < 2)
+        error ("ClassificationSVM.savemodel: too few input arguments.");
+      endif
+      if (! (ischar (fname) && isrow (fname) && ! isempty (fname)))
+        error ("ClassificationSVM.savemodel: FNAME must be a character vector.");
+      endif
       ## Generate variable for class name
       classdef_name = 'ClassificationSVM';
 
@@ -1600,11 +1606,13 @@ classdef ClassificationSVM
       SupportVectors      = this.SupportVectors;
 
       ## Save classdef name and all model properties as individual variables
+      STname          = this.STname;
+
       save ('-binary', fname, 'classdef_name', 'X', 'Y', 'NumObservations', ...
             'RowsUsed', 'NumPredictors', 'PredictorNames', 'ResponseName', ...
             'ClassNames', 'ScoreTransform', 'Standardize', 'Sigma', 'Mu',  ...
             'ModelParameters', 'Model', 'Alpha', 'Beta', 'Bias', ...
-            'IsSupportVector', 'SupportVectorLabels', 'SupportVectors');
+            'IsSupportVector', 'SupportVectorLabels', 'SupportVectors', 'STname');
     endfunction
 
   endmethods
@@ -1615,16 +1623,19 @@ classdef ClassificationSVM
       ## Create a ClassificationSVM object
       mdl = ClassificationSVM (1, 1);
 
-      ## Check that fieldnames in DATA match properties in ClassificationSVM
+      ## Copy the saved data into the object.  Iterate over what was
+      ## saved rather than over fieldnames (mdl): a private property such
+      ## as STname is written out by savemodel but is not reported by
+      ## fieldnames, so comparing the two sets could never match and every
+      ## load failed.  Assignment is legal here because this is a method of
+      ## the class itself.
       names = fieldnames (data);
-      props = fieldnames (mdl);
-      if (! isequal (sort (names), sort (props)))
-        error ("ClassificationSVM.load_model: invalid model in '%s'.", filename)
-      endif
-
-      ## Copy data into object
-      for i = 1:numel (props)
-        mdl.(props{i}) = data.(props{i});
+      for i = 1:numel (names)
+        try
+          mdl.(names{i}) = data.(names{i});
+        catch
+          error ("ClassificationSVM.load_model: invalid model in '%s'.", filename)
+        end_try_catch
       endfor
     endfunction
 
@@ -1860,6 +1871,30 @@ endclassdef
 %! label = predict (obj, xc);
 %! assert_equal (label, [1; 2; 2]);
 
+## A single-observation query used to corrupt the heap and abort the
+## interpreter; each row on its own must agree with the batch answer.
+%!test
+%! obj = fitcsvm (x, y);
+%! xc = [min(x); mean(x); max(x)];
+%! batch = predict (obj, xc);
+%! for i = 1:rows (xc)
+%!   assert_equal (predict (obj, xc(i,:)), batch(i));
+%! endfor
+%!test
+%! obj = fitcsvm (x, y, 'KernelFunction', 'rbf', 'Tolerance', 1e-7);
+%! xc = [min(x); mean(x); max(x)];
+%! [bl, bs] = predict (obj, xc);
+%! [l1, s1] = predict (obj, xc(1,:));
+%! assert_equal (l1, bl(1));
+%! assert_equal (size (l1), [1, 1]);
+%! assert_equal (size (s1), [1, 2]);
+%! assert_equal (s1, bs(1,:), 2e-5);
+%!test
+%! obj = compact (fitcsvm (x, y));
+%! xc = [min(x); mean(x); max(x)];
+%! batch = predict (obj, xc);
+%! assert_equal (predict (obj, xc(1,:)), batch(1));
+
 ## Test input validation for predict method
 %!error<ClassificationSVM.predict: too few input arguments.> ...
 %! predict (ClassificationSVM (ones (40,2), ones (40,1)))
@@ -2048,3 +2083,9 @@ endclassdef
 %! crossval (ClassificationSVM (ones (40,2),randi ([1, 2], 40, 1)), 'CVPartition', 'a')
 %!error<ClassificationSVM.crossval: invalid parameter name in optional paired arguments> ...
 %! crossval (ClassificationSVM (ones (40,2),randi ([1, 2], 40, 1)), 'some', 'some')
+%!error <ClassificationSVM.savemodel: too few input arguments.> ...
+%! savemodel (ClassificationSVM ([1, 2; 2, 3; 3, 4; 4, 5], [1; 1; 2; 2]))
+%!error <ClassificationSVM.savemodel: FNAME must be a character vector.> ...
+%! savemodel (ClassificationSVM ([1, 2; 2, 3; 3, 4; 4, 5], [1; 1; 2; 2]), 1)
+%!error <ClassificationSVM.savemodel: FNAME must be a character vector.> ...
+%! savemodel (ClassificationSVM ([1, 2; 2, 3; 3, 4; 4, 5], [1; 1; 2; 2]), ['ab'; 'cd'])

@@ -86,14 +86,21 @@
 
 function h = violin (ax, varargin)
 
-  old_hold = ishold ();
+  if (nargin < 1)
+    print_usage ();
+  endif
+
   # First argument is not an axis
   if (! ishandle (ax) || ! isscalar (ax))
     x  = ax;
-    ax = gca ();
+    ax_given = false;
   else
+    if (isempty (varargin))
+      print_usage ();
+    endif
     x = varargin{1};
     varargin(1) = [];
+    ax_given = true;
   endif
 
   ######################
@@ -126,10 +133,42 @@ function h = violin (ax, varargin)
 
   ## Make everything a cell for code simplicity
   if (! iscell (x))
-    [N Nc] = size (x);
-    x      = mat2cell (x, N, ones (1, Nc));
+    ## A vector is one variable however it is oriented, as in boxplot.  Taking
+    ## a row vector as many variables of a single observation each made every
+    ## row vector fail inside the kernel estimate.
+    if (isvector (x))
+      x = x(:);
+    endif
+    [N, Nc] = size (x);
+    if (N == 0 || Nc == 0)
+      error ("violin: X must not be empty.");
+    endif
+    x = mat2cell (x, N, ones (1, Nc));
   else
     Nc = numel (x);
+    if (Nc == 0)
+      error ("violin: X must not be empty.");
+    endif
+    x = cellfun (@(v) v(:), x, 'UniformOutput', false);
+  endif
+
+  ## Integer and logical observations are perfectly good data; the kernel
+  ## estimate only needs them in floating point, which is what var insists on.
+  ## And a variable needs a spread for there to be a density at all.  Both
+  ## used to surface as an internal subscript or nonconformance error.
+  if (! all (cellfun (@(v) isnumeric (v) || islogical (v), x)))
+    error ("violin: X must be numeric or logical.");
+  endif
+  if (any (cellfun (@numel, x) < 2))
+    error ("violin: each variable in X needs at least two observations.");
+  endif
+  x = cellfun (@double, x, 'UniformOutput', false);
+
+  ## Only now claim an axis.  gca creates a figure when there is none, so
+  ## doing it before the checks above left a rejected call -- violin ([]),
+  ## violin (5), violin ('abc') -- with an empty figure open behind the error.
+  if (! ax_given)
+    ax = gca ();
   endif
 
   try
@@ -393,3 +432,70 @@ endfunction
 %!   close (hf);
 %! end_unwind_protect
 
+## A vector is one variable however it is oriented, as in boxplot.  A row
+## vector used to be read as many variables of a single observation each, and
+## died inside the kernel estimate.
+%!test
+%! hf = figure ("visible", "off");
+%! unwind_protect
+%!   r = violin (randn (1, 60));
+%!   nrow = numel (findobj (gca (), "Type", "patch"));
+%!   clf;
+%!   c = violin (randn (60, 1));
+%!   ncol = numel (findobj (gca (), "Type", "patch"));
+%!   assert_equal (nrow, 1);
+%!   assert_equal (ncol, 1);
+%!   assert_equal (numel (r.violin), numel (c.violin));
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+## Columns of a matrix remain one variable each.
+%!test
+%! hf = figure ("visible", "off");
+%! unwind_protect
+%!   h = violin (randn (40, 3));
+%!   assert_equal (numel (findobj (gca (), "Type", "patch")), 3);
+%!   assert_equal (numel (h.violin), 3);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+## A cell of row vectors is as good as a cell of columns.
+%!test
+%! hf = figure ("visible", "off");
+%! unwind_protect
+%!   violin ({[1, 2, 3, 4], [3, 4, 5, 6]});
+%!   assert_equal (numel (findobj (gca (), "Type", "patch")), 2);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+## Integer and logical observations are data too; var wanted them in floating
+## point, so they were refused outright.
+%!test
+%! hf = figure ("visible", "off");
+%! unwind_protect
+%!   v = [1 2 3 4 5 4 3 2 1 2 3];
+%!   violin (int32 (v));
+%!   ni = numel (findobj (gca (), "Type", "patch"));
+%!   clf;
+%!   violin (double (v));
+%!   nd = numel (findobj (gca (), "Type", "patch"));
+%!   assert_equal (ni, nd);
+%!   clf;
+%!   violin (logical ([1 0 1 1 0 0 1 0 1 1]));
+%!   assert_equal (numel (findobj (gca (), "Type", "patch")), 1);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+## Test input validation
+%!error <Invalid call to violin> violin ()
+%!error <violin: X must not be empty.> violin ([])
+%!error <violin: X must not be empty.> violin ({})
+%!error <violin: each variable in X needs at least two observations.> ...
+%! violin (5)
+%!error <violin: each variable in X needs at least two observations.> ...
+%! violin ({[1, 2, 3], 4})
+%!error <violin: X must be numeric or logical.> violin ('abcdef')

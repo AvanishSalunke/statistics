@@ -2,7 +2,224 @@
 # name: cache
 # type: cell
 # rows: 3
-# columns: 152
+# columns: 207
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 27
+GeneralizedLinearMixedModel
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 850
+ -- statistics: GeneralizedLinearMixedModel
+
+     Generalized linear mixed-effects model fitted to data.
+
+     A ‘GeneralizedLinearMixedModel’ object represents a fitted generalized
+     linear mixed-effects model: a generalized linear model whose linear
+     predictor ‘X*beta + Z*b’ includes normally distributed random effects ‘b ~
+     N(0, Psi)’.  Objects are created with ‘fitglme’.
+
+     The model is fitted by penalized quasi-likelihood.  The fixed-effects
+     estimates and their statistics are available through the ‘Coefficients’
+     table, the covariance parameters through ‘covarianceParameters’, and
+     predictions, residuals, and hypothesis tests through the ‘predict’,
+     ‘residuals’, ‘anova’, ‘coefTest’, and ‘coefCI’ methods.
+
+     See also: fitglme, fitlme, GeneralizedLinearModel.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 54
+Generalized linear mixed-effects model fitted to data.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 22
+GeneralizedLinearModel
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2635
+ -- statistics: GeneralizedLinearModel
+
+     Generalized linear regression model class.
+
+     A ‘GeneralizedLinearModel’ object encapsulates a generalized linear model
+     (GLM) of a response on one or more predictors, fitted by iteratively
+     reweighted least squares.  It is the GLM counterpart of ‘LinearModel’ and
+     is normally created with the ‘fitglm’ function.
+
+     The response is modelled through a distribution from the exponential family
+     ('normal', 'binomial', 'poisson', 'gamma', or 'inverse gaussian') and a
+     link function g relating the mean mu to the linear predictor eta = g (mu).
+
+     The most useful properties are ‘Coefficients’ (a table of estimates,
+     standard errors, t-statistics and p-values), ‘Deviance’, ‘Dispersion’,
+     ‘Residuals’, ‘Fitted’, ‘Diagnostics’, ‘Distribution’, and ‘Link’.
+     ‘ObservationInfo’ records which rows were weighted, excluded, or missing,
+     and ‘Variables’ holds the data the model was built from.  Fitted models
+     support the ‘predict’ and ‘feval’ methods for prediction.
+
+     ‘Fitted’, ‘Residuals’, ‘Diagnostics’, and ‘ObservationInfo’ have one row
+     per _input_ observation, not per fitted observation.  Rows that were
+     excluded with the 'Exclude' pair still carry a fitted value and a residual,
+     since the model can be evaluated there; rows dropped because a variable was
+     missing carry ‘NaN’.
+
+     For a binomial response given together with a 'BinomialSize' vector N, the
+     response is the _proportion_ of successes, as ‘fitglm’ documents.
+     ‘Fitted.Response’ is then the fitted count N p and ‘Residuals.Raw’ is on
+     that same count scale.
+
+     A categorical predictor expands to indicator columns, one per level bar the
+     reference level, which the intercept carries.  When the model has no
+     intercept, the _first_ categorical predictor is given an indicator for
+     every one of its levels instead, so that its coefficients are the group
+     means; any further categorical predictor stays reference coded, which keeps
+     the design full rank.  This differs from MATLAB, which omits the reference
+     level whether or not an intercept is present and so cannot fit the
+     reference group at all - for a three-level grouping variable ‘g’, MATLAB
+     fits ‘y ~ g - 1’ with two coefficients, predicts exactly 0 for every
+     observation in the omitted group, and reports a negative R^2.  This
+     implementation returns three coefficients, one per group.
+
+     See also: fitglm, LinearModel, glmfit, glmval.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 42
+Generalized linear regression model class.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 15
+IsolationForest
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 670
+ -- statistics: MDL = IsolationForest (X)
+ -- statistics: MDL = IsolationForest (X, NAME, VALUE)
+
+     Isolation Forest model for anomaly detection.
+
+     An ‘IsolationForest’ object stores an ensemble of isolation trees fitted to
+     a set of observations and detects anomalies through the ‘isanomaly’ method.
+     Create a model with the ‘iforest’ function rather than by calling this
+     constructor directly.
+
+     Anomalies are easier to isolate, so they sit closer to the root of a random
+     isolation tree; the shorter its average path length across the ensemble,
+     the higher an observation's anomaly score.
+
+     See also: iforest, isanomaly.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 45
+Isolation Forest model for anomaly detection.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+LinearFormula
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1214
+ -- statistics: LinearFormula
+
+     Model formula of a linear or generalized linear regression.
+
+     A LinearFormula object describes the terms of a fitted model: which
+     variables the model draws on, how they combine into terms, and how the
+     whole thing reads back as a formula.  It is the class of the ‘Formula’
+     property of a ‘LinearModel’ and of a ‘GeneralizedLinearModel’, and is
+     normally obtained from a fitted model rather than built directly.
+
+     The object is defined by its terms matrix and the names of the variables
+     that matrix is written over; every other property is derived from those
+     two.  Each row of ‘Terms’ is one term of the model and each column is one
+     variable, the entry giving the power that variable carries in that term.
+     An all-zero row is the intercept.  The response variable occupies a column
+     of its own, which is always zero.
+
+     Converting the object with ‘char’ renders the whole formula, response
+     included, as "y ~ 1 + x1 + x2"; the ‘LinearPredictor’ property holds the
+     right-hand side on its own.  For a generalized linear model the response
+     carries its link function, as in "logit(y) ~ 1 + x1".
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 59
+Model formula of a linear or generalized linear regression.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 16
+LinearMixedModel
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 822
+ -- statistics: LinearMixedModel
+
+     Linear mixed-effects model fitted to data.
+
+     A ‘LinearMixedModel’ object represents a fitted linear mixed-effects model
+     ‘y = X*beta + Z*b + e’, with fixed effects BETA, random effects B
+     distributed as ‘N(0, Psi)’, and independent errors ‘N(0, sigma2)’.  Objects
+     are created with ‘fitlmematrix’ (from design matrices).
+
+     The estimated fixed effects and their statistics are available through the
+     ‘Coefficients’ table; the covariance parameters through
+     ‘covarianceParameters’; the random-effect BLUPs through ‘randomEffects’;
+     and predictions, residuals, and hypothesis tests through the ‘predict’,
+     ‘residuals’, ‘anova’, ‘coefTest’, and ‘coefCI’ methods.
+
+     See also: fitlmematrix, fitlm.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 42
+Linear mixed-effects model fitted to data.
+
+
+
 # name: <cell-element>
 # type: sq_string
 # elements: 1
@@ -13,7 +230,7 @@ LinearModel
 # name: <cell-element>
 # type: sq_string
 # elements: 1
-# length: 7368
+# length: 8206
  -- statistics: LinearModel
 
      Linear regression model
@@ -53,6 +270,18 @@ LinearModel
                         used, excluded, missing, or weighted), ‘ObservationNames’,
                         ‘PredictorNames’, ‘ResponseName’, ‘VariableInfo’,
                         ‘VariableNames’, and ‘Variables’.
+
+     A categorical predictor expands to indicator columns, one per level bar the
+     reference level, which the intercept carries.  When the model has no
+     intercept, the _first_ categorical predictor is given an indicator for
+     every one of its levels instead, so that its coefficients are the group
+     means; any further categorical predictor stays reference coded, which keeps
+     the design full rank.  This differs from MATLAB, which omits the reference
+     level whether or not an intercept is present and so cannot fit the
+     reference group at all - for a three-level grouping variable ‘g’, MATLAB
+     fits ‘y ~ g - 1’ with two coefficients, predicts exactly 0 for every
+     observation in the omitted group, and reports a negative R^2.  This
+     implementation returns three coefficients, one per group.
 
      A ‘LinearModel’ object supports categorical predictors, which are
      automatically encoded internally as indicator (dummy) variables,
@@ -140,6 +369,223 @@ LinearModel
 # elements: 1
 # length: 23
 Linear regression model
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 18
+LocalOutlierFactor
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 755
+ -- statistics: MDL = LocalOutlierFactor (X)
+ -- statistics: MDL = LocalOutlierFactor (X, NAME, VALUE)
+
+     Local Outlier Factor model for anomaly detection.
+
+     A ‘LocalOutlierFactor’ object stores a Local Outlier Factor (LOF) model
+     fitted to a set of observations, and detects anomalies among those or new
+     observations through the ‘isanomaly’ method.  Create a model with the ‘lof’
+     function rather than by calling this constructor directly.
+
+     The LOF of an observation compares its local density with the local density
+     of its neighbors; a value near 1 indicates an inlier, whereas a value well
+     above 1 indicates an outlier that lies in a sparser region than its
+     neighbors.
+
+     See also: lof, isanomaly.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 49
+Local Outlier Factor model for anomaly detection.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 14
+NonLinearModel
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2198
+ -- statistics: MDL = NonLinearModel (...)
+
+     Nonlinear regression model class.
+
+     A ‘NonLinearModel’ object holds a nonlinear regression fitted by ‘fitnlm’,
+     together with its coefficients, fit statistics, and methods for inference,
+     prediction, and diagnostics.  Construct one with ‘fitnlm’, which documents
+     the accepted inputs and NAME/VALUE pairs.
+
+     The estimated coefficients and their statistics are in the ‘Coefficients’
+     table; ‘Rsquared’, ‘ModelCriterion’, ‘LogLikelihood’, ‘RMSE’, ‘SSE’, ‘SST’,
+     and ‘SSR’ summarize the fit.  The methods ‘predict’, ‘feval’, ‘random’,
+     ‘coefCI’, ‘coefTest’, ‘plotResiduals’, ‘plotDiagnostics’, and ‘plotSlice’
+     operate on the fitted model.
+
+     Fit statistics
+     --------------
+
+     The fit statistics follow MATLAB's conventions.  ‘SSE’ is the residual sum
+     of squares, ‘SST’ the total sum of squares of the response about its
+     (weighted) mean, and ‘SSR’ the regression sum of squares of the fitted
+     values about that mean; because the model is nonlinear, ‘SST’ does _not_ in
+     general equal ‘SSR + SSE’.  ‘Rsquared.Ordinary’ is ‘1 - SSE / SST’ and
+     ‘Rsquared.Adjusted’ corrects for the error degrees of freedom.  ‘RMSE’ is
+     ‘sqrt (MSE)’, and the Gaussian ‘LogLikelihood’ uses the maximum-likelihood
+     error variance ‘SSE / n’.  The information criteria in ‘ModelCriterion’
+     (‘AIC’, ‘AICc’, ‘BIC’, ‘CAIC’) count the p coefficients as the only
+     parameters - the error variance is _not_ counted.  ‘coefTest’ is a Wald
+     test: for a contrast matrix H it forms ‘(H*b)' * inv (H*V*H') * (H*b) / r’
+     with V the coefficient covariance and r the number of rows of H, referred
+     to an F distribution on r and DFE degrees of freedom.  The summary printed
+     by ‘disp’ instead reports an F statistic versus the zero model, formed from
+     the uncorrected regression sum of squares (the sum of the squared fitted
+     values).
+
+     See also: fitnlm, nlinfit, nlparci, nlpredci, LinearModel,
+     GeneralizedLinearModel.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 33
+Nonlinear regression model class.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 11
+OneClassSVM
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 732
+ -- statistics: MDL = OneClassSVM (X)
+ -- statistics: MDL = OneClassSVM (X, NAME, VALUE)
+
+     One-class support vector machine model for anomaly detection.
+
+     A ‘OneClassSVM’ object stores a one-class support vector machine fitted to
+     a set of observations in an expanded feature space, and detects anomalies
+     through the ‘isanomaly’ method.  Create a model with the ‘ocsvm’ function
+     rather than by calling this constructor directly.
+
+     The model maps the data to a randomized feature space that approximates a
+     Gaussian kernel and fits a linear boundary that encloses the bulk of the
+     observations; points outside the boundary receive higher anomaly scores.
+
+     See also: ocsvm, isanomaly.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 61
+One-class support vector machine model for anomaly detection.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 17
+ReconstructionICA
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1066
+ -- statistics: ReconstructionICA
+
+     Reconstruction independent component analysis (RICA) feature-extraction
+     model.
+
+     A ReconstructionICA object stores the transformation learned by ‘rica’ for
+     extracting features from data.  Create one with ‘rica’; apply it to data
+     with the ‘transform’ method.
+
+     An object of this class has the following properties:
+
+        • TransformWeights — the P * Q matrix of learned transformation weights
+          (unit-length columns).
+        • Mu, Sigma — the per-predictor mean and standard deviation used when
+          'Standardize' is true (empty otherwise).
+        • FitInfo — a structure with the number of Iterations and the final
+          Objective value of the fit.
+        • ModelParameters — a structure of the options used for the fit.
+        • NumPredictors, NumLearnedFeatures — the input dimension P and the
+          number of learned features Q.
+        • InitialTransformWeights — the starting weights used by the fit.
+
+     See also: rica, sparsefilt.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 78
+Reconstruction independent component analysis (RICA) feature-extraction model.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 15
+SparseFiltering
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1001
+ -- statistics: SparseFiltering
+
+     Sparse filtering feature-extraction model.
+
+     A SparseFiltering object stores the transformation learned by ‘sparsefilt’
+     for extracting features from data.  Create one with ‘sparsefilt’; apply it
+     to data with the ‘transform’ method.
+
+     An object of this class has the following properties:
+
+        • TransformWeights — the P * Q matrix of learned transformation weights.
+        • Mu, Sigma — the per-predictor mean and standard deviation used when
+          'Standardize' is true (empty otherwise).
+        • FitInfo — a structure with the number of Iterations and the final
+          Objective value of the fit.
+        • ModelParameters — a structure of the options used for the fit.
+        • NumPredictors, NumLearnedFeatures — the input dimension P and the
+          number of learned features Q.
+        • InitialTransformWeights — the starting weights used by the fit.
+
+     See also: sparsefilt, rica.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 42
+Sparse filtering feature-extraction model.
 
 
 
@@ -243,6 +689,68 @@ adtest
 # elements: 1
 # length: 49
 Anderson-Darling goodness-of-fit hypothesis test.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 11
+andrewsplot
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1720
+ -- statistics: andrewsplot (X)
+ -- statistics: andrewsplot (X, NAME, VALUE, ...)
+ -- statistics: andrewsplot (AX, ...)
+ -- statistics: H = andrewsplot (...)
+
+     Create an Andrews plot of the multivariate data in X.
+
+     ‘andrewsplot (X)’ plots each observation (row) of the ‘n’-by-‘p’ matrix X
+     as a smooth curve defined by the finite Fourier series
+
+          f_i(t) = x_i1/sqrt(2) + x_i2 sin(2*pi*t) + x_i3 cos(2*pi*t)
+                   + x_i4 sin(4*pi*t) + x_i5 cos(4*pi*t) + ...
+
+     evaluated over t in the interval [0,1], where X_IJ is the j-th variable of
+     the i-th observation.
+
+     The following name/value pairs are accepted:
+
+     "Group"
+          A grouping variable (numeric, logical, character, string, or cell
+          array of strings) with one entry per row of X.  Curves are colored by
+          group.
+
+     "Standardize"
+          Controls how the columns of X are transformed before the curves are
+          computed: "off" (default) uses the raw data, "on" centers and scales
+          each column to zero mean and unit standard deviation, "PCA" uses the
+          principal component scores, and "PCAStd" uses the principal component
+          scores of the standardized data.
+
+     "Quantile"
+          A scalar ALPHA in the interval (0,1).  Instead of one curve per
+          observation, only three curves per group are drawn: the pointwise
+          median and the ALPHA and 1-ALPHA quantiles of the group's curves.
+
+     ‘andrewsplot (AX, ...)’ plots into the axes AX.
+
+     The optional output H is a vector of handles to the plotted lines: one per
+     observation, or three per group when "Quantile" is used.
+
+     See also: parallelcoords, glyphplot, pca.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 53
+Create an Andrews plot of the multivariate data in X.
 
 
 
@@ -645,6 +1153,84 @@ Perform a multi (N)-way analysis of (co)variance (ANOVA or ANCOVA) to evaluat...
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 13
+ansaribradley
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2914
+ -- statistics: H = ansaribradley (X, Y)
+ -- statistics: H = ansaribradley (X, Y, NAME, VALUE)
+ -- statistics: [H, P] = ansaribradley (...)
+ -- statistics: [H, P, STATS] = ansaribradley (...)
+
+     Ansari-Bradley two-sample test for equal dispersions.
+
+     ‘H = ansaribradley (X, Y)’ performs an Ansari-Bradley test of the
+     hypothesis that the two independent samples in the vectors X and Y come
+     from distributions with the same dispersion parameter, against the
+     alternative that they come from distributions with different dispersions.
+     The result is H = 0 if the null hypothesis of equal dispersions cannot be
+     rejected at the 5% significance level, or H = 1 if it can.
+
+     The Ansari-Bradley test is a nonparametric alternative to the two-sample F
+     test (‘vartest2’) that does not assume normality.  It assumes that the two
+     samples are independent and that they come from distributions with the same
+     median and shape, differing (under the alternative) only in dispersion.  If
+     the medians differ, the data should be recentred (e.g. by subtracting the
+     sample medians) before applying the test.
+
+     ‘ansaribradley’ treats NaNs in X or Y as missing values and ignores them.
+
+     ‘[H, P] = ansaribradley (...)’ returns the p-value of the test, that is the
+     probability, under the null hypothesis, of observing a value of the test
+     statistic as or more extreme than the one observed.
+
+     ‘[H, P, STATS] = ansaribradley (...)’ returns a structure with the
+     following fields:
+
+     W                the value of the Ansari-Bradley test statistic, the sum of
+                      the Ansari-Bradley scores of the sample X
+     Wstar            the value of the approximate normal (z) statistic
+
+     ‘[...] = ansaribradley (..., NAME, VALUE)’ specifies one or more of the
+     following name/value pairs:
+
+     Name             Value
+     ------------------------------------------------------------------------------
+     'alpha'          the significance level.  Default is 0.05.
+                      
+     'tail'           a string specifying the alternative hypothesis
+                      
+     'method'         a string selecting the p-value computation, either 'exact'
+                      to use the exact permutation distribution of the
+                      statistic, or 'approximate' to use the normal
+                      approximation.  The default is 'exact' when the total
+                      sample size is 25 or less, and 'approximate' otherwise.
+
+     The 'tail' option can take one of the following values:
+
+     'both'       dispersions are not equal (two-tailed, default)
+     'right'      dispersion of X is greater than dispersion of Y
+                  (right-tailed)
+     'left'       dispersion of X is less than dispersion of Y (left-tailed)
+
+     See also: vartest2, vartestn, kstest2, ranksum.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 53
+Ansari-Bradley two-sample test for equal dispersions.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 4
 bar3
 
@@ -989,6 +1575,75 @@ Test for probability P of a binomial sample
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 6
+biplot
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2077
+ -- statistics: biplot (COEFS)
+ -- statistics: biplot (COEFS, NAME, VALUE, ...)
+ -- statistics: biplot (AX, ...)
+ -- statistics: H = biplot (...)
+
+     Create a biplot of the coefficients in COEFS.
+
+     ‘biplot (COEFS)’ plots the rows of COEFS, typically the principal component
+     coefficients returned by ‘pca’ or ‘pcacov’ or the factor loadings returned
+     by ‘factoran’, as vectors from the origin.  COEFS has one row per observed
+     variable and either two columns (for a 2-D biplot) or three columns (for a
+     3-D biplot).
+
+     The following name/value pairs are accepted:
+
+     "Scores"
+          A matrix of scores with the same number of columns as COEFS (one row
+          per observation).  The scores are plotted as points, scaled to fit
+          within the unit circle relative to the maximum coefficient length:
+          each score is divided by the maximum absolute score value and
+          multiplied by the length of the longest coefficient vector.
+
+     "VarLabels"
+          A character array or cell array of strings labeling each variable
+          vector.
+
+     "ObsLabels"
+          A character array or cell array of strings labeling each observation.
+
+     "Positive"
+          If true, the reference axes are drawn only over the positive quadrant
+          (2-D) or octant (3-D). The default is false.
+
+     Any additional name/value pairs are treated as line properties and applied
+     to the variable vectors.
+
+     For readability the sign of each column of COEFS is chosen so that its
+     largest-magnitude element is positive; the same sign change is applied to
+     the corresponding column of the scores.
+
+     ‘biplot (AX, ...)’ plots into the axes AX.
+
+     The optional output H is a column vector of handles to the plotted graphics
+     objects, ordered as the variable vector lines, the variable markers, the
+     variable text labels (if any), the observation markers, the observation
+     text labels (if any), and finally the reference axis lines.
+
+     See also: pca, pcacov, factoran, rotatefactors.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 45
+Create a biplot of the coefficients in COEFS.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 7
 boxplot
 
@@ -996,7 +1651,7 @@ boxplot
 # name: <cell-element>
 # type: sq_string
 # elements: 1
-# length: 8734
+# length: 9054
  -- statistics: S = boxplot (DATA)
  -- statistics: S = boxplot (DATA, GROUP)
  -- statistics: S = boxplot (DATA, NOTCHED, SYMBOL, ORIENTATION, WHISKER, ...)
@@ -1140,6 +1795,11 @@ boxplot
      5        Maximum
      6        Lower confidence limit for median
      7        Upper confidence limit for median
+
+     The quartiles are those of ‘quantile’ at its default method, which is also
+     what ‘prctile’ returns, so the box edges of a data set always agree with
+     ‘prctile (DATA, [25, 75])’.  They set the inter-quartile range, and so the
+     whisker fences and which observations are reported as outliers.
 
      The returned structure H contains handles to the plot elements, allowing
      customization of the visualization using set/get functions.
@@ -2271,6 +2931,87 @@ Randomly sample data.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 6
+dbscan
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3553
+ -- statistics: IDX = dbscan (X, EPSILON, MINPTS)
+ -- statistics: IDX = dbscan (D, EPSILON, MINPTS, 'Distance', 'precomputed')
+ -- statistics: IDX = dbscan (..., NAME, VALUE)
+ -- statistics: [IDX, COREPTS] = dbscan (...)
+
+     Density-Based Spatial Clustering of Applications with Noise (DBSCAN).
+
+     ‘IDX = dbscan (X, EPSILON, MINPTS)’ partitions the observations in the N*P
+     numeric matrix X into clusters using the DBSCAN algorithm with neighborhood
+     radius EPSILON and minimum number of neighbors MINPTS.  Rows of X
+     correspond to observations and columns correspond to features or variables.
+     EPSILON must be a nonnegative scalar and MINPTS a positive integer scalar.
+     IDX is an N*1 vector of cluster indices, numbered 1 to the number of
+     clusters found; observations flagged as noise are assigned the value -1.
+
+     A point is a _core point_ when at least MINPTS observations (*including the
+     point itself*) lie within distance EPSILON of it.  Clusters grow from core
+     points to every observation that is density-reachable from them; a non-core
+     observation that lies within EPSILON of a core point becomes a _border
+     point_ and joins that point's cluster, while an observation that is neither
+     core nor within reach of a core point is labelled noise.  A border point
+     that is reachable from more than one cluster is assigned to the first
+     cluster that reaches it, following the order of the observations in X.
+
+     ‘IDX = dbscan (D, EPSILON, MINPTS, 'Distance', 'precomputed')’ treats the
+     N*N matrix D as a precomputed matrix of pairwise distances between
+     observations, such as the output of ‘pdist2’; D(i,j) is the distance
+     between observations i and j.
+
+     ‘[IDX, COREPTS] = dbscan (...)’ also returns an N*1 logical vector COREPTS
+     that is true for each observation that is a core point.
+
+     Additional parameters can be specified by Name-Value pair arguments.
+
+     NAME           VALUE
+                    
+     --------------------------------------------------------------------------------
+     'Distance'     is the distance metric used to find neighbors, specified as
+                    one of the metrics accepted by ‘rangesearch’ ('euclidean' by
+                    default, and also 'seuclidean', 'cityblock', 'chebychev',
+                    'minkowski', 'mahalanobis', 'cosine', 'correlation',
+                    'spearman', 'hamming', 'jaccard', or a custom distance
+                    function handle), or the string 'precomputed' to interpret the
+                    first input as a matrix of pairwise distances.
+                    
+     'P'            is the Minkowski distance exponent, a positive scalar.  This
+                    argument is only valid when the selected distance metric is
+                    'minkowski'.  By default it is 2.
+                    
+     'Scale'        is the scale parameter for the standardized Euclidean
+                    distance, a nonnegative numeric vector of length equal to the
+                    number of columns in X.  This argument is only valid when the
+                    selected distance metric is 'seuclidean'.
+                    
+     'Cov'          is the covariance matrix for the mahalanobis distance, a
+                    positive definite matrix matching the number of columns in X.
+                    This argument is only valid when the selected distance metric
+                    is 'mahalanobis'.
+
+     See also: kmeans, rangesearch, pdist2, knnsearch.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 69
+Density-Based Spatial Clustering of Applications with Noise (DBSCAN).
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 4
 dcov
 
@@ -2560,6 +3301,59 @@ Empirical (Kaplan-Meier) cumulative distribution function.
 # type: sq_string
 # elements: 1
 # length: 8
+ecdfhist
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1401
+ -- statistics: [N, C] = ecdfhist (F, X)
+ -- statistics: [N, C] = ecdfhist (F, X, M)
+ -- statistics: [N, C] = ecdfhist (F, X, CENTERS)
+ -- statistics: ecdfhist (...)
+ -- statistics: ecdfhist (AX, ...)
+
+     Create a histogram from the output of ‘ecdf’.
+
+     ‘[N, C] = ecdfhist (F, X)’ takes the empirical cumulative distribution
+     function F evaluated at the points X, as computed by ‘ecdf’, and returns
+     the heights N of histogram bars for 10 equally spaced bins together with
+     their centers C.  Unlike a count histogram, the bar heights are normalized
+     so that the area of the histogram is equal to 1, giving an estimate of the
+     probability density function.
+
+     ‘[N, C] = ecdfhist (F, X, M)’ uses M equally spaced bins.
+
+     ‘[N, C] = ecdfhist (F, X, CENTERS)’ uses bins with the specified centers,
+     given as a vector of monotonically increasing values.
+
+     ‘ecdfhist (...)’ without output arguments plots the histogram.
+
+     ‘ecdfhist (AX, ...)’ plots into the axes AX instead of the current axes.
+
+     The probability mass assigned to each bin is the sum of the increments of
+     the empirical cdf, ‘diff (F)’, over the points X that fall closest to the
+     corresponding bin center; ties are assigned to the lower center.  Each bar
+     height is that mass divided by the bin width.
+
+     See also: ecdf, cdfplot, hist, histogram.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 53
+Create a histogram from the output of ‘ecdf’.
+
+  
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 8
 einstein
 
 
@@ -2727,46 +3521,143 @@ factoran
 # name: <cell-element>
 # type: sq_string
 # elements: 1
-# length: 1446
- -- statistics: LOADINGS = factoran (X, NFAC)
- -- statistics: [LOADINGS, SPECVAR] = factoran (X, NFAC)
- -- statistics: [LOADINGS, SPECVAR, FSCORES] = factoran (X, NFAC)
+# length: 6129
+ -- statistics: LAMBDA = factoran (X, M)
+ -- statistics: [LAMBDA, PSI] = factoran (X, M)
+ -- statistics: [LAMBDA, PSI, T] = factoran (X, M)
+ -- statistics: [LAMBDA, PSI, T, STATS] = factoran (X, M)
+ -- statistics: [LAMBDA, PSI, T, STATS, F] = factoran (X, M)
+ -- statistics: [...] = factoran (..., NAME, VALUE)
 
-     Perform principal axis factor analysis on data matrix.
+     Common factor analysis.
 
-     ‘LOADINGS = factoran (X, NFAC)’ performs principal axis factoring to
-     extract NFAC factors from the N * P data matrix X, where rows correspond to
-     observations and columns to variables.  The output LOADINGS is a P * NFAC
-     matrix whose columns contain the loadings on each factor, in decreasing
-     order of importance.
+     ‘LAMBDA = factoran (X, M)’ fits the common factor model with M common
+     factors to the N-by-P data matrix X, whose rows are observations and
+     columns are variables, and returns the P-by-M matrix LAMBDA of factor
+     loadings.  The model is
 
-     ‘[LOADINGS, SPECVAR] = factoran (...)’ also returns a P * 1 vector SPECVAR
-     containing the specific variances (unique variances) for each variable.
+          X = MU + LAMBDA * F + E
 
-     ‘[LOADINGS, SPECVAR, FSCORES] = factoran (...)’ also returns the N * NFAC
-     matrix FSCORES of estimated factor scores, computed using the regression
-     method.
+     where F are the common factors and E the variable-specific errors,
+     uncorrelated with each other and with F.  The analysis is carried out on
+     the correlation matrix, so the loadings are in standardized units and a
+     variable's communality ‘sum (LAMBDA(i,:) .^ 2)’ and its specific variance
+     ‘PSI(i)’ sum to one.
 
-     The analysis is performed on the correlation matrix of the standardized X.
-     Initial communalities are set to 1.  Iterations continue until the maximum
-     change in communality is less than 1e-4 or 50 iterations are reached.  The
-     sign of each loading vector is chosen so that the element with largest
-     absolute value is positive.
+     ‘[LAMBDA, PSI] = factoran (...)’ also returns the P-by-1 vector PSI of
+     specific variances.
+
+     ‘[LAMBDA, PSI, T] = factoran (...)’ also returns the M-by-M rotation matrix
+     T that was applied to the loadings.  It is the identity when 'Rotate' is
+     'none'.
+
+     ‘[LAMBDA, PSI, T, STATS] = factoran (...)’ also returns a structure STATS
+     with the fields
+
+     Field        Description
+     ------------------------------------------------------------------------------
+     loglike      the maximized log-likelihood, up to a constant.
+     dfe          the error degrees of freedom, ‘((P - M)^2 - P - M) / 2’.
+     chisq        the likelihood ratio statistic testing M common factors
+                  against an unrestricted covariance.
+     p            the significance of CHISQ.
+
+     The last two are present only when they can be computed: they are omitted
+     when the degrees of freedom are not positive, when a specific variance has
+     reached its lower bound (a Heywood case, where the likelihood is on the
+     boundary), and for the 'paf' extraction, which does not maximize a
+     likelihood.  Test for them with ‘isfield’ before using them.
+
+     ‘[LAMBDA, PSI, T, STATS, F] = factoran (...)’ also returns the N-by-M
+     matrix F of predicted factor scores.  Scores are not available from a
+     covariance matrix, only from data.
+
+     Name-Value pairs
+     ----------------
+
+     Name           Value
+     ------------------------------------------------------------------------------
+     'Extraction'   How the loadings are estimated, either 'ml' (default) for
+                    maximum likelihood or 'paf' for principal axis factoring.
+                    *An Octave extension*; MATLAB fits by maximum likelihood
+                    only.  See the note below.
+                    
+     'Xtype'        Whether X holds 'data' (default) or a 'covariance' (or
+                    correlation) matrix.
+                    
+     'Nobs'         The number of observations behind a covariance matrix.
+                    Required for STATS when 'Xtype' is 'covariance'.
+                    
+     'Delta'        The lower bound on the specific variances, a scalar in ‘[0,
+                    1)’ (default ‘0.005’).  Bounding them away from zero keeps
+                    the likelihood finite; a solution that reaches the bound is
+                    a Heywood case and is reported by a warning.
+                    
+     'Rotate'       The rotation applied to the loadings, passed to
+                    ‘rotatefactors’: 'varimax' (default), 'none', 'quartimax',
+                    'equamax', 'parsimax', 'orthomax', or 'promax'.
+                    
+     'Normalize'    Whether the rotation normalizes the rows of the loadings
+                    (Kaiser normalization), 'on' (default) or 'off'.
+                    
+     'Power'        The exponent of the 'promax' target, a scalar not less than
+                    1 (default 4).
+                    
+     'Scores'       How F is predicted, either 'wls' (default, also named
+                    'Bartlett') or 'regression' (also named 'Thomson').
+                    
+     'Maxit'        The iteration limit of the extraction (default ‘500’).
+                    
+     'Tolerance'    The convergence tolerance of the extraction (default
+                    ‘1e-8’).
+
+     Choosing the extraction
+     -----------------------
+
+     The two extractions fit the same model but estimate it differently, and
+     they answer to different circumstances.
+
+     'ml' maximizes the likelihood of a multivariate normal, and is what
+     MATLAB's ‘factoran’ does.  Use it when you want the likelihood ratio test
+     in STATS to decide how many factors the data support, and when the data are
+     plausibly normal.  It can fail to converge, or push a specific variance to
+     zero, when the model asks for more factors than the data hold.
+
+     'paf' iterates communalities on the reduced correlation matrix.  It makes
+     no distributional assumption and is stable where maximum likelihood
+     struggles, which is why it remains available here, but it provides no
+     likelihood and therefore no test: STATS carries only dfe.
+
+     The two agree closely when the model fits the data well and diverge when it
+     does not, so a large difference between them is itself informative.
+
+     Number of factors
+     -----------------
+
+     M must leave the model identified, that is ‘(P - M)^2 >= P + M’.  With six
+     variables at most three factors can be fitted, and only the smaller counts
+     leave degrees of freedom to test.
 
      References
      ----------
 
-       1. Harman, H. H., Modern Factor Analysis, 3rd Edition, University of
+       1. Lawley, D. N., and Maxwell, A. E., ‘Factor Analysis as a Statistical
+          Method’, 2nd Edition, Butterworths, 1971.
+
+       2. Joreskog, K. G., "Some contributions to maximum likelihood factor
+          analysis", ‘Psychometrika’ 32(4), 443-482, 1967.
+
+       3. Harman, H. H., ‘Modern Factor Analysis’, 3rd Edition, University of
           Chicago Press, 1976.
 
-     See also: barttest, pca, pcacov, pcares.
+     See also: rotatefactors, pca, pcacov, princomp, barttest.
 
 
 # name: <cell-element>
 # type: sq_string
 # elements: 1
-# length: 54
-Perform principal axis factor analysis on data matrix.
+# length: 23
+Common factor analysis.
 
 
 
@@ -3845,6 +4736,141 @@ Fit a Support Vector Machine classification model.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 6
+fitglm
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3526
+ -- statistics: MDL = fitglm (X, Y)
+ -- statistics: MDL = fitglm (X, Y, MODELSPEC)
+ -- statistics: MDL = fitglm (TBL)
+ -- statistics: MDL = fitglm (TBL, MODELSPEC)
+ -- statistics: MDL = fitglm (..., NAME, VALUE)
+
+     Fit a generalized linear regression model.
+
+     ‘MDL = fitglm (X, Y)’ fits a generalized linear model of the response
+     vector Y on the columns of the n-by-p numeric predictor matrix X, and
+     returns a ‘GeneralizedLinearModel’ object.  ‘MDL = fitglm (TBL)’ instead
+     takes the predictors and response from the table TBL (the last column is
+     the response unless overridden).  By default the response is 'normal' with
+     an identity link, an intercept is included, and the model is additive in
+     the predictors.
+
+     MODELSPEC selects the model terms.  It is either a Wilkinson formula string
+     (e.g. 'y ~ x1 + x2*x3'), a keyword ('constant', 'linear', 'interactions',
+     'purequadratic', 'quadratic', or 'full'), or a terms matrix.
+
+     The following NAME/VALUE pairs are accepted:
+
+     Name             Value
+     ------------------------------------------------------------------------------
+     'Distribution'   the response distribution: 'normal' (default), 'binomial',
+                      'poisson', 'gamma', or 'inverse gaussian'.
+     'Link'           the link function.  Defaults to the canonical link of the
+                      distribution; accepts any link name understood by ‘glmfit’
+                      or a numeric exponent for a power link.
+     'Weights'        a vector of nonnegative observation weights.
+     'Offset'         a vector added as a fixed term to the linear predictor.
+     'BinomialSize'   for the 'binomial' distribution, the number of trials (a
+                      scalar or a per-observation vector); Y holds the
+                      proportion of successes.
+     'Intercept'      a logical value (default true) whether to include an
+                      intercept term.
+     'DispersionFlag' a logical value forcing the dispersion parameter to be
+                      estimated (true) or held at 1 (false).
+     'CategoricalVars'predictors to treat as categorical (a logical vector,
+                      numeric indices, or a cell array of names).
+     'Exclude'        observations to exclude from the fit (a logical vector or
+                      numeric indices).
+     'VarNames'       a cell array of p + 1 variable names (predictors followed
+                      by the response) for numeric X.
+     'PredictorVars', for table input, the predictor and response variable
+     'ResponseVar'    names.
+
+     A categorical predictor expands to indicator columns, one per level bar the
+     reference level, which the intercept carries.  When the model has no
+     intercept, the _first_ categorical predictor is given an indicator for
+     every one of its levels instead, so that its coefficients are the group
+     means; any further categorical predictor stays reference coded, which keeps
+     the design full rank.  This differs from MATLAB, which omits the reference
+     level whether or not an intercept is present and so cannot fit the
+     reference group at all - for a three-level grouping variable ‘g’, MATLAB
+     fits ‘y ~ g - 1’ with two coefficients, predicts exactly 0 for every
+     observation in the omitted group, and reports a negative R^2.  This
+     implementation returns three coefficients, one per group.
+
+     See also: GeneralizedLinearModel, fitlm, glmfit, glmval, lassoglm.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 42
+Fit a generalized linear regression model.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 7
+fitglme
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1403
+ -- statistics: GLME = fitglme (TBL, FORMULA)
+ -- statistics: GLME = fitglme (..., NAME, VALUE)
+
+     Fit a generalized linear mixed-effects model specified by a formula.
+
+     ‘fitglme (TBL, FORMULA)’ fits the generalized linear mixed-effects model
+     described by FORMULA to the table TBL and returns a
+     ‘GeneralizedLinearMixedModel’ object.
+
+     FORMULA uses the same syntax as ‘fitlme’: a response, a fixed-effects part,
+     and one or more random-effects terms ‘(EXPR | GROUP)’, for example "y ~ x +
+     (1 | g)".  The model is fitted by penalized quasi-likelihood.
+
+     The following NAME/VALUE pairs are accepted:
+
+     "Distribution"
+          The response distribution: "normal" (default), "binomial", or
+          "poisson".
+
+     "Link"
+          The link function: "identity", "logit", or "log".  The default is the
+          canonical link of the chosen distribution.
+
+     "FitMethod"
+          "MPL" (maximum pseudo-likelihood, the default), "REMPL" (restricted
+          MPL), "Laplace", or "ApproximateLaplace".  The first two differ in the
+          pseudo-likelihood used for the covariance parameters; the last two
+          report the Laplace-approximated marginal log-likelihood.
+
+     Only the canonical links and the full (unstructured) random-effects
+     covariance are currently supported.
+
+     See also: GeneralizedLinearMixedModel, fitlme, fitglm.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 68
+Fit a generalized linear mixed-effects model specified by a formula.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 9
 fitgmdist
 
@@ -3926,7 +4952,7 @@ fitlm
 # name: <cell-element>
 # type: sq_string
 # elements: 1
-# length: 11914
+# length: 12752
  -- statistics: MDL = fitlm (X, Y)
  -- statistics: MDL = fitlm (TBL)
  -- statistics: MDL = fitlm (TBL, RESPONSEVARNAME)
@@ -4131,6 +5157,18 @@ fitlm
      ordinary least squares fit, and its ‘Robust’ property is populated
      accordingly.
 
+     A categorical predictor expands to indicator columns, one per level bar the
+     reference level, which the intercept carries.  When the model has no
+     intercept, the _first_ categorical predictor is given an indicator for
+     every one of its levels instead, so that its coefficients are the group
+     means; any further categorical predictor stays reference coded, which keeps
+     the design full rank.  This differs from MATLAB, which omits the reference
+     level whether or not an intercept is present and so cannot fit the
+     reference group at all - for a three-level grouping variable ‘g’, MATLAB
+     fits ‘y ~ g - 1’ with two coefficients, predicts exactly 0 for every
+     observation in the omitted group, and reports a negative R^2.  This
+     implementation returns three coefficients, one per group.
+
      See also: LinearModel.
 
 
@@ -4141,6 +5179,178 @@ fitlm
 Fit a linear regression model to data and return a ‘LinearModel’ object.
 
   
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 6
+fitlme
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1309
+ -- statistics: LME = fitlme (TBL, FORMULA)
+ -- statistics: LME = fitlme (..., NAME, VALUE)
+
+     Fit a linear mixed-effects model specified by a formula.
+
+     ‘fitlme (TBL, FORMULA)’ fits the linear mixed-effects model described by
+     FORMULA to the variables in the table TBL, and returns a ‘LinearMixedModel’
+     object.
+
+     FORMULA is a character vector in Wilkinson notation extended with
+     random-effects terms, for example "y ~ x1 + x2 + (1 | g)".  The part to the
+     left of ‘~’ names the response; the fixed-effects part uses the usual
+     operators (‘+’, ‘*’, ‘:’, ‘^’, and ‘-1’ to drop the intercept); and each
+     random-effects term ‘(EXPR | GROUP)’ adds random intercepts and slopes EXPR
+     grouped by the factor GROUP (or an interaction of factors, e.g. ‘g1:g2’).
+     As with fixed effects, a random intercept is implicit unless suppressed
+     with ‘0’ or ‘-1’.
+
+     Rows of TBL with missing values in any model variable are removed before
+     fitting.
+
+     The following NAME/VALUE pairs are accepted:
+
+     "FitMethod"
+          The estimation criterion, "ML" (maximum likelihood, the default) or
+          "REML" (restricted maximum likelihood).
+
+     See also: LinearMixedModel, fitlmematrix, fitlm, parseWilkinsonFormula.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 56
+Fit a linear mixed-effects model specified by a formula.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 12
+fitlmematrix
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2083
+ -- statistics: LME = fitlmematrix (X, Y, Z, G)
+ -- statistics: LME = fitlmematrix (..., NAME, VALUE)
+
+     Fit a linear mixed-effects model from design matrices.
+
+     ‘fitlmematrix (X, Y, Z, G)’ fits the linear mixed-effects model ‘y = X*beta
+     + Z*b + e’ with fixed-effects design X, response Y, random-effects design
+     Z, and grouping variable G.  The random effects B are normally distributed
+     with mean zero and an unstructured covariance PSI (shared across the levels
+     of the grouping variable), and the observation errors are independent ‘N(0,
+     sigma2)’.
+
+     X is an N-by-P numeric matrix and Y an N-by-1 response vector.  Z is an
+     N-by-Q random-effects design and G an N-by-1 grouping variable (numeric,
+     logical, char, cell array of strings, or categorical).  To specify several
+     grouping terms, pass Z and G as cell arrays of the same length, one design
+     and one grouping variable per term.
+
+     The following NAME/VALUE pairs are accepted:
+
+     "FitMethod"
+          The estimation criterion, either "ML" (maximum likelihood, the
+          default) or "REML" (restricted maximum likelihood).
+
+     "FixedEffectPredictors"
+          A cell array of P names for the columns of X (default ‘{"x1", ...,
+          "xp"}’).
+
+     "RandomEffectPredictors"
+          A cell array (one entry per grouping term) of cell arrays naming the
+          columns of each Z (default ‘z1, z2, ...’).
+
+     "RandomEffectGroups"
+          A cell array of names for the grouping terms (default ‘g1, g2’, etc.).
+
+     The returned LME is a ‘LinearMixedModel’ object describing the fitted
+     model: the estimated fixed effects and their statistics
+     (‘lme.Coefficients’), the covariance parameters (‘covarianceParameters’),
+     the random-effects BLUPs (‘randomEffects’), the log-likelihood, and methods
+     for prediction, residuals, and hypothesis tests.
+
+     Only the full (unstructured) random-effects covariance is currently
+     supported.
+
+     See also: LinearMixedModel, fitlm, parseWilkinsonFormula.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 54
+Fit a linear mixed-effects model from design matrices.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 6
+fitnlm
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1850
+ -- statistics: MDL = fitnlm (X, Y, MODELFUN, BETA0)
+ -- statistics: MDL = fitnlm (TBL, MODELFUN, BETA0)
+ -- statistics: MDL = fitnlm (..., NAME, VALUE)
+
+     Fit a nonlinear regression model.
+
+     ‘MDL = fitnlm (X, Y, MODELFUN, BETA0)’ fits the nonlinear regression model
+     ‘Y = MODELFUN (BETA, X)’ to the response vector Y and the n-by-p predictor
+     matrix X, starting the iterative fit from the coefficient vector BETA0, and
+     returns a ‘NonLinearModel’ object.  MODELFUN is a function handle ‘@(B, X)’
+     returning the fitted responses.
+
+     ‘MDL = fitnlm (TBL, MODELFUN, BETA0)’ takes the predictors and response
+     from the table TBL; the last column is the response unless overridden by
+     'ResponseVar'.
+
+     The following NAME/VALUE pairs are accepted:
+
+     Name             Value
+     ------------------------------------------------------------------------------
+     'CoefficientNames'a cell array of names for the coefficients (default 'b1',
+                      'b2', ...).
+     'Weights'        a vector of nonnegative observation weights.
+     'ErrorModel'     the error-variance model: 'constant' (default),
+                      'proportional', or 'combined'.
+     'RobustWgtFun'   the name of a robust weight function, enabling robust
+                      fitting (see ‘nlinfit’).
+     'Options'        a statset-style options structure controlling the
+                      iterative fit (MaxIter, TolFun, TolX).
+     'PredictorVars', for table input, the predictor and response variable
+     'ResponseVar'    names.
+     'VarNames'       a cell array of p + 1 variable names (predictors followed
+                      by the response) for numeric X.
+     'Exclude'        observations to exclude from the fit.
+
+     See also: NonLinearModel, nlinfit, nlparci, nlpredci, fitlm, fitglm.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 33
+Fit a nonlinear regression model.
 
 
 
@@ -4608,6 +5818,72 @@ Predict values for a generalized linear model.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 9
+glyphplot
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1823
+ -- statistics: glyphplot (X)
+ -- statistics: glyphplot (X, NAME, VALUE, ...)
+ -- statistics: G = glyphplot (...)
+
+     Create a star (glyph) plot of the multivariate data in X.
+
+     ‘glyphplot (X)’ draws each observation (row) of the ‘n’-by-‘p’ matrix X as
+     a star glyph, arranged on a grid.  The P spokes of each star radiate from
+     its center at equally spaced angles, with lengths proportional to the
+     values of the P variables; the tips of the spokes are joined to form the
+     star perimeter.
+
+     The following name/value pairs are accepted:
+
+     "Glyph"
+          "star" (default) draws star glyphs.  "face" (Chernoff faces) is not
+          currently supported.
+
+     "Standardize"
+          How the columns of X are scaled to spoke lengths: "column" (default)
+          scales each column to the range [0,1], "matrix" scales the whole
+          matrix to [0,1], "PCA" uses principal component scores scaled to
+          [0,1], and "off" uses the values as given.  A spoke of relative length
+          0 is still drawn at 10% of the maximum radius so that it remains
+          visible.
+
+     "Grid"
+          A two-element vector ‘[rows cols]’ specifying the layout of the
+          glyphs.  The default is chosen automatically.
+
+     "Centers"
+          An ‘n’-by-2 matrix giving the center coordinates of the glyphs
+          explicitly, overriding "Grid".
+
+     "Radius"
+          The maximum glyph radius (default 0.4).
+
+     "ObsLabels"
+          A character array or cell array of strings labeling the observations.
+          The default is the observation numbers.
+
+     The optional output G is an ‘n’-by-3 matrix of handles whose columns hold,
+     respectively, the star perimeters, the star spokes, and the text labels.
+
+     See also: andrewsplot, parallelcoords.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 57
+Create a star (glyph) plot of the multivariate data in X.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 14
 gmdistribution
 
@@ -4649,6 +5925,89 @@ gmdistribution
 # elements: 1
 # length: 80
 Create an object of the gmdistribution class which represents a Gaussian mixt...
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 11
+gplotmatrix
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2927
+ -- statistics: gplotmatrix (X, Y, GROUP)
+ -- statistics: gplotmatrix (X, [], GROUP)
+ -- statistics: gplotmatrix (X, Y, GROUP, CLR, SYM, SIZ)
+ -- statistics: gplotmatrix (..., DOLEG, DISPOPT)
+ -- statistics: gplotmatrix (..., DOLEG, DISPOPT, XNAM, YNAM)
+ -- statistics: gplotmatrix (PARENT, ...)
+ -- statistics: [H, AX, BIGAX] = gplotmatrix (...)
+
+     Create a matrix of scatter plots grouped by a categorical variable.
+
+     ‘gplotmatrix (X, Y, GROUP)’ creates a matrix of scatter plots.  Each
+     subplot in the resulting figure is a scatter plot of a column of X against
+     a column of Y.  If X is ‘n’-by-P and Y is ‘n’-by-Q, the resulting figure
+     holds a Q-by-P grid of subplots; the subplot in row I and column J plots
+     ‘X(:,j)’ on the horizontal axis against ‘Y(:,i)’ on the vertical axis.
+     Points are grouped and colored according to GROUP, which is a grouping
+     variable (numeric, logical, character, string, or cell array of strings)
+     with one entry per row of X.
+
+     ‘gplotmatrix (X, [], GROUP)’ is equivalent to ‘gplotmatrix (X, X, GROUP)’
+     except that the diagonal of the P-by-P grid is replaced by grouped
+     histograms of the columns of X.
+
+     The appearance of the plot is controlled by further positional arguments:
+
+     CLR
+          Marker colors, given as a character vector of color specifiers (e.g.
+          "rgb") or as a matrix of RGB triplets, one row per group.  Colors
+          cycle if fewer are supplied than there are groups.
+
+     SYM
+          Marker symbols, given as a character vector (e.g.  "o+x"); defaults to
+          ".".  Symbols cycle if fewer are supplied than there are groups.
+
+     SIZ
+          Marker sizes, given as a numeric vector.  Sizes cycle if fewer are
+          supplied than there are groups.
+
+     DOLEG
+          Either "on" (default) to display a legend of the groups or "off" to
+          suppress it.
+
+     DISPOPT
+          Controls the diagonal of the grid when Y is empty: "stairs" (default)
+          for grouped stairstep histograms, "hist" or "grpbars" for grouped bar
+          histograms, "none" to leave the diagonal empty, or "variable" to write
+          the variable names on the diagonal.
+
+     XNAM, YNAM
+          Character vectors or cell arrays of strings giving the names of the
+          columns of X and Y, used to label the outer axes.
+
+     An optional leading PARENT argument (a figure or uipanel handle) selects
+     the container for the plot.
+
+     The optional outputs are H, an array of handles to the plotted objects with
+     size NY-by-P-by-K (where NY is the number of rows of the grid and K the
+     number of groups); AX, the matrix of handles to the subplot axes (with an
+     extra row of hidden axes for the diagonal histograms); and BIGAX, the
+     handle to the invisible enclosing axes used for titles and labels.
+
+     See also: gscatter, plotmatrix, grpstats.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 67
+Create a matrix of scatter plots grouped by a categorical variable.
 
 
 
@@ -5112,6 +6471,95 @@ Plot histogram with superimposed distribution fit.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 9
+hmmdecode
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3047
+ -- statistics: PSTATES = hmmdecode (SEQUENCE, TRANSPROB, OUTPROB)
+ -- statistics: [PSTATES, LOGPSEQ] = hmmdecode (...)
+ -- statistics: [PSTATES, LOGPSEQ, FS, BS, S] = hmmdecode (...)
+ -- statistics: [...] = hmmdecode (..., "symbols", SYMBOLS)
+
+     Posterior state probabilities of a hidden Markov model.
+
+     Calculate the posterior state probabilities of the sequence SEQUENCE from a
+     hidden Markov model.  The posterior state probabilities are the conditional
+     probabilities of being in each state given the whole observed sequence.
+     The model assumes that the generation starts in state ‘1’ at step ‘0’ but
+     does not include step ‘0’ in the sequence.
+
+     Arguments
+     ---------
+
+        • SEQUENCE is a vector of length LEN of given outputs.  The outputs must
+          be integers ranging from ‘1’ to ‘columns (outprob)’.
+
+        • TRANSPROB is the matrix of transition probabilities of the states.
+          ‘transprob(i, j)’ is the probability of a transition to state ‘j’
+          given state ‘i’.
+
+        • OUTPROB is the matrix of output probabilities.  ‘outprob(i, j)’ is the
+          probability of generating output ‘j’ given state ‘i’.
+
+     Return values
+     -------------
+
+        • PSTATES is the matrix of posterior state probabilities.  It has one
+          row for each state and one column for each element of SEQUENCE.
+          ‘pstates(i, j)’ is the conditional probability that the model is in
+          state ‘i’ when it generates the ‘j’-th output of SEQUENCE, given that
+          SEQUENCE is emitted.
+
+        • LOGPSEQ is the logarithm of the probability of the sequence SEQUENCE.
+
+        • FS and BS are the scaled forward and backward probabilities,
+          respectively, and S is the vector of scale factors used to keep the
+          computation numerically stable.
+
+     If ‘"symbols"’ is specified, then SEQUENCE is expected to be a sequence of
+     the elements of SYMBOLS instead of integers ranging from ‘1’ to ‘columns
+     (outprob)’.  SYMBOLS can be a cell array.
+
+     Examples
+     --------
+
+          transprob = [0.8, 0.2; 0.4, 0.6];
+          outprob = [0.2, 0.4, 0.4; 0.7, 0.2, 0.1];
+          [sequence, states] = hmmgenerate (25, transprob, outprob);
+          pstates = hmmdecode (sequence, transprob, outprob);
+
+          symbols = {"A", "B", "C"};
+          [sequence, states] = hmmgenerate (25, transprob, outprob, ...
+                                            "symbols", symbols);
+          pstates = hmmdecode (sequence, transprob, outprob, "symbols", symbols);
+
+     References
+     ----------
+
+       1. Wendy L. Martinez and Angel R. Martinez.  ‘Computational Statistics
+          Handbook with MATLAB’. Appendix E, pages 547-557, Chapman & Hall/CRC,
+          2001.
+
+       2. Lawrence R. Rabiner.  A Tutorial on Hidden Markov Models and Selected
+          Applications in Speech Recognition.  ‘Proceedings of the IEEE’, 77(2),
+          pages 257-286, February 1989.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 55
+Posterior state probabilities of a hidden Markov model.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 11
 hmmestimate
 
@@ -5119,7 +6567,7 @@ hmmestimate
 # name: <cell-element>
 # type: sq_string
 # elements: 1
-# length: 4535
+# length: 4598
  -- statistics: [TRANSPROBEST, OUTPROBEST] = hmmestimate (SEQUENCE, STATES)
  -- statistics: [...] = hmmestimate (..., "statenames", STATENAMES)
  -- statistics: [...] = hmmestimate (..., "symbols", SYMBOLS)
@@ -5131,9 +6579,10 @@ hmmestimate
 
      Estimate the matrix of transition probabilities and the matrix of output
      probabilities of a given sequence of outputs and states generated by a
-     hidden Markov model.  The model assumes that the generation starts in state
-     ‘1’ at step ‘0’ but does not include step ‘0’ in the generated states and
-     sequence.
+     hidden Markov model.  The transition probabilities are estimated by
+     counting the transitions that actually occur between consecutive states in
+     STATES; the output probabilities are estimated from the outputs emitted by
+     each state.
 
      Arguments
      ---------
@@ -5304,6 +6753,117 @@ hmmgenerate
 # elements: 1
 # length: 59
 Output sequence and hidden states of a hidden Markov model.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 8
+hmmtrain
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 4188
+ -- statistics: [ESTTR, ESTOUT] = hmmtrain (SEQUENCE, TRANSGUESS, OUTGUESS)
+ -- statistics: [...] = hmmtrain (..., "algorithm", ALGORITHM)
+ -- statistics: [...] = hmmtrain (..., "symbols", SYMBOLS)
+ -- statistics: [...] = hmmtrain (..., "tolerance", TOL)
+ -- statistics: [...] = hmmtrain (..., "maxiterations", MAXITER)
+ -- statistics: [...] = hmmtrain (..., "pseudotransitions", PSEUDOTRANSITIONS)
+ -- statistics: [...] = hmmtrain (..., "pseudoemissions", PSEUDOEMISSIONS)
+ -- statistics: [...] = hmmtrain (..., "verbose", VFLAG)
+
+     Estimate the parameters of a hidden Markov model from emitted sequences.
+
+     Given one or more observed output sequences and initial guesses for the
+     transition and output probability matrices, ‘hmmtrain’ finds maximum
+     likelihood estimates of the two matrices using the Baum-Welch algorithm
+     (the default) or Viterbi training.  The model assumes that the generation
+     starts in state ‘1’ at step ‘0’ but does not include step ‘0’ in the
+     sequence.
+
+     Arguments
+     ---------
+
+        • SEQUENCE is a vector of a sequence of given outputs, or, for training
+          from several sequences, a cell array of such vectors or a matrix whose
+          rows are individual sequences.  The outputs must be integers ranging
+          from ‘1’ to ‘columns (outguess)’.
+
+        • TRANSGUESS is the initial guess for the matrix of transition
+          probabilities.  ‘transguess(i, j)’ is the probability of a transition
+          to state ‘j’ given state ‘i’.
+
+        • OUTGUESS is the initial guess for the matrix of output probabilities.
+          ‘outguess(i, j)’ is the probability of generating output ‘j’ given
+          state ‘i’.
+
+     Return values
+     -------------
+
+        • ESTTR is the estimated matrix of transition probabilities.
+
+        • ESTOUT is the estimated matrix of output probabilities.
+
+     Name-Value pair arguments
+     -------------------------
+
+        • ‘"algorithm"’ selects the training algorithm, either ‘"BaumWelch"’
+          (default) or ‘"Viterbi"’.  ‘"BaumWelch"’ performs the standard
+          forward-backward re-estimation and is recommended for most uses.
+          ‘"Viterbi"’ performs segmental (hard) re-estimation from the most
+          likely state path of each sequence; it is faster but only approximates
+          the maximum-likelihood estimate.
+
+        • ‘"symbols"’ specifies the possible outputs.  If given, SEQUENCE is
+          expected to hold the elements of SYMBOLS instead of integers.  SYMBOLS
+          can be a cell array.
+
+        • ‘"tolerance"’ is the convergence tolerance (default ‘1e-6’).  The
+          algorithm terminates when the change in the log-likelihood and in both
+          estimated matrices falls below TOL.
+
+        • ‘"maxiterations"’ is the maximum number of iterations (default ‘500’).
+          A warning is issued if the algorithm has not converged within this
+          many iterations.
+
+        • ‘"pseudotransitions"’ and ‘"pseudoemissions"’ supply pseudo-count
+          matrices for Viterbi training, used to keep transitions or outputs
+          that are very unlikely to occur from collapsing to zero probability.
+
+        • ‘"verbose"’, when true, prints the log-likelihood and the change in
+          the estimates at each iteration.
+
+     Examples
+     --------
+
+          transprob = [0.8, 0.2; 0.4, 0.6];
+          outprob = [0.2, 0.4, 0.4; 0.7, 0.2, 0.1];
+          sequence = hmmgenerate (100, transprob, outprob);
+          transguess = [0.6, 0.4; 0.5, 0.5];
+          outguess = [0.3, 0.3, 0.4; 0.5, 0.3, 0.2];
+          [esttr, estout] = hmmtrain (sequence, transguess, outguess);
+
+     References
+     ----------
+
+       1. Wendy L. Martinez and Angel R. Martinez.  ‘Computational Statistics
+          Handbook with MATLAB’. Appendix E, pages 547-557, Chapman & Hall/CRC,
+          2001.
+
+       2. Lawrence R. Rabiner.  A Tutorial on Hidden Markov Models and Selected
+          Applications in Speech Recognition.  ‘Proceedings of the IEEE’, 77(2),
+          pages 257-286, February 1989.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 72
+Estimate the parameters of a hidden Markov model from emitted sequences.
 
 
 
@@ -5503,6 +7063,74 @@ hotelling_t2test2
 # elements: 1
 # length: 71
 Compute Hotelling's T^2 ("T-squared") test for two independent samples.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 7
+iforest
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2538
+ -- statistics: MDL = iforest (X)
+ -- statistics: [MDL, TF] = iforest (X)
+ -- statistics: [MDL, TF, SCORES] = iforest (X)
+ -- statistics: [...] = iforest (..., NAME, VALUE)
+
+     Detect anomalies with an isolation forest.
+
+     ‘MDL = iforest (X)’ fits an isolation forest to the N-by-P matrix X, whose
+     rows are observations and columns are variables, and returns an
+     ‘IsolationForest’ object MDL.
+
+     ‘[MDL, TF, SCORES] = iforest (X)’ also returns the N-by-1 logical vector TF
+     flagging the anomalous observations and the N-by-1 vector SCORES of anomaly
+     scores in the range [0, 1].  A higher score indicates an observation that
+     is more easily isolated, and therefore more likely to be an anomaly.
+
+     The score of an observation is ‘2^(-E[h] / c)’, where E[h] is its average
+     path length over the isolation trees and c is the expected path length of
+     an unsuccessful search in a binary tree of NUMOBSERVATIONSPERLEARNER nodes.
+     Each tree is grown from a random subsample of the data by recursively
+     splitting on a random variable at a random value, so anomalies, being
+     easier to isolate, obtain shorter paths.
+
+     Additional parameters can be specified by Name-Value pair arguments.
+
+     NAME                        VALUE
+                                 
+     ----------------------------------------------------------------------------------
+     'NumLearners'               the number of isolation trees, a positive integer
+                                 (default 100).
+                                 
+     'NumObservationsPerLearner' the subsample size used to grow each tree, an
+                                 integer in [3, N] (default ‘min (N, 256)’).
+                                 
+     'ContaminationFraction'     the assumed fraction of anomalies in X, a scalar in
+                                 [0, 1] (default 0).  It sets ‘MDL.ScoreThreshold’
+                                 to ‘quantile (SCORES, 1 - CONTAMINATIONFRACTION)’;
+                                 when it is 0 the threshold is the maximum score and
+                                 no training observation is flagged.
+
+     Because the trees are grown from random subsamples and random splits, the
+     scores depend on the state of the random number generator and are not
+     reproducible across runs unless the generator is seeded.
+
+     Use the ‘isanomaly’ method of MDL to detect anomalies in new data.
+
+     See also: IsolationForest, isanomaly, lof, robustcov.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 42
+Detect anomalies with an isolation forest.
 
 
 
@@ -5925,6 +7553,55 @@ Jarque-Bera hypothesis test of composite normality.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 8
+johnsrnd
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1566
+ -- statistics: R = johnsrnd (QUANTILES)
+ -- statistics: R = johnsrnd (QUANTILES, M)
+ -- statistics: R = johnsrnd (QUANTILES, M, N, ...)
+ -- statistics: R = johnsrnd (QUANTILES, [M, N, ...])
+ -- statistics: [R, TYPE, COEFS] = johnsrnd (...)
+
+     Random arrays from the Johnson system of distributions.
+
+     ‘R = johnsrnd (QUANTILES)’ returns a random value drawn from the
+     distribution in the Johnson system that matches the four values in
+     QUANTILES.  QUANTILES is a four-element vector of the desired quantiles at
+     the standard normal quantiles ‘[-1.5, -0.5, 0.5, 1.5]’, and its elements
+     must be strictly increasing.  ‘johnsrnd’ fits the Johnson curve passing
+     through these four points using the quantile method of Slifker and Shapiro.
+
+     ‘johnsrnd (QUANTILES, M, N, ...)’ or ‘johnsrnd (QUANTILES, [M, N, ...])’
+     returns an M-by-N-by-... array of random values, following the size
+     conventions of ‘randn’.
+
+     ‘[R, TYPE, COEFS] = johnsrnd (...)’ also returns the selected member of the
+     Johnson system in TYPE, one of "SN" (the normal distribution), "SL"
+     (lognormal), "SU" (unbounded), or "SB" (bounded), and the coefficients
+     COEFS = ‘[GAMMA, DELTA, XI, LAMBDA]’ of the transform.  A value R is
+     generated by transforming a standard normal deviate Z as ‘R = XI + LAMBDA *
+     g ((Z - GAMMA) / DELTA)’, where ‘g’ is the identity, ‘exp’, ‘sinh’, or the
+     logistic function for "SN", "SL", "SU", and "SB", respectively.
+
+     See also: pearsrnd, random, randn.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 55
+Random arrays from the Johnson system of distributions.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 6
 kmeans
 
@@ -6064,6 +7741,97 @@ kmeans
 # elements: 1
 # length: 52
 Perform a K-means clustering of the N*D matrix DATA.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 8
+kmedoids
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3785
+ -- statistics: IDX = kmedoids (X, K)
+ -- statistics: [IDX, C] = kmedoids (X, K)
+ -- statistics: [IDX, C, SUMD] = kmedoids (X, K)
+ -- statistics: [IDX, C, SUMD, D] = kmedoids (X, K)
+ -- statistics: [IDX, C, SUMD, D, MIDX] = kmedoids (X, K)
+ -- statistics: [IDX, C, SUMD, D, MIDX, INFO] = kmedoids (X, K)
+ -- statistics: [...] = kmedoids (..., NAME, VALUE)
+
+     Partition observations into K clusters using the k-medoids algorithm.
+
+     ‘IDX = kmedoids (X, K)’ partitions the N*P numeric matrix X into K
+     clusters, each represented by one of the observations (its _medoid_), and
+     returns the N*1 vector IDX of cluster indices.  Rows of X correspond to
+     observations and columns correspond to features or variables.  Unlike
+     ‘kmeans’, whose centroids are the mean of each cluster, a medoid is an
+     actual data point, which makes k-medoids more robust to outliers and
+     applicable to any distance metric.
+
+     ‘[IDX, C, SUMD, D, MIDX, INFO] = kmedoids (...)’ returns additional
+     results:
+
+     C              a k*P matrix with the coordinates of the K medoids, one per
+                    row (‘C = X(MIDX,:)’).
+                    
+     SUMD           a k*1 vector with the within-cluster sum of the distances from
+                    each point to its cluster medoid, measured with the selected
+                    metric.
+                    
+     D              an N*k matrix with the distance from every observation to
+                    every medoid.
+                    
+     MIDX           a k*1 vector with the row indices into X of the K medoids.
+                    
+     INFO           a scalar structure with the fields 'algorithm', 'start',
+                    'distance', 'iterations', and 'bestReplicate' describing the
+                    chosen run.
+
+     Additional parameters can be specified by Name-Value pair arguments.
+
+     NAME           VALUE
+                    
+     --------------------------------------------------------------------------------
+     'Distance'     the distance metric, one of 'sqeuclidean' (default),
+                    'euclidean', 'seuclidean', 'cityblock', 'minkowski',
+                    'chebychev', 'cosine', 'correlation', 'hamming', 'jaccard',
+                    'spearman', 'mahalanobis', or a custom distance function
+                    handle accepted by ‘pdist2’.
+                    
+     'Algorithm'    the optimization algorithm, either 'pam' (default) for
+                    Partitioning Around Medoids, which searches over all
+                    medoid/non-medoid swaps, or 'small' for the faster Voronoi
+                    iteration that reassigns points and re-selects each cluster
+                    medoid until convergence.
+                    
+     'Start'        the method used to choose the initial medoids: 'plus'
+                    (default, k-means++), 'sample' (a random subset of the
+                    observations), 'cluster' (a preliminary pass on a subsample),
+                    or a k*P numeric matrix of starting medoid locations, each
+                    snapped to the nearest observation.  A k*P*R array supplies a
+                    separate start for each of R replicates.
+                    
+     'Replicates'   a positive integer number of times to repeat the clustering,
+                    each with a new set of initial medoids; the solution with the
+                    lowest total sum of distances is returned.  The default is 1,
+                    or the size of the third dimension of a numeric 'Start'.
+                    
+     'Options'      a structure, as created by ‘statset’, whose 'MaxIter' field
+                    caps the number of iterations (default 100).
+
+     See also: kmeans, linkage, pdist2, dbscan.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 69
+Partition observations into K clusters using the k-medoids algorithm.
 
 
 
@@ -6501,6 +8269,186 @@ Two-sample Kolmogorov-Smirnov goodness-of-fit hypothesis test.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 5
+lasso
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3411
+ -- statistics: B = lasso (X, Y)
+ -- statistics: [B, FITINFO] = lasso (X, Y)
+ -- statistics: [...] = lasso (..., NAME, VALUE)
+
+     Lasso and elastic-net regularized least-squares regression.
+
+     ‘B = lasso (X, Y)’ fits a series of regularized linear models of the
+     response Y on the predictor matrix X by lasso, over a sequence of values of
+     the regularization parameter LAMBDA.  B is a P*L matrix whose column k
+     holds the coefficient estimates for the k-th LAMBDA, in ascending order of
+     LAMBDA.
+
+     ‘[B, FITINFO] = lasso (...)’ additionally returns a structure FITINFO with
+     fields ‘Intercept’, ‘Lambda’, ‘Alpha’, ‘DF’ (number of non-zero
+     coefficients), and ‘MSE’ (mean squared error), one entry per value of
+     LAMBDA.
+
+     The following Name-Value pairs are supported:
+
+     NAME           VALUE
+                    
+     ----------------------------------------------------------------------------------
+     'Alpha'        The elastic-net mixing parameter in (0, 1].  1 (default) is the
+                    lasso penalty; smaller values add a ridge penalty.
+                    
+     'Lambda'       A vector of non-negative regularization parameters.  By default
+                    a geometric sequence of 'NumLambda' values is used, from the
+                    smallest value that drives all coefficients to zero down to
+                    'LambdaRatio' times that value.
+                    
+     'NumLambda'    The number of LAMBDA values in the default sequence (default
+                    100).
+                    
+     'LambdaRatio'  The ratio of the smallest to the largest LAMBDA in the default
+                    sequence (default 1e-4, or 1e-2 when the number of observations
+                    is below the number of predictors).
+                    
+     'Standardize'  Whether to standardize X to zero mean and unit variance before
+                    fitting (default true).  Coefficients are always returned on the
+                    original scale.
+                    
+     'Weights'      A vector of non-negative observation weights.
+                    
+     'RelTol'       Convergence tolerance for the coordinate descent (default 1e-4).
+                    
+     'MaxIter'      Maximum number of coordinate-descent iterations (default 1e5).
+                    
+     'DFmax'        The maximum number of non-zero coefficients; the default
+                    sequence stops once this is exceeded.
+                    
+     'Intercept'    Whether to fit a constant term (default true).
+                    
+     'PredictorNames'A cell array of predictor names, kept in FITINFO.
+                    
+     'CV'           The number of folds K for K-fold cross-validation of the mean
+                    squared error, or a ‘cvpartition’ object.
+                    
+     'MCReps'       The number of Monte-Carlo repetitions of the cross-validation
+                    (default 1).
+
+     When 'CV' is used, FITINFO‘.MSE’ is the cross-validated error, plus ‘SE’,
+     ‘LambdaMinMSE’, ‘IndexMinMSE’, ‘Lambda1SE’, and ‘Index1SE’, which report
+     the LAMBDA with the lowest error and the largest LAMBDA within one standard
+     error of it.  The fold assignment is random, so these selections are not
+     reproducible without fixing the random seed.
+
+     See also: ridge, regress, lassoglm.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 59
+Lasso and elastic-net regularized least-squares regression.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 8
+lassoglm
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 4109
+ -- statistics: B = lassoglm (X, Y)
+ -- statistics: B = lassoglm (X, Y, DISTR)
+ -- statistics: B = lassoglm (X, Y, DISTR, NAME, VALUE)
+ -- statistics: [B, FITINFO] = lassoglm (...)
+
+     Lasso and elastic-net regularized generalized linear model regression.
+
+     ‘B = lassoglm (X, Y, DISTR)’ returns fitted least-squares regression
+     coefficients for a generalized linear model of the response Y on the
+     predictor data X, penalized by the lasso (L1) or elastic-net penalty.  X is
+     an n-by-p numeric matrix of p predictors at each of n observations, and Y
+     is a numeric vector of n responses.  DISTR names the distribution of the
+     response: 'normal' (default), 'binomial', 'poisson', 'gamma', or 'inverse
+     gaussian'.  The canonical link function of the chosen distribution is used
+     unless overridden by the 'Link' option.
+
+     B is a p-by-L matrix, where L is the number of regularization ('Lambda')
+     values used; column k holds the coefficients for the k-th value of lambda,
+     in order of ascending lambda.
+
+     ‘[B, FITINFO] = lassoglm (...)’ also returns a structure FITINFO with
+     information about the fitted models:
+
+     Intercept        a 1-by-L vector of intercept terms
+     Lambda           the 1-by-L vector of lambda values, in ascending order
+     Alpha            the elastic-net mixing value used
+     DF               the number of nonzero coefficients in each column of B
+     Deviance         the deviance of the fitted model at each lambda; when
+                      cross-validation is requested this is instead the
+                      cross-validated mean deviance
+
+     When cross-validation is requested (see 'CV' below), FITINFO additionally
+     contains SE (standard error of the cross-validated deviance),
+     LambdaMinDeviance and IndexMinDeviance (the lambda with minimum
+     cross-validated deviance and its index), and Lambda1SE and Index1SE (the
+     largest lambda within one standard error of that minimum).
+
+     ‘lassoglm’ accepts the following NAME/VALUE pairs:
+
+     Name             Value
+     ------------------------------------------------------------------------------
+     'Alpha'          the elastic-net mixing parameter, a scalar in (0, 1].
+                      'Alpha' = 1 is the lasso penalty (default); values towards
+                      0 approach ridge regression.
+     'Lambda'         a vector of non-negative lambda values.
+     'Standardize'    a logical value (default true) specifying whether the
+                      predictors are standardized before fitting.
+     'Weights'        a vector of non-negative observation weights.
+     'Size'           for the 'binomial' distribution, the number of trials (a
+                      scalar or a per-observation vector); Y holds the number of
+                      successes.  Default is 1 (Bernoulli responses).
+     'Link'           the link function to use instead of the family's canonical
+                      link.  Accepts any link name understood by ‘glmfit’ (e.g.
+                      'log', 'probit') or a numeric exponent for a power link.
+     'Offset'         a numeric vector, one value per observation, added as a
+                      fixed term to the linear predictor (not penalized or
+                      fitted).
+     'RelTol'         convergence tolerance for the coordinate descent.
+     'MaxIter'        maximum number of iterations.
+     'DFmax'          maximum number of nonzero coefficients.
+     'Intercept'      a logical value (default true) whether to fit an intercept
+                      term.
+     'PredictorNames' a cell array of predictor names.
+     'CV'             the number of folds K for K-fold cross-validation, or a
+                      ‘cvpartition’ object.  The fold assignment is random, so
+                      the selected lambda values are not reproducible without a
+                      fixed random seed.
+     'MCReps'         the number of Monte-Carlo repetitions of the
+                      cross-validation (default 1).
+
+     See also: lasso, glmfit, glmval, cvpartition.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 70
+Lasso and elastic-net regularized generalized linear model regression.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 11
 levene_test
 
@@ -6750,6 +8698,76 @@ loadmodel
 # elements: 1
 # length: 54
 Load a Classification or Regression model from a file.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3
+lof
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2656
+ -- statistics: MDL = lof (X)
+ -- statistics: [MDL, TF] = lof (X)
+ -- statistics: [MDL, TF, SCORES] = lof (X)
+ -- statistics: [...] = lof (..., NAME, VALUE)
+
+     Detect anomalies with the Local Outlier Factor (LOF) method.
+
+     ‘MDL = lof (X)’ fits a Local Outlier Factor model to the N-by-P matrix X,
+     whose rows are observations and columns are variables, and returns a
+     ‘LocalOutlierFactor’ object MDL.
+
+     ‘[MDL, TF, SCORES] = lof (X)’ also returns the N-by-1 logical vector TF
+     flagging the anomalous observations and the N-by-1 vector SCORES of LOF
+     values.  A score near 1 indicates an inlier, whereas a score well above 1
+     indicates an outlier lying in a region sparser than its neighbors.
+
+     The Local Outlier Factor of an observation is the average ratio of the
+     local reachability density of its NUMNEIGHBORS nearest neighbors to its own
+     local reachability density, where the local reachability density is the
+     inverse mean reachability distance to those neighbors and the reachability
+     distance from p to o is ‘max (k-distance (o), d (p, o))’.
+
+     Additional parameters can be specified by Name-Value pair arguments.
+
+     NAME                   VALUE
+                            
+     ----------------------------------------------------------------------------------
+     'NumNeighbors'         the number of nearest neighbors, a positive integer less
+                            than N. The default is ‘min (20, U - 1)’, where U is the
+                            number of unique observations.
+                            
+     'Distance'             the distance metric used to find neighbors, one of the
+                            metrics accepted by ‘pdist2’ ('euclidean' by default).
+                            
+     'ContaminationFraction'the assumed fraction of anomalies in X, a scalar in [0,
+                            1] (default 0).  It sets ‘MDL.ScoreThreshold’ to
+                            ‘quantile (SCORES, 1 - CONTAMINATIONFRACTION)’; when it
+                            is 0 the threshold is the maximum score and no training
+                            observation is flagged.
+                            
+     'Exponent'             the Minkowski distance exponent (default 2), used only
+                            with the 'minkowski' distance.
+                            
+     'Cov'                  the covariance matrix used only with the 'mahalanobis'
+                            distance.
+
+     Use the ‘isanomaly’ method of MDL to detect anomalies in new data.
+
+     See also: LocalOutlierFactor, isanomaly, dbscan, robustcov.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 60
+Detect anomalies with the Local Outlier Factor (LOF) method.
 
 
 
@@ -7131,6 +9149,113 @@ mcnemar_test
 # elements: 1
 # length: 48
 Perform a McNemar's test on paired nominal data.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 7
+mdscale
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3907
+ -- statistics: Y = mdscale (D, P)
+ -- statistics: [Y, STRESS] = mdscale (D, P)
+ -- statistics: [Y, STRESS, DISPARITIES] = mdscale (D, P)
+ -- statistics: [...] = mdscale (..., NAME, VALUE)
+
+     Nonclassical (metric and nonmetric) multidimensional scaling.
+
+     ‘Y = mdscale (D, P)’ takes a matrix of dissimilarities D and returns a
+     configuration Y of N points in P dimensions (an N * P matrix) whose
+     interpoint distances approximate D, by minimizing a stress criterion.  D
+     may be given either as a full N * N symmetric matrix with zero diagonal, or
+     as the vector of the N (N - 1) / 2 upper-triangle dissimilarities returned
+     by ‘pdist’.
+
+     ‘[Y, STRESS, DISPARITIES] = mdscale (...)’ also returns the final value of
+     the STRESS criterion and the DISPARITIES (the transformed dissimilarities
+     the distances are fitted to).  For the nonmetric criteria the disparities
+     are the monotone (isotonic) regression of the dissimilarities onto the
+     distances; for the metric criteria they are the dissimilarities themselves.
+
+     Name/Value pairs:
+
+     'Criterion'
+          The goodness-of-fit criterion to minimize, one of:
+
+          'stress' (default)
+               Kruskal's normalized stress-1, sqrt (sum ((d - dhat)^2) / sum
+               (d^2)), computed from disparities DHAT (nonmetric).
+
+          'sstress'
+               Squared stress, sqrt (sum ((d^2 - dhat^2)^2) / sum (d^4))
+               (nonmetric).
+
+          'metricstress'
+               Metric stress, sqrt (sum ((d - delta)^2) / sum (delta^2)),
+               fitting the dissimilarities DELTA directly.
+
+          'metricsstress'
+               Metric squared stress, sqrt (sum ((d^2 - delta^2)^2) / sum
+               (delta^4)).
+
+          'sammon'
+               Sammon's nonlinear mapping criterion, (1 / sum (delta)) sum ((d -
+               delta)^2 / delta).
+
+          'strain'
+               The classical scaling criterion; equivalent to ‘cmdscale’.
+
+     'Weights'
+          A matrix or vector of nonnegative weights, the same size as D,
+          weighting each dissimilarity in the criterion.
+
+     'Start'
+          The initial configuration: 'cmdscale' (default, classical scaling),
+          'random', or an explicit N * P matrix.
+
+     'Replicates'
+          The number of times to repeat the minimization from different starting
+          points, keeping the best (lowest-stress) result.  The default is 1.
+
+     'Options'
+          A structure of algorithm options (as returned by ‘statset’) whose
+          MaxIter, TolFun, and TolX fields control the iterative minimization.
+
+     Non-uniqueness of the solution
+     ------------------------------
+
+     A stress-minimizing configuration is defined only up to a translation,
+     rotation, and reflection, because these leave all interpoint distances (and
+     hence the stress) unchanged.  ‘mdscale’ removes this ambiguity by returning
+     Y centred at the origin and rotated to its principal axes (with the
+     largest-magnitude coordinate on each axis made positive), matching the
+     convention used by MATLAB.
+
+     Beyond that rigid ambiguity, the *nonmetric* criteria ('stress' and
+     'sstress') are non-convex and typically have several local minima; the one
+     reached depends on the starting configuration and the details of the
+     optimizer.  As a result the returned configuration for these criteria may
+     differ from the one another program (including MATLAB) reports even when
+     the *stress value* agrees, and different runs may find configurations with
+     slightly different stress.  Use 'Replicates' with a 'random' start to
+     search for a lower-stress solution.  The metric criteria and 'strain' have
+     an essentially unique solution and are reproducible up to the rigid
+     ambiguity above.
+
+     See also: cmdscale, pdist, squareform, procrustes, statset.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 61
+Nonclassical (metric and nonmetric) multidimensional scaling.
 
 
 
@@ -7686,6 +9811,220 @@ Solve the multiway number partitioning problem.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 11
+mvksdensity
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1572
+ -- statistics: F = mvksdensity (X, PTS, NAME, VALUE)
+
+     Multivariate kernel smoothing density estimate.
+
+     ‘F = mvksdensity (X, PTS)’ computes a probability density estimate of the
+     sample in the N*D matrix X, evaluated at the points in the M*D matrix PTS.
+     Each row of X is a single D-dimensional observation, and each row of PTS is
+     a point at which to evaluate the estimate.  The result F is an M*1 vector,
+     with one density value per row of PTS.
+
+     The density estimate uses a product kernel: the multivariate kernel is the
+     product of the univariate kernels applied to each dimension, each with its
+     own bandwidth.
+
+     The following Name-Value pairs are supported:
+
+     NAME           VALUE
+                    
+     ----------------------------------------------------------------------------------
+     'Bandwidth'    The kernel bandwidth, either a positive scalar applied to every
+                    dimension or a 1*D vector of positive values, one per dimension.
+                    The default is a diagonal normal-reference (Silverman) rule
+                    computed from X.
+                    
+     'Kernel'       The smoothing kernel applied in each dimension: 'normal'
+                    (default), 'box', 'triangle', or 'epanechnikov'.
+                    
+     'Function'     The function to estimate: 'pdf' (default) or 'cdf'.
+                    
+     'Weights'      A vector of non-negative weights, one for each row of X.  The
+                    default weights are all equal.
+
+     See also: ksdensity.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 47
+Multivariate kernel smoothing density estimate.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 9
+mvregress
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1982
+ -- statistics: BETA = mvregress (X, Y)
+ -- statistics: BETA = mvregress (..., NAME, VALUE)
+ -- statistics: [BETA, SIGMA, E, COVB, LOGL] = mvregress (...)
+
+     Multivariate (multiple-response) linear regression by maximum likelihood.
+
+     ‘mvregress (X, Y)’ fits the multivariate normal regression of the N-by-D
+     response matrix Y on the design X and returns the coefficient estimates
+     BETA.
+
+     X is either a numeric N-by-P matrix, in which case the same P predictors
+     apply to every response and BETA is returned as a P-by-D matrix; or a cell
+     array of N design matrices, each D-by-K, in which case BETA is a K-by-1
+     vector.
+
+     Missing responses (‘NaN’ entries of Y) are handled according to the
+     estimation algorithm.
+
+     The following NAME/VALUE pairs are accepted:
+
+     "algorithm"
+          "mvn" (multivariate normal; observations with any missing response are
+          discarded), "ecm" (expectation-conditional-maximization, using every
+          observed response), or "cwls" (covariance-weighted least squares, with
+          the weight given by "covar0").  The default is "mvn" when Y has no
+          missing values and "ecm" otherwise.
+
+     "covar0"
+          The D-by-D covariance weight for "cwls" (default the identity), or the
+          initial covariance for "ecm".
+
+     "maxiter"
+          Maximum number of iterations (default 100).
+
+     "tolbeta", "tolobj"
+          Convergence tolerances on the coefficients and the objective (defaults
+          ‘1e-8’ and ‘1e-8’).
+
+     The additional outputs are the estimated residual covariance SIGMA
+     (D-by-D), the residuals E (N-by-D), the covariance COVB of the coefficient
+     estimates, and the log-likelihood LOGL.  (With missing data and the "ecm"
+     algorithm, COVB is the standard observed-information covariance and can
+     differ from MATLAB's value at the ‘1e-3’ level; all other outputs agree.)
+
+     See also: mvregresslike, regress, fitlm.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 73
+Multivariate (multiple-response) linear regression by maximum likelihood.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+mvregresslike
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1461
+ -- statistics: NLOGL = mvregresslike (X, Y, BETA, SIGMA, ALG)
+ -- statistics: [NLOGL, COVB] = mvregresslike (...)
+
+     Negative log-likelihood for a multivariate regression model.
+
+     ‘mvregresslike (X, Y, BETA, SIGMA, ALG)’ returns the negative
+     log-likelihood NLOGL of the multivariate normal regression model with
+     responses Y (an N-by-D matrix, one row per observation), coefficients BETA,
+     and residual covariance SIGMA (D-by-D).
+
+     X specifies the design.  It is either a numeric N-by-P matrix, in which
+     case the same P predictors apply to every response and BETA is P-by-D; or a
+     cell array of N design matrices, each D-by-K, in which case BETA is K-by-1.
+
+     ALG selects how missing responses (‘NaN’ entries of Y) are handled: "ecm"
+     (the default) and "cwls" use every observed response through the marginal
+     likelihood of the observed components, while "mvn" discards any observation
+     that has a missing response.  With no missing data all three agree.
+
+     The optional second output COVB is the covariance matrix of the coefficient
+     estimates, computed as the inverse of the observed Fisher information at
+     BETA and SIGMA.  With missing data and the "ecm"/"cwls" algorithms this is
+     the standard observed-data covariance and can differ from MATLAB's value
+     (which uses a different information convention) at the ‘1e-3’ level; NLOGL
+     agrees exactly.
+
+     See also: mvregress.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 60
+Negative log-likelihood for a multivariate regression model.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 6
+nancov
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1282
+ -- statistics: C = nancov (X)
+ -- statistics: C = nancov (X, Y)
+ -- statistics: C = nancov (..., NORMALIZATION)
+ -- statistics: C = nancov (..., METHOD)
+
+     Compute the covariance matrix while ignoring NaN values.
+
+     ‘C = nancov (X)’ returns the covariance matrix of the columns of X,
+     treating each row as an observation, after removing NaN values.  If X is a
+     vector, the scalar variance of its non-NaN elements is returned.
+
+     ‘C = nancov (X, Y)’, where X and Y are of equal length, is equivalent to
+     ‘nancov ([X(:), Y(:)])’ and returns the 2-by-2 covariance matrix.
+
+     ‘C = nancov (..., NORMALIZATION)’ specifies the normalization.  When
+     NORMALIZATION is 0 (default), the covariance is normalized by N-1, where N
+     is the number of observations used.  When it is 1, it is normalized by N.
+
+     ‘C = nancov (..., METHOD)’ selects how NaN values are handled.  With
+     "complete" (the default), any row of the data that contains a NaN value is
+     removed before the covariance is computed.  With "pairwise", each element
+     ‘C(i,j)’ is computed using all rows in which both column I and column J are
+     non-NaN; the resulting matrix may fail to be positive semidefinite.
+
+     See also: cov, nanvar, nanstd, nanmean.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 56
+Compute the covariance matrix while ignoring NaN values.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 6
 nanmax
 
@@ -7800,6 +10139,53 @@ Compute the mean while ignoring NaN values.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 9
+nanmedian
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1296
+ -- statistics: M = nanmedian (X)
+ -- statistics: M = nanmedian (X, 'all')
+ -- statistics: M = nanmedian (X, DIM)
+ -- statistics: M = nanmedian (X, VECDIM)
+
+     Compute the median while ignoring NaN values.
+
+     ‘M = nanmedian (X)’ returns the median of X, after removing NaN values.  If
+     X is a vector, a scalar value is returned.  If X is a matrix, a row vector
+     of column medians is returned.  If X is a multidimensional array,
+     ‘nanmedian’ operates along the first nonsingleton dimension.  If all values
+     along a dimension are NaN, the median is returned as NaN.
+
+     ‘M = nanmedian (X, 'all')’ returns the median of all elements of X, after
+     removing NaN values.  It is the equivalent of ‘nanmedian (X(:))’.
+
+     ‘M = nanmedian (X, DIM)’ operates along the dimension DIM of X.
+
+     ‘M = nanmedian (X, VECDIM)’ returns the median over the dimensions
+     specified in the vector VECDIM.  Each element of VECDIM represents a
+     dimension of the input array X and the output M has length 1 in the
+     specified operating dimensions.  If VECDIM indexes all dimensions of X,
+     then it is equivalent to ‘nanmedian (X, 'all')’.  Any dimension in VECDIM
+     greater than ‘ndims (X)’ is ignored.
+
+     See also: median, nanmean, nansum.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 45
+Compute the median while ignoring NaN values.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 6
 nanmin
 
@@ -7859,6 +10245,62 @@ Find the minimum while ignoring NaN values.
 # type: sq_string
 # elements: 1
 # length: 6
+nanstd
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1750
+ -- statistics: S = nanstd (X)
+ -- statistics: S = nanstd (X, W)
+ -- statistics: S = nanstd (X, W, 'all')
+ -- statistics: S = nanstd (X, W, DIM)
+ -- statistics: S = nanstd (X, W, VECDIM)
+
+     Compute the standard deviation while ignoring NaN values.
+
+     ‘S = nanstd (X)’ returns the standard deviation of X, after removing NaN
+     values.  If X is a vector, a scalar value is returned.  If X is a matrix, a
+     row vector of column standard deviations is returned.  If X is a
+     multidimensional array, ‘nanstd’ operates along the first nonsingleton
+     dimension.  If a dimension contains fewer than two non-NaN values, the
+     standard deviation is returned as 0 for a single value and as NaN when all
+     values are NaN.
+
+     ‘S = nanstd (X, W)’ specifies the normalization.  When W is 0 (default),
+     the standard deviation is normalized by N-1, where N is the number of
+     non-NaN observations.  When W is 1, it is normalized by N. W may also be a
+     vector of nonnegative weights whose length matches the operating dimension,
+     in which case the weighted standard deviation normalized by the sum of the
+     weights is returned.
+
+     ‘S = nanstd (X, W, 'all')’ returns the standard deviation of all elements
+     of X, after removing NaN values.  Use an empty value, ‘W = []’, to pass the
+     default normalization.
+
+     ‘S = nanstd (X, W, DIM)’ operates along the dimension DIM of X.
+
+     ‘S = nanstd (X, W, VECDIM)’ returns the standard deviation over the
+     dimensions specified in the vector VECDIM.  A weight vector is not
+     supported together with 'all' or VECDIM.  Any dimension in VECDIM greater
+     than ‘ndims (X)’ is ignored.
+
+     See also: std, nanvar, nanmean, nansum.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 57
+Compute the standard deviation while ignoring NaN values.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 6
 nansum
 
 
@@ -7902,6 +10344,328 @@ nansum
 # elements: 1
 # length: 42
 Compute the sum while ignoring NaN values.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 6
+nanvar
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1665
+ -- statistics: V = nanvar (X)
+ -- statistics: V = nanvar (X, W)
+ -- statistics: V = nanvar (X, W, 'all')
+ -- statistics: V = nanvar (X, W, DIM)
+ -- statistics: V = nanvar (X, W, VECDIM)
+
+     Compute the variance while ignoring NaN values.
+
+     ‘V = nanvar (X)’ returns the variance of X, after removing NaN values.  If
+     X is a vector, a scalar value is returned.  If X is a matrix, a row vector
+     of column variances is returned.  If X is a multidimensional array,
+     ‘nanvar’ operates along the first nonsingleton dimension.  If a dimension
+     contains fewer than two non-NaN values, the variance is returned as 0 for a
+     single value and as NaN when all values are NaN.
+
+     ‘V = nanvar (X, W)’ specifies the normalization.  When W is 0 (default),
+     the variance is normalized by N-1, where N is the number of non-NaN
+     observations.  When W is 1, it is normalized by N. W may also be a vector
+     of nonnegative weights whose length matches the operating dimension, in
+     which case the weighted variance normalized by the sum of the weights is
+     returned.
+
+     ‘V = nanvar (X, W, 'all')’ returns the variance of all elements of X, after
+     removing NaN values.  Use an empty value, ‘W = []’, to pass the default
+     normalization.
+
+     ‘V = nanvar (X, W, DIM)’ operates along the dimension DIM of X.
+
+     ‘V = nanvar (X, W, VECDIM)’ returns the variance over the dimensions
+     specified in the vector VECDIM.  A weight vector is not supported together
+     with 'all' or VECDIM.  Any dimension in VECDIM greater than ‘ndims (X)’ is
+     ignored.
+
+     See also: var, nanstd, nanmean, nansum.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 47
+Compute the variance while ignoring NaN values.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 7
+nlinfit
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 4146
+ -- statistics: BETA = nlinfit (X, Y, MODELFUN, BETA0)
+ -- statistics: BETA = nlinfit (..., OPTIONS)
+ -- statistics: BETA = nlinfit (..., NAME, VALUE)
+ -- statistics: [BETA, R, J, COVB, MSE, ERRORMODELINFO] = nlinfit (...)
+
+     Fit a nonlinear regression model.
+
+     ‘BETA = nlinfit (X, Y, MODELFUN, BETA0)’ estimates the coefficients of the
+     nonlinear regression model ‘Y = MODELFUN (BETA, X)’ by iteratively
+     minimizing the (possibly weighted) sum of squared residuals, starting from
+     the initial coefficient vector BETA0.  The fit uses the Levenberg-Marquardt
+     algorithm with a numerically computed Jacobian.
+
+        • X is a matrix of predictor values.  ‘nlinfit’ does not interpret the
+          columns of X; the array is passed unchanged as the second argument of
+          MODELFUN, so its shape is whatever MODELFUN expects.
+        • Y is a numeric vector of responses, one element per observation.
+        • MODELFUN is a function handle ‘@(B, X)’ returning a vector of fitted
+          responses the same size as Y.
+        • BETA0 is a numeric vector of initial values for the coefficients.
+
+     Additional options are given either as a statset-style OPTIONS structure or
+     as Name/Value pairs (or both).  The supported options are:
+
+     NAME             VALUE
+     --------------------------------------------------------------------------------
+     'Weights'        A vector of nonnegative observation weights, or a function
+                      handle ‘@(YHAT)’ returning such a vector.  Weighted least
+                      squares is used.
+     'ErrorModel'     The form of the error variance: 'constant' (default),
+                      'proportional', or 'combined'.
+     'ErrorParameters'Initial values for the error-model parameters.
+     'RobustWgtFun'   The name of a robust weight function ('andrews', 'bisquare',
+                      'cauchy', 'fair', 'huber', 'logistic', 'talwar', or
+                      'welsch'), enabling robust iteratively reweighted least
+                      squares.
+     'Tune'           The tuning constant for the robust weight function.
+     'Options'        A statset-style structure whose MaxIter, TolFun, TolX, and
+                      DerivStep fields override the corresponding defaults.
+
+     The remaining outputs describe the converged fit: R is the vector of raw
+     residuals ‘Y - MODELFUN (BETA, X)’, J is the Jacobian of MODELFUN with
+     respect to BETA at the solution, COVB is the estimated covariance matrix of
+     the coefficients, MSE is the mean squared error, and ERRORMODELINFO is a
+     structure describing the fitted error model.
+
+     Algorithm
+     ---------
+
+     The coefficients are estimated by the Levenberg-Marquardt algorithm using a
+     numerically computed (forward-difference) Jacobian.  For an ordinary or
+     weighted fit the coefficient covariance is ‘COVB = MSE * inv (J' * W * J)’,
+     where W is the diagonal matrix of observation weights and MSE is the
+     weighted residual sum of squares divided by the error degrees of freedom n
+     - p (with p coefficients).  A non-constant 'ErrorModel' is fitted by
+     generalized least squares, re-deriving the observation weights from the
+     fitted values each iteration; the 'proportional' model weights each
+     observation by the inverse squared fitted value, and MSE then estimates the
+     proportionality constant of the variance.
+
+     For a robust fit ('RobustWgtFun') the coefficients are found by iteratively
+     reweighted least squares applied to leverage-adjusted residuals (the
+     leverage is taken from the ordinary fit and held fixed).  The robust
+     coefficient covariance follows the Street-Carroll-Ruppert convention, the
+     same one used by ‘robustfit’: ‘COVB = s^2 * inv (J' * J)’ and MSE = s^2,
+     where the scale ‘s’ blends the ordinary-fit scale ‘ols_s’ with the robust
+     scale ‘robust_s’ at the solution as s^2 = (p^2 * ols_s^2 + n * robust_s^2)
+     / (n + p^2), taken to be at least ‘robust_s’.
+
+     See also: fitnlm, nlparci, nlpredci, NonLinearModel, robustfit.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 33
+Fit a nonlinear regression model.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 7
+nlparci
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1146
+ -- statistics: CI = nlparci (BETA, RESID, 'covar', COVB)
+ -- statistics: CI = nlparci (BETA, RESID, 'jacobian', J)
+ -- statistics: CI = nlparci (..., 'alpha', ALPHA)
+
+     Confidence intervals for the coefficients of a nonlinear regression.
+
+     ‘CI = nlparci (BETA, RESID, 'covar', COVB)’ returns the 100 (1 - ALPHA)%
+     confidence intervals for the fitted coefficients BETA of a nonlinear
+     regression, given the residual vector RESID and the estimated coefficient
+     covariance matrix COVB (both produced by ‘nlinfit’).  CI is a p-by-2 matrix
+     whose rows are the lower and upper bounds for the corresponding
+     coefficient.
+
+     ‘CI = nlparci (BETA, RESID, 'jacobian', J)’ instead derives the coefficient
+     covariance from the Jacobian J and the residuals.  A legacy positional form
+     ‘nlparci (BETA, RESID, J)’ is also accepted.
+
+     The confidence level defaults to 95%; pass ‘'alpha', ALPHA’ for a 100 (1 -
+     ALPHA)% interval.  The intervals use Student's t distribution with ‘numel
+     (RESID) - numel (BETA)’ degrees of freedom.
+
+     See also: nlinfit, nlpredci, fitnlm, NonLinearModel.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 68
+Confidence intervals for the coefficients of a nonlinear regression.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 8
+nlpredci
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2433
+ -- statistics: [YPRED, DELTA] = nlpredci (MODELFUN, X, BETA, RESID, 'Jacobian',
+          J)
+ -- statistics: [YPRED, DELTA] = nlpredci (MODELFUN, X, BETA, RESID, 'Covar',
+          COVB)
+ -- statistics: [YPRED, DELTA] = nlpredci (..., NAME, VALUE)
+
+     Confidence intervals for predictions of a nonlinear regression.
+
+     ‘[YPRED, DELTA] = nlpredci (MODELFUN, X, BETA, RESID, 'Jacobian', J)’
+     returns the predicted responses YPRED of the model ‘MODELFUN (BETA, X)’ at
+     the new predictor values X, together with the half-widths DELTA of the 100
+     (1 - ALPHA)% confidence intervals, so that ‘YPRED - DELTA’ and ‘YPRED +
+     DELTA’ bound the response.  BETA, RESID (the residuals) and J (the
+     Jacobian) come from ‘nlinfit’.
+
+     Instead of the Jacobian, an estimated coefficient covariance may be
+     supplied with ‘'Covar', COVB’.  The following Name/ Value pairs are also
+     accepted:
+
+     NAME             VALUE
+     --------------------------------------------------------------------------------
+     'MSE'            The mean squared error from ‘nlinfit’, required with 'Covar'
+                      for observation (prediction) intervals.
+     'PredOpt'        'curve' (default) for confidence intervals on the fitted
+                      curve, or 'observation' for prediction intervals on a new
+                      observation.
+     'SimOpt'         'off' (default) for pointwise intervals, or 'on' for
+                      simultaneous (Scheffe) intervals.
+     'Alpha'          The significance level; the interval has confidence 100 (1 -
+                      ALPHA)% (default ALPHA = 0.05).
+
+     Algorithm
+     ---------
+
+     Each half-width is ‘DELTA = c * sqrt (v)’.  The variance ‘v’ of the fitted
+     curve is ‘diag (JNEW * V * JNEW')’, where V is the coefficient covariance
+     (either COVB, or ‘MSE * inv (J' * J)’ when a Jacobian is supplied) and JNEW
+     is the Jacobian of MODELFUN at X; an 'observation' interval adds the error
+     variance MSE to ‘v’.  The critical value ‘c’ is the Student's t quantile at
+     1 - ALPHA/2 with the error degrees of freedom for a pointwise interval, or
+     the Scheffe value ‘sqrt (k * finv (1 - ALPHA, k, dfe))’ for a simultaneous
+     interval, where k is the number of coefficients (plus one for an
+     observation interval).
+
+     See also: nlinfit, nlparci, fitnlm, NonLinearModel.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 63
+Confidence intervals for predictions of a nonlinear regression.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 4
+nnmf
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1895
+ -- statistics: [W, H] = nnmf (A, K)
+ -- statistics: [W, H, D] = nnmf (A, K)
+ -- statistics: [...] = nnmf (..., NAME, VALUE)
+
+     Nonnegative matrix factorization.
+
+     ‘[W, H] = nnmf (A, K)’ factors the nonnegative N * M matrix A into
+     nonnegative factors W (N * K) and H (K * M) whose product approximates A,
+     by minimizing the root-mean-square residual between A and ‘W * H’.  K, the
+     number of factors, is typically smaller than N and M.
+
+     ‘[W, H, D] = nnmf (...)’ also returns the root-mean-square residual D, that
+     is ‘norm (A - W * H, "fro") / sqrt (N * M)’.
+
+     The factorization is not unique: the returned factors are normalized so
+     that the rows of H have unit length, and the columns of W (and the
+     corresponding rows of H) are ordered by decreasing length of the columns of
+     W.  Because the objective is not convex, the iteration converges to a local
+     minimum that depends on the starting point; use 'Replicates' to try several
+     random starts and keep the best.
+
+     Name/Value pairs:
+
+     'Algorithm'
+          'als' (default) for alternating least squares, or 'mult' for
+          multiplicative updates.  Alternating least squares usually converges
+          faster and more reliably; multiplicative updates are more sensitive to
+          the starting point.
+
+     'W0'
+          An N * K initial value for W.
+
+     'H0'
+          A K * M initial value for H.
+
+     'Replicates'
+          The number of times to repeat the factorization from new random
+          starting points, keeping the result with the smallest residual.  The
+          default is 1.  Ignored for a starting point fixed by both 'W0' and
+          'H0'.
+
+     'Options'
+          A structure of algorithm options (as returned by ‘statset’) whose
+          MaxIter, TolFun, and TolX fields control the iteration.
+
+     See also: pca, statset.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 33
+Nonnegative matrix factorization.
 
 
 
@@ -8005,6 +10769,89 @@ Produce normal probability plot of the data in X.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 5
+ocsvm
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3457
+ -- statistics: MDL = ocsvm (X)
+ -- statistics: [MDL, TF] = ocsvm (X)
+ -- statistics: [MDL, TF, SCORES] = ocsvm (X)
+ -- statistics: [...] = ocsvm (..., NAME, VALUE)
+
+     Detect anomalies with a one-class support vector machine.
+
+     ‘MDL = ocsvm (X)’ fits a one-class support vector machine to the N-by-P
+     matrix X, whose rows are observations and columns are variables, and
+     returns a ‘OneClassSVM’ object MDL.
+
+     ‘[MDL, TF, SCORES] = ocsvm (X)’ also returns the N-by-1 logical vector TF
+     flagging the anomalous observations and the N-by-1 vector SCORES of anomaly
+     scores.  A higher score indicates an observation that lies further outside
+     the boundary enclosing the data, and is therefore more likely to be an
+     anomaly.
+
+     The observations are mapped to a randomized feature space that approximates
+     a Gaussian kernel of scale KERNELSCALE using NUMEXPANSIONDIMENSIONS
+     features, and a linear one-class boundary is fitted there with ridge
+     regularization of strength LAMBDA.
+
+     Additional parameters can be specified by Name-Value pair arguments.
+
+     NAME                        VALUE
+                                 
+     ----------------------------------------------------------------------------------
+     'KernelScale'               the scale of the approximated Gaussian kernel, a
+                                 positive scalar or 'auto' (default).
+                                 
+     'Lambda'                    the ridge regularization strength, a nonnegative
+                                 scalar or 'auto' (default).
+                                 
+     'NumExpansionDimensions'    the number of expanded feature dimensions, a
+                                 positive integer or 'auto' (default).
+                                 
+     'StandardizeData'           a logical scalar (default ‘false’); when ‘true’
+                                 each predictor is centered and scaled and the means
+                                 and standard deviations are stored in ‘MDL.Mu’ and
+                                 ‘MDL.Sigma’.
+                                 
+     'ContaminationFraction'     the assumed fraction of anomalies in X, a scalar in
+                                 [0, 1] (default 0).  It sets ‘MDL.ScoreThreshold’
+                                 to ‘quantile (SCORES, 1 - CONTAMINATIONFRACTION)’;
+                                 when it is 0 the threshold is the maximum score and
+                                 no training observation is flagged.
+
+     The feature expansion uses random projections, so the scores depend on the
+     state of the random number generator and are not reproducible across runs
+     unless the generator is seeded.  The 'auto' selections and the fitted model
+     differ from MATLAB's implementation, which uses a different feature
+     expansion and solver.
+
+     For a deterministic, classic one-class support vector machine (a nu-SVM
+     with an exact kernel, computed through ‘libsvm’), use ‘fitcsvm’ with a
+     single class in the response or with the 'Nu' name-value argument; that
+     path returns a ‘ClassificationSVM’ object whose ‘predict’ method labels
+     observations, rather than the anomaly-scoring interface provided here.
+
+     Use the ‘isanomaly’ method of MDL to detect anomalies in new data.
+
+     See also: OneClassSVM, isanomaly, iforest, lof, fitcsvm.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 57
+Detect anomalies with a one-class support vector machine.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 16
 optimalleaforder
 
@@ -8057,6 +10904,67 @@ Compute the optimal leaf ordering of a hierarchical binary cluster tree.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 14
+parallelcoords
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1694
+ -- statistics: parallelcoords (X)
+ -- statistics: parallelcoords (X, NAME, VALUE, ...)
+ -- statistics: parallelcoords (AX, ...)
+ -- statistics: H = parallelcoords (...)
+
+     Create a parallel coordinates plot of the multivariate data in X.
+
+     ‘parallelcoords (X)’ plots each observation (row) of the ‘n’-by-‘p’ matrix
+     X as a line connecting the values of its P coordinates, which are placed at
+     the equally spaced horizontal positions ‘1, 2, ..., p’.
+
+     The following name/value pairs are accepted:
+
+     "Group"
+          A grouping variable (numeric, logical, character, string, or cell
+          array of strings) with one entry per row of X.  Lines are colored by
+          group.
+
+     "Standardize"
+          Controls how the columns of X are transformed before plotting: "off"
+          (default) uses the raw data, "on" centers and scales each column to
+          zero mean and unit standard deviation, "PCA" uses the principal
+          component scores, and "PCAStd" uses the principal component scores of
+          the standardized data.
+
+     "Quantile"
+          A scalar ALPHA in the interval (0,1).  Instead of one line per
+          observation, only three lines per group are drawn: the coordinate-wise
+          median and the ALPHA and 1-ALPHA quantiles of the group.
+
+     "Labels"
+          A character array or cell array of strings giving the tick labels for
+          the coordinate axis.
+
+     ‘parallelcoords (AX, ...)’ plots into the axes AX.
+
+     The optional output H is a vector of handles to the plotted lines: one per
+     observation, or three per group when "Quantile" is used.
+
+     See also: andrewsplot, glyphplot, pca.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 65
+Create a parallel coordinates plot of the multivariate data in X.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 21
 parseWilkinsonFormula
 
@@ -8064,11 +10972,12 @@ parseWilkinsonFormula
 # name: <cell-element>
 # type: sq_string
 # elements: 1
-# length: 5639
+# length: 8036
  -- statistics: TERMS = parseWilkinsonFormula (FORMULA)
  -- statistics: RESULT = parseWilkinsonFormula (FORMULA, MODE)
  -- statistics: [X, Y, NAMES] = parseWilkinsonFormula (FORMULA, "model_matrix",
           DATA)
+ -- statistics: S = parseWilkinsonFormula (FORMULA, "mixed")
 
      Parse and expand statistical model formulae using the Wilkinson notation.
 
@@ -8140,6 +11049,10 @@ parseWilkinsonFormula
 
         • ‘'tokenize'’ - Returns the array of tokens generated by the lexer.
 
+        • ‘'mixed'’ - Decomposes a mixed-effects formula containing
+          random-effects terms of the form ‘(EXPR | GROUP)’ into its fixed and
+          random parts.  See *Mixed-Effects Formulae* below.
+
      *Data Handling ('model_matrix' mode)* When using the ‘'model_matrix'’ mode,
      a DATA argument must be provided as an Octave ‘table’.
         • *Categorical Variables:* Cell arrays of strings in the table are
@@ -8149,6 +11062,33 @@ parseWilkinsonFormula
           continuous predictors or responses.
         • *Missing Data:* Rows containing ‘NaN’ values in any of the active
           variables are automatically omitted from the final matrices.
+
+     *Mixed-Effects Formulae ('mixed' mode)* A random-effects term is written
+     ‘(EXPR | GROUP)’, where EXPR is a Wilkinson design expression for the
+     random intercept and slopes and GROUP is the grouping factor (or an
+     interaction of factors such as ‘g1:g2’).  As with fixed effects an
+     intercept is implicit; suppress it with ‘0’ or ‘-1’ (for example ‘(x - 1 |
+     g)’ or ‘(-1 + x | g)’ for a random slope with no random intercept).  The
+     ‘'mixed'’ mode returns a structure with the following fields:
+
+     ‘Response’
+          The response (LHS) as a character vector.
+     ‘FixedTerms’
+          A cell array of the expanded fixed-effects terms, excluding the
+          intercept.
+     ‘FixedIntercept’
+          A logical flag, true when the fixed model includes an intercept.
+     ‘Random’
+          A struct array with one element per random-effects term, each with
+          fields ‘Expr’ (the raw expression), ‘Terms’ (its expanded predictor
+          terms), ‘Intercept’ (logical), ‘Group’ (the raw grouping spec), and
+          ‘GroupVars’ (its grouping variables as a cell array).
+     ‘HasRandom’
+          A logical flag, true when the formula contains any random-effects
+          term.
+
+     A formula with no random-effects term is still valid in ‘'mixed'’ mode: it
+     returns ‘HasRandom’ false and an empty ‘Random’ array.
 
      *Outputs*
      TERMS / RESULT
@@ -8170,12 +11110,144 @@ parseWilkinsonFormula
      Factorial Models for Analysis of Variance.  Applied Statistics, 22,
      392-399.
 
+     In "model_matrix" mode a categorical variable expands to indicator columns,
+     one per level bar the reference level, which the intercept carries.  The
+     levels of a character or string column are taken in the order the data
+     presents them, so the reference level is the one seen first; a
+     ‘categorical’ column uses its own category order.  When the formula has no
+     intercept, the first categorical variable is given an indicator for every
+     one of its levels and any further categorical variable stays reference
+     coded.  MATLAB omits the reference level whether or not an intercept is
+     present, and so cannot fit the reference group.
+
 
 # name: <cell-element>
 # type: sq_string
 # elements: 1
 # length: 73
 Parse and expand statistical model formulae using the Wilkinson notation.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 11
+partialcorr
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2565
+ -- statistics: RHO = partialcorr (X)
+ -- statistics: RHO = partialcorr (X, Z)
+ -- statistics: RHO = partialcorr (X, Y, Z)
+ -- statistics: [RHO, PVAL] = partialcorr (...)
+ -- statistics: [...] = partialcorr (..., NAME, VALUE)
+
+     Linear or rank partial correlation coefficients.
+
+     ‘RHO = partialcorr (X)’ returns the sample linear partial correlation
+     coefficients between pairs of variables in the n-by-p matrix X, controlling
+     for the remaining columns of X.  Each element ‘RHO(i,j)’ is the partial
+     correlation between ‘X(:,i)’ and ‘X(:,j)’, adjusted for the other p-2
+     columns.  RHO is a symmetric p-by-p matrix with ones on the diagonal.
+
+     ‘RHO = partialcorr (X, Z)’ controls instead for the variables in the n-by-q
+     matrix Z, returning the p-by-p partial correlations among the columns of X.
+
+     ‘RHO = partialcorr (X, Y, Z)’ returns the p1-by-p2 matrix of partial
+     correlations between the columns of the n-by-p1 matrix X and the n-by-p2
+     matrix Y, controlling for Z.  Element ‘RHO(i,j)’ is the partial correlation
+     between ‘X(:,i)’ and ‘Y(:,j)’.
+
+     ‘[RHO, PVAL] = partialcorr (...)’ also returns PVAL, a matrix of p-values
+     for testing the hypothesis of no partial correlation against the
+     alternative selected by 'Tail'.
+
+     The following NAME/VALUE pairs are accepted:
+
+     'Type'
+          'Pearson' (default) for linear partial correlation, or 'Spearman' for
+          rank partial correlation (computed on the ranks of the data).
+          'Kendall' is _not_ supported and raises an error, as in MATLAB.
+
+     'Rows'
+          'all' (default) uses all rows regardless of missing values (any ‘NaN’
+          yields a ‘NaN’ result); 'complete' uses only the rows with no missing
+          values across all supplied variables; 'pairwise' uses, for each
+          computed coefficient, the rows with no missing values among just the
+          variables involved in that coefficient.
+
+     'Tail'
+          The alternative hypothesis for PVAL: 'both' (default, nonzero
+          correlation), 'right' (greater than zero), or 'left' (less than zero).
+
+     The partial correlation is computed by regressing each of the two variables
+     on the controlling variables (with an intercept) and correlating the
+     residuals.  The p-value uses a Student's t statistic with n - 2 - k degrees
+     of freedom, where k is the number of controlling variables and n the number
+     of observations used.
+
+     See also: partialcorri, corr, corrcoef, tiedrank.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 48
+Linear or rank partial correlation coefficients.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 12
+partialcorri
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1355
+ -- statistics: RHO = partialcorri (Y, X)
+ -- statistics: RHO = partialcorri (Y, X, Z)
+ -- statistics: [RHO, PVAL] = partialcorri (...)
+ -- statistics: [...] = partialcorri (..., NAME, VALUE)
+
+     Partial correlation of each response with each predictor, adjusting for the
+     remaining predictors.
+
+     ‘RHO = partialcorri (Y, X)’ returns the sample partial correlation
+     coefficients between the columns of the n-by-p response matrix Y and the
+     columns of the n-by-q predictor matrix X.  Element ‘RHO(i,j)’ is the
+     partial correlation between ‘Y(:,i)’ and ‘X(:,j)’, adjusted for the other
+     columns of X (that is, all columns of X except the j-th).  RHO is a p-by-q
+     matrix.
+
+     ‘RHO = partialcorri (Y, X, Z)’ additionally controls for the variables in
+     the n-by-r matrix Z, so that ‘RHO(i,j)’ is adjusted for both the other
+     columns of X and all columns of Z.
+
+     ‘[RHO, PVAL] = partialcorri (...)’ also returns PVAL, a matrix of p-values
+     for testing the hypothesis of no partial correlation against the
+     alternative selected by 'Tail'.
+
+     The 'Type', 'Rows', and 'Tail' NAME/VALUE options are accepted with the
+     same meaning as in ‘partialcorr’.  'Kendall' is _not_ supported and raises
+     an error, as in MATLAB.
+
+     See also: partialcorr, corr, corrcoef, tiedrank.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 80
+Partial correlation of each response with each predictor, adjusting for the
+r...
 
 
 
@@ -8574,6 +11646,56 @@ Compute pairwise distance between two sets of vectors.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 8
+pearsrnd
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1605
+ -- statistics: R = pearsrnd (MU, SIGMA, SKEW, KURT)
+ -- statistics: R = pearsrnd (MU, SIGMA, SKEW, KURT, M)
+ -- statistics: R = pearsrnd (MU, SIGMA, SKEW, KURT, M, N, ...)
+ -- statistics: R = pearsrnd (MU, SIGMA, SKEW, KURT, [M, N, ...])
+ -- statistics: [R, TYPE, COEFS] = pearsrnd (...)
+
+     Random arrays from the Pearson system of distributions.
+
+     ‘R = pearsrnd (MU, SIGMA, SKEW, KURT)’ returns a random value drawn from
+     the distribution in the Pearson system with mean MU, standard deviation
+     SIGMA, skewness SKEW, and kurtosis KURT.  KURT is the (non-excess)
+     kurtosis, and the moments must satisfy ‘KURT > SKEW^2 + 1’.
+
+     ‘pearsrnd (MU, SIGMA, SKEW, KURT, M, N, ...)’ or ‘pearsrnd (..., [M, N,
+     ...])’ returns an M-by-N-by-... array of random values, following the size
+     conventions of ‘randn’.
+
+     ‘[R, TYPE, COEFS] = pearsrnd (...)’ also returns the type of the Pearson
+     distribution (an integer ‘0’ to ‘7’) in TYPE, and the three coefficients
+     COEFS = ‘[C0, C1, C2]’ of the denominator quadratic of the Pearson
+     differential equation for the standardized distribution, so that ‘F'(X) / F
+     (X) = -(X + C1) / (C0 + C1 X + C2 X^2)’.
+
+     The Pearson types are: ‘0’ normal, ‘1’ four-parameter beta, ‘2’ symmetric
+     four-parameter beta, ‘3’ gamma, ‘4’ (not a named distribution), ‘5’ inverse
+     gamma, ‘6’ beta prime, and ‘7’ Student's t.  Type ‘4’ is generated by
+     numerical inversion of its cumulative distribution function.
+
+     See also: johnsrnd, random, randn.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 55
+Random arrays from the Pearson system of distributions.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 9
 perfcurve
 
@@ -8763,6 +11885,85 @@ Calculate partial least squares regression using SIMPLS algorithm.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 4
+ppca
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2480
+ -- statistics: COEFF = ppca (Y, K)
+ -- statistics: [COEFF, SCORE] = ppca (Y, K)
+ -- statistics: [COEFF, SCORE, PCVAR] = ppca (Y, K)
+ -- statistics: [COEFF, SCORE, PCVAR, MU] = ppca (Y, K)
+ -- statistics: [COEFF, SCORE, PCVAR, MU, V] = ppca (Y, K)
+ -- statistics: [COEFF, SCORE, PCVAR, MU, V, S] = ppca (Y, K)
+ -- statistics: [...] = ppca (..., NAME, VALUE)
+
+     Probabilistic principal component analysis.
+
+     ‘COEFF = ppca (Y, K)’ fits a probabilistic principal component analysis
+     (PPCA) model with K components to the N * P data matrix Y (rows are
+     observations, columns are variables) and returns the P * K matrix COEFF of
+     orthonormal principal component coefficients, ordered by decreasing
+     component variance.  Y may contain ‘NaN’ values marking missing
+     observations; the model is fitted by an expectation-maximization algorithm
+     that accounts for them.  K must be a positive integer smaller than P.
+
+     ‘[COEFF, SCORE, PCVAR, MU, V, S] = ppca (...)’ returns further outputs:
+
+     SCORE
+          The N * K principal component scores (the data projected onto the
+          components; missing entries are reconstructed from the model before
+          projection).
+
+     PCVAR
+          A K * 1 vector of the principal component variances (the variance
+          explained by each component).
+
+     MU
+          A 1 * P vector of the estimated mean of Y.
+
+     V
+          The estimated residual (isotropic noise) variance.
+
+     S
+          A structure with the fitted model details: the loadings W, the
+          expected scores Xexp, the reconstruction Recon, the number of
+          iterations NumIter, and the root-mean-square residual RMSResid.
+
+     Name/Value pairs control the fit:
+
+     'W0'
+          A P * K initial value for the loadings used by the
+          expectation-maximization algorithm (missing-data case).
+
+     'Options'
+          A structure of algorithm options, as returned by ‘statset’, whose
+          MaxIter, TolFun, and TolX fields set the maximum number of iterations
+          and the convergence tolerances of the expectation-maximization
+          algorithm.
+
+     When Y has no missing values the model is fitted directly from the
+     eigendecomposition of its covariance matrix; COEFF, PCVAR, and V are then
+     the principal component directions, the leading variances, and the mean of
+     the trailing variances, respectively.
+
+     See also: pca, pcacov, pcares, factoran, barttest.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 43
+Probabilistic principal component analysis.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 6
 ppplot
 
@@ -8880,6 +12081,70 @@ probit
 # elements: 1
 # length: 21
 Probit transformation
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 8
+probplot
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2136
+ -- statistics: probplot (Y)
+ -- statistics: probplot (DIST, Y)
+ -- statistics: probplot (DIST, Y, CENS)
+ -- statistics: probplot (DIST, Y, CENS, FREQ)
+ -- statistics: probplot (AX, ...)
+ -- statistics: probplot (..., "noref")
+ -- statistics: H = probplot (...)
+
+     Produce a probability plot of the data in Y against the distribution DIST.
+
+     On a probability plot the ordered data are drawn against a nonlinear
+     probability axis chosen so that a sample from the reference distribution
+     DIST falls approximately along a straight line.  Systematic departures from
+     the reference line indicate departures from the distribution.
+
+     DIST is one of "normal" (the default when DIST is omitted), "lognormal",
+     "exponential", "extreme value", "weibull", "rayleigh", "logistic", or
+     "loglogistic".  For "lognormal", "weibull", and "loglogistic" the data axis
+     is logarithmic.
+
+     Y is a numeric vector, or a matrix in which case each column is plotted as
+     a separate sample.  ‘NaN’ values are ignored.
+
+     CENS is a logical vector the same size as Y that is true for right-censored
+     observations; censored points are not plotted and the plotting positions of
+     the remaining points follow the Kaplan-Meier estimate.  FREQ is a vector of
+     nonnegative integer frequencies (counts) the same size as Y.  Pass ‘[]’ to
+     omit either one.
+
+     ‘probplot (AX, ...)’ plots into the axes AX instead of the current axes.
+     The trailing option "noref" suppresses the reference line.
+
+     ‘H = probplot (...)’ returns a column vector of handles to the plotted line
+     objects (the data markers, followed by the reference line unless "noref"
+     was given).
+
+     The reference line is a robust fit through the first and third quartiles of
+     the data on the transformed scale.  For censored data the quartiles are
+     taken from the Kaplan-Meier plotting positions; when heavy censoring
+     prevents the data from reaching a quartile the position is linearly
+     extrapolated, which may deviate slightly from MATLAB.
+
+     See also: normplot, wblplot, qqplot, cdfplot, ecdf.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 74
+Produce a probability plot of the data in Y against the distribution DIST.
 
 
 
@@ -9527,6 +12792,81 @@ Perform a linear regression t-test.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 4
+rica
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2087
+ -- statistics: MDL = rica (X, Q)
+ -- statistics: MDL = rica (X, Q, NAME, VALUE)
+
+     Reconstruction independent component analysis (RICA) for feature
+     extraction.
+
+     ‘MDL = rica (X, Q)’ learns Q features from the N * P data matrix X (rows
+     are observations, columns are predictors) and returns a ReconstructionICA
+     object MDL.  Apply the learned transformation to data with ‘transform (MDL,
+     X)’, which returns ‘X * MDL.TransformWeights’.
+
+     The P * Q weight matrix (with unit-length columns) minimizes the objective
+
+          LAMBDA * ||X * W * W' - X||_F^2
+                + sum (sum (0.5 * log (cosh (2 * X * W))))
+
+     over the transformation weights W, combining a reconstruction cost with a
+     'logcosh' sparsity contrast.
+
+     Name/Value pairs:
+
+     'IterationLimit'
+          Maximum number of iterations (default 1000).
+
+     'Lambda'
+          Weight of the reconstruction term (default 1).
+
+     'Standardize'
+          Logical; center and scale each predictor before fitting (default
+          false).
+
+     'ContrastFcn'
+          The sparsity contrast.  Only 'logcosh' — that is 0.5 \log (\cosh (2
+          z)) — is supported.
+
+     'InitialTransformWeights'
+          A P * Q initial value for the weights.  The default is random.
+
+     'GradientTolerance', 'StepTolerance'
+          Accepted for MATLAB compatibility and recorded in ModelParameters; the
+          built-in solver iterates up to 'IterationLimit' with tight internal
+          tolerances.
+
+     Note on reproducibility
+     -----------------------
+
+     The RICA objective is not convex and is minimized by a quasi-Newton solver,
+     so the learned weights depend on the starting point and the solver, and are
+     only defined up to a permutation and sign of the feature columns.
+     Different runs (or different software, including MATLAB) may return
+     different weights that nonetheless describe an equally valid feature
+     transformation.  Fix 'InitialTransformWeights' for a reproducible result.
+
+     See also: ReconstructionICA, sparsefilt, pca.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 76
+Reconstruction independent component analysis (RICA) for feature extraction.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 5
 ridge
 
@@ -9643,6 +12983,280 @@ rmmissing
 # elements: 1
 # length: 32
 Remove missing data from arrays.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 9
+robustcov
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2984
+ -- statistics: SIG = robustcov (X)
+ -- statistics: [SIG, MU] = robustcov (X)
+ -- statistics: [SIG, MU, MAH] = robustcov (X)
+ -- statistics: [SIG, MU, MAH, OUTLIERS] = robustcov (X)
+ -- statistics: [SIG, MU, MAH, OUTLIERS, S] = robustcov (X)
+ -- statistics: [...] = robustcov (..., NAME, VALUE)
+
+     Robust multivariate covariance and mean estimate.
+
+     ‘SIG = robustcov (X)’ returns a robust estimate SIG of the covariance
+     matrix of the N*P data matrix X, computed so that it is not distorted by
+     outlying observations.  Rows of X are observations and columns are
+     variables.  Rows containing ‘NaN’ values are removed.
+
+     ‘[SIG, MU, MAH, OUTLIERS, S] = robustcov (...)’ also returns the robust
+     mean MU (1*P), the robust Mahalanobis distances MAH (N*1) of each
+     observation from the estimated distribution, a logical vector OUTLIERS
+     (N*1) flagging observations whose distance exceeds ‘sqrt (chi2inv (0.975,
+     P))’, and a structure S holding the estimate metadata.
+
+     Additional parameters can be specified by Name-Value pair arguments.
+
+     NAME               VALUE
+                        
+     ---------------------------------------------------------------------------------
+     'Method'           the estimator, either 'fmcd' (default, the Fast Minimum
+                        Covariance Determinant algorithm) or 'ogk' (the
+                        Orthogonalized Gnanadesikan-Kettenring estimator).
+                        'olivehawkins' is not implemented.
+                        
+     'OutlierFraction'  the maximum fraction of outliers, a scalar in [0, 0.5]
+                        (default 0.5), used to set the size of the elemental
+                        subsets in 'fmcd'.
+                        
+     'NumTrials'        the number of random elemental subsets drawn by 'fmcd', a
+                        positive integer (default 500).
+                        
+     'BiasCorrection'   a logical scalar (default ‘true’) that applies the
+                        small-sample bias correction to the 'fmcd' estimate.
+                        
+     'NumOGKIterations' the number of orthogonalization iterations for 'ogk', a
+                        positive integer (default 2).
+                        
+     'UnivariateEstimator'the robust univariate location/scale estimator used by
+                        'ogk', either 'tauscale' (default) or 'qn'.
+
+     *Note on reproducibility.*  'fmcd' draws random subsets, so its exact
+     estimate depends on the random number generator and is not identical to
+     MATLAB's on data where the optimal subset is ambiguous; on well-separated
+     data both converge to the same estimate.  For 'fmcd' with 'BiasCorrection'
+     enabled, the small-sample factor uses the published Pison-Van Aelst-Willems
+     asymptotic formula, which differs from MATLAB's tabulated simulation values
+     by up to about 1.6% for very small samples.
+
+     See also: mahal, cov, mad, dbscan.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 49
+Robust multivariate covariance and mean estimate.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 9
+robustfit
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1898
+ -- statistics: B = robustfit (X, Y)
+ -- statistics: B = robustfit (X, Y, WFUN)
+ -- statistics: B = robustfit (X, Y, WFUN, TUNE)
+ -- statistics: B = robustfit (X, Y, WFUN, TUNE, CONST)
+ -- statistics: [B, STATS] = robustfit (...)
+
+     Robust linear regression.
+
+     ‘B = robustfit (X, Y)’ returns the coefficient vector B of a linear
+     regression of the response Y on the predictors X, fitted by robust
+     M-estimation (iteratively reweighted least squares) so that outlying
+     observations are downweighted.  A column of ones is added to X by default,
+     so ‘B(1)’ is the intercept.
+
+     ‘B = robustfit (X, Y, WFUN, TUNE, CONST)’ selects the weight function WFUN,
+     its tuning constant TUNE, and whether a constant term is included.  WFUN is
+     one of 'bisquare' (default), 'andrews', 'cauchy', 'fair', 'huber',
+     'logistic', 'ols', 'talwar', 'welsch', or a function handle ‘@(r)’ giving
+     the weights as a function of the scaled residual.  TUNE defaults to the
+     value that gives 95% efficiency for each weight function.  CONST is 'on'
+     (default) to include a constant term or 'off' to omit.
+
+     ‘[B, STATS] = robustfit (...)’ also returns a structure STATS with fields
+     ‘ols_s’, ‘robust_s’, ‘mad_s’, ‘s’, ‘se’, ‘covb’, ‘coeffcorr’, ‘t’, ‘p’,
+     ‘w’, ‘R’, ‘dfe’, ‘h’, and ‘resid’.  The coefficients and the fields
+     ‘ols_s’, ‘mad_s’, ‘dfe’, ‘h’, ‘w’, and ‘resid’ match MATLAB. The standard
+     errors and quantities derived from them (‘se’, ‘t’, ‘p’, ‘covb’) agree with
+     MATLAB to within a small fraction of a percent; ‘robust_s’ is the
+     Street-Carroll-Ruppert robust scale estimate, which may differ from
+     MATLAB's by a few percent (it has a negligible effect on the standard
+     errors).
+
+     See also: regress, fitlm.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 25
+Robust linear regression.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 10
+rocmetrics
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 900
+ -- statistics: rocmetrics
+
+     Receiver operating characteristic (ROC) metrics for classifier output.
+
+     The ‘rocmetrics’ class evaluates a classifier's performance by computing,
+     for each class, a one-versus-all ROC curve together with a set of
+     threshold-dependent performance metrics.  It stores the results in the
+     ‘Metrics’ table and the per-class area under the curve in ‘AUC’, and
+     provides the ‘addMetrics’, ‘average’, and ‘plot’ methods for follow-up
+     analysis.
+
+     For a problem with K classes and scores supplied as an N-by-K matrix, the
+     discriminant score used for class K is the one-versus-all margin
+     ‘Scores(:,k) - max (Scores(:,j))’ over ‘j != k’, matching MATLAB's
+     ‘rocmetrics’.  Every metric is evaluated at each distinct value of that
+     margin.
+
+     See also: perfcurve, confusionmat, confusionchart.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 70
+Receiver operating characteristic (ROC) metrics for classifier output.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+rotatefactors
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3226
+ -- statistics: B = rotatefactors (A)
+ -- statistics: B = rotatefactors (A, NAME, VALUE, ...)
+ -- statistics: [B, T] = rotatefactors (...)
+
+     Rotate a factor-loading matrix.
+
+     ‘B = rotatefactors (A)’ rotates the D * M factor loadings matrix A (D
+     observed variables, M factors) to the 'varimax' criterion and returns the
+     rotated loadings B, the same size as A.
+
+     ‘[B, T] = rotatefactors (...)’ also returns the M * M rotation matrix T, so
+     that ‘B = A * T’.  For the orthogonal methods T is orthonormal (‘T' * T’ is
+     the identity); for the oblique methods ('promax' and oblique 'procrustes')
+     it is a general invertible matrix.
+
+     The rotation is controlled by NAME/VALUE pairs:
+
+     'Method'
+          The rotation criterion, one of:
+
+          'varimax' (default)
+               Orthomax with a criterion coefficient of 1; maximizes the
+               variance of the squared loadings within each factor.
+
+          'quartimax'
+               Orthomax with a coefficient of 0; simplifies the description of
+               each variable.
+
+          'equamax'
+               Orthomax with a coefficient of M / 2.
+
+          'parsimax'
+               Orthomax with a coefficient of D (M - 1) / (D + M - 2).
+
+          'orthomax'
+               General orthomax with the coefficient given by 'Coeff'.
+
+          'promax'
+               Oblique rotation obtained by fitting an oblique transformation to
+               a target built from a 'varimax' solution raised to the power
+               'Power'.
+
+          'procrustes'
+               Rotation towards the 'Target' matrix, either orthogonal or
+               oblique according to 'Type'.
+
+     'Normalize'
+          'on' (default) applies Kaiser normalization (each row of A is scaled
+          to unit length before the orthomax rotation and unscaled afterwards);
+          'off' disables it.  Ignored by 'procrustes'.
+
+     'Reltol'
+          Relative convergence tolerance for the iterative orthomax rotation.
+          The default is ‘sqrt (eps)’.
+
+     'Maxit'
+          Maximum number of iterations for the iterative orthomax rotation.  The
+          default is 250.
+
+     'Coeff'
+          The orthomax coefficient used when 'Method' is 'orthomax'.  The
+          default is 1 (equivalent to 'varimax').
+
+     'Power'
+          The power used to build the 'promax' target, a scalar greater than or
+          equal to 1.  The default is 4.
+
+     'Target'
+          The target loadings matrix for 'procrustes', the same size as A.
+          Required for that method.
+
+     'Type'
+          'orthogonal' (default) or 'oblique', selecting the kind of
+          'procrustes' rotation.
+
+     *Note on the orthomax family:* for coefficients up to 1 ('varimax',
+     'quartimax', and small 'orthomax') the rotation follows the same
+     successive-SVD iteration as MATLAB and stops at the same relative
+     tolerance.  For larger coefficients ('equamax', 'parsimax') that iteration
+     does not converge, so a monotonically convergent pairwise algorithm is used
+     instead; it reaches the same optimum as MATLAB to that solution's own
+     convergence precision.
+
+     See also: factoran, pca, pcacov, procrustes.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 31
+Rotate a factor-loading matrix.
 
 
 
@@ -9837,6 +13451,100 @@ sampsizepwr
 # elements: 1
 # length: 54
 Sample size and power calculation for hypothesis test.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 11
+scatterhist
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3098
+ -- statistics: scatterhist (X, Y)
+ -- statistics: scatterhist (X, Y, NAME, VALUE, ...)
+ -- statistics: H = scatterhist (...)
+
+     Create a scatter plot of X and Y with marginal histograms.
+
+     ‘scatterhist (X, Y)’ draws a scatter plot of the vectors X and Y in a
+     central set of axes, with a histogram of X above it and a histogram of Y to
+     its right.  X and Y must be vectors of the same length; NaN values are
+     removed pairwise from the scatter plot and individually from each marginal
+     histogram.
+
+     The following name/value pairs are accepted:
+
+     "Group"
+          A grouping variable (numeric, logical, character, string, or cell
+          array of strings) with one entry per point.  The scatter points and
+          the marginal histograms are separated and colored by group.
+
+     "NBins"
+          The number of bins for the marginal histograms, either a scalar
+          applied to both or a two-element vector ‘[nx ny]’.  The default is
+          chosen by Scott's rule.
+
+     "Kernel"
+          "off" (default) draws histograms for the marginals; "on" or "overlay"
+          draws kernel density estimates instead.
+
+     "Location"
+          Position of the marginal plots: "SouthWest" (default), "SouthEast",
+          "NorthEast", or "NorthWest".
+
+     "Legend"
+          "on" or "off" to show or hide the group legend.  The default is "on"
+          when a grouping variable is supplied.
+
+     "Marker", "MarkerSize"
+          The marker symbol(s) and size(s) for the scatter points, cycled over
+          the groups.
+
+     The optional output H is a three-element vector of axes handles: the
+     central scatter axes, the axes of the X (horizontal) histogram, and the
+     axes of the Y (vertical) histogram.
+
+     See also: gscatter, scatter, hist, ksdensity.
+
+     'Parent' draws into a supplied figure or uipanel instead of the current
+     figure.  The container is used as it stands and is never cleared, so a
+     scatterhist can be placed alongside other axes.
+
+     'Location' names the corner the scatter occupies, 'SouthWest' by default,
+     or 'SouthEast', 'NorthEast' or 'NorthWest'; the marginals take the two
+     opposite sides.
+
+     'Direction' points the marginal bars toward the scatter plot, 'in' by
+     default, or away from it with 'out', whichever side 'Location' has placed
+     them on.
+
+     'PlotGroup' draws one marginal per group with 'on', or a single pooled
+     marginal with 'off'.  It defaults to 'on' when 'Group' is given and to
+     'off' otherwise.
+
+     'Style' outlines the marginals as 'bar' or 'stairs', defaulting to stairs
+     when the data are grouped and bars when they are not.
+
+     'Color' sets the group colours, either as a character vector of colour
+     names or as an N-by-3 matrix of RGB values, cycled over the groups.
+
+     'LineStyle' and 'LineWidth' style the marginal outlines, not the scatter
+     markers, and are cycled over the groups.
+
+     'Bandwidth' sets the kernel bandwidth used when 'Kernel' is on: a scalar
+     for all marginals, a pair for X and Y, or one row per group.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 58
+Create a scatter plot of X and Y with marginal histograms.
 
 
 
@@ -10238,6 +13946,164 @@ Draws NSAMPLES samples from a target stationary distribution PDF using slice
 # type: sq_string
 # elements: 1
 # length: 10
+sparsefilt
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1915
+ -- statistics: MDL = sparsefilt (X, Q)
+ -- statistics: MDL = sparsefilt (X, Q, NAME, VALUE)
+
+     Sparse filtering for feature extraction.
+
+     ‘MDL = sparsefilt (X, Q)’ learns Q features from the N * P data matrix X
+     (rows are observations, columns are predictors) and returns a
+     SparseFiltering object MDL.  Apply the learned transformation to data with
+     ‘transform (MDL, X)’.
+
+     The N * Q features returned by ‘transform’ are the soft-absolute
+     activations ‘sqrt ((X * W) .^ 2 + 1e-8)’, normalized first across
+     observations (each feature) and then across features (each observation).
+     The P * Q weight matrix W minimizes the sum of those features plus an L2
+     penalty ‘LAMBDA * ||W ||_F^2’, driving the features to be sparse.
+
+     Name/Value pairs:
+
+     'IterationLimit'
+          Maximum number of iterations (default 1000).
+
+     'Lambda'
+          Weight of the L2 penalty on the transform weights (default 1).
+
+     'Standardize'
+          Logical; center and scale each predictor before fitting (default
+          false).
+
+     'InitialTransformWeights'
+          A P * Q initial value for the weights.  The default is random.
+
+     'GradientTolerance', 'StepTolerance'
+          Accepted for MATLAB compatibility and recorded in ModelParameters; the
+          built-in solver iterates up to 'IterationLimit' with tight internal
+          tolerances.
+
+     Note on reproducibility
+     -----------------------
+
+     The sparse filtering objective is not convex and is minimized by a
+     quasi-Newton solver, so the learned weights depend on the starting point
+     and the solver.  Different runs (or different software, including MATLAB)
+     may return different weights that nonetheless describe an equally valid
+     feature transformation.  Fix 'InitialTransformWeights' for a reproducible
+     result.
+
+     See also: SparseFiltering, rica, pca.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 40
+Sparse filtering for feature extraction.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 15
+spectralcluster
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3838
+ -- statistics: IDX = spectralcluster (X, K)
+ -- statistics: IDX = spectralcluster (S, K, 'Distance', 'precomputed')
+ -- statistics: [IDX, V] = spectralcluster (...)
+ -- statistics: [IDX, V, D] = spectralcluster (...)
+ -- statistics: [...] = spectralcluster (..., NAME, VALUE)
+
+     Partition observations into K clusters using spectral clustering.
+
+     ‘IDX = spectralcluster (X, K)’ partitions the N*P numeric matrix X into K
+     clusters and returns the N*1 vector IDX of cluster indices.  Rows of X
+     correspond to observations and columns to features.  Spectral clustering
+     builds a similarity graph over the observations, embeds them with the
+     eigenvectors of the graph Laplacian, and clusters that embedding, which
+     lets it recover clusters that are not linearly separable in the original
+     space.
+
+     ‘[IDX, V, D] = spectralcluster (...)’ also returns the N*k matrix V whose
+     columns are the eigenvectors associated with the K smallest eigenvalues of
+     the Laplacian, and the k*1 vector D of those eigenvalues.  The signs of the
+     eigenvectors, and the basis within a repeated eigenvalue, are arbitrary.
+
+     Additional parameters can be specified by Name-Value pair arguments.
+
+     NAME               VALUE
+                        
+     ---------------------------------------------------------------------------------
+     'Distance'         the distance metric used to build the similarity graph, one
+                        of 'euclidean' (default), 'seuclidean', 'mahalanobis',
+                        'cityblock', 'minkowski', 'chebychev', 'cosine',
+                        'correlation', 'hamming', 'jaccard', 'spearman', or a
+                        function handle accepted by ‘pdist2’, or the string
+                        'precomputed' to interpret the first input as an N*N
+                        similarity matrix.
+                        
+     'SimilarityGraph'  'knn' (default) to connect each observation to its nearest
+                        neighbors, or 'epsilon' to connect observations that are
+                        within a fixed radius.
+                        
+     'NumNeighbors'     the number of nearest neighbors for the 'knn' graph, a
+                        positive integer.  The default is ‘ceil (log (N))’.
+                        
+     'KNNGraphType'     'complete' (default) to connect i and j when either is a
+                        nearest neighbor of the other, or 'mutual' to connect them
+                        only when each is a nearest neighbor of the other.
+                        
+     'Radius'           the radius for the 'epsilon' graph, a nonnegative scalar.
+                        Required when 'SimilarityGraph' is 'epsilon'.
+                        
+     'KernelScale'      the positive scale factor SIGMA in the Gaussian similarity
+                        kernel ‘exp (-(dist / sigma)^2)’ applied to the graph
+                        edges.  The default is 1.
+                        
+     'LaplacianNormalization''randomwalk' (default), 'symmetric', or 'none', selecting
+                        how the graph Laplacian is normalized before the
+                        eigendecomposition.
+                        
+     'ClusterMethod'    'kmeans' (default) or 'kmedoids' to cluster the eigenvector
+                        embedding.
+                        
+     'P'                the Minkowski exponent (default 2), used only with the
+                        'minkowski' distance.
+                        
+     'Cov'              the covariance matrix used only with the 'mahalanobis'
+                        distance.
+                        
+     'Scale'            the scaling vector used only with the 'seuclidean'
+                        distance.
+
+     See also: kmeans, kmedoids, dbscan, linkage, pdist2.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 65
+Partition observations into K clusters using spectral clustering.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 10
 squareform
 
 
@@ -10456,6 +14322,81 @@ Perform stepwise linear regression using conditional p-value criteria.
 # name: <cell-element>
 # type: sq_string
 # elements: 1
+# length: 11
+stepwiseglm
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3063
+ -- statistics: MDL = stepwiseglm (X, Y)
+ -- statistics: MDL = stepwiseglm (X, Y, MODELSPEC)
+ -- statistics: MDL = stepwiseglm (TBL)
+ -- statistics: MDL = stepwiseglm (TBL, MODELSPEC)
+ -- statistics: MDL = stepwiseglm (..., NAME, VALUE)
+
+     Fit a generalized linear regression model by stepwise term selection.
+
+     ‘MDL = stepwiseglm (X, Y)’ starts from a model given by MODELSPEC and
+     repeatedly adds or removes terms, one at a time, until no further move
+     improves the selection criterion.  It returns the fitted
+     ‘GeneralizedLinearModel’ object MDL, whose ‘Steps’ property records the
+     term-selection trace.  X is an n-by-p numeric predictor matrix and Y the
+     response; ‘MDL = stepwiseglm (TBL)’ instead takes the predictors and
+     response from the table TBL (the last column is the response unless
+     overridden).
+
+     MODELSPEC is the _starting_ model.  It is a Wilkinson formula string (e.g.
+     'y ~ x1 + x2'), a keyword ('constant' (default), 'linear', 'interactions',
+     'purequadratic', 'quadratic', or 'full'), or a terms matrix.  The candidate
+     terms available to the search are bounded below by 'Lower' and above by
+     'Upper'.
+
+     The following NAME/VALUE pairs control the stepwise search:
+
+     Name             Value
+     ------------------------------------------------------------------------------
+     'Lower'          the smallest model considered (terms in it are never
+                      removed).  Defaults to 'constant'.
+     'Upper'          the largest model considered (the candidate term
+                      universe).  Defaults to 'interactions'.
+     'Criterion'      the selection criterion: 'Deviance' (default), 'sse',
+                      'aic', or 'bic'.  Under 'Deviance' and 'sse', terms enter
+                      or leave by a chi-squared or F test on the change in
+                      deviance; under 'aic'/'bic' the move that most reduces the
+                      information criterion is taken.
+     'PEnter'         the p-value (or criterion margin) below which a term is
+                      added.  Defaults to 0.05 for 'Deviance' and 'sse', and 0
+                      for 'aic'/'bic'.
+     'PRemove'        the p-value (or criterion margin) above which a term is
+                      removed.  Defaults to 0.10 for 'Deviance' and 'sse', and 0
+                      for 'aic'/'bic'.
+     'NSteps'         the maximum number of steps.  Defaults to ‘Inf’ (run to
+                      convergence).
+     'Verbose'        0 to run silently, or 1 (default) to print each accepted
+                      step.
+
+     All NAME/VALUE pairs accepted by ‘fitglm’ (such as 'Distribution', 'Link',
+     'Weights', 'Offset', 'BinomialSize', 'Intercept', 'DispersionFlag', and
+     'Exclude') are also accepted and forwarded to the fit.  Categorical
+     predictors are not supported by the stepwise search; use ‘fitglm’ for a
+     fixed model with categorical predictors.
+
+     See also: GeneralizedLinearModel, fitglm, stepwisefit, glmfit, glmval.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 69
+Fit a generalized linear regression model by stepwise term selection.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
 # length: 8
 tabulate
 
@@ -10512,10 +14453,15 @@ tiedrank
 # name: <cell-element>
 # type: sq_string
 # elements: 1
-# length: 1045
+# length: 1343
  -- statistics: [R, TIEADJ] = tiedrank (X)
  -- statistics: [R, TIEADJ] = tiedrank (X, TIEFLAG)
  -- statistics: [R, TIEADJ] = tiedrank (X, TIEFLAG, BIDIR)
+
+     X may be a vector or an array.  An array is ranked along its first
+     dimension, so a matrix is ranked column by column, and TIEADJ then carries
+     one entry per column: its first dimension has length 1 by default, or 3
+     when TIEFLAG is set, and its higher dimensions are those of X.
 
      Compute rank adjusted for ties.
 
@@ -10538,8 +14484,8 @@ tiedrank
 # name: <cell-element>
 # type: sq_string
 # elements: 1
-# length: 31
-Compute rank adjusted for ties.
+# length: 30
+X may be a vector or an array.
 
 
 
@@ -10616,6 +14562,85 @@ trimmean
 # elements: 1
 # length: 25
 Compute the trimmed mean.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 4
+tsne
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 2101
+ -- statistics: Y = tsne (X)
+ -- statistics: [Y, LOSS] = tsne (X)
+ -- statistics: [...] = tsne (..., NAME, VALUE)
+
+     t-distributed stochastic neighbor embedding (t-SNE).
+
+     ‘Y = tsne (X)’ embeds the N * P data matrix X (rows are observations) into
+     a low-dimensional space and returns the N * NUMDIMENSIONS matrix Y of
+     embedded points, whose pairwise (Student-t) affinities approximate the
+     Gaussian affinities of the rows of X.
+
+     ‘[Y, LOSS] = tsne (...)’ also returns the Kullback-Leibler divergence LOSS
+     between the two affinity distributions at the returned embedding.
+
+     Name/Value pairs:
+
+     'Algorithm'
+          Only 'exact' is supported (MATLAB's approximate 'barneshut' algorithm
+          is not available).
+
+     'Distance'
+          The distance metric used for the high-dimensional affinities, as
+          accepted by ‘pdist’ (default 'euclidean').
+
+     'NumDimensions'
+          The dimension of the embedding Y (default ‘min (P, 2)’).
+
+     'NumPCAComponents'
+          If positive, reduce X to this many principal components before
+          embedding (default 0, no reduction).
+
+     'Standardize'
+          Logical; center and scale each column of X before embedding (default
+          false).
+
+     'Perplexity'
+          The effective number of local neighbors (default 30).  It must be
+          smaller than N.
+
+     'Exaggeration'
+          Tightness factor applied to the high-dimensional affinities for the
+          first 100 iterations (default 4, no less than 1).
+
+     'LearnRate'
+          The learning rate of the optimization (default 500).
+
+     'InitialY'
+          An N * NUMDIMENSIONS initial embedding (default ‘1e-4 * randn’).
+
+     'Options'
+          A structure (as returned by ‘statset’) whose MaxIter (default 1000)
+          and TolFun (default ‘1e-10’) fields control the optimization.
+
+     The embedding is not unique: it depends on the initial configuration and
+     the random state.  Set 'InitialY' (or the random seed) for a reproducible
+     result.
+
+     See also: pca, pdist, statset.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 52
+t-distributed stochastic neighbor embedding (t-SNE).
 
 
 
@@ -11320,318 +15345,6 @@ ztest2
 # elements: 1
 # length: 23
 Two proportions Z-test.
-
-
-
-# name: <cell-element>
-# type: sq_string
-# elements: 1
-# length: 9
-robustfit
-
-
-# name: <cell-element>
-# type: sq_string
-# elements: 1
-# length: 1898
- -- statistics: B = robustfit (X, Y)
- -- statistics: B = robustfit (X, Y, WFUN)
- -- statistics: B = robustfit (X, Y, WFUN, TUNE)
- -- statistics: B = robustfit (X, Y, WFUN, TUNE, CONST)
- -- statistics: [B, STATS] = robustfit (...)
-
-     Robust linear regression.
-
-     ‘B = robustfit (X, Y)’ returns the coefficient vector B of a linear
-     regression of the response Y on the predictors X, fitted by robust
-     M-estimation (iteratively reweighted least squares) so that outlying
-     observations are downweighted.  A column of ones is added to X by default,
-     so ‘B(1)’ is the intercept.
-
-     ‘B = robustfit (X, Y, WFUN, TUNE, CONST)’ selects the weight function WFUN,
-     its tuning constant TUNE, and whether a constant term is included.  WFUN is
-     one of 'bisquare' (default), 'andrews', 'cauchy', 'fair', 'huber',
-     'logistic', 'ols', 'talwar', 'welsch', or a function handle ‘@(r)’ giving
-     the weights as a function of the scaled residual.  TUNE defaults to the
-     value that gives 95% efficiency for each weight function.  CONST is 'on'
-     (default) to include a constant term or 'off' to omit.
-
-     ‘[B, STATS] = robustfit (...)’ also returns a structure STATS with fields
-     ‘ols_s’, ‘robust_s’, ‘mad_s’, ‘s’, ‘se’, ‘covb’, ‘coeffcorr’, ‘t’, ‘p’,
-     ‘w’, ‘R’, ‘dfe’, ‘h’, and ‘resid’.  The coefficients and the fields
-     ‘ols_s’, ‘mad_s’, ‘dfe’, ‘h’, ‘w’, and ‘resid’ match MATLAB. The standard
-     errors and quantities derived from them (‘se’, ‘t’, ‘p’, ‘covb’) agree with
-     MATLAB to within a small fraction of a percent; ‘robust_s’ is the
-     Street-Carroll-Ruppert robust scale estimate, which may differ from
-     MATLAB's by a few percent (it has a negligible effect on the standard
-     errors).
-
-     See also: regress, fitlm.
-
-
-# name: <cell-element>
-# type: sq_string
-# elements: 1
-# length: 25
-Robust linear regression.
-
-
-
-# name: <cell-element>
-# type: sq_string
-# elements: 1
-# length: 5
-lasso
-
-
-# name: <cell-element>
-# type: sq_string
-# elements: 1
-# length: 3411
- -- statistics: B = lasso (X, Y)
- -- statistics: [B, FITINFO] = lasso (X, Y)
- -- statistics: [...] = lasso (..., NAME, VALUE)
-
-     Lasso and elastic-net regularized least-squares regression.
-
-     ‘B = lasso (X, Y)’ fits a series of regularized linear models of the
-     response Y on the predictor matrix X by lasso, over a sequence of values of
-     the regularization parameter LAMBDA.  B is a P*L matrix whose column k
-     holds the coefficient estimates for the k-th LAMBDA, in ascending order of
-     LAMBDA.
-
-     ‘[B, FITINFO] = lasso (...)’ additionally returns a structure FITINFO with
-     fields ‘Intercept’, ‘Lambda’, ‘Alpha’, ‘DF’ (number of non-zero
-     coefficients), and ‘MSE’ (mean squared error), one entry per value of
-     LAMBDA.
-
-     The following Name-Value pairs are supported:
-
-     NAME           VALUE
-                    
-     ----------------------------------------------------------------------------------
-     'Alpha'        The elastic-net mixing parameter in (0, 1].  1 (default) is the
-                    lasso penalty; smaller values add a ridge penalty.
-                    
-     'Lambda'       A vector of non-negative regularization parameters.  By default
-                    a geometric sequence of 'NumLambda' values is used, from the
-                    smallest value that drives all coefficients to zero down to
-                    'LambdaRatio' times that value.
-                    
-     'NumLambda'    The number of LAMBDA values in the default sequence (default
-                    100).
-                    
-     'LambdaRatio'  The ratio of the smallest to the largest LAMBDA in the default
-                    sequence (default 1e-4, or 1e-2 when the number of observations
-                    is below the number of predictors).
-                    
-     'Standardize'  Whether to standardize X to zero mean and unit variance before
-                    fitting (default true).  Coefficients are always returned on the
-                    original scale.
-                    
-     'Weights'      A vector of non-negative observation weights.
-                    
-     'RelTol'       Convergence tolerance for the coordinate descent (default 1e-4).
-                    
-     'MaxIter'      Maximum number of coordinate-descent iterations (default 1e5).
-                    
-     'DFmax'        The maximum number of non-zero coefficients; the default
-                    sequence stops once this is exceeded.
-                    
-     'Intercept'    Whether to fit a constant term (default true).
-                    
-     'PredictorNames'A cell array of predictor names, kept in FITINFO.
-                    
-     'CV'           The number of folds K for K-fold cross-validation of the mean
-                    squared error, or a ‘cvpartition’ object.
-                    
-     'MCReps'       The number of Monte-Carlo repetitions of the cross-validation
-                    (default 1).
-
-     When 'CV' is used, FITINFO‘.MSE’ is the cross-validated error, plus ‘SE’,
-     ‘LambdaMinMSE’, ‘IndexMinMSE’, ‘Lambda1SE’, and ‘Index1SE’, which report
-     the LAMBDA with the lowest error and the largest LAMBDA within one standard
-     error of it.  The fold assignment is random, so these selections are not
-     reproducible without fixing the random seed.
-
-     See also: ridge, regress, lassoglm.
-
-
-# name: <cell-element>
-# type: sq_string
-# elements: 1
-# length: 59
-Lasso and elastic-net regularized least-squares regression.
-
-
-
-# name: <cell-element>
-# type: sq_string
-# elements: 1
-# length: 13
-ansaribradley
-
-
-# name: <cell-element>
-# type: sq_string
-# elements: 1
-# length: 2914
- -- statistics: H = ansaribradley (X, Y)
- -- statistics: H = ansaribradley (X, Y, NAME, VALUE)
- -- statistics: [H, P] = ansaribradley (...)
- -- statistics: [H, P, STATS] = ansaribradley (...)
-
-     Ansari-Bradley two-sample test for equal dispersions.
-
-     ‘H = ansaribradley (X, Y)’ performs an Ansari-Bradley test of the
-     hypothesis that the two independent samples in the vectors X and Y come
-     from distributions with the same dispersion parameter, against the
-     alternative that they come from distributions with different dispersions.
-     The result is H = 0 if the null hypothesis of equal dispersions cannot be
-     rejected at the 5% significance level, or H = 1 if it can.
-
-     The Ansari-Bradley test is a nonparametric alternative to the two-sample F
-     test (‘vartest2’) that does not assume normality.  It assumes that the two
-     samples are independent and that they come from distributions with the same
-     median and shape, differing (under the alternative) only in dispersion.  If
-     the medians differ, the data should be recentred (e.g. by subtracting the
-     sample medians) before applying the test.
-
-     ‘ansaribradley’ treats NaNs in X or Y as missing values and ignores them.
-
-     ‘[H, P] = ansaribradley (...)’ returns the p-value of the test, that is the
-     probability, under the null hypothesis, of observing a value of the test
-     statistic as or more extreme than the one observed.
-
-     ‘[H, P, STATS] = ansaribradley (...)’ returns a structure with the
-     following fields:
-
-     W                the value of the Ansari-Bradley test statistic, the sum of
-                      the Ansari-Bradley scores of the sample X
-     Wstar            the value of the approximate normal (z) statistic
-
-     ‘[...] = ansaribradley (..., NAME, VALUE)’ specifies one or more of the
-     following name/value pairs:
-
-     Name             Value
-     ------------------------------------------------------------------------------
-     'alpha'          the significance level.  Default is 0.05.
-                      
-     'tail'           a string specifying the alternative hypothesis
-                      
-     'method'         a string selecting the p-value computation, either 'exact'
-                      to use the exact permutation distribution of the
-                      statistic, or 'approximate' to use the normal
-                      approximation.  The default is 'exact' when the total
-                      sample size is 25 or less, and 'approximate' otherwise.
-
-     The 'tail' option can take one of the following values:
-
-     'both'       dispersions are not equal (two-tailed, default)
-     'right'      dispersion of X is greater than dispersion of Y
-                  (right-tailed)
-     'left'       dispersion of X is less than dispersion of Y (left-tailed)
-
-     See also: vartest2, vartestn, kstest2, ranksum.
-
-
-# name: <cell-element>
-# type: sq_string
-# elements: 1
-# length: 53
-Ansari-Bradley two-sample test for equal dispersions.
-
-
-
-# name: <cell-element>
-# type: sq_string
-# elements: 1
-# length: 8
-lassoglm
-
-
-# name: <cell-element>
-# type: sq_string
-# elements: 1
-# length: 4109
- -- statistics: B = lassoglm (X, Y)
- -- statistics: B = lassoglm (X, Y, DISTR)
- -- statistics: B = lassoglm (X, Y, DISTR, NAME, VALUE)
- -- statistics: [B, FITINFO] = lassoglm (...)
-
-     Lasso and elastic-net regularized generalized linear model regression.
-
-     ‘B = lassoglm (X, Y, DISTR)’ returns fitted least-squares regression
-     coefficients for a generalized linear model of the response Y on the
-     predictor data X, penalized by the lasso (L1) or elastic-net penalty.  X is
-     an n-by-p numeric matrix of p predictors at each of n observations, and Y
-     is a numeric vector of n responses.  DISTR names the distribution of the
-     response: 'normal' (default), 'binomial', 'poisson', 'gamma', or 'inverse
-     gaussian'.  The canonical link function of the chosen distribution is used
-     unless overridden by the 'Link' option.
-
-     B is a p-by-L matrix, where L is the number of regularization ('Lambda')
-     values used; column k holds the coefficients for the k-th value of lambda,
-     in order of ascending lambda.
-
-     ‘[B, FITINFO] = lassoglm (...)’ also returns a structure FITINFO with
-     information about the fitted models:
-
-     Intercept        a 1-by-L vector of intercept terms
-     Lambda           the 1-by-L vector of lambda values, in ascending order
-     Alpha            the elastic-net mixing value used
-     DF               the number of nonzero coefficients in each column of B
-     Deviance         the deviance of the fitted model at each lambda; when
-                      cross-validation is requested this is instead the
-                      cross-validated mean deviance
-
-     When cross-validation is requested (see 'CV' below), FITINFO additionally
-     contains SE (standard error of the cross-validated deviance),
-     LambdaMinDeviance and IndexMinDeviance (the lambda with minimum
-     cross-validated deviance and its index), and Lambda1SE and Index1SE (the
-     largest lambda within one standard error of that minimum).
-
-     ‘lassoglm’ accepts the following NAME/VALUE pairs:
-
-     Name             Value
-     ------------------------------------------------------------------------------
-     'Alpha'          the elastic-net mixing parameter, a scalar in (0, 1].
-                      'Alpha' = 1 is the lasso penalty (default); values towards
-                      0 approach ridge regression.
-     'Lambda'         a vector of non-negative lambda values.
-     'Standardize'    a logical value (default true) specifying whether the
-                      predictors are standardized before fitting.
-     'Weights'        a vector of non-negative observation weights.
-     'Size'           for the 'binomial' distribution, the number of trials (a
-                      scalar or a per-observation vector); Y holds the number of
-                      successes.  Default is 1 (Bernoulli responses).
-     'Link'           the link function to use instead of the family's canonical
-                      link.  Accepts any link name understood by ‘glmfit’ (e.g.
-                      'log', 'probit') or a numeric exponent for a power link.
-     'Offset'         a numeric vector, one value per observation, added as a
-                      fixed term to the linear predictor (not penalized or
-                      fitted).
-     'RelTol'         convergence tolerance for the coordinate descent.
-     'MaxIter'        maximum number of iterations.
-     'DFmax'          maximum number of nonzero coefficients.
-     'Intercept'      a logical value (default true) whether to fit an intercept
-                      term.
-     'PredictorNames' a cell array of predictor names.
-     'CV'             the number of folds K for K-fold cross-validation, or a
-                      ‘cvpartition’ object.  The fold assignment is random, so
-                      the selected lambda values are not reproducible without a
-                      fixed random seed.
-     'MCReps'         the number of Monte-Carlo repetitions of the
-                      cross-validation (default 1).
-
-     See also: lasso, glmfit, glmval, cvpartition.
-
-
-# name: <cell-element>
-# type: sq_string
-# elements: 1
-# length: 70
-Lasso and elastic-net regularized generalized linear model regression.
 
 
 

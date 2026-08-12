@@ -167,6 +167,12 @@
 ## @item 7 @tab Upper confidence limit for median
 ## @end multitable
 ##
+## The quartiles are those of @code{quantile} at its default method, which is
+## also what @code{prctile} returns, so the box edges of a data set always
+## agree with @code{prctile (@var{data}, [25, 75])}.  They set the
+## inter-quartile range, and so the whisker fences and which observations are
+## reported as outliers.
+##
 ## The returned structure @var{h} contains handles to the plot elements,
 ## allowing customization of the visualization using set/get functions.
 ##
@@ -196,6 +202,17 @@ function [s_o, hs_o] = boxplot (data, varargin)
     if (! all (cellfun ('isnumeric', data)))
       error ("boxplot: data cells must contain numerical data.");
     endif
+  endif
+
+  ## Integer observations are perfectly good data, and MATLAB accepts them, but
+  ## the quartiles are taken through statistics, whose call to var insists on
+  ## floating point.  Convert rather than refuse.  Unlike MATLAB the quartiles
+  ## are then computed in double, so they are not rounded back to the integer
+  ## grid: the quartiles of int32 (1:7) are 2.25 and 5.75, not 3 and 6.
+  if (isinteger (data))
+    data = double (data);
+  elseif (iscell (data) && any (cellfun (@isinteger, data)))
+    data = cellfun (@double, data, 'UniformOutput', false);
   endif
 
   ## Default values
@@ -591,16 +608,28 @@ function [s_o, hs_o] = boxplot (data, varargin)
     nd = length (col);
     box(indi) = nd;
     if (nd > 1)
-      ## Min, max and quartiles
-      s(1:5, indi) = statistics (col)(1:5);
+      ## Min, max and quartiles.  These come from quantile at its own default
+      ## method, which is the one prctile and MATLAB both use.  Taking them
+      ## from the core statistics function instead put the quartiles on a
+      ## different definition (it asks quantile for method 7), so a box drawn
+      ## here disagreed with prctile called on the same data, and the shifted
+      ## inter-quartile range moved the whisker fences with it.
+      s(1:5, indi) = quantile (col, [0, 0.25, 0.5, 0.75, 1])(:);
       ## Confidence interval for the median
       est = 1.57 * (s(4, indi) - s(2, indi)) / sqrt (nd);
       s(6, indi) = max ([s(3, indi) - est, s(2, indi)]);
       s(7, indi) = min ([s(3, indi) + est, s(4, indi)]);
       ## Whiskers out to the last point within the desired inter-quartile range
       IQR = maxwhisker * (s(4, indi) - s(2, indi));
-      whisker_y(:, indi) = [min(col(col >= s(2, indi) - IQR)); s(2, indi)];
-      whisker_y(:, nc+indi) = [max(col(col <= s(4, indi) + IQR)); s(4, indi)];
+      lo_adj = min (col(col >= s(2, indi) - IQR));
+      hi_adj = max (col(col <= s(4, indi) + IQR));
+      ## A whisker never reaches back across its own quartile.  When no
+      ## observation lies between a quartile and its fence, the whisker
+      ## collapses onto the quartile rather than being drawn into the box.
+      lo_adj = min (lo_adj, s(2, indi));
+      hi_adj = max (hi_adj, s(4, indi));
+      whisker_y(:, indi) = [lo_adj; s(2, indi)];
+      whisker_y(:, nc+indi) = [hi_adj; s(4, indi)];
       ## Outliers beyond 1 and 2 inter-quartile ranges
       outliers = col((col < s(2, indi) - IQR & col >= s(2, indi) - 2 * IQR) | ...
                      (col > s(4, indi) + IQR & col <= s(4, indi) + 2 * IQR));
@@ -668,6 +697,10 @@ function [s_o, hs_o] = boxplot (data, varargin)
   median_x(:, chop) = [];
   median_y(:, chop) = [];
   box(chop) = [];
+  ## The cap widths below are built from BOX and WIDTHS together, so WIDTHS has
+  ## to lose the same entries.  Left at its full length it made every grouped
+  ## plot with a one-point group fail on a nonconformant subtraction.
+  widths(chop) = [];
 
   ## Add caps to the remaining whiskers
   cap_x = whisker_x;
@@ -732,30 +765,44 @@ function [s_o, hs_o] = boxplot (data, varargin)
       endif
   endif
 
-  ## Distribute handles for box outlines and box fill (if any)
-  nq = 1 : size (quartile_x, 2);
-  hs.box = h(nq);
+  ## Distribute the handles that plot returned.  They come back in the order
+  ## the segments were passed and a segment with no columns contributes none,
+  ## so walk them with a running offset.  Chaining each block off the last index
+  ## of the one before it broke as soon as a block was empty: a single-point,
+  ## an all-NaN, or an empty data set leaves no box at all, and the chain then
+  ## indexed the previous block at zero.
+  n_box  = columns (quartile_x);
+  n_whis = 2 * columns (whisker_x);   # the caps repeat the whisker columns
+  n_med  = columns (median_x);
+  ## The outliers of every group are plotted as one series, so they account for
+  ## a single handle when there are any.  Counting their columns would say one
+  ## for the 0x1 empty they collapse to when there are none.
+  n_out  = double (! isempty (outliers_y));
+  n_out2 = double (! isempty (outliers2_y));
+  used   = 0;
+
+  ## Box outlines and box fill (if any).  The fill follows the boxes that were
+  ## actually drawn, which is not the number of groups once any were chopped.
+  hs.box = h(used + [1 : n_box]);
+  used += n_box;
   if (box_style)
-    nf = 1 : length (groups);
-    hs.box_fill = f(nf);
+    hs.box_fill = f(1 : n_box);
   else
     hs.box_fill = [];
   endif
 
-  ## Distribute handles for whiskers (including caps) and median lines
-  nw = nq(end) + [1 : 2 * (size (whisker_x, 2))];
-  hs.whisker = h(nw);
-  nm = nw(end)+ [1 : (size (median_x, 2))];
-  hs.median = h(nm);
-  ## Distribute handles for outliers (if any) and their respective tags
-  ## (if applicable)
-  no = nm;
-  if (! isempty (outliers_y))
-    no = nm(end) + [1 : size(outliers_y, 2)];
-    hs.outliers = h(no);
+  ## Whiskers (including caps) and median lines
+  hs.whisker = h(used + [1 : n_whis]);
+  used += n_whis;
+  hs.median = h(used + [1 : n_med]);
+  used += n_med;
+
+  ## Outliers (if any) and their respective tags (if applicable)
+  if (n_out > 0)
+    hs.outliers = h(used + [1 : n_out]);
+    used += n_out;
     if (outlier_tags == 1)
-      nt = 1 : length (outliers_tags_y);
-      hs.out_tags = t1(nt);
+      hs.out_tags = t1(1 : length (outliers_tags_y));
     else
       hs.out_tags = [];
     endif
@@ -763,14 +810,13 @@ function [s_o, hs_o] = boxplot (data, varargin)
     hs.outliers = [];
     hs.out_tags = [];
   endif
-  ## Distribute handles for extreme outliers (if any) and their respective tags
-  ## (if applicable)
-  if (! isempty (outliers2_y))
-    no2 = no(end) + [1 : size(outliers2_y, 2)];
-    hs.outliers2 = h(no2);
+
+  ## Extreme outliers (if any) and their respective tags (if applicable)
+  if (n_out2 > 0)
+    hs.outliers2 = h(used + [1 : n_out2]);
+    used += n_out2;
     if (outlier_tags == 1)
-      nt2 = 1 : length (outliers2_tags_y);
-      hs.out_tags2 = t2(nt2);
+      hs.out_tags2 = t2(1 : length (outliers2_tags_y));
     else
       hs.out_tags2 = [];
     endif
@@ -991,4 +1037,236 @@ endfunction
 %!   assert_equal (size (a, 2), 2);
 %! unwind_protect_cleanup
 %!     close (hf);
+%! end_unwind_protect
+
+## Inputs that used to die inside boxplot rather than be plotted or refused.
+
+%!test
+%! ## A single observation is plotted, not an internal subscript error.  Every
+%! ## statistic collapses to the value, as it does in MATLAB.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   [s, hs] = boxplot (5);
+%!   assert_equal (s, 5 * ones (7, 1));
+%!   assert_equal (isempty (hs.box), true);
+%!   assert_equal (numel (hs.outliers), 1);
+%!   assert_equal (get (hs.outliers, 'YData'), 5);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!test
+%! ## An empty input draws nothing and returns no statistics, as in MATLAB,
+%! ## rather than indexing an empty handle list at zero.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   [s, hs] = boxplot ([]);
+%!   assert_equal (size (s, 2), 0);
+%!   assert_equal (isempty (hs.box), true);
+%!   assert_equal (isempty (hs.whisker), true);
+%!   assert_equal (isempty (hs.median), true);
+%!   assert_equal (isempty (hs.outliers), true);
+%!   clf;
+%!   [s, hs] = boxplot ({});
+%!   assert_equal (size (s, 2), 0);
+%!   assert_equal (isempty (hs.box), true);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!test
+%! ## A variable that is entirely missing leaves no box, which used to take the
+%! ## handle bookkeeping with it.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   [s, hs] = boxplot ([NaN; NaN; NaN]);
+%!   assert_equal (all (isnan (s)), true);
+%!   assert_equal (isempty (hs.box), true);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!test
+%! ## Integer observations are accepted and agree with the same numbers in
+%! ## double; the internal call to var used to refuse them outright.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   sd = boxplot ([1; 2; 3; 4; 5; 6; 7]);
+%!   clf;
+%!   si = boxplot (int32 ([1; 2; 3; 4; 5; 6; 7]));
+%!   clf;
+%!   su = boxplot (uint8 ([1; 2; 3; 4; 5; 6; 7]));
+%!   assert_equal (si, sd);
+%!   assert_equal (su, sd);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!test
+%! ## The same holds for an integer variable inside a cell.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   sd = boxplot ({[1; 2; 3; 4; 5], [2; 3; 4; 5; 6]});
+%!   clf;
+%!   si = boxplot ({int32([1; 2; 3; 4; 5]), int32([2; 3; 4; 5; 6])});
+%!   assert_equal (si, sd);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!test
+%! ## A group holding a single observation leaves fewer boxes than groups.  The
+%! ## cap widths were built from the full-length widths vector against the
+%! ## chopped box vector, so the subtraction did not conform.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   data = [1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 42];
+%!   grp  = [1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2];
+%!   [s, hs] = boxplot (data, grp);
+%!   assert_equal (size (s, 2), 2);
+%!   assert_equal (s(:, 2), 42 * ones (7, 1));
+%!   assert_equal (numel (hs.box), 1);
+%!   assert_equal (numel (hs.median), 1);
+%!   assert_equal (numel (hs.whisker), 4);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!test
+%! ## The box fill follows the boxes actually drawn, not the number of groups.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   data = [1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 42];
+%!   grp  = [1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2];
+%!   [s, hs] = boxplot (data, grp, 'BoxStyle', 'filled');
+%!   assert_equal (numel (hs.box_fill), numel (hs.box));
+%!   assert_equal (get (hs.box_fill(1), 'Type'), 'patch');
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!test
+%! ## Both kinds of outlier keep their own handles, and the ones after them
+%! ## stay in step.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   data = [1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 42];
+%!   grp  = [1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2];
+%!   [s, hs] = boxplot ([data; 60], [grp; 1]);
+%!   assert_equal (numel (hs.outliers), 1);
+%!   assert_equal (numel (hs.outliers2), 1);
+%!   assert_equal (get (hs.median, 'Type'), 'line');
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+## Logical and character data stay refused, as they are in MATLAB.
+%!error <numerical array or cell array containing data expected.> ...
+%! boxplot ([true; false; true; true])
+%!error <numerical array or cell array containing data expected.> ...
+%! boxplot ('abcde')
+
+## Quartiles follow quantile's own default method, which is prctile's and
+## MATLAB's.  Values below are MATLAB R2024a's, read off the box, whisker and
+## outlier objects it draws.
+
+%!test
+%! ## The box edges are the 25th and 75th percentiles, for odd and even counts
+%! ## alike, and agree with prctile called on the same data.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   s = boxplot ((1:7)');
+%!   assert_equal (s(1:5)', [1, 2.25, 4, 5.75, 7]);
+%!   clf;
+%!   s = boxplot ((1:8)');
+%!   assert_equal (s(1:5)', [1, 2.5, 4.5, 6.5, 8]);
+%!   clf;
+%!   x = [2; 4; 4; 4; 5; 5; 7; 9];
+%!   s = boxplot (x);
+%!   assert_equal (s(1:5)', [2, 4, 4.5, 6, 9]);
+%!   assert_equal (s(2:4)', [prctile(x, 25), median(x), prctile(x, 75)]);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!test
+%! ## Small samples, where the two quantile definitions differ most.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   s = boxplot ([1; 2]);
+%!   assert_equal (s(1:5)', [1, 1, 1.5, 2, 2]);
+%!   clf;
+%!   s = boxplot ([1; 2; 3]);
+%!   assert_equal (s(1:5)', [1, 1.25, 2, 2.75, 3]);
+%!   clf;
+%!   s = boxplot ([1; 2; 3; 4]);
+%!   assert_equal (s(1:5)', [1, 1.5, 2.5, 3.5, 4]);
+%!   clf;
+%!   s = boxplot ([1; 2; 3; 4; 5]);
+%!   assert_equal (s(1:5)', [1, 1.75, 3, 4.25, 5]);
+%!   clf;
+%!   s = boxplot ([1; 2; 3; 4; 5; 6]);
+%!   assert_equal (s(1:5)', [1, 2, 3.5, 5, 6]);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!test
+%! ## Missing values are dropped before the quartiles are taken.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   s = boxplot ([1; 2; NaN; 4; 5; 6; 7]);
+%!   assert_equal (s(1:5)', [1, 2, 4.5, 6, 7]);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!test
+%! ## The inter-quartile range sets the fences, so the quartile definition
+%! ## decides which points are outliers.  33 lies beyond the fence and 31.5
+%! ## does not; the old quartiles put the fence between them and called both
+%! ## outliers.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   [s, hs] = boxplot ([(1:20)'; 31.5]);
+%!   assert_equal (s(1:5)', [1, 5.75, 11, 16.25, 31.5]);
+%!   assert_equal (isempty (hs.outliers), true);
+%!   assert_equal (isempty (hs.outliers2), true);
+%!   clf;
+%!   [s, hs] = boxplot ([(1:20)'; 33]);
+%!   assert_equal (s(1:5)', [1, 5.75, 11, 16.25, 33]);
+%!   assert_equal (isempty (hs.outliers) && isempty (hs.outliers2), false);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!test
+%! ## When no observation lies between a quartile and its fence the whisker
+%! ## collapses onto the quartile instead of being drawn back into the box.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   [s, hs] = boxplot ([1; 1; 2; 2; 3; 3; 4; 40; 50]);
+%!   assert_equal (s(1:5)', [1, 1.75, 3, 13, 50]);
+%!   yd = get (hs.whisker, 'YData');
+%!   assert_equal (max ([yd{3}, yd{4}]), 13);
+%!   clf;
+%!   [s, hs] = boxplot ([-50; -40; -4; -3; -3; -2; -2; -1; -1]);
+%!   assert_equal (s(1:5)', [-50, -13, -3, -1.75, -1]);
+%!   yd = get (hs.whisker, 'YData');
+%!   assert_equal (min ([yd{1}, yd{2}]), -13);
+%! unwind_protect_cleanup
+%!   close (hf);
+%! end_unwind_protect
+
+%!test
+%! ## A whisker that does reach real data is not clamped.
+%! hf = figure ('visible', 'off');
+%! unwind_protect
+%!   [s, hs] = boxplot ([-50; -40; -4; -3; -3; -2; -2; 40; 50]);
+%!   assert_equal (s(1:5)', [-50, -13, -3, 8.5, 50]);
+%!   yd = get (hs.whisker, 'YData');
+%!   assert_equal (min ([yd{1}, yd{2}]), -40);
+%!   assert_equal (max ([yd{3}, yd{4}]), 40);
+%! unwind_protect_cleanup
+%!   close (hf);
 %! end_unwind_protect

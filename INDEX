@@ -7,20 +7,30 @@ Clustering
  cophenet
  createns
  crossval
+ dbscan
  editDistance
  evalclusters
+ iforest
  inconsistent
+ johnsrnd
  kmeans
+ kmedoids
  knnsearch
  linkage
+ lof
  mahal
+ mdscale
  mhsample
+ ocsvm
  optimalleaforder
  pdist
  pdist2
+ pearsrnd
  procrustes
  rangesearch
+ robustcov
  slicesample
+ spectralcluster
  squareform
 Classification Classes
  ClassificationDiscriminant
@@ -34,6 +44,7 @@ Classification Classes
  CompactClassificationNeuralNetwork
  CompactClassificationSVM
  ConfusionMatrixChart
+ rocmetrics
 Clustering Classes
  CalinskiHarabaszEvaluation
  ClusterCriterion
@@ -42,7 +53,10 @@ Clustering Classes
  ExhaustiveSearcher
  GapEvaluation
  hnswSearcher
+ IsolationForest
  KDTreeSearcher
+ LocalOutlierFactor
+ OneClassSVM
  SilhouetteEvaluation
 Regression Classes
  RegressionGAM
@@ -57,6 +71,7 @@ Data Manipulation
  isoutlier
  multiway
  normalise_distribution
+ randsample
  rmmissing
  standardizeMissing
  tabulate
@@ -68,39 +83,50 @@ Descriptive Statistics
  harmmean
  jackknife
  ksdensity
+ mvksdensity
+ nancov
  nanmax
  nanmean
+ nanmedian
  nanmin
+ nanstd
  nansum
+ nanvar
+ partialcorr
+ partialcorri
  trimmean
 Distribution Classes
- BetaDistribution
- BinomialDistribution
- BirnbaumSaundersDistribution
- BurrDistribution
- ExponentialDistribution
- ExtremeValueDistribution
- GammaDistribution
- GeneralizedExtremeValueDistribution
- GeneralizedParetoDistribution
- HalfNormalDistribution
- InverseGaussianDistribution
- LogisticDistribution
- LoglogisticDistribution
- LognormalDistribution
- LoguniformDistribution
- MultinomialDistribution
- NakagamiDistribution
- NegativeBinomialDistribution
- NormalDistribution
- PiecewiseLinearDistribution
- PoissonDistribution
- RayleighDistribution
- RicianDistribution
- tLocationScaleDistribution
- TriangularDistribution
- UniformDistribution
- WeibullDistribution
+ paretotails
+ prob.ProbabilityDistribution
+ prob.BetaDistribution
+ prob.BinomialDistribution
+ prob.BirnbaumSaundersDistribution
+ prob.BurrDistribution
+ prob.ExponentialDistribution
+ prob.ExtremeValueDistribution
+ prob.GammaDistribution
+ prob.GeneralizedExtremeValueDistribution
+ prob.GeneralizedParetoDistribution
+ prob.HalfNormalDistribution
+ prob.InverseGaussianDistribution
+ prob.KernelDistribution
+ prob.LogisticDistribution
+ prob.LoglogisticDistribution
+ prob.LognormalDistribution
+ prob.LoguniformDistribution
+ prob.MultinomialDistribution
+ prob.NakagamiDistribution
+ prob.NegativeBinomialDistribution
+ prob.NormalDistribution
+ prob.PiecewiseLinearDistribution
+ prob.PoissonDistribution
+ prob.RayleighDistribution
+ prob.RicianDistribution
+ prob.StableDistribution
+ prob.tLocationScaleDistribution
+ prob.TriangularDistribution
+ prob.UniformDistribution
+ prob.WeibullDistribution
 Distribution Fitting
  betafit betalike
  binofit binolike
@@ -125,6 +151,7 @@ Distribution Fitting
  poissfit poisslike
  raylfit rayllike
  ricefit ricelike
+ stblfit stbllike
  tlsfit tlslike
  unidfit
  unifit
@@ -139,6 +166,7 @@ Distribution Functions
  cauchycdf cauchyinv cauchypdf cauchyrnd
  chi2cdf chi2inv chi2pdf chi2rnd
  copulacdf copulapdf copularnd
+ copulafit copulaparam copulastat
  evcdf evinv evpdf evrnd
  expcdf expinv exppdf exprnd
  fcdf finv fpdf frnd
@@ -170,6 +198,7 @@ Distribution Functions
  poisscdf poissinv poisspdf poissrnd
  raylcdf raylinv raylpdf raylrnd
  ricecdf riceinv ricepdf ricernd
+ stblcdf stblinv stblpdf stblrnd
  tcdf tinv tpdf trnd
  tlscdf tlsinv tlspdf tlsrnd
  tricdf triinv tripdf trirnd
@@ -220,6 +249,7 @@ Distribution Wrappers
  icdf
  makedist
  mle
+ mlecov
  pdf
  random
 Experimental Design
@@ -231,8 +261,10 @@ Experimental Design
 Machine Learning
  fcnnpredict
  fcnntrain
+ hmmdecode
  hmmestimate
  hmmgenerate
+ hmmtrain
  hmmviterbi
  perfcurve
  svmpredict
@@ -243,10 +275,20 @@ Model Fitting
  fitcknn
  fitcnet
  fitcsvm
+ fitglm
+ fitglme
  fitgmdist
  fitlm
+ fitlme
+ fitlmematrix
+ fitnlm
  fitrgam
+ stepwiseglm
+ GeneralizedLinearMixedModel
+ GeneralizedLinearModel
+ LinearMixedModel
  LinearModel
+ NonLinearModel
 Hypothesis Testing
  adtest
  anova
@@ -296,21 +338,29 @@ I/O
 Interpolation
  makima
 Plotting
+ andrewsplot
  bar3
  bar3h
+ biplot
  boxplot
  cdfplot
  confusionchart
  dendrogram
  ecdf
+ ecdfhist
  einstein
+ glyphplot
+ gplotmatrix
  gscatter
  histfit
  hist3
  manovacluster
  normplot
+ parallelcoords
  ppplot
+ probplot
  qqplot
+ scatterhist
  silhouette
  violin
  wblplot
@@ -327,17 +377,30 @@ Regression
  mnrfit
  mnrval
  monotone_smooth
+ mvregress
+ mvregresslike
+ nlinfit
+ nlparci
+ nlpredci
+ nnmf
  parseWilkinsonFormula
  pca
  pcacov
  pcares
  plsregress
+ ppca
  princomp
  regress
  regress_gp
+ rica
+ ReconstructionICA
  ridge
  robustfit
+ rotatefactors
+ sparsefilt
+ SparseFiltering
  stepwisefit
+ tsne
 Transforms
  logit
  probit

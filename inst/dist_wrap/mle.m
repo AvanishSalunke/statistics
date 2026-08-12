@@ -60,9 +60,76 @@
 ## @item @qcode{'options'} @tab A structure specifying the control
 ## parameters for the iterative algorithm used to compute ML estimates with the
 ## @code{fminsearch} function.
+##
+## @item @qcode{'pdf'} @tab A function handle
+## @code{@@(@var{data}, @var{p1}, @var{p2}, @dots{})} to the probability density
+## of a @strong{custom} distribution, whose parameters are then estimated by
+## maximum likelihood.  Requires @qcode{'start'}.  It is mutually exclusive with
+## @qcode{'distribution'} and with @qcode{'logpdf'}/@qcode{'nloglf'}.
+##
+## @item @qcode{'cdf'} @tab A function handle to the cumulative distribution
+## function of the custom distribution, with the same calling convention as
+## @qcode{'pdf'}.  Required together with @qcode{'pdf'} for censored or
+## truncated data.
+##
+## @item @qcode{'logpdf'} @tab A function handle to the log probability density
+## of a custom distribution, with the same calling convention as @qcode{'pdf'}.
+## Requires @qcode{'start'}.
+##
+## @item @qcode{'logsf'} @tab A function handle to the log survivor function
+## @math{log (1 - cdf)} of the custom distribution, with the same calling
+## convention as @qcode{'pdf'}.  Required together with @qcode{'logpdf'} for
+## censored data.
+##
+## @item @qcode{'nloglf'} @tab A function handle
+## @code{@@(@var{params}, @var{data}, @var{cens}, @var{freq})} returning the
+## scalar negative log-likelihood of a custom distribution.  Requires
+## @qcode{'start'}.
+##
+## @item @qcode{'start'} @tab A vector of initial parameter values for a
+## custom-distribution fit.  Required with @qcode{'pdf'}, @qcode{'logpdf'}, or
+## @qcode{'nloglf'}.
+##
+## @item @qcode{'lowerbound'} @tab A scalar or vector of lower bounds for the
+## custom-distribution parameters.  By default they are unbounded below.
+##
+## @item @qcode{'upperbound'} @tab A scalar or vector of upper bounds for the
+## custom-distribution parameters.  By default they are unbounded above.
+##
+## @item @qcode{'truncationbounds'} @tab A two-element vector @qcode{[L U]}
+## giving the truncation interval of a custom distribution.  Requires a
+## @qcode{'cdf'} function.
+##
+## @item @qcode{'optimfun'} @tab The optimizer for a custom-distribution fit.
+## Only @qcode{'fminsearch'} is supported; bounded fits are handled by internal
+## reparameterization of the constrained parameters.
 ## @end multitable
 ##
-## @seealso{fitdist, makedist}
+## When a custom distribution is specified through @qcode{'pdf'},
+## @qcode{'logpdf'}, or @qcode{'nloglf'}, the parameters are estimated by
+## maximizing the likelihood with @code{fminsearch}, and the second output
+## @var{pci} gives asymptotic normal (Wald) confidence intervals computed from
+## the observed Fisher information at @var{phat} (see @code{mlecov}).  Bounded
+## parameters are estimated on an internally reparameterized unconstrained
+## scale.
+##
+## Distribution names are matched ignoring case, spaces and hyphens, so that
+## @qcode{'Extreme Value'}, @qcode{'ExtremeValue'} and @qcode{'extreme-value'}
+## all select the same distribution, and the same set of names is accepted by
+## @code{cdf}, @code{pdf}, @code{icdf}, @code{random}, @code{makedist},
+## @code{fitdist} and @code{mle}.
+##
+## This accepts more names than MATLAB.  MATLAB takes the spaced and the
+## squashed spelling but refuses the hyphenated one, so
+## @qcode{'Birnbaum-Saunders'} and @qcode{'Log-Logistic'} are errors there;
+## Octave has always accepted them and continues to.  MATLAB also accepts
+## @qcode{'tLocationScale'} in @code{makedist} while refusing it in
+## @code{cdf} for the same distribution; Octave accepts it, and
+## @qcode{'location-scale T'}, everywhere.  Code written against MATLAB's
+## names therefore runs unchanged, but code relying on these names will not
+## port back.
+##
+## @seealso{mlecov, fitdist, makedist}
 ## @end deftypefn
 
 function [phat, pci] = mle (x, varargin)
@@ -84,6 +151,17 @@ function [phat, pci] = mle (x, varargin)
   options.MaxIter = 200;
   options.TolX = 1e-6;
   distname = 'normal';
+  userdist = false;
+  custpdf = [];
+  custlogpdf = [];
+  custnloglf = [];
+  custcdf = [];
+  custlogsf = [];
+  start = [];
+  lowbnd = [];
+  uppbnd = [];
+  truncbnd = [];
+  optimfun = 'fminsearch';
 
   ## Parse extra arguments
   if (mod (numel (varargin), 2) != 0)
@@ -93,6 +171,7 @@ function [phat, pci] = mle (x, varargin)
     switch (tolower (varargin{1}))
       case 'distribution'
         distname = varargin{2};
+        userdist = true;
       case 'censoring'
         censor = varargin{2};
         if (! isequal (size (x), size (censor)) && ! isempty (censor))
@@ -101,7 +180,9 @@ function [phat, pci] = mle (x, varargin)
         endif
       case 'frequency'
         freq = varargin{2};
-        if (! isequal (size (x), size (freq)))
+        if (isempty (freq))
+          freq = ones (size (x));
+        elseif (! isequal (size (x), size (freq)))
           error (strcat ("mle: 'frequency' argument must have the same", ...
                          " size as the input data in X."));
         endif
@@ -134,17 +215,54 @@ function [phat, pci] = mle (x, varargin)
                          " compatible for 'fminsearch'."));
         endif
 
-      case {'pdf', 'cdf', 'logpdf', 'logsf', 'nloglf', 'truncationbounds', ...
-            'start', 'lowerbound', 'upperbound', 'optimfun'}
-        printf ("mle: parameter not supported yet.");
+      case 'pdf'
+        custpdf = varargin{2};
+      case 'logpdf'
+        custlogpdf = varargin{2};
+      case 'nloglf'
+        custnloglf = varargin{2};
+      case 'cdf'
+        custcdf = varargin{2};
+      case 'logsf'
+        custlogsf = varargin{2};
+      case 'start'
+        start = varargin{2};
+      case 'lowerbound'
+        lowbnd = varargin{2};
+      case 'upperbound'
+        uppbnd = varargin{2};
+      case 'truncationbounds'
+        truncbnd = varargin{2};
+      case 'optimfun'
+        optimfun = varargin{2};
       otherwise
         error ("mle: unknown parameter name.");
     endswitch
     varargin([1:2]) = [];
   endwhile
 
+  ## Custom-distribution fit through user-supplied likelihood functions.  When a
+  ## 'pdf', 'logpdf', or 'nloglf' handle is given, the parameters are estimated
+  ## by maximum likelihood and the named-distribution path below is bypassed.
+  ncust = (! isempty (custpdf)) + (! isempty (custlogpdf)) ...
+                                + (! isempty (custnloglf));
+  if (ncust > 0)
+    if (userdist)
+      error (strcat ("mle: the 'distribution' argument cannot be combined", ...
+                     " with a custom 'pdf', 'logpdf', or 'nloglf' function."));
+    endif
+    if (ncust > 1)
+      error (strcat ("mle: only one of the 'pdf', 'logpdf', or 'nloglf'", ...
+                     " arguments can be specified."));
+    endif
+    [phat, pci] = mle_custom (x, custpdf, custlogpdf, custnloglf, custcdf, ...
+                              custlogsf, start, lowbnd, uppbnd, truncbnd, ...
+                              censor, freq, alpha, options, optimfun, nargout);
+    return;
+  endif
+
   ## Switch to known distributions
-  switch (tolower (distname))
+  switch (__distname_key__ (distname))
 
     case 'bernoulli'
       if (! isempty (censor))
@@ -184,9 +302,12 @@ function [phat, pci] = mle (x, varargin)
         phat = binofit (sum (x .* freq), sum (freq) .* ntrials);
       else
         [phat, pci] = binofit (sum (x .* freq), sum (freq) .* ntrials, alpha);
+        ## binofit reports the interval as a row; mle reports one column per
+        ## parameter, as it does for every other distribution
+        pci = pci(:);
       endif
 
-    case {'bisa', 'BirnbaumSaunders'}
+    case {'bisa', 'birnbaumsaunders'}
       if (nargout < 2)
         phat = bisafit (x, alpha, censor, freq, options);
       else
@@ -200,7 +321,7 @@ function [phat, pci] = mle (x, varargin)
         [phat, pci] = burrfit (x, alpha, censor, freq, options);
       endif
 
-    case {'ev', 'extreme value'}
+    case {'ev', 'extremevalue'}
       if (nargout < 2)
         phat = evfit (x, alpha, censor, freq, options);
       else
@@ -232,7 +353,7 @@ function [phat, pci] = mle (x, varargin)
         [phat, pci] = geofit (x, alpha, freq);
       endif
 
-    case {'gev', 'generalized extreme value'}
+    case {'gev', 'generalizedextremevalue'}
       if (! isempty (censor))
         error (strcat ("mle: censoring is not supported for the", ...
                        " Generalized Extreme Value distribution."));
@@ -243,7 +364,7 @@ function [phat, pci] = mle (x, varargin)
         [phat, pci] = gevfit (x, alpha, freq, options);
       endif
 
-    case {'gp', 'generalized pareto'}
+    case {'gp', 'generalizedpareto'}
       if (! isempty (censor))
         error (strcat ("mle: censoring is not supported for", ...
                        " the Generalized Pareto distribution."));
@@ -265,7 +386,7 @@ function [phat, pci] = mle (x, varargin)
         [phat, pci] = gumbelfit (x, alpha, censor, freq, options);
       endif
 
-    case {'hn', 'half normal', 'halfnormal'}
+    case {'hn', 'halfnormal'}
       if (! isempty (censor))
         error (strcat ("mle: censoring is not supported for", ...
                        " the Half Normal distribution."));
@@ -280,7 +401,7 @@ function [phat, pci] = mle (x, varargin)
         [phat, pci] = hnfit (x, mu, alpha, freq);
       endif
 
-    case {'invg', 'inversegaussian', 'inverse gaussian'}
+    case {'invg', 'inversegaussian'}
       if (nargout < 2)
         phat = invgfit (x, alpha, censor, freq, options);
       else
@@ -307,6 +428,7 @@ function [phat, pci] = mle (x, varargin)
       else
         [phat, pci] = lognfit (x, alpha, censor, freq, options);
       endif
+      phat(2) = mle_sigma (phat(2), censor, freq);
 
     case {'naka', 'nakagami'}
       if (nargout < 2)
@@ -315,7 +437,7 @@ function [phat, pci] = mle (x, varargin)
         [phat, pci] = nakafit (x, alpha, censor, freq, options);
       endif
 
-    case {'nbin', 'negativebinomial', 'negative binomial'}
+    case {'nbin', 'negativebinomial'}
       if (! isempty (censor))
         error (strcat ("mle: censoring is not supported for", ...
                        " the Negative Binomial distribution."));
@@ -329,11 +451,11 @@ function [phat, pci] = mle (x, varargin)
     case {'norm', 'normal'}
       if (nargout < 2)
         [muhat, sigmahat] = normfit (x, alpha, censor, freq, options);
-        phat = [muhat, sigmahat];
+        phat = [muhat, mle_sigma(sigmahat, censor, freq)];
       else
         [muhat, sigmahat, muci, sigmaci] = normfit (x, alpha, censor, ...
                                                     freq, options);
-        phat = [muhat, sigmahat];
+        phat = [muhat, mle_sigma(sigmahat, censor, freq)];
         pci = [muci, sigmaci];
       endif
 
@@ -362,14 +484,25 @@ function [phat, pci] = mle (x, varargin)
         [phat, pci] = ricefit (x, alpha, censor, freq, options);
       endif
 
-    case {'tls', 'tlocationscale'}
+    case {'stbl', 'stable'}
+      if (! isempty (censor))
+        error (strcat ("mle: censoring is not supported for", ...
+                       " the Stable distribution."));
+      endif
+      if (nargout < 2)
+        phat = stblfit (x, alpha, freq, options);
+      else
+        [phat, pci] = stblfit (x, alpha, freq, options);
+      endif
+
+    case {'tls', 'tlocationscale', 'locationscalet'}
       if (nargout < 2)
         phat = tlsfit (x, alpha, censor, freq, options);
       else
         [phat, pci] = tlsfit (x, alpha, censor, freq, options);
       endif
 
-    case {'unid', 'uniform discrete', 'discrete uniform', 'discrete'}
+    case {'unid', 'uniformdiscrete', 'discreteuniform', 'discrete'}
       if (! isempty (censor))
         error (strcat ("mle: censoring is not supported for", ...
                        " the Discrete Uniform distribution."));
@@ -380,15 +513,15 @@ function [phat, pci] = mle (x, varargin)
         [phat, pci] = unidfit (x, alpha, freq);
       endif
 
-    case {'unif', 'uniform', 'continuous uniform'}
+    case {'unif', 'uniform', 'continuousuniform'}
       if (! isempty (censor))
         error (strcat ("mle: censoring is not supported for", ...
                        " the Continuous Uniform distribution."));
       endif
       if (nargout < 2)
-        phat = uniffit (x, alpha, freq);
+        phat = unifit (x, alpha, freq);
       else
-        [phat, pci] = uniffit (x, alpha, freq);
+        [phat, pci] = unifit (x, alpha, freq);
       endif
 
     case {'wbl', 'weibull'}
@@ -407,18 +540,380 @@ endfunction
 
 ## Helper function for expanding data according to frequency vector
 function [x, freq] = expandFreq (x, freq)
-  ## Remove NaNs and zeros
+  ## Drop observations whose frequency is NaN
   remove = isnan (freq);
   x(remove) = [];
   freq(remove) = [];
-  if (! all (freq == 1))
-    xf = [];
-    for i = 1:numel (freq)
-      xf = [xf, repmat(x(i), 1, freq(i))];
-    endfor
-  endif
-  x = xf;
+  ## Repeat each observation according to its frequency.  Building the
+  ## expanded vector only when some frequency differed from 1 left it
+  ## unassigned in exactly the default case, so every call without a frequency
+  ## vector died on an undefined variable.  repelem covers all of it, drops
+  ## zero-frequency observations, and keeps the orientation of X.
+  x = repelem (x, freq);
+  freq = ones (size (x));
 endfunction
+
+## Maximum likelihood fit of a user-supplied custom distribution
+function [phat, pci] = mle_custom (x, custpdf, custlogpdf, custnloglf, ...
+                        custcdf, custlogsf, start, lowbnd, uppbnd, truncbnd, ...
+                        censor, freq, alpha, options, optimfun, nout)
+
+  ## Only fminsearch is available in core Octave; bounded fits are handled by
+  ## reparameterization, so a separate constrained optimizer is not required.
+  if (! (ischar (optimfun) && strcmpi (optimfun, 'fminsearch')))
+    error (strcat ("mle: 'optimfun' only supports 'fminsearch'; bounded", ...
+                   " fits are handled by internal reparameterization."));
+  endif
+
+  ## 'start' is required and sets the number of parameters
+  if (isempty (start))
+    error (strcat ("mle: a 'start' vector of initial parameter values is", ...
+                   " required for a custom distribution fit."));
+  endif
+  if (! (isvector (start) && isnumeric (start) && isreal (start)))
+    error ("mle: 'start' must be a numeric vector of real values.");
+  endif
+  start = start(:).';
+  k = numel (start);
+
+  ## Identify the input form and validate the supplied handles
+  if (! isempty (custpdf))
+    form = 'pdf';
+    if (! is_function_handle (custpdf))
+      error ("mle: 'pdf' argument must be a function handle.");
+    endif
+  elseif (! isempty (custlogpdf))
+    form = 'logpdf';
+    if (! is_function_handle (custlogpdf))
+      error ("mle: 'logpdf' argument must be a function handle.");
+    endif
+  else
+    form = 'nloglf';
+    if (! is_function_handle (custnloglf))
+      error ("mle: 'nloglf' argument must be a function handle.");
+    endif
+  endif
+  if (! isempty (custcdf) && ! is_function_handle (custcdf))
+    error ("mle: 'cdf' argument must be a function handle.");
+  endif
+  if (! isempty (custlogsf) && ! is_function_handle (custlogsf))
+    error ("mle: 'logsf' argument must be a function handle.");
+  endif
+
+  ## Data, censoring, and frequency as columns
+  x = x(:);
+  n = numel (x);
+  if (isempty (censor))
+    cens = false (n, 1);
+  else
+    cens = logical (censor(:));
+  endif
+  freq = freq(:);
+  docens = any (cens);
+
+  ## Truncation bounds
+  dotrunc = ! isempty (truncbnd);
+  if (dotrunc && ! (isnumeric (truncbnd) && isreal (truncbnd)
+                    && numel (truncbnd) == 2 && truncbnd(1) < truncbnd(2)))
+    error (strcat ("mle: 'truncationbounds' must be a two-element vector", ...
+                   " [L U] with L < U."));
+  endif
+
+  ## Censoring and truncation need the complementary functions
+  if (strcmp (form, 'pdf') && (docens || dotrunc) && isempty (custcdf))
+    error (strcat ("mle: a 'cdf' function handle is required for censored", ...
+                   " or truncated data when using the 'pdf' argument."));
+  endif
+  if (strcmp (form, 'logpdf') && docens && isempty (custlogsf))
+    error (strcat ("mle: a 'logsf' function handle is required for", ...
+                   " censored data when using the 'logpdf' argument."));
+  endif
+  if (strcmp (form, 'logpdf') && dotrunc && isempty (custcdf))
+    error (strcat ("mle: a 'cdf' function handle is required for truncated", ...
+                   " data when using the 'logpdf' argument."));
+  endif
+
+  ## Parameter bounds, expanded to per-parameter row vectors
+  if (isempty (lowbnd))
+    lb = -Inf (1, k);
+  elseif (isscalar (lowbnd))
+    lb = lowbnd * ones (1, k);
+  elseif (numel (lowbnd) == k)
+    lb = lowbnd(:).';
+  else
+    error ("mle: 'lowerbound' must be a scalar or match the size of 'start'.");
+  endif
+  if (isempty (uppbnd))
+    ub = Inf (1, k);
+  elseif (isscalar (uppbnd))
+    ub = uppbnd * ones (1, k);
+  elseif (numel (uppbnd) == k)
+    ub = uppbnd(:).';
+  else
+    error ("mle: 'upperbound' must be a scalar or match the size of 'start'.");
+  endif
+  if (any (lb >= ub))
+    error (strcat ("mle: each 'lowerbound' must be strictly less than its", ...
+                   " corresponding 'upperbound'."));
+  endif
+  if (any (start <= lb) || any (start >= ub))
+    error ("mle: 'start' values must lie strictly within the given bounds.");
+  endif
+
+  ## Aggregate negative log-likelihood of the sample at a parameter row vector
+  nllfun = @(th) custom_nll (th, form, custpdf, custlogpdf, custnloglf, ...
+                             custcdf, custlogsf, x, cens, freq, docens, ...
+                             dotrunc, truncbnd);
+
+  ## Maximize the likelihood.  Bounded parameters are optimized on an
+  ## unconstrained transformed scale and mapped back.
+  if (any (isfinite (lb)) || any (isfinite (ub)))
+    obj = @(u) nllfun (to_con (u, lb, ub));
+    uopt = fminsearch (obj, to_uncon (start, lb, ub), options);
+    phat = to_con (uopt, lb, ub);
+  else
+    phat = fminsearch (nllfun, start, options);
+  endif
+
+  ## Asymptotic (Wald) confidence intervals from the observed information
+  if (nout > 1)
+    acov = mlecov (phat, x, 'nloglf', @(pp, dd, cc, ff) nllfun (pp));
+    se = sqrt (diag (acov)).';
+    z = norminv (1 - alpha / 2);
+    pci = [phat - z .* se; phat + z .* se];
+  else
+    pci = [];
+  endif
+
+endfunction
+
+## Aggregate negative log-likelihood for a custom distribution
+function nll = custom_nll (th, form, cpdf, clogpdf, cnloglf, ccdf, clogsf, ...
+                           x, cens, freq, docens, dotrunc, tb)
+  if (strcmp (form, 'nloglf'))
+    nll = cnloglf (th, x, double (cens), freq);
+    return;
+  endif
+  pc = num2cell (th);
+  unc = ! cens;
+  terms = zeros (size (x));
+  if (strcmp (form, 'pdf'))
+    terms(unc) = log (cpdf (x(unc), pc{:}));
+    if (docens)
+      terms(cens) = log (1 - ccdf (x(cens), pc{:}));
+    endif
+  else
+    terms(unc) = clogpdf (x(unc), pc{:});
+    if (docens)
+      terms(cens) = clogsf (x(cens), pc{:});
+    endif
+  endif
+  if (dotrunc)
+    logZ = log (ccdf (tb(2), pc{:}) - ccdf (tb(1), pc{:}));
+    ## Right-censored survival is renormalized to the truncation interval
+    if (docens)
+      terms(cens) = log (ccdf (tb(2), pc{:}) - ccdf (x(cens), pc{:}));
+    endif
+    terms = terms - logZ;
+  endif
+  nll = -sum (freq .* terms);
+endfunction
+
+## Map constrained parameters to an unconstrained scale for optimization
+function u = to_uncon (th, lb, ub)
+  u = th;
+  for i = 1:numel (th)
+    if (isfinite (lb(i)) && isfinite (ub(i)))
+      u(i) = log ((th(i) - lb(i)) / (ub(i) - th(i)));
+    elseif (isfinite (lb(i)))
+      u(i) = log (th(i) - lb(i));
+    elseif (isfinite (ub(i)))
+      u(i) = log (ub(i) - th(i));
+    endif
+  endfor
+endfunction
+
+## Map unconstrained parameters back to the constrained scale
+function th = to_con (u, lb, ub)
+  th = u;
+  for i = 1:numel (u)
+    if (isfinite (lb(i)) && isfinite (ub(i)))
+      th(i) = lb(i) + (ub(i) - lb(i)) / (1 + exp (-u(i)));
+    elseif (isfinite (lb(i)))
+      th(i) = lb(i) + exp (u(i));
+    elseif (isfinite (ub(i)))
+      th(i) = ub(i) - exp (u(i));
+    endif
+  endfor
+endfunction
+
+## Turn an unbiased standard deviation into the maximum likelihood estimate.
+## normfit and lognfit deliberately return the unbiased estimator when the data
+## are uncensored, and each documents the correction needed to recover the MLE;
+## mle promises the MLE, so it applies that correction here.  With censoring
+## both fits maximise the likelihood directly and no correction is wanted.
+function s = mle_sigma (s, censor, freq)
+  if (isempty (censor) || ! any (censor))
+    n = sum (freq);
+    s = s .* sqrt ((n - 1) ./ n);
+  endif
+endfunction
+
+%!demo
+%! ## Fit a custom (normal) distribution by maximum likelihood and return the
+%! ## asymptotic 95% confidence intervals of the estimates.
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5];
+%! pdf = @(x, mu, sigma) normpdf (x, mu, sigma);
+%! [phat, pci] = mle (x, 'pdf', pdf, 'start', [mean(x), std(x)])
+
+## Two distribution families were dead.  'bernoulli' expanded its data through
+## a helper that only assigned the expanded vector when some frequency
+## differed from 1, so the default case died on an undefined variable, and
+## 'unif' called a uniffit that does not exist -- the function is unifit.
+%!test
+%! x = [1 0 1 0 1 1 0 1];
+%! assert_equal (mle (x, 'distribution', 'bernoulli'), mean (x), 1e-12);
+%!test
+%! x = [1 0 1 0 1 1 0 1];
+%! [phat, pci] = mle (x, 'distribution', 'bernoulli');
+%! [bp, bci] = binofit (sum (x), numel (x), 0.05);
+%! assert_equal (phat, bp);
+%! assert_equal (pci, bci);
+%!test
+%! ## a frequency vector expands the sample, and a zero frequency drops it
+%! assert_equal (mle ([1, 0], 'distribution', 'bernoulli', ...
+%!                    'frequency', [3, 5]), 3/8, 1e-12);
+%! assert_equal (mle ([1, 0], 'distribution', 'bernoulli', ...
+%!                    'frequency', [2, 0]), 1, 1e-12);
+%!test
+%! ## a column vector must work as well as a row
+%! assert_equal (mle ([1;0;1;1], 'distribution', 'bernoulli'), 0.75, 1e-12);
+%!test
+%! ## the uniform MLE is the sample range
+%! u = [0.2, 0.5, 0.7, 0.9, 0.35];
+%! assert_equal (mle (u, 'distribution', 'unif'), [min(u), max(u)]);
+%! assert_equal (mle (u, 'distribution', 'uniform'), [min(u), max(u)]);
+%! assert_equal (mle (u, 'distribution', 'continuous uniform'), ...
+%!               [min(u), max(u)]);
+%!test
+%! u = [0.2, 0.5, 0.7, 0.9, 0.35];
+%! [phat, pci] = mle (u, 'distribution', 'uniform');
+%! [a, b] = unifit (u, 0.05);
+%! assert_equal (phat, a);
+%! assert_equal (pci, b);
+
+## mle returns the maximum likelihood estimate, so the scale parameter is
+## std (x, 1) and not normfit's unbiased std (x, 0).  It used to return the
+## unbiased value, contradicting both its own name and its custom-pdf path.
+%!test
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5]';
+%! phat = mle (x, 'distribution', 'normal');
+%! assert_equal (phat(1), mean (x), 1e-12);
+%! assert_equal (phat(2), std (x, 1), 1e-12);
+%! assert_equal (isequal (abs (phat(2) - std (x, 0)) < 1e-12, true), false);
+%!test
+%! ## the named path and the equivalent custom pdf must agree
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5]';
+%! a = mle (x, 'distribution', 'normal');
+%! b = mle (x, 'pdf', @(v, m, s) normpdf (v, m, s), 'start', [3, 1]);
+%! assert_equal (a, b, 1e-4);
+%!test
+%! ## lognfit is a normal fit on the logs, so it carried the same bias
+%! x = [1.2, 2.4, 0.9, 3.2, 1.1, 2.8, 1.3, 4.7, 2.2, 0.6, 3.0, 1.5]';
+%! phat = mle (x, 'distribution', 'lognormal');
+%! assert_equal (phat(2), std (log (x), 1), 1e-12);
+%!test
+%! ## a frequency vector scales the effective sample size
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8]';
+%! f = [1, 2, 1, 3, 1, 2]';
+%! phat = mle (x, 'distribution', 'normal', 'frequency', f);
+%! xx = repelem (x, f);
+%! assert_equal (phat(2), std (xx, 1), 1e-10);
+%!test
+%! ## with censoring normfit already maximises the likelihood: no correction
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5]';
+%! c = [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0]';
+%! ref = normfit (x, 0.05, c);
+%! [~, s] = normfit (x, 0.05, c);
+%! phat = mle (x, 'distribution', 'normal', 'censoring', c);
+%! assert_equal (phat(2), s, 1e-12);
+%!test
+%! ## the confidence interval is normfit's and must not shift
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5]';
+%! [~, pci] = mle (x, 'distribution', 'normal');
+%! [~, ~, muci, sci] = normfit (x);
+%! assert_equal (pci, [muci, sci], 1e-12);
+
+## Test custom-distribution fitting (values verified against MATLAB)
+%!test
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5];
+%! [phat, pci] = mle (x, 'pdf', @(x, mu, s) normpdf (x, mu, s), ...
+%!                    'start', [mean(x), std(x)]);
+%! assert_equal (phat, [3.42499970800201, 1.03208912390818], 1e-4);
+%! assert_equal (pci, [2.8410510441517, 0.619175174501268; ...
+%!               4.00894837185232, 1.44500307331509], 1e-4);
+
+%!test
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5];
+%! nll = @(p, d, c, f) -sum (log (normpdf (d, p(1), p(2))));
+%! phat = mle (x, 'nloglf', nll, 'start', [3, 1]);
+%! assert_equal (phat, [3.42499959294639, 1.03208933560634], 1e-4);
+
+%!test
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5];
+%! phat = mle (x, 'logpdf', @(x, mu, s) log (normpdf (x, mu, s)), ...
+%!             'start', [3, 1]);
+%! assert_equal (phat, [3.42499959294639, 1.03208933560634], 1e-4);
+
+%!test
+%! ## Alpha propagates into the Wald interval
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5];
+%! [~, pci] = mle (x, 'pdf', @(x, mu, s) normpdf (x, mu, s), ...
+%!                 'start', [mean(x), std(x)], 'alpha', 0.10);
+%! assert_equal (pci, [2.93493454085403, 0.685560813868748; ...
+%!               3.91506487514999, 1.37861743394761], 1e-4);
+
+%!test
+%! ## Frequency-weighted fit
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5];
+%! f = [1, 2, 1, 1, 3, 1, 2, 1, 1, 1, 2, 1];
+%! phat = mle (x, 'pdf', @(x, mu, s) normpdf (x, mu, s), ...
+%!             'start', [mean(x), std(x)], 'frequency', f);
+%! assert_equal (phat, [3.47058837030174, 0.902783454993327], 1e-4);
+
+%!test
+%! ## Right-censored fit (needs a cdf)
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5];
+%! c = [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0];
+%! phat = mle (x, 'pdf', @(x, mu, s) normpdf (x, mu, s), ...
+%!             'cdf', @(x, mu, s) normcdf (x, mu, s), ...
+%!             'start', [mean(x), std(x)], 'censoring', c);
+%! assert_equal (phat, [3.62195934926527, 1.03307264832117], 1e-4);
+
+%!test
+%! ## Bounded fit via reparameterization (lower bound inactive at the optimum)
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5];
+%! phat = mle (x, 'pdf', @(x, mu) exppdf (x, mu), 'start', 3, 'lowerbound', 0);
+%! assert_equal (phat, 3.42499980926514, 1e-4);
+
+%!test
+%! ## Truncated fit on [1, 6]
+%! x = [2.1, 3.4, 1.9, 5.2, 4.1, 2.8, 3.3, 4.7, 2.2, 3.9, 3.0, 4.5];
+%! phat = mle (x, 'pdf', @(x, mu, s) normpdf (x, mu, s), ...
+%!             'cdf', @(x, mu, s) normcdf (x, mu, s), ...
+%!             'start', [mean(x), std(x)], 'truncationbounds', [1, 6]);
+%! assert_equal (phat, [3.41148048015442, 1.12176348358835], 1e-4);
+
+%!test
+%! ## The BirnbaumSaunders distribution is reachable by its full name, not only
+%! ## by 'bisa'; the name is matched after tolower, so a mixed-case label was
+%! ## never matched by anything.
+%! x = [1.2; 0.4; 3.1; 0.7; 2.5; 1.8; 0.3; 4.2; 1.1; 0.9; ...
+%!      2.2; 0.6; 1.5; 3.7; 0.8; 2.9; 1.3; 0.5; 2.0; 1.6];
+%! assert_equal (mle (x, 'distribution', 'BirnbaumSaunders'), ...
+%!               mle (x, 'distribution', 'bisa'));
+%! assert_equal (mle (x, 'distribution', 'birnbaumsaunders'), ...
+%!               mle (x, 'distribution', 'bisa'));
 
 ## Test input validation
 %!error <mle: X must be a numeric vector of real values.> mle (ones (2))
@@ -484,3 +979,33 @@ endfunction
 %!error <mle: unrecognized distribution name.> mle ([1:50], 'distribution', 'value')
 %!error <mle: censoring is not supported for the Continuous Uniform distribution.> ...
 %! mle ([1 0 1 0], 'distribution', 'unif', 'censoring', [1 1 0 0])
+%!error <mle: the 'distribution' argument cannot be combined with a custom 'pdf', 'logpdf', or 'nloglf' function.> ...
+%! mle ([1:50], 'distribution', 'normal', 'pdf', @(x, a, b) normpdf (x, a, b))
+%!error <mle: only one of the 'pdf', 'logpdf', or 'nloglf' arguments can be specified.> ...
+%! mle ([1:50], 'pdf', @sin, 'nloglf', @cos)
+%!error <mle: a 'start' vector of initial parameter values is required for a custom distribution fit.> ...
+%! mle ([1:50], 'pdf', @(x, a, b) normpdf (x, a, b))
+%!error <mle: 'start' must be a numeric vector of real values.> ...
+%! mle ([1:50], 'pdf', @(x, a, b) normpdf (x, a, b), 'start', 'text')
+%!error <mle: 'pdf' argument must be a function handle.> ...
+%! mle ([1:50], 'pdf', 5, 'start', [0, 1])
+%!error <mle: 'nloglf' argument must be a function handle.> ...
+%! mle ([1:50], 'nloglf', 5, 'start', [0, 1])
+%!error <mle: 'cdf' argument must be a function handle.> ...
+%! mle ([1:50], 'pdf', @(x, a, b) normpdf (x, a, b), 'cdf', 5, 'start', [0, 1])
+%!error <mle: a 'cdf' function handle is required for censored or truncated data when using the 'pdf' argument.> ...
+%! mle ([1:50], 'pdf', @(x, a, b) normpdf (x, a, b), 'start', [0, 1], ...
+%!      'censoring', [1, zeros(1, 49)])
+%!error <mle: 'truncationbounds' must be a two-element vector \[L U\] with L < U.> ...
+%! mle ([1:50], 'pdf', @(x, a, b) normpdf (x, a, b), ...
+%!      'cdf', @(x, a, b) normcdf (x, a, b), 'start', [0, 1], ...
+%!      'truncationbounds', [6, 1])
+%!error <mle: each 'lowerbound' must be strictly less than its corresponding 'upperbound'.> ...
+%! mle ([1:50], 'pdf', @(x, a, b) normpdf (x, a, b), 'start', [0, 1], ...
+%!      'lowerbound', [0, 2], 'upperbound', [0, 5])
+%!error <mle: 'start' values must lie strictly within the given bounds.> ...
+%! mle ([1:50], 'pdf', @(x, a, b) normpdf (x, a, b), 'start', [0, 1], ...
+%!      'lowerbound', [1, 0])
+%!error <mle: 'optimfun' only supports 'fminsearch'; bounded fits are handled by internal reparameterization.> ...
+%! mle ([1:50], 'pdf', @(x, a, b) normpdf (x, a, b), 'start', [0, 1], ...
+%!      'optimfun', 'fmincon')

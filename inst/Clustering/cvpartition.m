@@ -238,7 +238,9 @@ classdef cvpartition
     ## @deftypefnx {cvpartition} {@var{C} =} cvpartition (@var{n}, @qcode{'KFold'}, @var{k}, @qcode{'GroupingVariables'}, @var{grpvars})
     ## @deftypefnx {cvpartition} {@var{C} =} cvpartition (@var{n}, @qcode{'Holdout'})
     ## @deftypefnx {cvpartition} {@var{C} =} cvpartition (@var{n}, @qcode{'Holdout'}, @var{p})
+    ## @deftypefnx {cvpartition} {@var{C} =} cvpartition (@var{n}, @qcode{'Holdout'}, @var{p}, @qcode{'GroupingVariables'}, @var{grpvars})
     ## @deftypefnx {cvpartition} {@var{C} =} cvpartition (@var{n}, @qcode{'Leaveout'})
+    ## @deftypefnx {cvpartition} {@var{C} =} cvpartition (@var{n}, @qcode{'Leaveout'}, @qcode{'GroupingVariables'}, @var{grpvars})
     ## @deftypefnx {cvpartition} {@var{C} =} cvpartition (@var{n}, @qcode{'Resubstitution'})
     ## @deftypefnx {cvpartition} {@var{C} =} cvpartition (@var{X}, @qcode{'KFold'})
     ## @deftypefnx {cvpartition} {@var{C} =} cvpartition (@var{X}, @qcode{'KFold'}, @var{k})
@@ -266,9 +268,15 @@ classdef cvpartition
     ## @qcode{'GroupingVariables'}, @var{grpvars})} creates a
     ## @qcode{cvpartition}
     ## object @var{C} that defines a random partition for k-fold
-    ## cross-validation with each fold containing the same combination of group
-    ## labels as defined by @var{grpvars}. The grouping variables specified in
-    ## @var{grpvars} can be one of the following:
+    ## cross-validation in which every observation sharing a group label, as
+    ## defined by @var{grpvars}, is assigned to the same fold.  No group is
+    ## split between the training and test sets, so a fold holds out whole
+    ## groups; this is the partition scikit-learn calls @code{GroupKFold}, and
+    ## it is what you want when observations within a group are not
+    ## independent, such as repeated measurements of one subject.  It is not
+    ## stratification: a fold does not contain a proportional mix of the group
+    ## labels, and @qcode{'Stratify'} is the option for that.  The grouping
+    ## variables specified in @var{grpvars} can be one of the following:
     ##
     ## @itemize
     ## @item A numeric vector, logical vector, categorical vector, character
@@ -278,6 +286,38 @@ classdef cvpartition
     ## variables. Each column in the matrix or array must correspond to one
     ## grouping variable.
     ## @end itemize
+    ##
+    ## @qcode{'GroupingVariables'} is an Octave extension: MATLAB's
+    ## @code{cvpartition} has no such option.  It follows the group-aware
+    ## splitters of scikit-learn, and each partition type takes the analogue of
+    ## its ungrouped self:
+    ##
+    ## @multitable @columnfractions 0.28 0.34 0.38
+    ## @headitem Partition type @tab scikit-learn analogue @tab Effect
+    ## @item @qcode{'KFold'} @tab @code{GroupKFold} @tab whole groups fill each
+    ## fold
+    ## @item @qcode{'Holdout'} @tab @code{GroupShuffleSplit} @tab whole groups
+    ## are held out
+    ## @item @qcode{'Leaveout'} @tab @code{LeaveOneGroupOut} @tab one whole
+    ## group is held out at a time
+    ## @item @qcode{'Resubstitution'} @tab none @tab an error: nothing can be
+    ## held out of a partition that holds everything
+    ## @end multitable
+    ##
+    ## Given a stratification variable, @qcode{'GroupingVariables'} may
+    ## follow @qcode{'Stratify'}, as in @code{cvpartition (@var{y},
+    ## @qcode{'KFold'}, @var{k}, @qcode{'Stratify'}, true,
+    ## @qcode{'GroupingVariables'}, @var{grpvars})}.  Each group is then
+    ## kept whole while the classes of @var{y} are spread as evenly over
+    ## the folds as the groups allow, which is scikit-learn's
+    ## @code{StratifiedGroupKFold}.  The two demands conflict, since a
+    ## group carries whatever class mix it has, so the balance is
+    ## approximate: groups are placed largest first, each into the fold
+    ## whose class counts it disturbs least.
+    ##
+    ## In every case an observation never appears in both the training and the
+    ## test set as one of its group fellows, which is what makes grouping worth
+    ## asking for when observations within a group are not independent.
     ##
     ## @code{@var{C} = cvpartition (@var{n}, @qcode{'Holdout'})} creates a
     ## @qcode{cvpartition} object @var{C}, which defines a random nonstratified
@@ -367,7 +407,7 @@ classdef cvpartition
       if (nargin < 2)
         error ("cvpartition: too few input arguments.");
       endif
-      if (nargin > 5)
+      if (nargin > 7)
         error ("cvpartition: too many input arguments.");
       endif
 
@@ -456,6 +496,13 @@ classdef cvpartition
 
         ## "Resubstitution"
         if (strcmpi (type, 'resubstitution'))
+          if (nargin > 2 && ischar (varargin{2})
+              && strcmpi (varargin{2}, 'groupingvariables'))
+            error (strcat ("cvpartition: 'GroupingVariables' does not", ...
+                           " apply to 'resubstitution': the training and", ...
+                           " test sets are both the whole sample, so no", ...
+                           " group can be held out of either."));
+          endif
           this.NumTestSets = 1;
           this.TrainSize = X;
           this.TestSize = X;
@@ -465,12 +512,40 @@ classdef cvpartition
 
         ## "Leaveout"
         elseif (strcmpi (type, 'leaveout'))
-          this.NumTestSets = X;
-          this.TrainSize = (X - 1) * ones (1, X);
-          this.TestSize = ones (1, X);
           this.Type = 'leaveout';
-          this.cvptype = 'Leave-one-out cross validation partition';
-          this.IsGrouped = false;
+          ## A non-character third argument has never meant anything here and
+          ## is still ignored; a character one must name 'GroupingVariables'.
+          if (nargin > 2 && ischar (varargin{2}))
+            if (! strcmpi (varargin{2}, 'groupingvariables'))
+              error (strcat ("cvpartition: invalid optional paired", ...
+                             " argument for 'GroupingVariables'."));
+            endif
+            if (nargin < 4)
+              error (strcat ("cvpartition: missing value for optional", ...
+                             " paired argument 'GroupingVariables'."));
+            endif
+            [inds, NumGroups, GroupSize, this.missidx, grpvars] = ...
+                                        __resolve_groups__ (varargin{3});
+            nobs = X - sum (this.missidx);
+            if (nobs != numel (inds))
+              error (strcat ("cvpartition: grouping variable does", ...
+                             " not match the number of observations."));
+            endif
+            this.grpvars = grpvars;
+            ## Each group is held out in turn: leave-one-group-out
+            this.indices = inds;
+            this.NumTestSets = NumGroups;
+            this.TestSize = GroupSize;
+            this.TrainSize = X * ones (1, NumGroups) - this.TestSize;
+            this.cvptype = 'Leave-one-group-out cross validation partition';
+            this.IsGrouped = true;
+          else
+            this.NumTestSets = X;
+            this.TrainSize = (X - 1) * ones (1, X);
+            this.TestSize = ones (1, X);
+            this.cvptype = 'Leave-one-out cross validation partition';
+            this.IsGrouped = false;
+          endif
 
         ## "Holdout"
         elseif (strcmpi (type, 'holdout'))
@@ -492,14 +567,57 @@ classdef cvpartition
           if (p < 1)            # target fraction to sample
             p = round (p * X);  # number of samples
           endif
-          inds = false (X, 1);
-          inds(randsample (X, p)) = true;  # indices for test set
+          this.Type = 'holdout';
+          ## 'GroupingVariables' holds out whole groups instead of individual
+          ## observations, drawing groups at random until the test set is at
+          ## least the requested size
+          grouped = (nargin > 3 && ischar (varargin{3})
+                     && strcmpi (varargin{3}, 'groupingvariables'));
+          if (nargin > 3 && ! grouped)
+            error (strcat ("cvpartition: invalid optional paired", ...
+                           " argument for 'GroupingVariables'."));
+          endif
+          if (grouped)
+            if (nargin < 5)
+              error (strcat ("cvpartition: missing value for optional", ...
+                             " paired argument 'GroupingVariables'."));
+            endif
+            [gidx, NumGroups, GroupSize, this.missidx, grpvars] = ...
+                                        __resolve_groups__ (varargin{4});
+            nobs = X - sum (this.missidx);
+            if (nobs != numel (gidx))
+              error (strcat ("cvpartition: grouping variable does", ...
+                             " not match the number of observations."));
+            endif
+            this.grpvars = grpvars;
+            order = randsample (NumGroups, NumGroups);
+            held = false (NumGroups, 1);
+            ntest = 0;
+            for i = 1:NumGroups
+              if (ntest >= p)
+                break;
+              endif
+              held(order(i)) = true;
+              ntest += GroupSize(order(i));
+            endfor
+            if (all (held))
+              error (strcat ("cvpartition: holding out %d observations", ...
+                             " needs every group; leave a group for", ...
+                             " training."), p);
+            endif
+            inds = false (X, 1);
+            inds(! this.missidx) = held(gidx);
+            this.cvptype = 'Group hold-out cross validation partition';
+            this.IsGrouped = true;
+          else
+            inds = false (X, 1);
+            inds(randsample (X, p)) = true;  # indices for test set
+            this.cvptype = 'Hold-out cross validation partition';
+            this.IsGrouped = false;
+          endif
           this.indices = inds;
           this.TrainSize = sum (! inds);
           this.TestSize = sum (inds);
-          this.Type = 'holdout';
-          this.cvptype = 'Hold-out cross validation partition';
-          this.IsGrouped = false;
 
         ## "KFold"
         elseif (strcmpi (type, 'kfold'))
@@ -544,46 +662,14 @@ classdef cvpartition
                              " paired argument 'GroupingVariables'."));
             endif
             grpvars = varargin{4};
-            if (isvector (grpvars))
-              ## Remove any missing values
-              this.missidx = ismissing (grpvars);
-              if (any (this.missidx))
-                grpvars(this.missidx) = [];
-                X -= sum (this.missidx);
-              endif
-              ## Get indices for each group
-              if (isa (grpvars, 'categorical'))
-                [~, idx, inds] = unique (grpvars, 'stable');
-              else
-                [~, idx, inds] = __unique__ (grpvars, 'stable');
-              endif
-            elseif (ismatrix (grpvars))
-              ## Remove any missing values
-              this.missidx = any (ismissing (grpvars), 2);
-              if (any (this.missidx))
-                grpvars(this.missidx, :) = [];
-                X -= sum (this.missidx);
-              endif
-              ## Get indices for each group
-              if (isa (grpvars, 'categorical'))
-                [~, idx, inds] = unique (grpvars, 'rows', 'stable');
-              else
-                [~, idx, inds] = __unique__ (grpvars, 'rows', 'stable');
-              endif
-            else
-              error (strcat ("cvpartition: invalid value for optional", ...
-                             " paired argument 'GroupingVariables'."));
-            endif
+            [inds, NumGroups, GroupSize, this.missidx, grpvars] = ...
+                                            __resolve_groups__ (grpvars);
+            X -= sum (this.missidx);
             if (X != numel (inds))
               error (strcat ("cvpartition: grouping variable does", ...
                              " not match the number of observations."));
             endif
             this.grpvars = grpvars;
-            ## Get number of groups and group sizes
-            NumGroups = numel (idx);
-            for i = 1:NumGroups
-              GroupSize(i) = sum (inds == i);
-            endfor
             ## Compare k-fold to number of groups and reduce K accordingly
             if (k > NumGroups)
               warning (strcat ("cvpartition: number of folds K is greater", ...
@@ -662,6 +748,26 @@ classdef cvpartition
                            " paired argument 'stratify'."));
           endif
           this.IsStratified = varargin{4};
+        endif
+
+        ## 'GroupingVariables' may follow 'Stratify', giving a partition that
+        ## keeps each group whole and the classes balanced across folds
+        grpvars = [];
+        if (nargin > 5)
+          if (! (ischar (varargin{5})
+                 && strcmpi (varargin{5}, 'groupingvariables')))
+            error (strcat ("cvpartition: invalid optional paired", ...
+                           " argument for 'GroupingVariables'."));
+          endif
+          if (nargin < 7)
+            error (strcat ("cvpartition: missing value for optional", ...
+                           " paired argument 'GroupingVariables'."));
+          endif
+          grpvars = varargin{6};
+          if (isempty (grpvars))
+            error (strcat ("cvpartition: invalid value for optional", ...
+                           " paired argument 'GroupingVariables'."));
+          endif
         endif
 
         ## Handle stratification
@@ -755,7 +861,31 @@ classdef cvpartition
             endif
           endif
           this.NumTestSets = k;
-          if (this.IsStratified)
+          if (this.IsStratified && ! isempty (grpvars))
+            ## Both: whole groups, classes balanced across folds
+            [gidx, NumGroups, GroupSize] = __resolve_groups__ (grpvars);
+            if (numel (gidx) != X)
+              error (strcat ("cvpartition: grouping variable does", ...
+                             " not match the number of observations."));
+            endif
+            if (k > NumGroups)
+              warning (strcat ("cvpartition: number of folds K is greater", ...
+                               " than the groups in 'GroupingVariables'.", ...
+                               " K is set to the number of groups."));
+              k = NumGroups;
+              this.NumTestSets = k;
+            endif
+            this.grpvars = grpvars;
+            inds = __stratified_group_folds__ (this.classes, gidx, k);
+            this.indices = inds;
+            for i = 1:k
+              this.TestSize(i) = sum (inds == i);
+            endfor
+            this.TrainSize = X * ones (1, k) - this.TestSize;
+            this.cvptype = ...
+                     'Stratified group K-fold cross validation partition';
+            this.IsGrouped = true;
+          elseif (this.IsStratified)
             inds = nan (X, 1);
             pooled_idx = false (X, 1);
             do_warn = true;
@@ -820,6 +950,27 @@ classdef cvpartition
               pooled_inds(1) = [];
             endwhile
             this.cvptype = 'Stratified K-fold cross validation partition';
+          elseif (! isempty (grpvars))
+            ## Groups without stratification: whole groups, and the
+            ## stratification variable is not used, as 'Stratify' asked
+            [gidx, NumGroups] = __resolve_groups__ (grpvars);
+            if (numel (gidx) != X)
+              error (strcat ("cvpartition: grouping variable does", ...
+                             " not match the number of observations."));
+            endif
+            if (k > NumGroups)
+              warning (strcat ("cvpartition: number of folds K is greater", ...
+                               " than the groups in 'GroupingVariables'.", ...
+                               " K is set to the number of groups."));
+              k = NumGroups;
+              this.NumTestSets = k;
+            endif
+            this.grpvars = grpvars;
+            gfold = randsample (NumGroups, NumGroups);
+            gfold = mod (gfold - 1, k) + 1;
+            inds = gfold(gidx);
+            this.cvptype = 'Group K-fold cross validation partition';
+            this.IsGrouped = true;
           else
             inds = floor ((0:(X - 1))' * (k / X)) + 1;
             inds = randsample (inds, X);
@@ -862,6 +1013,12 @@ classdef cvpartition
     ## @code{rand ("state", @var{sval})}.  If @var{sval} is a scalar, then the
     ## @qcode{'seed'} keyword is used as in @code{rand ("seed", @var{sval})} to
     ## specify that old generators should be used.
+    ##
+    ## Seeding is confined to this call: the state of the random generator is
+    ## saved beforehand and restored before @code{repartition} returns, so
+    ## @var{sval} does not carry over into the random numbers the caller draws
+    ## afterwards.  @var{sval} is an Octave extension; MATLAB expects a
+    ## @code{RandStream} object in this position, which Octave does not have.
     ##
     ## @code{@var{Cnew} = repartition (@var{C}, @qcode{'legacy'})} only applies
     ## to @qcode{cvpartition} objects @var{C} that use k-fold partitioning and
@@ -911,8 +1068,15 @@ classdef cvpartition
           error (strcat ("cvpartition.repartition: SVAL must be", ...
                          " a real scalar or vector."));
         endif
+        ## SVAL seeds this repartitioning only.  The caller's generator is put
+        ## back before returning -- on the error path too, hence onCleanup --
+        ## so that seeding a partition cannot silently make the rest of the
+        ## session reproducible as well.  Octave has no RandStream to confine
+        ## the draw to, which is why the state has to be saved and restored.
+        saved_rand_state = rand ('state');
+        rand_state_guard = onCleanup (@() rand ('state', saved_rand_state));
         if (isscalar (sval))
-          rand ('sval', sval);
+          rand ('seed', sval);
         else
           rand ('state', sval);
         endif
@@ -1292,10 +1456,14 @@ classdef cvpartition
                 endif
                 idx = [idx, cid];
               endfor
-            case 'leaveout' # no stratification
+            case 'leaveout'
               for i = 1:this.NumTestSets
                 cid = false (this.NumObservations, 1);
-                cid(i) = true;
+                if (this.IsGrouped)
+                  cid(! this.missidx) = this.indices == i;
+                else
+                  cid(i) = true;
+                endif
                 idx = [idx, cid];
               endfor
             case 'holdout'
@@ -1338,22 +1506,30 @@ classdef cvpartition
             for j = i
               if (this.IsStratified || this.IsGrouped)
                 cid = false (this.NumObservations, 1);
-                cid(! this.missidx) = this.indices == i;
+                cid(! this.missidx) = this.indices == j;
               else
-                cid = this.indices == i;
+                cid = this.indices == j;
               endif
               idx = [idx, cid];
             endfor
           endif
-        case 'leaveout' # no stratification
+        case 'leaveout'
           if (isscalar (i))
             idx = false (this.NumObservations, 1);
-            idx(i) = true;
+            if (this.IsGrouped)
+              idx(! this.missidx) = this.indices == i;
+            else
+              idx(i) = true;
+            endif
           else
             idx = logical ([]);
             for j = i
               new = false (this.NumObservations, 1);
-              new(j) = true;
+              if (this.IsGrouped)
+                new(! this.missidx) = this.indices == j;
+              else
+                new(j) = true;
+              endif
               idx = [idx, new];
             endfor
           endif
@@ -1419,10 +1595,14 @@ classdef cvpartition
                 endif
                 idx = [idx, cid];
               endfor
-            case 'leaveout' # no stratification
+            case 'leaveout'
               for i = 1:this.NumTestSets
                 cid = true (this.NumObservations, 1);
-                cid(i) = false;
+                if (this.IsGrouped)
+                  cid(! this.missidx) = this.indices != i;
+                else
+                  cid(i) = false;
+                endif
                 idx = [idx, cid];
               endfor
             case 'holdout'
@@ -1465,22 +1645,30 @@ classdef cvpartition
             for j = i
               if (this.IsStratified || this.IsGrouped)
                 cid = false (this.NumObservations, 1);
-                cid(! this.missidx) = this.indices != i;
+                cid(! this.missidx) = this.indices != j;
               else
-                cid = this.indices != i;
+                cid = this.indices != j;
               endif
               idx = [idx, cid];
             endfor
           endif
-        case 'leaveout' # no stratification
+        case 'leaveout'
           if (isscalar (i))
             idx = true (this.NumObservations, 1);
-            idx(i) = false;
+            if (this.IsGrouped)
+              idx(! this.missidx) = this.indices != i;
+            else
+              idx(i) = false;
+            endif
           else
             idx = logical ([]);
             for j = i
               new = true (this.NumObservations, 1);
-              new(j) = false;
+              if (this.IsGrouped)
+                new(! this.missidx) = this.indices != j;
+              else
+                new(j) = false;
+              endif
               idx = [idx, new];
             endfor
           endif
@@ -1952,8 +2140,103 @@ endclassdef
 %! assert_equal (sum (test (cv, 'all'), 2), [1; 1; 1; 1; 0]);
 
 ## Test input validation
+%!test
+%! ## A vector of set indices returns one column per set, not every set.
+%! ## The k-fold loop used the whole index vector instead of the loop
+%! ## variable, so the comparison broadcast and each pass added a column
+%! ## per requested set.
+%! c = cvpartition (60, 'KFold', 4);
+%! t = test (c, [1, 2]);
+%! assert_equal (size (t), [60, 2]);
+%! assert_equal (t(:,1), test (c, 1));
+%! assert_equal (t(:,2), test (c, 2));
+%! assert_equal (any (t(:,1) & t(:,2)), false);
+%! assert_equal (size (test (c, [1, 3, 4])), [60, 3]);
+
+%!test
+%! ## training indexes the same way, and stays the complement of test
+%! c = cvpartition (60, 'KFold', 4);
+%! r = training (c, [1, 2]);
+%! assert_equal (size (r), [60, 2]);
+%! assert_equal (r(:,1), training (c, 1));
+%! assert_equal (r, ! test (c, [1, 2]));
+
+%!test
+%! ## 'GroupingVariables' with 'HoldOut' holds out whole groups, as
+%! ## scikit-learn's GroupShuffleSplit does: no group is split between the
+%! ## training and test sets.
+%! g = [1 1 1 1 2 2 2 2 3 3 3 3]';
+%! c = cvpartition (12, 'HoldOut', 0.25, 'GroupingVariables', g);
+%! assert_equal (c.IsGrouped, true);
+%! te = test (c);  tr = training (c);
+%! assert_equal (any (ismember (unique (g(te)), unique (g(tr)))), false);
+%! assert_equal (tr, ! te);
+
+%!test
+%! ## 'GroupingVariables' with 'LeaveOut' leaves one whole group out at a
+%! ## time, as scikit-learn's LeaveOneGroupOut does.
+%! g = [1 1 1 1 2 2 2 2 3 3 3 3]';
+%! c = cvpartition (12, 'LeaveOut', 'GroupingVariables', g);
+%! assert_equal (c.IsGrouped, true);
+%! assert_equal (c.NumTestSets, 3);
+%! assert_equal (c.TestSize, [4, 4, 4]);
+%! for s = 1:3
+%!   te = test (c, s);
+%!   assert_equal (numel (unique (g(te))), 1);
+%!   assert_equal (training (c, s), ! te);
+%! endfor
+%! assert_equal (size (test (c, 'all')), [12, 3]);
+
+%!test
+%! ## the ungrouped forms are untouched
+%! c = cvpartition (12, 'LeaveOut');
+%! assert_equal (c.NumTestSets, 12);
+%! assert_equal (c.IsGrouped, false);
+%! c = cvpartition (12, 'HoldOut', 0.25);
+%! assert_equal (c.IsGrouped, false);
+
+%!test
+%! ## 'Stratify' and 'GroupingVariables' together keep each group whole
+%! ## while spreading the classes across the folds, as scikit-learn's
+%! ## StratifiedGroupKFold does.  Six single-class groups, two classes.
+%! g = [1 1 2 2 3 3 4 4 5 5 6 6]';
+%! y = [1 1 1 1 1 1 2 2 2 2 2 2]';
+%! c = cvpartition (y, 'KFold', 3, 'Stratify', true, ...
+%!                  'GroupingVariables', g);
+%! assert_equal (c.IsStratified, true);
+%! assert_equal (c.IsGrouped, true);
+%! assert_equal (c.NumTestSets, 3);
+%! assert_equal (c.TestSize, [4, 4, 4]);
+%! for s = 1:3
+%!   te = test (c, s);
+%!   ## no group is split between training and test
+%!   assert_equal (any (ismember (unique (g(te)), ...
+%!                                unique (g(training (c, s))))), false);
+%!   ## and the fold still sees both classes
+%!   assert_equal (numel (unique (y(te))), 2);
+%! endfor
+
+%!test
+%! ## 'GroupingVariables' with 'Stratify', false groups without stratifying:
+%! ## the stratification variable is simply not used, as asked.
+%! g = [1 1 2 2 3 3 4 4]';
+%! y = [1 1 1 1 2 2 2 2]';
+%! c = cvpartition (y, 'KFold', 2, 'Stratify', false, 'GroupingVariables', g);
+%! assert_equal (c.IsGrouped, true);
+%! assert_equal (c.IsStratified, false);
+%! for s = 1:c.NumTestSets
+%!   te = test (c, s);
+%!   assert_equal (any (ismember (unique (g(te)), ...
+%!                                unique (g(training (c, s))))), false);
+%! endfor
+
+%!error <cvpartition: 'GroupingVariables' does not apply to 'resubstitution'> ...
+%! cvpartition (12, 'Resubstitution', 'GroupingVariables', ...
+%!              [1 1 2 2 3 3 1 1 2 2 3 3])
+
 %!error <cvpartition: too few input arguments.> cvpartition (2)
-%!error <cvpartition: too many input arguments.> cvpartition (1, 2, 3, 4, 5, 6)
+%!error <cvpartition: too many input arguments.> ...
+%! cvpartition (1, 2, 3, 4, 5, 6, 7, 8)
 %!error <cvpartition: TESTSETS must be numeric of logical.> ...
 %! cvpartition ('CustomPartition', 'a')
 %!error <cvpartition: TESTSETS must be a numeric vector.> ...
@@ -2058,6 +2341,48 @@ endclassdef
 %! cvpartition ([1, 1, 1, 2, 2], 'some')
 %!error <cvpartition: invalid first input argument.> ...
 %! cvpartition ({1, 1; 2, 2}, 'kfold')
+
+## A scalar SVAL seeds the repartitioning.  The keyword was misspelt 'sval'
+## rather than 'seed', so every scalar-seeded call used to error out.
+%!test
+%! c = cvpartition (60, 'KFold', 5);
+%! assert_equal (test (repartition (c, 42), 1), test (repartition (c, 42), 1));
+%! assert_equal (isequal (test (repartition (c, 42), 1), ...
+%!                        test (repartition (c, 43), 1)), false);
+%!test
+%! c = cvpartition (60, 'KFold', 5);
+%! assert_equal (test (repartition (c, [1 2 3]), 1), ...
+%!               test (repartition (c, [1 2 3]), 1));
+
+## Seeding is scoped to the call: the caller's generator is restored, so the
+## seed does not carry into the random numbers drawn afterwards.
+%!test
+%! c = cvpartition (60, 'KFold', 5);
+%! rand ('twister', 5);
+%! expect = rand (1, 4);
+%! rand ('twister', 5);
+%! repartition (c, 42);
+%! assert_equal (rand (1, 4), expect);
+%! rand ('twister', 5);
+%! repartition (c, [1 2 3]);
+%! assert_equal (rand (1, 4), expect);
+
+## The seeded partition must not depend on the caller's state either.
+%!test
+%! c = cvpartition (60, 'KFold', 5);
+%! rand ('twister', 5);
+%! a = test (repartition (c, 42), 1);
+%! rand ('twister', 777);
+%! assert_equal (test (repartition (c, 42), 1), a);
+
+## Without SVAL the call still consumes randomness, as it must.
+%!test
+%! c = cvpartition (60, 'KFold', 5);
+%! rand ('twister', 5);
+%! untouched = rand (1, 4);
+%! rand ('twister', 5);
+%! repartition (c);
+%! assert_equal (isequal (rand (1, 4), untouched), false);
 
 %!error <cvpartition.repartition: cannot repartition a custom partition.> ...
 %! repartition (cvpartition ('CustomPartition', [1,1,2,2,3,3]))
