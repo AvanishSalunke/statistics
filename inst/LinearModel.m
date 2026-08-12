@@ -1581,7 +1581,7 @@ classdef LinearModel
     endfunction
 
     ## -*- texinfo -*-
-    ## @deftypefn  {CompactLinearModel} {@var{ysim} =} random (@var{mdl}, @var{Xnew})
+    ## @deftypefn  {LinearModel} {@var{ysim} =} random (@var{mdl}, @var{Xnew})
     ##
     ## Simulate responses with random noise from a fitted linear regression
     ## model.
