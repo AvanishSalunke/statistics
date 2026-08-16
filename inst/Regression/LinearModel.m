@@ -481,25 +481,22 @@ classdef LinearModel
     ##
     ## Stepwise fitting information
     ##
-    ## A structure with seven fields:
-    ## @itemize
-    ## @item @code{Start} - formula string of the starting model
-    ## @item @code{Lower} - formula string of the lower-bound model; terms
-    ##   listed here cannot be removed
-    ## @item @code{Upper} - formula string of the upper-bound model; the
-    ##   model cannot grow beyond this
-    ## @item @code{Criterion} - criterion used, e.g. @qcode{'sse'}
-    ## @item @code{PEnter} - threshold for adding a term
-    ## @item @code{PRemove} - threshold for removing a term
-    ## @item @code{History} - table with one row per step and columns
-    ##   @code{Action}, @code{TermName}, @code{Terms}, @code{DF},
-    ##   @code{delDF}, @code{FStat}, @code{PValue}
-    ## @end itemize
-    ## This structure is empty unless the model was fit using stepwise
-    ## regression.  This property is read-only.
+    ## In MATLAB, this is a structure with seven fields (@code{Start},
+    ## @code{Lower}, @code{Upper}, @code{Criterion}, @code{PEnter},
+    ## @code{PRemove}, and @code{History}, the last being a table with one
+    ## row per step and columns @code{Action}, @code{TermName}, @code{Terms},
+    ## @code{DF}, @code{delDF}, @code{FStat}, @code{PValue}), populated
+    ## whenever the model was fit using stepwise regression, and empty
+    ## otherwise.
+    ##
+    ## This implementation always returns an empty struct, regardless of
+    ## whether the model was fit with @code{stepwiselm} or @code{step}; the
+    ## per-step history is not yet tracked.  This is a known deviation from
+    ## MATLAB and not a deliberate design choice.  This property is
+    ## read-only.
     ##
     ## @end deftp
-    Steps = [];
+    Steps = struct ();
 
 
     ## Input data properties
@@ -1399,7 +1396,7 @@ classdef LinearModel
       this.SSR                      = SSR;
       this.SST                      = SST;
       this.Robust                   = RobustS;
-      this.Steps                    = [];
+      this.Steps                    = struct ();
       this.Formula                  = FormulaObj;
       this.NumObservations          = n_obs;
       this.NumPredictors            = p_raw;
