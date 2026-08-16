@@ -2697,9 +2697,10 @@ classdef LinearModel
           bw_raw = 3.5 * s / (n_act ^ (1/3));
           mag    = 10 ^ floor (log10 (bw_raw));
           frac   = bw_raw / mag;
-          if (frac <= 1); nice = 1;
-          elseif (frac <= 2); nice = 2;
-          elseif (frac <= 5); nice = 5;
+          if (frac < 1.5); nice = 1;
+          elseif (frac < 2.5); nice = 2;
+          elseif (frac < 4); nice = 3;
+          elseif (frac < 7.5); nice = 5;
           else;                nice = 10;
           endif
           bw = nice * mag;
