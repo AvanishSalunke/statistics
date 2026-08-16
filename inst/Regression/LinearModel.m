@@ -2137,12 +2137,82 @@ classdef LinearModel
         error (strcat ("addTerms: Model update specification must be a model formula", " character vector or string scalar, or a terms matrix"));
       endif
 
-      existing = mdl.TermsMatrix;
-      is_new   = false (rows (T), 1);
-      for i = 1:rows (T)
-        is_new(i) = ! any (all (existing == T(i,:), 2));
+      cat_info = mdl.CatLevelInfo;
+      ename    = mdl.EncPredictorNames;
+      n_pred   = nv - 1;
+
+      ## Every candidate predictor's encoded column name(s), whether or not
+      ## it is part of the model yet: a plain predictor occupies one column,
+      ## a categorical one column per non-reference level, named exactly as
+      ## reencode_predictors expects to find them.
+      target_names = cell (n_pred, 1);
+      for j = 1:n_pred
+        ci = [];
+        if (! isempty (cat_info) && isfield (cat_info, 'names') ...
+            && ! isempty (cat_info.names))
+          ci = find (strcmp (cat_info.names, pred{j}));
+        endif
+        if (isempty (ci))
+          target_names{j} = pred(j);
+        else
+          levels_j  = cat_info.levels{ci};
+          lvl_names = cell (1, numel (levels_j) - 1);
+          for L = 2:numel (levels_j)
+            lvl_names{L-1} = sprintf ("%s_%s", pred{j}, char (levels_j{L}));
+          endfor
+          target_names{j} = lvl_names;
+        endif
       endfor
-      new_rows = T(is_new, :);
+      target_enc = [target_names{:}];
+      nc_full    = numel (target_enc) + 1;
+
+      ## Re-slot the model's current encoded terms into that full space, so
+      ## a predictor with no columns yet simply stays all zero.
+      existing = zeros (rows (mdl.TermsMatrix), nc_full);
+      existing(:, end) = mdl.TermsMatrix(:, end);
+      for c = 1:numel (ename)
+        col = find (strcmp (target_enc, ename{c}), 1);
+        existing(:, col) = mdl.TermsMatrix(:, c);
+      endfor
+
+      ## Expand each requested raw-predictor row into that same full space.
+      new_rows = zeros (0, nc_full);
+      for i = 1:rows (T)
+        orig_row = T(i, 1:n_pred);
+        any_cat  = false;
+        cat_rows = zeros (0, nc_full);
+        cont_row = zeros (1, nc_full);
+        col_off  = 0;
+        for j = 1:n_pred
+          n_cols = numel (target_names{j});
+          if (orig_row(j) != 0)
+            if (n_cols > 1)
+              any_cat = true;
+              for k = 1:n_cols
+                r              = zeros (1, nc_full);
+                r(col_off + k) = 1;
+                cat_rows       = [cat_rows; r];
+              endfor
+            else
+              cont_row(col_off + 1) = orig_row(j);
+            endif
+          endif
+          col_off = col_off + n_cols;
+        endfor
+        if (any_cat)
+          for k = 1:rows (cat_rows)
+            new_rows = [new_rows; cat_rows(k,:) + cont_row];
+          endfor
+        else
+          new_rows = [new_rows; cont_row];
+        endif
+      endfor
+
+      is_new = false (rows (new_rows), 1);
+      for i = 1:rows (new_rows)
+        is_new(i) = ! any (all (existing == new_rows(i,:), 2));
+      endfor
+      new_rows = new_rows(is_new, :);
 
       if (isempty (new_rows))
         warning ("addTerms: There are no new terms among the terms you specified.");
@@ -2322,9 +2392,9 @@ classdef LinearModel
       nc = columns (mdl.TermsMatrix);
       if (nc != nv)
         cat_info    = mdl.CatLevelInfo;
+        ename       = mdl.EncPredictorNames;
         n_pred      = nv - 1;
         orig_to_enc = cell (n_pred, 1);
-        ecol        = 1;
         for j = 1:n_pred
           ci = [];
           if (! isempty (cat_info) && isfield (cat_info, 'names') ...
@@ -2332,12 +2402,18 @@ classdef LinearModel
             ci = find (strcmp (cat_info.names, pred{j}));
           endif
           if (isempty (ci))
-            orig_to_enc{j} = ecol;
-            ecol            = ecol + 1;
+            orig_to_enc{j} = find (strcmp (ename, pred{j}));
           else
-            n_lev           = numel (cat_info.levels{ci});
-            orig_to_enc{j}  = ecol:(ecol + n_lev - 2);
-            ecol            = ecol + n_lev - 1;
+            levels_j = cat_info.levels{ci};
+            ecols    = [];
+            for L = 2:numel (levels_j)
+              lvl_name = sprintf ("%s_%s", pred{j}, char (levels_j{L}));
+              k        = find (strcmp (ename, lvl_name));
+              if (! isempty (k))
+                ecols(end+1) = k;
+              endif
+            endfor
+            orig_to_enc{j} = ecols;
           endif
         endfor
 
