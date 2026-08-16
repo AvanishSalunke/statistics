@@ -1,0 +1,814 @@
+# doc-cache created by Octave 11.3.0
+# name: cache
+# type: cell
+# rows: 3
+# columns: 8
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3
+cdf
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 5077
+ -- statistics: P = cdf (NAME, X, A)
+ -- statistics: P = cdf (NAME, X, A, B)
+ -- statistics: P = cdf (NAME, X, A, B, C)
+ -- statistics: P = cdf (..., 'upper')
+
+     Return the CDF of a univariate distribution evaluated at X.
+
+     'cdf' is a wrapper for the univariate cumulative distribution functions
+     available in the statistics package.  See the corresponding functions' help
+     to learn the signification of the parameters after X.
+
+     'P = cdf (NAME, X, A)' returns the CDF for the one-parameter distribution
+     family specified by NAME and the distribution parameter A, evaluated at the
+     values in X.
+
+     'P = cdf (NAME, X, A, B)' returns the CDF for the two-parameter
+     distribution family specified by NAME and the distribution parameters A and
+     B, evaluated at the values in X.
+
+     'P = cdf (NAME, X, A, B, C)' returns the CDF for the three-parameter
+     distribution family specified by NAME and the distribution parameters A, B,
+     and C, evaluated at the values in X.
+
+     'P = cdf (..., 'upper')' returns the complement of the CDF using an
+     algorithm that more accurately computes the extreme upper-tail
+     probabilities.  'upper' can follow any of the input arguments in the
+     previous syntaxes.
+
+     NAME must be a char string of the name or the abbreviation of the desired
+     cumulative distribution function as listed in the following table.  The
+     last column shows the number of required parameters that should be parsed
+     after X to the desired CDF. The optional input argument 'upper' does not
+     count in the required number of parameters.
+
+     Distribution Name                Abbreviation     Input Parameters
+     ---------------------------------------------------------------------------
+     'Beta'                           'beta'           2
+     'Binomial'                       'bino'           2
+     'Birnbaum-Saunders'              'bisa'           2
+     'Burr'                           'burr'           3
+     'Cauchy'                         'cauchy'         2
+     'Chi-squared'                    'chi2'           1
+     'Extreme Value'                  'ev'             2
+     'Exponential'                    'exp'            1
+     'F-Distribution'                 'f'              2
+     'Gamma'                          'gam'            2
+     'Geometric'                      'geo'            1
+     'Generalized Extreme Value'      'gev'            3
+     'Generalized Pareto'             'gp'             3
+     'Gumbel'                         'gumbel'         2
+     'Half-normal'                    'hn'             2
+     'Hypergeometric'                 'hyge'           3
+     'Inverse Gaussian'               'invg'           2
+     'Laplace'                        'laplace'        2
+     'Logistic'                       'logi'           2
+     'Log-Logistic'                   'logl'           2
+     'Lognormal'                      'logn'           2
+     'Nakagami'                       'naka'           2
+     'Negative Binomial'              'nbin'           2
+     'Noncentral F-Distribution'      'ncf'            3
+     'Noncentral Student T'           'nct'            2
+     'Noncentral Chi-Squared'         'ncx2'           2
+     'Normal'                         'norm'           2
+     'Poisson'                        'poiss'          1
+     'Rayleigh'                       'rayl'           1
+     'Rician'                         'rice'           2
+     'Student T'                      't'              1
+     'location-scale T'               'tls'            3
+     'Triangular'                     'tri'            3
+     'Discrete Uniform'               'unid'           1
+     'Uniform'                        'unif'           2
+     'Von Mises'                      'vm'             2
+     'Weibull'                        'wbl'            2
+
+     Distribution names are matched ignoring case, spaces and hyphens, so that
+     'Extreme Value', 'ExtremeValue' and 'extreme-value' all select the same
+     distribution, and the same set of names is accepted by 'cdf', 'pdf',
+     'icdf', 'random', 'makedist', 'fitdist' and 'mle'.
+
+     This accepts more names than MATLAB. MATLAB takes the spaced and the
+     squashed spelling but refuses the hyphenated one, so 'Birnbaum-Saunders'
+     and 'Log-Logistic' are errors there; Octave has always accepted them and
+     continues to.  MATLAB also accepts 'tLocationScale' in 'makedist' while
+     refusing it in 'cdf' for the same distribution; Octave accepts it, and
+     'location-scale T', everywhere.  Code written against MATLAB's names
+     therefore runs unchanged, but code relying on these names will not port
+     back.
+
+     See also: icdf, pdf, cdf, betacdf, binocdf, bisacdf, burrcdf, cauchycdf,
+     chi2cdf, evcdf, expcdf, fcdf, gamcdf, geocdf, gevcdf, gpcdf, gumbelcdf,
+     hncdf, hygecdf, invgcdf, laplacecdf, logicdf, loglcdf, logncdf, nakacdf,
+     nbincdf, ncfcdf, nctcdf, ncx2cdf, normcdf, poisscdf, raylcdf, ricecdf,
+     tcdf, tlscdf, tricdf, unidcdf, unifcdf, vmcdf, wblcdf.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 59
+Return the CDF of a univariate distribution evaluated at X.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 7
+fitdist
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3815
+ -- statistics: PD = fitdist (X, DISTNAME)
+ -- statistics: PD = fitdist (X, DISTNAME, NAME, VALUE)
+ -- statistics: [PDCA, GN, GL] = fitdist (X, DISTNAME, 'By', GROUPVAR)
+ -- statistics: [PDCA, GN, GL] = fitdist (X, DISTNAME, 'By', GROUPVAR, NAME,
+          VALUE)
+
+     Create probability distribution object.
+
+     'PD = fitdist (X, DISTNAME)' creates a probability distribution object by
+     fitting the distribution specified by DISTNAME to the data in vector X.
+
+     'PD = fitdist (X, DISTNAME, NAME, VALUE)' creates the probability
+     distribution object with additional options specified by one or more
+     Name-Value pair arguments listed below.
+
+     NAME           VALUE
+                    
+     --------------------------------------------------------------------------------
+     'distribution' A character vector specifying the distribution type for which
+                    to estimate parameters.
+                    
+     'Ntrials'      A scalar specifying the number of trials for the corresponding
+                    element of X for the binomial distribution.
+                    
+     'theta'        A scalar specifying the location parameter for the generalized
+                    Pareto distribution.
+                    
+     'mu'           A scalar specifying the location parameter for the half-normal
+                    distribution.
+                    
+     'censoring'    A vector of the same size as X indicating censored data in X.
+                    By default it is CENSOR = zeros (size (X)).
+                    
+     'frequency'    A vector of nonnegative integer counts of the same size as X
+                    used as frequency observations.  By default it is FREQ = ones
+                    (size (X)).
+                    
+     'alpha'        A scalar in the range (0,1), as the significance level for the
+                    confidence interval PCI.  By default it is 0.05 corresponding
+                    to 95% confidence intervals.
+                    
+     'options'      A structure specifying the control parameters for the
+                    iterative algorithm used to compute ML estimates with the
+                    'fminsearch' function.
+
+     '[PDCA, GN, GL] = fitdist (X, DISTNAME, 'By', GROUPVAR)' creates
+     probability distribution objects by fitting the distribution specified by
+     DISTNAME to the data in X based on the grouping variable GROUPVAR.  It
+     returns a cell array of fitted probability distribution object, PDCA, a
+     cell array of group labels, GN, and a cell array of grouping variable
+     levels, GL.
+
+     '[PDCA, GN, GL] = fitdist (X, DISTNAME, 'By', GROUPVAR, NAME, VALUE)'
+     returns the same output arguments using additional options specified by one
+     or more Name-Value pair arguments mentioned above.
+
+     Note: calling 'fitdist' without any input arguments will return a cell
+     array of character vectors listing all supported distributions.
+
+     Distribution names are matched ignoring case, spaces and hyphens, so that
+     'Extreme Value', 'ExtremeValue' and 'extreme-value' all select the same
+     distribution, and the same set of names is accepted by 'cdf', 'pdf',
+     'icdf', 'random', 'makedist', 'fitdist' and 'mle'.
+
+     This accepts more names than MATLAB. MATLAB takes the spaced and the
+     squashed spelling but refuses the hyphenated one, so 'Birnbaum-Saunders'
+     and 'Log-Logistic' are errors there; Octave has always accepted them and
+     continues to.  MATLAB also accepts 'tLocationScale' in 'makedist' while
+     refusing it in 'cdf' for the same distribution; Octave accepts it, and
+     'location-scale T', everywhere.  Code written against MATLAB's names
+     therefore runs unchanged, but code relying on these names will not port
+     back.
+
+     See also: makedist.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 39
+Create probability distribution object.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 4
+icdf
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 4729
+ -- statistics: X = icdf (NAME, P, A)
+ -- statistics: X = icdf (NAME, P, A, B)
+ -- statistics: X = icdf (NAME, P, A, B, C)
+
+     Return the inverse CDF of a univariate distribution evaluated at P.
+
+     'icdf' is a wrapper for the univariate quantile distribution functions
+     (iCDF) available in the statistics package.  See the corresponding
+     functions' help to learn the signification of the parameters after P.
+
+     'X = icdf (NAME, P, A)' returns the iCDF for the one-parameter distribution
+     family specified by NAME and the distribution parameter A, evaluated at the
+     values in P.
+
+     'X = icdf (NAME, P, A, B)' returns the iCDF for the two-parameter
+     distribution family specified by NAME and the distribution parameters A and
+     B, evaluated at the values in P.
+
+     'X = icdf (NAME, P, A, B, C)' returns the iCDF for the three-parameter
+     distribution family specified by NAME and the distribution parameters A, B,
+     and C, evaluated at the values in P.
+
+     NAME must be a char string of the name or the abbreviation of the desired
+     quantile distribution function as listed in the following table.  The last
+     column shows the number of required parameters that should be parsed after
+     X to the desired iCDF.
+
+     Distribution Name                Abbreviation     Input Parameters
+     ---------------------------------------------------------------------------
+     'Beta'                           'beta'           2
+     'Binomial'                       'bino'           2
+     'Birnbaum-Saunders'              'bisa'           2
+     'Burr'                           'burr'           3
+     'Cauchy'                         'cauchy'         2
+     'Chi-squared'                    'chi2'           1
+     'Extreme Value'                  'ev'             2
+     'Exponential'                    'exp'            1
+     'F-Distribution'                 'f'              2
+     'Gamma'                          'gam'            2
+     'Geometric'                      'geo'            1
+     'Generalized Extreme Value'      'gev'            3
+     'Generalized Pareto'             'gp'             3
+     'Gumbel'                         'gumbel'         2
+     'Half-normal'                    'hn'             2
+     'Hypergeometric'                 'hyge'           3
+     'Inverse Gaussian'               'invg'           2
+     'Laplace'                        'laplace'        2
+     'Logistic'                       'logi'           2
+     'Log-Logistic'                   'logl'           2
+     'Lognormal'                      'logn'           2
+     'Nakagami'                       'naka'           2
+     'Negative Binomial'              'nbin'           2
+     'Noncentral F-Distribution'      'ncf'            3
+     'Noncentral Student T'           'nct'            2
+     'Noncentral Chi-Squared'         'ncx2'           2
+     'Normal'                         'norm'           2
+     'Poisson'                        'poiss'          1
+     'Rayleigh'                       'rayl'           1
+     'Rician'                         'rice'           2
+     'Student T'                      't'              1
+     'location-scale T'               'tls'            3
+     'Triangular'                     'tri'            3
+     'Discrete Uniform'               'unid'           1
+     'Uniform'                        'unif'           2
+     'Von Mises'                      'vm'             2
+     'Weibull'                        'wbl'            2
+
+     Distribution names are matched ignoring case, spaces and hyphens, so that
+     'Extreme Value', 'ExtremeValue' and 'extreme-value' all select the same
+     distribution, and the same set of names is accepted by 'cdf', 'pdf',
+     'icdf', 'random', 'makedist', 'fitdist' and 'mle'.
+
+     This accepts more names than MATLAB. MATLAB takes the spaced and the
+     squashed spelling but refuses the hyphenated one, so 'Birnbaum-Saunders'
+     and 'Log-Logistic' are errors there; Octave has always accepted them and
+     continues to.  MATLAB also accepts 'tLocationScale' in 'makedist' while
+     refusing it in 'cdf' for the same distribution; Octave accepts it, and
+     'location-scale T', everywhere.  Code written against MATLAB's names
+     therefore runs unchanged, but code relying on these names will not port
+     back.
+
+     See also: icdf, pdf, random, betainv, binoinv, bisainv, burrinv, cauchyinv,
+     chi2inv, evinv, expinv, finv, gaminv, geoinv, gevinv, gpinv, gumbelinv,
+     hninv, hygeinv, invginv, laplaceinv, logiinv, loglinv, logninv, nakainv,
+     nbininv, ncfinv, nctinv, ncx2inv, norminv, poissinv, raylinv, riceinv,
+     tinv, tlsinv, triinv, unidinv, unifinv, vminv, wblinv.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 67
+Return the inverse CDF of a univariate distribution evaluated at P.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 8
+makedist
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1514
+ -- statistics: PD = makedist (DISTNAME)
+ -- statistics: PD = makedist (DISTNAME, NAME, VALUE)
+ -- statistics: LIST = makedist
+
+     Create probability distribution object.
+
+     'PD = makedist (DISTNAME)' creates a probability distribution object for
+     the distribution specified in DISTNAME, using the default parameter values.
+
+     'PD = makedist (DISTNAME, NAME, VALUE)' also creates a probability
+     distribution object with one or more distribution parameter values
+     specified by Name-Value pair arguments.
+
+     'LIST = makedist' returns a cell array, LIST, containing a list of the
+     probability distributions that makedist can create.
+
+     Distribution names are matched ignoring case, spaces and hyphens, so that
+     'Extreme Value', 'ExtremeValue' and 'extreme-value' all select the same
+     distribution, and the same set of names is accepted by 'cdf', 'pdf',
+     'icdf', 'random', 'makedist', 'fitdist' and 'mle'.
+
+     This accepts more names than MATLAB. MATLAB takes the spaced and the
+     squashed spelling but refuses the hyphenated one, so 'Birnbaum-Saunders'
+     and 'Log-Logistic' are errors there; Octave has always accepted them and
+     continues to.  MATLAB also accepts 'tLocationScale' in 'makedist' while
+     refusing it in 'cdf' for the same distribution; Octave accepts it, and
+     'location-scale T', everywhere.  Code written against MATLAB's names
+     therefore runs unchanged, but code relying on these names will not port
+     back.
+
+     See also: fitdist.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 39
+Create probability distribution object.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3
+mle
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 5641
+ -- statistics: PHAT = mle (X)
+ -- statistics: PHAT = mle (X, NAME, VALUE)
+ -- statistics: [PHAT, PCI] = mle (...)
+
+     Compute maximum likelihood estimates.
+
+     'PHAT = mle (X)' returns the maximum likelihood estimates (MLEs) for the
+     parameters of a normal distribution using the sample data in X, which must
+     be a numeric vector of real values.
+
+     'PHAT = mle (X, NAME, VALUE)' returns the MLEs with additional options
+     specified by Name-Value pair arguments listed below.
+
+     NAME           VALUE
+                    
+     --------------------------------------------------------------------------------
+     'distribution' A character vector specifying the distribution type for which
+                    to estimate parameters.
+                    
+     'Ntrials'      A scalar specifying the number of trials for the corresponding
+                    element of X for the binomial distribution.
+                    
+     'theta'        A scalar specifying the location parameter for the generalized
+                    Pareto distribution.
+                    
+     'mu'           A scalar specifying the location parameter for the half-normal
+                    distribution.
+                    
+     'censoring'    A vector of the same size as X indicating censored data in X.
+                    By default it is CENSOR = zeros (size (X)).
+                    
+     'frequency'    A vector of nonnegative integer counts of the same size as X
+                    used as frequency observations.  By default it is FREQ = ones
+                    (size (X)).
+                    
+     'alpha'        A scalar in the range (0,1), as the significance level for the
+                    confidence interval PCI.  By default it is 0.05 corresponding
+                    to 95% confidence intervals.
+                    
+     'options'      A structure specifying the control parameters for the
+                    iterative algorithm used to compute ML estimates with the
+                    'fminsearch' function.
+                    
+     'pdf'          A function handle '@(DATA, P1, P2, ...)' to the probability
+                    density of a *custom* distribution, whose parameters are then
+                    estimated by maximum likelihood.  Requires 'start'.  It is
+                    mutually exclusive with 'distribution' and with
+                    'logpdf'/'nloglf'.
+                    
+     'cdf'          A function handle to the cumulative distribution function of
+                    the custom distribution, with the same calling convention as
+                    'pdf'.  Required together with 'pdf' for censored or truncated
+                    data.
+                    
+     'logpdf'       A function handle to the log probability density of a custom
+                    distribution, with the same calling convention as 'pdf'.
+                    Requires 'start'.
+                    
+     'logsf'        A function handle to the log survivor function log (1 - cdf)
+                    of the custom distribution, with the same calling convention
+                    as 'pdf'.  Required together with 'logpdf' for censored data.
+                    
+     'nloglf'       A function handle '@(PARAMS, DATA, CENS, FREQ)' returning the
+                    scalar negative log-likelihood of a custom distribution.
+                    Requires 'start'.
+                    
+     'start'        A vector of initial parameter values for a custom-distribution
+                    fit.  Required with 'pdf', 'logpdf', or 'nloglf'.
+                    
+     'lowerbound'   A scalar or vector of lower bounds for the custom-distribution
+                    parameters.  By default they are unbounded below.
+                    
+     'upperbound'   A scalar or vector of upper bounds for the custom-distribution
+                    parameters.  By default they are unbounded above.
+                    
+     'truncationbounds'A two-element vector [L U] giving the truncation interval of a
+                    custom distribution.  Requires a 'cdf' function.
+                    
+     'optimfun'     The optimizer for a custom-distribution fit.  Only
+                    'fminsearch' is supported; bounded fits are handled by
+                    internal reparameterization of the constrained parameters.
+
+     When a custom distribution is specified through 'pdf', 'logpdf', or
+     'nloglf', the parameters are estimated by maximizing the likelihood with
+     'fminsearch', and the second output PCI gives asymptotic normal (Wald)
+     confidence intervals computed from the observed Fisher information at PHAT
+     (see 'mlecov').  Bounded parameters are estimated on an internally
+     reparameterized unconstrained scale.
+
+     Distribution names are matched ignoring case, spaces and hyphens, so that
+     'Extreme Value', 'ExtremeValue' and 'extreme-value' all select the same
+     distribution, and the same set of names is accepted by 'cdf', 'pdf',
+     'icdf', 'random', 'makedist', 'fitdist' and 'mle'.
+
+     This accepts more names than MATLAB. MATLAB takes the spaced and the
+     squashed spelling but refuses the hyphenated one, so 'Birnbaum-Saunders'
+     and 'Log-Logistic' are errors there; Octave has always accepted them and
+     continues to.  MATLAB also accepts 'tLocationScale' in 'makedist' while
+     refusing it in 'cdf' for the same distribution; Octave accepts it, and
+     'location-scale T', everywhere.  Code written against MATLAB's names
+     therefore runs unchanged, but code relying on these names will not port
+     back.
+
+     See also: mlecov, fitdist, makedist.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 37
+Compute maximum likelihood estimates.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 6
+mlecov
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 4670
+ -- statistics: ACOV = mlecov (PARAMS, DATA, NAME, VALUE)
+
+     Asymptotic covariance matrix of maximum likelihood estimators.
+
+     'ACOV = mlecov (PARAMS, DATA, ...)' returns an approximation to the
+     asymptotic covariance matrix of the maximum likelihood estimators of the
+     parameters of a distribution, evaluated at the parameter values in PARAMS
+     for the sample data in DATA.  PARAMS is a numeric vector of parameter
+     values (typically the estimates returned by 'mle' or 'fitdist') and DATA is
+     a numeric vector of the sample observations.  ACOV is a p*p matrix, where p
+     = numel (PARAMS).
+
+     The distribution is not identified by name; instead it is supplied through
+     Name-Value paired arguments that give function handles to its density, its
+     log density, or its negative log-likelihood.  Exactly *one* of the
+     following three arguments must be specified:
+
+     NAME           VALUE
+                    
+     --------------------------------------------------------------------------------
+     'pdf'          A function handle, 'F(DATA, P1, P2, ...)', that accepts the
+                    sample data as its first argument and the distribution
+                    parameters as subsequent scalar arguments, and returns a
+                    vector of probability density values, one per observation.
+                    
+     'logpdf'       A function handle, 'F(DATA, P1, P2, ...)', with the same
+                    calling convention as 'pdf' but returning the _logarithm_ of
+                    the density.
+                    
+     'nloglf'       A function handle, 'NLL(PARAMS, DATA, CENS, FREQ)', that
+                    returns the scalar negative log-likelihood of the whole
+                    sample.  It receives the current parameter vector, the data,
+                    the censoring vector, and the frequency vector, and is
+                    responsible for incorporating censoring and frequency itself.
+                    
+     'cdf'          A function handle to the cumulative distribution function,
+                    with the same calling convention as 'pdf'.  It is *required*
+                    together with 'pdf' when the data are censored, so that
+                    censored observations can contribute their survival
+                    probability.
+                    
+     'logsf'        A function handle to the logarithm of the survivor function
+                    log (1 - cdf), with the same calling convention as 'pdf'.  It
+                    is *required* together with 'logpdf' when the data are
+                    censored.
+                    
+     'Censoring'    A vector of the same size as DATA indicating censored
+                    observations (nonzero for right-censored).  By default no
+                    observation is censored.
+                    
+     'Frequency'    A vector of nonnegative integer counts of the same size as
+                    DATA, giving the number of times each observation was
+                    observed.  By default it is ones (size (DATA)).
+                    
+     'Options'      A structure that may contain a 'DerivStep' field specifying
+                    the relative finite-difference step used to approximate the
+                    Hessian (a positive scalar or a vector the same size as
+                    PARAMS).  The default step is eps ^ (1/4).
+
+     *Computation and numerical behavior.*  'mlecov' approximates the covariance
+     matrix as the inverse of the observed Fisher information, that is, the
+     inverse of the Hessian of the _aggregate_ negative log-likelihood of the
+     sample, evaluated by central finite differences at PARAMS.  The covariance
+     is computed _at_ the supplied PARAMS; 'mlecov' does not refit the
+     parameters, so PARAMS should be the maximum likelihood estimates for the
+     result to be meaningful.
+
+     Whichever of 'pdf', 'logpdf', or 'nloglf' is supplied, the Hessian is
+     always formed by differencing the same aggregate negative log-likelihood
+     rather than by differentiating the density itself.  This makes the three
+     input forms consistent with one another and is numerically far more stable
+     than differentiating a density; as a consequence ACOV may differ from other
+     implementations (including MATLAB) in ill-conditioned cases where those
+     differentiate the density directly and return unreliable values or 'NaN'.
+     If the computed Hessian is not positive definite (for example when PARAMS
+     is not at a likelihood maximum), a warning is issued and ACOV is returned
+     as an all-'NaN' matrix.
+
+     See also: mle, fitdist, makedist.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 62
+Asymptotic covariance matrix of maximum likelihood estimators.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3
+pdf
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 4707
+ -- statistics: Y = pdf (NAME, X, A)
+ -- statistics: Y = pdf (NAME, X, A, B)
+ -- statistics: Y = pdf (NAME, X, A, B, C)
+
+     Return the PDF of a univariate distribution evaluated at X.
+
+     'pdf' is a wrapper for the univariate cumulative distribution functions
+     available in the statistics package.  See the corresponding functions' help
+     to learn the signification of the parameters after X.
+
+     'Y = pdf (NAME, X, A)' returns the CDF for the one-parameter distribution
+     family specified by NAME and the distribution parameter A, evaluated at the
+     values in X.
+
+     'Y = pdf (NAME, X, A, B)' returns the CDF for the two-parameter
+     distribution family specified by NAME and the distribution parameters A and
+     B, evaluated at the values in X.
+
+     'Y = pdf (NAME, X, A, B, C)' returns the CDF for the three-parameter
+     distribution family specified by NAME and the distribution parameters A, B,
+     and C, evaluated at the values in X.
+
+     NAME must be a char string of the name or the abbreviation of the desired
+     cumulative distribution function as listed in the following table.  The
+     last column shows the number of required parameters that should be parsed
+     after X to the desired PDF.
+
+     Distribution Name                Abbreviation     Input Parameters
+     ---------------------------------------------------------------------------
+     'Beta'                           'beta'           2
+     'Binomial'                       'bino'           2
+     'Birnbaum-Saunders'              'bisa'           2
+     'Burr'                           'burr'           3
+     'Cauchy'                         'cauchy'         2
+     'Chi-squared'                    'chi2'           1
+     'Extreme Value'                  'ev'             2
+     'Exponential'                    'exp'            1
+     'F-Distribution'                 'f'              2
+     'Gamma'                          'gam'            2
+     'Geometric'                      'geo'            1
+     'Generalized Extreme Value'      'gev'            3
+     'Generalized Pareto'             'gp'             3
+     'Gumbel'                         'gumbel'         2
+     'Half-normal'                    'hn'             2
+     'Hypergeometric'                 'hyge'           3
+     'Inverse Gaussian'               'invg'           2
+     'Laplace'                        'laplace'        2
+     'Logistic'                       'logi'           2
+     'Log-Logistic'                   'logl'           2
+     'Lognormal'                      'logn'           2
+     'Nakagami'                       'naka'           2
+     'Negative Binomial'              'nbin'           2
+     'Noncentral F-Distribution'      'ncf'            3
+     'Noncentral Student T'           'nct'            2
+     'Noncentral Chi-Squared'         'ncx2'           2
+     'Normal'                         'norm'           2
+     'Poisson'                        'poiss'          1
+     'Rayleigh'                       'rayl'           1
+     'Rician'                         'rice'           2
+     'Student T'                      't'              1
+     'location-scale T'               'tls'            3
+     'Triangular'                     'tri'            3
+     'Discrete Uniform'               'unid'           1
+     'Uniform'                        'unif'           2
+     'Von Mises'                      'vm'             2
+     'Weibull'                        'wbl'            2
+
+     Distribution names are matched ignoring case, spaces and hyphens, so that
+     'Extreme Value', 'ExtremeValue' and 'extreme-value' all select the same
+     distribution, and the same set of names is accepted by 'cdf', 'pdf',
+     'icdf', 'random', 'makedist', 'fitdist' and 'mle'.
+
+     This accepts more names than MATLAB. MATLAB takes the spaced and the
+     squashed spelling but refuses the hyphenated one, so 'Birnbaum-Saunders'
+     and 'Log-Logistic' are errors there; Octave has always accepted them and
+     continues to.  MATLAB also accepts 'tLocationScale' in 'makedist' while
+     refusing it in 'cdf' for the same distribution; Octave accepts it, and
+     'location-scale T', everywhere.  Code written against MATLAB's names
+     therefore runs unchanged, but code relying on these names will not port
+     back.
+
+     See also: cdf, icdf, random, betapdf, binopdf, bisapdf, burrpdf, cauchypdf,
+     chi2pdf, evpdf, exppdf, fpdf, gampdf, geopdf, gevpdf, gppdf, gumbelpdf,
+     hnpdf, hygepdf, invgpdf, laplacepdf, logipdf, loglpdf, lognpdf, nakapdf,
+     nbinpdf, ncfpdf, nctpdf, ncx2pdf, normpdf, poisspdf, raylpdf, ricepdf,
+     tpdf, tlspdf, tripdf, unidpdf, unifpdf, vmpdf, wblpdf.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 59
+Return the PDF of a univariate distribution evaluated at X.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 6
+random
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 4879
+ -- statistics: R = random (NAME, A)
+ -- statistics: R = random (NAME, A, B)
+ -- statistics: R = random (NAME, A, B, C)
+ -- statistics: R = random (NAME, ..., ROWS, COLS)
+ -- statistics: R = random (NAME, ..., ROWS, COLS, ...)
+ -- statistics: R = random (NAME, ..., [SZ])
+
+     Random arrays from a given one-, two-, or three-parameter distribution.
+
+     The variable NAME must be a string with the name of the distribution to
+     sample from.  If this distribution is a one-parameter distribution, A must
+     be supplied, if it is a two-parameter distribution, B must also be
+     supplied, and if it is a three-parameter distribution, C must also be
+     supplied.  Any arguments following the distribution parameters will
+     determine the size of the result.
+
+     When called with a single size argument, return a square matrix with the
+     dimension specified.  When called with more than one scalar argument the
+     first two arguments are taken as the number of rows and columns and any
+     further arguments specify additional matrix dimensions.  The size may also
+     be specified with a vector of dimensions SZ.
+
+     NAME must be a char string of the name or the abbreviation of the desired
+     probability distribution function as listed in the following table.  The
+     last column shows the required number of parameters that must be passed to
+     the desired *rnd distribution function.
+
+     Distribution Name                Abbreviation     Input Parameters
+     ---------------------------------------------------------------------------
+     'Beta'                           'beta'           2
+     'Binomial'                       'bino'           2
+     'Birnbaum-Saunders'              'bisa'           2
+     'Burr'                           'burr'           3
+     'Cauchy'                         'cauchy'         2
+     'Chi-squared'                    'chi2'           1
+     'Extreme Value'                  'ev'             2
+     'Exponential'                    'exp'            1
+     'F-Distribution'                 'f'              2
+     'Gamma'                          'gam'            2
+     'Geometric'                      'geo'            1
+     'Generalized Extreme Value'      'gev'            3
+     'Generalized Pareto'             'gp'             3
+     'Gumbel'                         'gumbel'         2
+     'Half-normal'                    'hn'             2
+     'Hypergeometric'                 'hyge'           3
+     'Inverse Gaussian'               'invg'           2
+     'Laplace'                        'laplace'        2
+     'Logistic'                       'logi'           2
+     'Log-Logistic'                   'logl'           2
+     'Lognormal'                      'logn'           2
+     'Nakagami'                       'naka'           2
+     'Negative Binomial'              'nbin'           2
+     'Noncentral F-Distribution'      'ncf'            3
+     'Noncentral Student T'           'nct'            2
+     'Noncentral Chi-Squared'         'ncx2'           2
+     'Normal'                         'norm'           2
+     'Poisson'                        'poiss'          1
+     'Rayleigh'                       'rayl'           1
+     'Rician'                         'rice'           2
+     'Student T'                      't'              1
+     'location-scale T'               'tls'            3
+     'Triangular'                     'tri'            3
+     'Discrete Uniform'               'unid'           1
+     'Uniform'                        'unif'           2
+     'Von Mises'                      'vm'             2
+     'Weibull'                        'wbl'            2
+
+     Distribution names are matched ignoring case, spaces and hyphens, so that
+     'Extreme Value', 'ExtremeValue' and 'extreme-value' all select the same
+     distribution, and the same set of names is accepted by 'cdf', 'pdf',
+     'icdf', 'random', 'makedist', 'fitdist' and 'mle'.
+
+     This accepts more names than MATLAB. MATLAB takes the spaced and the
+     squashed spelling but refuses the hyphenated one, so 'Birnbaum-Saunders'
+     and 'Log-Logistic' are errors there; Octave has always accepted them and
+     continues to.  MATLAB also accepts 'tLocationScale' in 'makedist' while
+     refusing it in 'cdf' for the same distribution; Octave accepts it, and
+     'location-scale T', everywhere.  Code written against MATLAB's names
+     therefore runs unchanged, but code relying on these names will not port
+     back.
+
+     See also: cdf, icdf, pdf, betarnd, binornd, bisarnd, burrrnd, cauchyrnd,
+     chi2rnd, evrnd, exprnd, frnd, gamrnd, geornd, gevrnd, gprnd, gumbelrnd,
+     hnrnd, hygernd, invgrnd, laplacernd, logirnd, loglrnd, lognrnd, nakarnd,
+     nbinrnd, ncfrnd, nctrnd, ncx2rnd, normrnd, poissrnd, raylrnd, ricernd,
+     trnd, tlsrnd, trirnd, unidrnd, unifrnd, vmrnd, wblrnd.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 71
+Random arrays from a given one-, two-, or three-parameter distribution.
+
+
+
+
+
