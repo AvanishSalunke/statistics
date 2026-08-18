@@ -16,6 +16,101 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 classdef CompactLinearModel
+  ## -*- texinfo -*-
+  ## @deftp {statistics} CompactLinearModel
+  ##
+  ## Compact linear regression model
+  ##
+  ## The @code{CompactLinearModel} class stores a fitted linear regression
+  ## model without the training data.  A @code{CompactLinearModel} object is
+  ## returned by the @code{compact} method of a @code{LinearModel} object, and
+  ## retains everything needed to inspect, predict from, and run inference on
+  ## the fit, while discarding the observations and per-observation
+  ## diagnostics that a @code{LinearModel} object carries.  This makes a
+  ## @code{CompactLinearModel} object smaller to store than the
+  ## @code{LinearModel} it was compacted from.
+  ##
+  ## The properties of a @code{CompactLinearModel} object fall into four
+  ## groups:
+  ##
+  ## @multitable @columnfractions 0.22 0.76
+  ## @headitem Group @tab Properties
+  ##
+  ## @item Coefficient estimates @tab @code{Coefficients} (a table of
+  ## estimates, standard errors, t-statistics, and p-values for each term),
+  ## @code{CoefficientCovariance}, @code{CoefficientNames}, and the
+  ## coefficient counts @code{NumCoefficients} and
+  ## @code{NumEstimatedCoefficients}.
+  ##
+  ## @item Summary statistics of the fit @tab @code{DFE}, @code{MSE},
+  ## @code{RMSE}, @code{Rsquared} (ordinary and adjusted), @code{SSE},
+  ## @code{SSR}, @code{SST}, @code{LogLikelihood}, and @code{ModelCriterion}
+  ## (AIC, BIC, etc.).
+  ##
+  ## @item Fitting method information @tab @code{Robust}, which records
+  ## the weighting function and tuning constant used when the model is fit by
+  ## robust regression, and is empty for an ordinary least squares fit.
+  ##
+  ## @item Input data properties @tab @code{Formula}, @code{NumObservations},
+  ## @code{NumPredictors}, @code{NumVariables}, @code{PredictorNames},
+  ## @code{ResponseName}, @code{VariableInfo}, and @code{VariableNames}.
+  ## @end multitable
+  ##
+  ## Because the training data is discarded, a @code{CompactLinearModel}
+  ## object has no @code{Fitted}, @code{Residuals}, @code{Diagnostics}, or
+  ## @code{ObservationInfo} properties, and none of its methods refit the
+  ## model.  Once created, the following methods are available on a
+  ## @code{CompactLinearModel} object:
+  ##
+  ## @multitable @columnfractions 0.2 0.78
+  ## @headitem Method @tab Description
+  ##
+  ## @item @code{predict} @tab Predict responses at new predictor values
+  ## given in a matrix or table.  Can also return pointwise or simultaneous
+  ## confidence intervals alongside the point predictions.
+  ##
+  ## @item @code{feval} @tab Predict responses given predictors as
+  ## separate scalar or vector arguments (one per predictor variable) instead
+  ## of a single matrix, so a @code{CompactLinearModel} object can be
+  ## evaluated the same way as a plain function handle.  Returns point
+  ## predictions only.
+  ##
+  ## @item @code{random} @tab Simulate new response values at new
+  ## predictor locations by adding independent Gaussian noise, drawn from the
+  ## estimated error variance @code{MSE}, to the fitted response.
+  ##
+  ## @item @code{coefCI} @tab Return Wald confidence intervals for every
+  ## fitted coefficient at a chosen significance level (default @math{0.05}).
+  ##
+  ## @item @code{coefTest} @tab Test a linear hypothesis on the fitted
+  ## coefficients.  With no arguments, tests the overall model F-test that
+  ## all non-intercept coefficients are zero; a custom hypothesis can be
+  ## given as a contrast matrix and, if needed, right-hand-side values.
+  ## Returns the p-value, and optionally the F-statistic and its numerator
+  ## degrees of freedom.
+  ##
+  ## @item @code{plotEffects} @tab Plot the estimated main effect and
+  ## 95% confidence interval of each predictor, evaluated between its
+  ## observed minimum and maximum with all other predictors held at their
+  ## observed means.
+  ##
+  ## @item @code{plotInteraction} @tab Plot the main and conditional effects
+  ## of two predictors, or the adjusted response as a function of one
+  ## predictor for several fixed values of the other, to visualize whether
+  ## the two predictors interact.
+  ##
+  ## @item @code{anova} @tab Analysis of variance for the fitted model.
+  ## Type 3 raises an error on a model missing a lower-order relative of one
+  ## of its terms, since a @code{CompactLinearModel} object has no data to
+  ## refit with.
+  ## @end multitable
+  ##
+  ## Create a @code{CompactLinearModel} object by using the @code{compact}
+  ## method of a fitted @code{LinearModel} object, or the class constructor
+  ## directly.
+  ##
+  ## @seealso{LinearModel, compact}
+  ## @end deftp
 
   properties(GetAccess = public, SetAccess = protected)
 
@@ -449,8 +544,32 @@ classdef CompactLinearModel
 
   endmethods
 
-  methods(Access = public)
+    methods(Access = public)
 
+    ## -*- texinfo -*-
+    ## @deftypefn  {CompactLinearModel} {@var{cmdl} =} CompactLinearModel ()
+    ## @deftypefnx {CompactLinearModel} {@var{cmdl} =} CompactLinearModel (@var{mdl})
+    ##
+    ## Create a compact linear regression model.
+    ##
+    ## @code{@var{cmdl} = CompactLinearModel ()} returns a
+    ## @code{CompactLinearModel} object with all properties empty.
+    ##
+    ## @code{@var{cmdl} = CompactLinearModel (@var{mdl})} copies the
+    ## coefficient estimates, fit statistics, and input data description
+    ## from the fitted @code{LinearModel} object @var{mdl} into a new
+    ## @code{CompactLinearModel} object @var{cmdl}, discarding the training
+    ## data, per-observation diagnostics, and stepwise fitting history.  If
+    ## @var{mdl} was fit using robust regression, the @code{Weights} field of
+    ## @code{@var{cmdl}.Robust} is emptied, although the rest of the
+    ## @code{Robust} structure is retained.
+    ##
+    ## The usual way to obtain a @code{CompactLinearModel} object is to call
+    ## the @code{compact} method on an already-fitted @code{LinearModel}
+    ## object, rather than calling this constructor directly.
+    ##
+    ## @seealso{LinearModel, compact}
+    ## @end deftypefn
     function this = CompactLinearModel (mdl = [])
 
       if (isempty (mdl))
@@ -1687,6 +1806,9 @@ classdef CompactLinearModel
 
 endclassdef
 
+## Duplicated from LinearModel, since we don't have superclass support
+## for Octave yet; kept as a separate, self-contained copy here instead
+## of being shared across both class files.
 function [ax, mdl, args] = cm_plot_axes (this, rest)
 
   if (isscalar (this) && isgraphics (this, 'axes'))
@@ -1700,6 +1822,9 @@ function [ax, mdl, args] = cm_plot_axes (this, rest)
   endif
 endfunction
 
+## Duplicated from LinearModel, since we don't have superclass support
+## for Octave yet; kept as a separate, self-contained copy here instead
+## of being shared across both class files.
 function [term_name, term_cols] = cm_anova_term_groups (coef_names, cat_info, has_intercept)
 
   dummy_names = {};
@@ -1741,6 +1866,9 @@ function [term_name, term_cols] = cm_anova_term_groups (coef_names, cat_info, ha
   endfor
 endfunction
 
+## Duplicated from LinearModel, since we don't have superclass support
+## for Octave yet; kept as a separate, self-contained copy here instead
+## of being shared across both class files.
 function contain_mx = cm_anova_containment (term_name, extended)
 
   nterm = numel (term_name);
@@ -1792,6 +1920,9 @@ function contain_mx = cm_anova_containment (term_name, extended)
   endfor
 endfunction
 
+## Duplicated from LinearModel, since we don't have superclass support
+## for Octave yet; kept as a separate, self-contained copy here instead
+## of being shared across both class files.
 function q = cm_anova_qform (cols, b, V)
 
   if (isempty (cols))
@@ -1803,12 +1934,18 @@ function q = cm_anova_qform (cols, b, V)
   endif
 endfunction
 
+## Duplicated from LinearModel, since we don't have superclass support
+## for Octave yet; kept as a separate, self-contained copy here instead
+## of being shared across both class files.
 function SumSq = cm_anova_ss (term_cols_k, excl_cols, b, V, MSE)
 
   full_cols = [excl_cols, term_cols_k];
   SumSq = MSE * (cm_anova_qform (full_cols, b, V) - cm_anova_qform (excl_cols, b, V));
 endfunction
 
+## Duplicated from LinearModel, since we don't have superclass support
+## for Octave yet; kept as a separate, self-contained copy here instead
+## of being shared across both class files.
 function X_dev = cm_deviation_encode (X_enc, pred_names, cat_info)
 
   X_dev   = X_enc;
@@ -1827,6 +1964,9 @@ function X_dev = cm_deviation_encode (X_enc, pred_names, cat_info)
   endfor
 endfunction
 
+## Duplicated from LinearModel, since we don't have superclass support
+## for Octave yet; kept as a separate, self-contained copy here instead
+## of being shared across both class files.
 function [Xsyn, Dsyn] = cm_anova_synthetic_design (mdl)
 
   pred_names = mdl.PredictorNames;
