@@ -50,7 +50,10 @@ classdef LinearModel
   ##
   ## @item Fitting method information @tab @code{Robust}, which records
   ## the weighting function and tuning constant used when the model is fit by
-  ## robust regression, and is empty for an ordinary least squares fit.
+  ## robust regression, and is empty for an ordinary least squares fit, and
+  ## @code{Steps}, which records the stepwise fitting information whenever
+  ## the model was fit using stepwise regression.  This implementation
+  ## currently always returns @code{Steps} as an empty structure.
   ##
   ## @item Input data properties @tab @code{Formula},
   ## @code{NumObservations}, @code{NumPredictors}, @code{NumVariables},
@@ -163,6 +166,14 @@ classdef LinearModel
   ## discards the training data and per-observation diagnostics while
   ## retaining the coefficient estimates and fit statistics needed for
   ## prediction and inference.
+  ##
+  ## @item @code{anova} @tab Analysis of variance for the fitted model,
+  ## reporting either the per-term breakdown of sums of squares or a
+  ## summary table of the model against the total and residual variation.
+  ##
+  ## @item @code{step} @tab Improve the fitted model by one or more
+  ## steps of stepwise term selection, returning a new, refitted
+  ## @code{LinearModel} without modifying the original.
   ## @end multitable
   ##
   ## Create a @code{LinearModel} object by using the @code{fitlm} function or
