@@ -235,6 +235,11 @@ function [idx, dist] = rangesearch (X, Y, r, varargin)
       NSMethod = 'exhaustive';
     endif
   else
+    if (! (ischar (NSMethod)
+           && any (strcmpi (NSMethod, {'kdtree', 'exhaustive'}))))
+      error (strcat ("rangesearch: 'NSMethod' must be either", ...
+                     " 'kdtree' or 'exhaustive'."));
+    endif
     ## Disallow kdtree with custom distance functions
     if (strcmpi (NSMethod, 'kdtree') && isa (Distance, 'function_handle'))
       error (strcat ("rangesearch: 'kdtree' cannot be used", ...
@@ -434,6 +439,9 @@ endfunction
 %! [idx, D] = rangesearch (x, y, 4, 'NSMethod', 'kdtree', 'SortIndices', false);
 %! assert_equal (idx, {[1, 2, 4]; [1, 4]});
 %! assert_equal (D, {[1.7321, 3.4641, 3.3166]; [2, 3.4641]}, 1e-4);
+%!test
+%! idx = rangesearch ([1, 2; 3, 4], [1, 2], 1, 'NSMethod', 'KDTREE');
+%! assert_equal (idx, {[1]});
 
 ## Test input validation
 %!error<rangesearch: too few input arguments.> rangesearch (1)
@@ -474,3 +482,9 @@ endfunction
 %! rangesearch (ones (4, 5), ones (1, 5), 1, 'NSmethod', 'kdtree', 'distance', 'jaccard')
 %!error<rangesearch: 'kdtree' cannot be used with custom distance functions.> ...
 %! rangesearch (ones (4,2), ones (1,2), 1, 'Distance', @(x,y) sqrt (sum ((x-y).^2)), 'NSMethod', 'kdtree')
+%!error<rangesearch: 'NSMethod' must be either 'kdtree' or 'exhaustive'.> ...
+%! rangesearch (ones (4, 2), ones (1, 2), 1, 'NSMethod', 'foo')
+%!error<rangesearch: 'NSMethod' must be either 'kdtree' or 'exhaustive'.> ...
+%! rangesearch (ones (4, 2), ones (1, 2), 1, 'NSMethod', 5)
+%!error<rangesearch: 'kdtree' cannot be used with the given distance metric.> ...
+%! rangesearch (ones (4, 2), ones (1, 2), 1, 'NSMethod', 'KDTREE', 'Distance', 'cosine')
