@@ -41,6 +41,10 @@
 ## a finite range around the fitted line and extends to @code{Inf} on one
 ## side only, with the other side of @var{dxlo}/@var{dxup} finite.
 ##
+## The bounds are @code{NaN} when only two observations remain after missing
+## values are dropped, since the fit then has no residual degrees of freedom,
+## and for elements of @var{y0} that are @code{NaN}.
+##
 ## @code{[@dots{}] = invpred (@dots{}, @var{name}, @var{value})} accepts the
 ## following name-value pairs:
 ##
@@ -138,40 +142,57 @@ function [x0, dxlo, dxup] = invpred (x, y, y0, varargin)
     return;
   endif
 
-  ## Fieller's interval.  The factor g compares the sampling variability of
-  ## the slope with the slope itself; once it reaches 1 the line cannot be
-  ## distinguished from a horizontal one and the interval is unbounded.
-  t_crit = tinv (1 - alpha / 2, n - 2);
-  g = t_crit ^ 2 * s2 / (slope ^ 2 * sxx);
-  if (g == 1)
-    dxlo = Inf (size (y0));
-    dxup = Inf (size (y0));
+  if (n < 3)
+    dxlo = NaN (size (y0));
+    dxup = NaN (size (y0));
     return;
   endif
 
+  ## Fieller's interval: x is accepted where the fitted deviation
+  ## z = slope * (x - xbar) satisfies a * z^2 + b * z + c <= 0
+  t_crit = tinv (1 - alpha / 2, n - 2);
+  k = t_crit ^ 2 * s2;
+
   ## A new observation carries its own variance; a point on the curve does not
   extra = double (strcmpi (predopt, "observation"));
-  centre = offset / (1 - g);
-  term = offset .^ 2 / sxx + (1 - g) * (1 / n + extra);
-  halfwidth = (t_crit * sqrt (s2) / (abs (slope) * abs (1 - g))) ...
-              .* sqrt (max (term, 0));
+  d = y0(:) - ybar;
+  a = 1 - k / (slope ^ 2 * sxx);
+  b = 2 * (ybar - y0(:));
+  c = d .^ 2 - k * (1 / n + extra);
 
-  if (g < 1)
-    dxlo = offset - centre + halfwidth;
-    dxup = centre + halfwidth - offset;
+  disc = b .^ 2 - 4 * a * c;
+  noroots = (disc < 0) & (b != 0);
+  disc(disc < 0) = 0;
+  q = -(b + sign (b) .* sqrt (disc)) / 2;
+  z = [q / a, c ./ q];
+
+  if (a > 0)
+    zlo = min (z, [], 2);
+    zhi = max (z, [], 2);
+    zlo(noroots) = NaN;
+    zhi(noroots) = NaN;
   else
-    ## Outside the significance level for the slope: the confidence region
-    ## is the exterior of the two roots, so one side of x0 is unbounded.
-    dxlo = Inf (size (y0));
-    dxup = Inf (size (y0));
-    real_roots = term >= 0;
-    lower_ray = real_roots & (offset < centre);
-    upper_ray = real_roots & (offset >= centre);
-    dxup(lower_ray) = centre(lower_ray) - halfwidth(lower_ray) ...
-                       - offset(lower_ray);
-    dxlo(upper_ray) = offset(upper_ray) - centre(upper_ray) ...
-                       - halfwidth(upper_ray);
+    ## The accepted set is two outer rays; keep the one that contains x0
+    below = z <= d;
+    zlo = z;
+    zlo(! below) = -Inf;
+    zlo = max (zlo, [], 2);
+    zhi = z;
+    zhi(below) = Inf;
+    zhi = min (zhi, [], 2);
+    zlo(noroots) = -Inf;
+    zhi(noroots) = Inf;
   endif
+
+  if (slope > 0)
+    dxlo = (d - zlo) / slope;
+    dxup = (zhi - d) / slope;
+  else
+    dxlo = (d - zhi) / slope;
+    dxup = (zlo - d) / slope;
+  endif
+  dxlo = reshape (dxlo, size (y0));
+  dxup = reshape (dxup, size (y0));
 
 endfunction
 
@@ -304,6 +325,57 @@ endfunction
 %! assert_equal (x0, [140.42857142857144; 283.2857142857143], 1e-12);
 %! assert_equal (dxlo, [111.30773209684287; 226.72556884927243], 1e-12);
 %! assert_equal (dxup, [Inf; Inf], 1e-12);
+
+## Two observations leave no residual degrees of freedom.
+%!test
+%! [x0, dxlo, dxup] = invpred ([1; 2], [1; 3], 5);
+%! assert_equal (x0, 3, 1e-12);
+%! assert_equal (isnan ([dxlo, dxup]), [true, true]);
+
+## A NaN response has no interval, even when the slope is not significant.
+%!test
+%! [x0, dxlo, dxup] = invpred ((1:5)', [1; 5; 2; 8; 3], NaN);
+%! assert_equal (isnan ([x0, dxlo, dxup]), [true, true, true]);
+
+## A weak slope at a large ALPHA gives a bounded, strongly asymmetric interval.
+%!test
+%! [x0, dxlo, dxup] = invpred ((1:5)', [1; 5; 2; 8; 3], [-100; 10], ...
+%!                             'alpha', 0.6);
+%! assert_equal (x0, [-145.285714285714; 11.8571428571429], 1e-10);
+%! assert_equal (dxlo, [512.850040050218; 4.3868758019588], 1e-10);
+%! assert_equal (dxup, [64.8087843549742; 31.1484922307691], 1e-10);
+
+## A negative slope mirrors the one-sided intervals.
+%!test
+%! [x0, dxlo, dxup] = invpred ((1:5)', [3; 8; 2; 5; 1], [-100; 100]);
+%! assert_equal (x0, [151.285714285714; -134.428571428571], 1e-10);
+%! assert_equal (dxlo, [120.07306008454; Inf], 1e-10);
+%! assert_equal (dxup, [Inf; 111.307732096843], 1e-10);
+
+## At the mean response with a non-significant slope the interval starts at x0.
+%!test
+%! y = [1; 5; 2; 8; 3];
+%! [x0, dxlo, dxup] = invpred ((1:5)', y, mean (y));
+%! assert_equal (x0, 3, 1e-12);
+%! assert_equal (dxlo, 0, 1e-12);
+%! assert_equal (dxup, Inf);
+
+## For a negative slope the unbounded side is the lower one.
+%!test
+%! y = [3; 8; 2; 5; 1];
+%! [x0, dxlo, dxup] = invpred ((1:5)', y, mean (y), 'alpha', 0.6);
+%! assert_equal (x0, 3, 1e-12);
+%! assert_equal (dxlo, Inf);
+%! assert_equal (dxup, 0, 1e-12);
+
+## Infinite responses leave the bound on the side x0 diverges towards undefined.
+%!test
+%! [x0, dxlo, dxup] = invpred ((1:5)', [1; 5; 2; 8; 3], [-Inf; Inf]);
+%! assert_equal (x0, [-Inf; Inf]);
+%! assert_equal (isnan (dxlo), [true; false]);
+%! assert_equal (dxlo(2), Inf);
+%! assert_equal (isnan (dxup), [false; true]);
+%! assert_equal (dxup(1), Inf);
 
 %!error<Invalid call to invpred> invpred ((1:10)', (1:10)')
 %!error<invpred: X must be a vector of real values.> ...
